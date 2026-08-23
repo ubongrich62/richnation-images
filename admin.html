@@ -6,7 +6,7 @@
 <meta http-equiv="Expires" content="0"/>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>RichNation Mall — Admin Panel</title>
+<title>RichNation Mall, Admin Panel</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -351,7 +351,7 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
   <div class="lcard">
     <img class="llogo" src="images/branding/richnation-logo-v2.png" style="height:44px;max-width:180px;object-fit:contain;display:block;margin:0 auto 18px;"/>
     <div class="ltitle">Admin Control Panel</div>
-    <div class="lsub">RichNation Mall — Authorised Access Only</div>
+    <div class="lsub">RichNation Mall, Authorised Access Only</div>
     <input class="fi" id="li-e" type="email" placeholder="Admin email" autocomplete="off"/>
     <div class="pw-wrap">
       <input class="fi" id="li-p" type="password" placeholder="Admin password" style="margin-bottom:0;"/>
@@ -376,7 +376,7 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
         &#128276;<span class="notif-badge" id="notif-badge"></span>
       </button>
       <div class="tb-user" id="tb-user">Admin</div>
-      <span id="tb-ceo-badge" style="display:none;font-size:9px;font-weight:800;padding:3px 8px;border-radius:99px;background:rgba(255,106,0,0.15);color:var(--or);margin-left:6px;">CEO MODE — actions reviewed by Owner</span>
+      <span id="tb-ceo-badge" style="display:none;font-size:9px;font-weight:800;padding:3px 8px;border-radius:99px;background:rgba(255,106,0,0.15);color:var(--or);margin-left:6px;">CEO MODE, actions reviewed by Owner</span>
       <button class="tb-out" onclick="signOut()">Sign out</button>
     </div>
   </div>
@@ -479,7 +479,7 @@ const FB='https://richnation-portal-default-rtdb.firebaseio.com';
 const FIREBASE_CONFIG={apiKey:"AIzaSyDLGnyGB8ZnEc2u6TbVzjIAQi1pgSaZVyQ",authDomain:"richnation-portal.firebaseapp.com",databaseURL:"https://richnation-portal-default-rtdb.firebaseio.com",projectId:"richnation-portal",storageBucket:"richnation-portal.firebasestorage.app",messagingSenderId:"175550692963",appId:"1:175550692963:web:1e3c995b3ed0baaadac256"};
 const RECAPTCHA_SITE_KEY='6Ld2O5EtAAAAAN6fXMnn7kn5a6SWvDpJs97kckGC';
 let appCheckToken=null;
-// App Check isn't enforced yet, so it adds nothing functional right now — loaded only
+// App Check isn't enforced yet, so it adds nothing functional right now, loaded only
 // after the page is fully done loading, so it costs the page nothing while unused.
 function loadAppCheckWhenIdle(){
   function loadScript(src){
@@ -499,7 +499,7 @@ function loadAppCheckWhenIdle(){
         appCheckInstance.getToken().then(function(r){appCheckToken=r.token;}).catch(function(e){console.warn('App Check token fetch failed:',e.message);});
         appCheckInstance.onTokenChanged(function(r){appCheckToken=r.token;});
       }catch(e){
-        console.warn('App Check init failed — requests will proceed without a token:',e.message);
+        console.warn('App Check init failed, requests will proceed without a token:',e.message);
       }
     });
 }
@@ -521,7 +521,7 @@ const GITHUB_DOCS_CONFIG={owner:'ubongrich62',repo:'richnation-documents',branch
 async function openDataDoc(uri){
   if(!uri)return;
   if(uri.indexOf('github-private:')===0){
-    // A sensitive document living in the private repo — fetch it WITH authentication
+    // A sensitive document living in the private repo, fetch it WITH authentication
     // rather than opening a link, since there's no public URL for private content.
     try{
       const path=uri.slice('github-private:'.length);
@@ -536,7 +536,7 @@ async function openDataDoc(uri){
     return;
   }
   if(uri.indexOf('data:')!==0){
-    // A real external URL (e.g. a pasted Google Drive link) — just open it directly.
+    // A real external URL (e.g. a pasted Google Drive link), just open it directly.
     window.open(uri,'_blank');
     return;
   }
@@ -559,7 +559,7 @@ async function openDataDoc(uri){
 async function fbG(p){
   try{const r=await fbFetchTimeout(FB+'/'+p+'.json');return r.json();}
   catch(e){
-    // One automatic retry before giving up — a single slow network blip
+    // One automatic retry before giving up, a single slow network blip
     // shouldn't make admin content vanish outright.
     try{await new Promise(res=>setTimeout(res,400));const r2=await fbFetchTimeout(FB+'/'+p+'.json');return r2.json();}
     catch(e2){return null;}
@@ -568,10 +568,10 @@ async function fbG(p){
 async function fbS(p,d){
   try{
     const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'PUT',body:JSON.stringify(d)});
-    if(!r||!r.ok){toast('Save failed — check your connection and try again','err');return false;}
+    if(!r||!r.ok){toast('Save failed, check your connection and try again','err');return false;}
     return true;
   }catch(e){
-    toast('Save failed — check your connection and try again','err');
+    toast('Save failed, check your connection and try again','err');
     console.warn('fbS failed for',p,':',e.message);
     return false;
   }
@@ -579,10 +579,10 @@ async function fbS(p,d){
 async function fbU(p,d){
   try{
     const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'PATCH',body:JSON.stringify(d)});
-    if(!r||!r.ok){toast('Save failed — check your connection and try again','err');return false;}
+    if(!r||!r.ok){toast('Save failed, check your connection and try again','err');return false;}
     return true;
   }catch(e){
-    toast('Save failed — check your connection and try again','err');
+    toast('Save failed, check your connection and try again','err');
     console.warn('fbU failed for',p,':',e.message);
     return false;
   }
@@ -654,7 +654,7 @@ async function doLogin(){
     initAdmin();
     return;
   }
-  // Not the Owner password — check if this is a CEO staff member who has been
+  // Not the Owner password, check if this is a CEO staff member who has been
   // explicitly granted admin panel access. Without that grant, this path does nothing.
   if(e){
     const allStaff=await fbG('rn_mall_staff')||{};
@@ -671,7 +671,7 @@ async function doLogin(){
       return;
     }
     if(match&&!match.adminPanelAccess){
-      err.textContent='Your CEO account hasn\'t been granted admin panel access yet — ask the Owner to enable it in Staff & Roles.';err.style.display='block';
+      err.textContent='Your CEO account hasn\'t been granted admin panel access yet, ask the Owner to enable it in Staff & Roles.';err.style.display='block';
       return;
     }
   }
@@ -715,7 +715,7 @@ async function manualRefreshAdmin(btn){
     settings=sett||settings;
     nav('dashboard',false);
     toast('Dashboard updated!');
-  }catch(e){toast('Refresh failed — check your connection','err');}
+  }catch(e){toast('Refresh failed, check your connection','err');}
   if(btn){btn.innerHTML=orig;btn.disabled=false;}
 }
 async function initAdmin(){
@@ -750,9 +750,9 @@ async function renderPromos(c){
   c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Seasonal Promotions</div></div><div style="padding:20px;color:var(--mu);">Loading...</div>';
   const promos=await fbG('rn_mall_seasonal_promos')||{};
   const list=Object.entries(promos).map(function(e){return Object.assign({_id:e[0]},e[1]);}).sort(function(a,b){return new Date(b.startDate)-new Date(a.startDate);});
-  var html='<div class="page-hdr" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;"><div><div class="page-hdr-title">Seasonal Promotions</div><div class="page-hdr-sub">Scheduled sitewide discounts for key dates — auto-activate and auto-expire</div></div><button class="btn btn-or btn-lg" onclick="openPromoForm(null)">+ New Campaign</button></div>';
+  var html='<div class="page-hdr" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;"><div><div class="page-hdr-title">Seasonal Promotions</div><div class="page-hdr-sub">Scheduled sitewide discounts for key dates, auto-activate and auto-expire</div></div><button class="btn btn-or btn-lg" onclick="openPromoForm(null)">+ New Campaign</button></div>';
   if(!list.length){
-    html+='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:36px;">🎉</div><div class="card-title" style="margin-top:12px;">No campaigns yet</div><div style="font-size:12px;color:var(--mu);margin-top:6px;">Create a Black Friday, Christmas, or Valentine campaign — it goes live automatically on its start date.</div></div>';
+    html+='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:36px;">🎉</div><div class="card-title" style="margin-top:12px;">No campaigns yet</div><div style="font-size:12px;color:var(--mu);margin-top:6px;">Create a Black Friday, Christmas, or Valentine campaign, it goes live automatically on its start date.</div></div>';
   }else{
     html+=list.map(function(p){
       const isLive=promoIsActive(p);
@@ -780,7 +780,7 @@ async function openPromoForm(id){
       <div class="fg"><label class="lbl">End Date</label><input class="inp" type="date" id="pr-end" value="${p.endDate||''}"/></div>
     </div>
     <div class="fg"><label class="lbl">Sitewide Discount %</label><input class="inp" type="number" id="pr-pct" value="${p.discountPct||10}" placeholder="10"/></div>
-    <div class="fg"><label class="lbl">Banner Message</label><input class="inp" id="pr-banner" value="${p.bannerText||''}" placeholder="e.g. 🎉 Black Friday is here — 20% off everything!"/></div>
+    <div class="fg"><label class="lbl">Banner Message</label><input class="inp" id="pr-banner" value="${p.bannerText||''}" placeholder="e.g. 🎉 Black Friday is here, 20% off everything!"/></div>
     <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;margin-bottom:16px;"><input type="checkbox" id="pr-active" ${p.active!==false?'checked':''} style="accent-color:var(--or);width:16px;height:16px;"/> Active</label>
     <div style="display:flex;gap:10px;">
       <button class="btn btn-or btn-lg" onclick="savePromo('${id||''}')">💾 ${id?'Update':'Save'} Campaign</button>
@@ -843,7 +843,7 @@ async function openBundleForm(id){
     return '<label style="display:flex;align-items:center;gap:8px;padding:8px;border-bottom:1px solid var(--bdr);font-size:13px;cursor:pointer;">'
       +'<input type="checkbox" value="'+pid+'" class="bundle-prod-cb" '+(selected.indexOf(pid)>-1?'checked':'')+' style="accent-color:var(--or);width:16px;height:16px;"/>'
       +(p.images&&p.images[0]?'<img src="'+p.images[0]+'" style="width:32px;height:32px;object-fit:cover;border-radius:5px;"/>':'')
-      +'<span>'+p.name+' — '+fmt(p.price)+'</span></label>';
+      +'<span>'+p.name+', '+fmt(p.price)+'</span></label>';
   }).join('');
   c.innerHTML=`
   <div class="page-hdr"><div class="page-hdr-title">${id?'Edit Bundle':'New Bundle'}</div></div>
@@ -881,13 +881,13 @@ async function delBundle(id,name){
 
 // ── STAFF & ROLES ──
 const STAFF_ROLES=[
-  {id:'ceo',label:'CEO',dept:'Executive Management',desc:'Full access — everything, granted by Admin'},
-  {id:'general_manager',label:'General Manager',dept:'Executive Management',desc:'Full Staff Portal access — Orders, Products, Vendors, Analytics, Customers, Wallet Issues, Customer Chat. Reviews strikes and staff conduct. Uses the Staff Portal only, not the Admin Panel.'},
+  {id:'ceo',label:'CEO',dept:'Executive Management',desc:'Full access, everything, granted by Admin'},
+  {id:'general_manager',label:'General Manager',dept:'Executive Management',desc:'Full Staff Portal access, Orders, Products, Vendors, Analytics, Customers, Wallet Issues, Customer Chat. Reviews strikes and staff conduct. Uses the Staff Portal only, not the Admin Panel.'},
   {id:'warehouse_manager',label:'Warehouse Manager',dept:'Operations',desc:'Products (full edit)'},
   {id:'accountant',label:'Accountant',dept:'Finance',desc:'Analytics + Wallet Issues (approve/mark refunds paid)'},
   {id:'hr_manager',label:'HR Manager',dept:'Human Resources',desc:'Staff directory, Reports/Complaints/Leave (company-wide view)'},
   {id:'logistics_manager',label:'Logistics Manager',dept:'Logistics',desc:'Orders, Dispatch Rider oversight'},
-  {id:'dispatch_rider',label:'Dispatch Rider',dept:'Logistics',desc:'Uses the separate Rider Portal — deliveries only'},
+  {id:'dispatch_rider',label:'Dispatch Rider',dept:'Logistics',desc:'Uses the separate Rider Portal, deliveries only'},
   {id:'customer_service',label:'Customer Service',dept:'Customer Experience',desc:'Orders, Customer Chat, Wallet Issues'},
   {id:'marketer',label:'Marketer',dept:'Marketing',desc:'Analytics, Products (view)'},
   {id:'social_media_manager',label:'Social Media Manager',dept:'Marketing',desc:'Analytics, Products (view)'},
@@ -921,19 +921,19 @@ const ROLE_CONTRIBUTIONS={
   product_manager:'maintaining accurate product listings'
 };
 const ROLE_JOB_DESCRIPTIONS={
-  ceo:'Full oversight of RichNation Mall — strategy, final approval on major decisions, sees everything every other role sees.',
-  general_manager:'Full day-to-day operational oversight through the Staff Portal — Orders, Products, Vendors, Analytics, Customers, Wallet Issues, Customer Chat. Reviews staff strikes and conduct, and pending-suspension cases as outlined in the Company Policy.',
+  ceo:'Full oversight of RichNation Mall, strategy, final approval on major decisions, sees everything every other role sees.',
+  general_manager:'Full day-to-day operational oversight through the Staff Portal, Orders, Products, Vendors, Analytics, Customers, Wallet Issues, Customer Chat. Reviews staff strikes and conduct, and pending-suspension cases as outlined in the Company Policy.',
   warehouse_manager:'Manages stock levels, receives new inventory, keeps product quantities accurate, flags low-stock items.',
   accountant:'Tracks revenue and analytics, reviews and approves wallet refund requests, handles financial reporting.',
   hr_manager:'Manages staff records, reviews reports/complaints/leave requests from the team, oversees onboarding of new staff.',
-  logistics_manager:'Oversees the delivery operation — assigns riders to orders, monitors active deliveries, resolves delivery issues.',
+  logistics_manager:'Oversees the delivery operation, assigns riders to orders, monitors active deliveries, resolves delivery issues.',
   dispatch_rider:'Picks up and delivers assigned orders, updates delivery status live so customers can track progress, collects proof of delivery.',
   customer_service:'Responds to customer chat messages, resolves wallet/refund complaints, handles general customer questions.',
   marketer:'Plans and runs promotional campaigns, coordinates with Social Media/Content/Graphics roles, tracks campaign performance.',
   social_media_manager:'Manages RichNation\'s social media presence, schedules posts, engages with followers.',
   content_creator:'Writes product descriptions, blog content, and promotional copy.',
   graphic_designer:'Creates visuals for products, banners, and social media.',
-  product_manager:'Adds and maintains full product listings — pricing, stock, images, descriptions, categories.'
+  product_manager:'Adds and maintains full product listings, pricing, stock, images, descriptions, categories.'
 };
 function generateStaffBio(name,roleId,joinYear){
   const roleLabel=(STAFF_ROLES.find(function(r){return r.id===roleId;})||{}).label||roleId;
@@ -1006,13 +1006,13 @@ async function renderStaffSubmissionsAdmin(c){
     return '<div class="card" style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;"><div><div style="font-weight:800;font-size:14px;color:var(--wh);">'+s.title+'</div><div style="font-size:11px;color:var(--mu);margin-top:2px;">'+(s.staffName||'Unknown')+' &middot; '+(ROLE_LABELS[s.role]||s.role||'')+'</div></div><span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;text-transform:uppercase;background:'+statusColor[s.status||'pending']+'22;color:'+statusColor[s.status||'pending']+';">'+(s.status||'pending')+'</span></div>'
       +(s.description?'<div style="font-size:13px;color:var(--w2);margin-top:8px;">'+s.description+'</div>':'')
       +(s.link?'<div style="margin-top:8px;"><a href="javascript:void(0)" data-uri="'+s.link+'" onclick="openDataDoc(this.dataset.uri)" style="color:var(--or);font-size:12px;">Open Link</a></div>':'')
-      +(s.fileData?'<div style="margin-top:8px;"><a href="javascript:void(0)" data-uri="'+s.fileData+'" onclick="openDataDoc(this.dataset.uri)" style="color:var(--or);font-size:12px;">Open File'+(s.fileName?' — '+s.fileName:'')+'</a></div>':'')
+      +(s.fileData?'<div style="margin-top:8px;"><a href="javascript:void(0)" data-uri="'+s.fileData+'" onclick="openDataDoc(this.dataset.uri)" style="color:var(--or);font-size:12px;">Open File'+(s.fileName?', '+s.fileName:'')+'</a></div>':'')
       +(s.reviewNote?'<div style="background:var(--card2);border-radius:8px;padding:10px;margin-top:10px;"><div style="font-size:10px;color:'+statusColor[s.status||'pending']+';font-weight:700;margin-bottom:4px;">Reviewer note:</div><div style="font-size:12px;color:var(--w2);">'+s.reviewNote+'</div></div>':'')
       +'<div style="font-size:10px;color:var(--mu);margin-top:8px;">'+s.date+'</div>'
       +((s.status||'pending')==='pending'?'<div style="display:flex;gap:8px;margin-top:12px;"><button class="btn btn-or" style="font-size:11px;padding:6px 14px;" onclick="reviewStaffSubmissionAdmin(\''+s._id+'\',\'approved\')">Approve</button><button class="btn btn-re" style="font-size:11px;padding:6px 14px;" onclick="reviewStaffSubmissionAdmin(\''+s._id+'\',\'rejected\')">Reject</button></div>':'')
       +'</div>';
   }
-  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Staff Submissions</div><div class="page-hdr-sub">Work submitted by the content team — Marketer, Social Media Manager, Content Creator, Graphic Designer.</div></div>'
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Staff Submissions</div><div class="page-hdr-sub">Work submitted by the content team, Marketer, Social Media Manager, Content Creator, Graphic Designer.</div></div>'
     +(pending.length?pending.map(card).join(''):'<div class="card" style="text-align:center;padding:30px;color:var(--mu);">Nothing pending.</div>')
     +(reviewed.length?'<div class="card-title" style="margin:20px 0 10px;">Reviewed</div>'+reviewed.map(card).join(''):'');
 }
@@ -1023,7 +1023,7 @@ async function reviewStaffSubmissionAdmin(id,decision){
   const s=await fbG('rn_mall_staff_submissions/'+id);if(!s)return;
   await fbU('rn_mall_staff_submissions/'+id,{status:decision,reviewNote:note.trim()||null,reviewedBy:sessionStorage.getItem('rnm_admin_ceo_name')||'Admin',reviewedAt:Date.now()});
   await fbP('rn_mall_staff_notifications/'+s.staffId,{type:decision==='approved'?'submission_approved':'submission_rejected',title:s.title,note:note.trim()||null,date:ds(),read:false,ts:Date.now()});
-  toast(decision==='approved'?'Approved!':'Rejected — feedback sent');
+  toast(decision==='approved'?'Approved!':'Rejected, feedback sent');
   staffNav('submissions');
 }
 async function renderStaffReportsAdmin(c){
@@ -1105,7 +1105,7 @@ async function renderManagementDashboard(c){
     return '<div class="card" style="cursor:pointer;" onclick="openStaffManagementMode(\''+s._id+'\')">'
       +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'
       +'<div style="width:40px;height:40px;border-radius:99px;background:var(--card2);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">'+(s.photo?'<img src="'+s.photo+'" style="width:100%;height:100%;object-fit:cover;"/>':'<span style="font-size:13px;font-weight:800;color:var(--or);">'+ini(s.name)+'</span>')+'</div>'
-      +'<div style="flex:1;min-width:0;"><div style="font-weight:800;font-size:13px;">'+s.name+'</div><div style="font-size:10px;color:var(--mu);">'+(s.staffNumber||'—')+'</div></div>'
+      +'<div style="flex:1;min-width:0;"><div style="font-weight:800;font-size:13px;">'+s.name+'</div><div style="font-size:10px;color:var(--mu);">'+(s.staffNumber||'N/A')+'</div></div>'
       +'<span style="font-size:9px;font-weight:800;padding:2px 8px;border-radius:99px;background:'+(suspended?'rgba(244,63,94,0.15)':'rgba(34,197,94,0.15)')+';color:'+(suspended?'var(--re)':'var(--su)')+';">'+(suspended?'SUSPENDED':'ACTIVE')+'</span>'
       +'</div>'
       +'<div style="font-size:11px;color:var(--or);font-weight:700;margin-bottom:10px;">'+role.label+'</div>'
@@ -1147,7 +1147,7 @@ function pendingApplicationRow(s){
     +'<div style="font-size:12px;color:var(--w2);line-height:1.9;">'
     +'📧 '+s.email+' &middot; 📞 '+s.phone+'<br>'
     +'🏠 '+s.address+', '+(s.lga||'')+', '+(s.country||'')+'<br>'
-    +'🎂 DOB: '+(s.dob||'—')+' &middot; Gender: '+(s.gender||'—')
+    +'🎂 DOB: '+(s.dob||'N/A')+' &middot; Gender: '+(s.gender||'N/A')
     +(s.note?'<br>📝 "'+s.note+'"':'')
     +'</div>'
     +'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'
@@ -1172,8 +1172,8 @@ async function approveStaffApplication(id,name){
   <div class="card">
     <div class="fg"><label class="lbl">Confirm Role</label><select class="inp" id="ap-confirm-role">${roleOpts}</select></div>
     <div class="fg"><label class="lbl">Company Division</label><select class="inp" id="ap-confirm-division">${COMPANY_DIVISIONS.map(function(d){return '<option>'+d+'</option>';}).join('')}</select></div>
-    <div class="fg"><label class="lbl">Starting Monthly Salary (₦) — optional, can set later</label><input class="inp" type="number" id="ap-confirm-salary" placeholder="0"/></div>
-    <div class="fg"><label class="lbl">Set Their Password</label><input class="inp" id="ap-confirm-pass" value="${suggestedPass}"/><div style="font-size:11px;color:var(--mu);margin-top:4px;">A suggestion is pre-filled — change it to whatever you want, or keep it.</div></div>
+    <div class="fg"><label class="lbl">Starting Monthly Salary (₦), optional, can set later</label><input class="inp" type="number" id="ap-confirm-salary" placeholder="0"/></div>
+    <div class="fg"><label class="lbl">Set Their Password</label><input class="inp" id="ap-confirm-pass" value="${suggestedPass}"/><div style="font-size:11px;color:var(--mu);margin-top:4px;">A suggestion is pre-filled, change it to whatever you want, or keep it.</div></div>
     <div style="display:flex;gap:10px;">
       <button class="btn btn-or btn-lg" onclick="finalizeApproveStaff('${id}','${name.replace(/'/g,"\\'")}','${s.email}')">✅ Approve Staff</button>
       <button class="btn btn-lg" onclick="staffNav('list')">Cancel</button>
@@ -1193,16 +1193,16 @@ async function finalizeApproveStaff(id,name,email){
   const department=roleObj?roleObj.dept:'';
   const bio=generateStaffBio(name,role,joinYear);
   await fbU('rn_mall_staff/'+id,{status:'active',role:role,password:pass,salary:salary,staffNumber:staffNumber,department:department,companyDivision:companyDivision,bio:bio});
-  logActivity('Approved staff application',name+' ('+role+') — '+staffNumber);
-  alert('✅ '+name+' approved as '+staffNumber+'!\n\nSend them these login details:\n\nEmail: '+email+'\nPassword: '+pass+'\n\n(There is no automatic email — please send this to them yourself via WhatsApp/email.)');
-  toast('Approved — credentials shown above');
+  logActivity('Approved staff application',name+' ('+role+'), '+staffNumber);
+  alert('✅ '+name+' approved as '+staffNumber+'!\n\nSend them these login details:\n\nEmail: '+email+'\nPassword: '+pass+'\n\n(There is no automatic email, please send this to them yourself via WhatsApp/email.)');
+  toast('Approved, credentials shown above');
   nav('staff',false);
 }
 async function rejectStaffApplication(id,name){
   const reason=prompt('Reason for rejecting '+name+'\'s application (optional):')||'';
   if(!confirm('Reject and remove this application?'))return;
   await fbD('rn_mall_staff/'+id);
-  logActivity('Rejected staff application',name+(reason?' — '+reason:''));
+  logActivity('Rejected staff application',name+(reason?', '+reason:''));
   toast('Application rejected');
   nav('staff',false);
 }
@@ -1222,11 +1222,11 @@ function staffRow(s,tasks){
     +'<div class="row-meta">'+s.email+(s.staffNumber?' &middot; '+s.staffNumber:'')+'</div>'
     +(extraPerms.length?'<div class="row-meta">🔓 Extra access: <strong style="color:var(--su);">'+extraPerms.join(', ')+'</strong></div>':'')
     +'<div class="row-meta">Password: <span id="pw-'+s._id+'" style="font-family:monospace;letter-spacing:1px;">••••••••</span> <span onclick="togglePwView(\''+s._id+'\',\''+(s.password||'').replace(/'/g,"\\'")+'\')" style="color:var(--or);cursor:pointer;font-weight:700;">show</span></div>'
-    +'<div class="row-meta">💰 Salary: <strong style="color:var(--wh);">'+fmt(s.salary||0)+'</strong>/mo — <span style="color:'+(s.salaryStatus==='paid'?'var(--su)':'var(--or)')+';">'+(s.salaryStatus||'pending')+'</span> &middot; ⭐ StaffPoints: <strong style="color:var(--or);">'+(s.points||0)+'</strong></div>'
+    +'<div class="row-meta">💰 Salary: <strong style="color:var(--wh);">'+fmt(s.salary||0)+'</strong>/mo, <span style="color:'+(s.salaryStatus==='paid'?'var(--su)':'var(--or)')+';">'+(s.salaryStatus||'pending')+'</span> &middot; ⭐ StaffPoints: <strong style="color:var(--or);">'+(s.points||0)+'</strong></div>'
     +(s.workingHours?'<div class="row-meta">🕒 Hours: <strong style="color:var(--wh);">'+s.workingHours+'</strong></div>':'')
     +(s.role==='ceo'?'<div class="row-meta">🖥️ Admin Panel Access: <strong style="color:'+(s.adminPanelAccess?'var(--su)':'var(--mu)')+';">'+(s.adminPanelAccess?'Granted':'Not granted')+'</strong></div>':'')
     +'<div class="row-meta">✅ Tasks Done: <strong style="color:var(--su);">'+tasksDoneLive+'</strong> &middot; ⏳ Pending: <strong style="color:var(--or);">'+tasksPendingLive+'</strong></div>'
-    +(s.bankAcctNo?'<div class="row-meta">🏦 '+s.bankName+' — '+s.bankAcctNo+' ('+s.bankAcctName+') '+(s.bankVerified?'<strong style="color:var(--su);">✔ Verified</strong>':'<strong style="color:var(--or);">Awaiting Verification</strong>')+'</div>':'')
+    +(s.bankAcctNo?'<div class="row-meta">🏦 '+s.bankName+', '+s.bankAcctNo+' ('+s.bankAcctName+') '+(s.bankVerified?'<strong style="color:var(--su);">✔ Verified</strong>':'<strong style="color:var(--or);">Awaiting Verification</strong>')+'</div>':'')
     +'</div>'
     +'<div class="row-actions">'
     +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="openStaffAccessForm(\''+s._id+'\')">🔓 Manage Access</button>'
@@ -1270,7 +1270,7 @@ async function openStaffForm(id){
     <div class="fg"><label class="lbl">Email</label><input class="inp" id="sf-email" type="email" value="${s.email||''}"/></div>
     <div class="fg"><label class="lbl">Password</label><input class="inp" id="sf-pass" value="${s.password||''}" placeholder="Set a password for them"/></div>
     <div class="fg"><label class="lbl">Role</label><select class="inp" id="sf-role">${roleOpts}</select>
-      <div style="font-size:11px;color:var(--mu);margin-top:5px;">Access level is determined automatically by role — see Staff &amp; Roles documentation for what each department can access.</div>
+      <div style="font-size:11px;color:var(--mu);margin-top:5px;">Access level is determined automatically by role, see Staff &amp; Roles documentation for what each department can access.</div>
     </div>
     <div class="fg"><label class="lbl">Company Division</label><select class="inp" id="sf-division">${COMPANY_DIVISIONS.map(function(d){return '<option '+(s.companyDivision===d?'selected':'')+'>'+d+'</option>';}).join('')}</select></div>
     <div class="fg"><label class="lbl">Monthly Salary (₦)</label><input class="inp" type="number" id="sf-salary" value="${s.salary||''}" placeholder="0"/></div>
@@ -1297,7 +1297,7 @@ async function saveStaff(id){
   const department=roleObj?roleObj.dept:(existing.department||'');
   const bio=existing.bio||generateStaffBio(name,role,new Date().getFullYear());
   await fbS('rn_mall_staff/'+sid,{id:sid,name,email,password:pass,role,companyDivision,salary,workingHours,staffNumber,department,bio,salaryStatus:existing.salaryStatus||'pending',points:existing.points||0,status:existing.status||'active',joinDate:existing.joinDate||ds(),ts:existing.ts||Date.now()});
-  logActivity(id?'Updated staff':'Added staff',name+' ('+role+') — '+staffNumber);
+  logActivity(id?'Updated staff':'Added staff',name+' ('+role+'), '+staffNumber);
   toast(id?'Staff updated!':'Staff added!');
   staffNav('list');
 }
@@ -1306,7 +1306,7 @@ async function setStaffHours(id,name,current){
   if(val===null)return;
   await fbU('rn_mall_staff/'+id,{workingHours:val.trim()});
   await fbP('rn_mall_staff_notifications/'+id,{type:'hours_set',hours:val.trim(),date:ds(),read:false,ts:Date.now()});
-  logActivity('Set working hours',name+' — '+val.trim());
+  logActivity('Set working hours',name+', '+val.trim());
   toast('Working hours updated for '+name);
   nav('staff',false);
 }
@@ -1328,12 +1328,12 @@ async function markSalaryPaid(id,name){
   const defaultMsg=settingsData.payoutMessageTemplate||'Payment has been sent. You should receive it between 3 to 7 working days.';
   const c=document.getElementById('content-inner')||document.getElementById('content');
   c.innerHTML=`
-  <div class="page-hdr"><div class="page-hdr-title">Mark Salary Paid — ${name}</div></div>
+  <div class="page-hdr"><div class="page-hdr-title">Mark Salary Paid, ${name}</div></div>
   <div class="card">
     <div class="fg"><label class="lbl">Amount (₦)</label><input class="inp" type="number" id="sp-amount" value="${s.salary||0}"/></div>
     <div class="fg"><label class="lbl">Description</label><input class="inp" id="sp-desc" placeholder="e.g. October salary"/></div>
     <div class="fg"><label class="lbl">Expected Arrival Date</label><input class="inp" type="date" id="sp-date"/></div>
-    <div class="fg"><label class="lbl">Message to Staff</label><textarea class="ta" id="sp-msg" rows="3">${defaultMsg}</textarea><div style="font-size:11px;color:var(--mu);margin-top:4px;">This becomes your default message for next time too — edit it here whenever you want to change the wording.</div></div>
+    <div class="fg"><label class="lbl">Message to Staff</label><textarea class="ta" id="sp-msg" rows="3">${defaultMsg}</textarea><div style="font-size:11px;color:var(--mu);margin-top:4px;">This becomes your default message for next time too, edit it here whenever you want to change the wording.</div></div>
     <div style="display:flex;gap:10px;">
       <button class="btn btn-or btn-lg" onclick="finalizeSalaryPaid('${id}','${name.replace(/'/g,"\\'")}')">💰 Mark Paid &amp; Notify</button>
       <button class="btn btn-lg" onclick="nav('staff',false)">Cancel</button>
@@ -1350,8 +1350,8 @@ async function finalizeSalaryPaid(id,name){
   await fbP('rn_mall_staff_salary_history/'+id,{amount,description,expectedDate,message,status:'paid',date:ds(),ts:Date.now()});
   await fbP('rn_mall_staff_notifications/'+id,{type:'salary_paid',amount,description,message,expectedDate,date:ds(),read:false,ts:Date.now()});
   if(message)await fbU('rn_mall_settings',{payoutMessageTemplate:message});
-  logActivity('Paid salary',name+' — '+fmt(amount));
-  toast('Marked as paid — '+name+' notified!');
+  logActivity('Paid salary',name+', '+fmt(amount));
+  toast('Marked as paid, '+name+' notified!');
   nav('staff',false);
 }
 async function awardStaffPoints(id,name){
@@ -1365,12 +1365,12 @@ async function awardStaffPoints(id,name){
   await fbU('rn_mall_staff/'+id,{points:newPts});
   await fbP('rn_mall_staff_points_log/'+id,{amount:pts,reason,date:ds(),ts:Date.now()});
   await fbP('rn_mall_staff_notifications/'+id,{type:'points_awarded',amount:pts,reason,date:ds(),read:false,ts:Date.now()});
-  logActivity('Awarded StaffPoints',name+' +'+pts+' pts — '+reason);
+  logActivity('Awarded StaffPoints',name+' +'+pts+' pts, '+reason);
   toast('Awarded '+pts+' points to '+name);
   nav('staff',false);
 }
 async function toggleCeoAdminAccess(id,name,grant){
-  if(!confirm(grant?'Grant '+name+' full access to the real Admin Panel — same login screen, their own CEO credentials? Every action they take will be flagged here for your review.':'Revoke '+name+'\'s admin panel access? They\'ll no longer be able to log in there.'))return;
+  if(!confirm(grant?'Grant '+name+' full access to the real Admin Panel, same login screen, their own CEO credentials? Every action they take will be flagged here for your review.':'Revoke '+name+'\'s admin panel access? They\'ll no longer be able to log in there.'))return;
   await fbU('rn_mall_staff/'+id,{adminPanelAccess:grant});
   logActivity(grant?'Granted CEO admin panel access':'Revoked CEO admin panel access',name);
   toast(grant?'Admin panel access granted to '+name:'Admin panel access revoked for '+name);
@@ -1381,7 +1381,7 @@ async function openStaffAccessForm(id){
   const perms=s.permissions||{};
   const c=document.getElementById('content-inner')||document.getElementById('content');
   c.innerHTML=`
-  <div class="page-hdr"><div class="page-hdr-title">Manage Access — ${s.name}</div><div class="page-hdr-sub">Their role (${(STAFF_ROLES.find(function(r){return r.id===s.role;})||{}).label||s.role}) already grants some access — turn any of these ON to give them extra access beyond their role, regardless of title. Turn OFF anytime.</div></div>
+  <div class="page-hdr"><div class="page-hdr-title">Manage Access, ${s.name}</div><div class="page-hdr-sub">Their role (${(STAFF_ROLES.find(function(r){return r.id===s.role;})||{}).label||s.role}) already grants some access, turn any of these ON to give them extra access beyond their role, regardless of title. Turn OFF anytime.</div></div>
   <div class="card">
     ${EXTRA_PERMISSIONS.map(function(p){return '<label style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--bdr);cursor:pointer;"><span style="font-size:13px;color:var(--w2);">'+p.label+'</span><input type="checkbox" id="perm-'+p.id+'" '+(perms[p.id]?'checked':'')+' style="width:20px;height:20px;accent-color:var(--or);"/></label>';}).join('')}
     <button class="btn btn-or btn-lg" style="margin-top:16px;" onclick="saveStaffAccess('${id}','${s.name.replace(/'/g,"\\'")}')">💾 Save Access</button>
@@ -1392,7 +1392,7 @@ async function saveStaffAccess(id,name){
   const perms={};
   EXTRA_PERMISSIONS.forEach(function(p){perms[p.id]=!!document.getElementById('perm-'+p.id).checked;});
   await fbU('rn_mall_staff/'+id,{permissions:perms});
-  logActivity('Updated access',name+' — '+EXTRA_PERMISSIONS.filter(function(p){return perms[p.id];}).map(function(p){return p.label;}).join(', ')||'none extra');
+  logActivity('Updated access',name+', '+EXTRA_PERMISSIONS.filter(function(p){return perms[p.id];}).map(function(p){return p.label;}).join(', ')||'none extra');
   toast('Access updated for '+name);
   nav('staff',false);
 }
@@ -1406,7 +1406,7 @@ async function viewStaffTasks(id,name){
     var s=status||'pending';
     return '<span style="font-size:9px;font-weight:800;padding:2px 8px;border-radius:99px;background:'+colors[s]+'22;color:'+colors[s]+';">'+labels[s]+'</span>';
   }
-  var html='<div class="page-hdr"><div class="page-hdr-title">Tasks — '+name+'</div></div>';
+  var html='<div class="page-hdr"><div class="page-hdr-title">Tasks, '+name+'</div></div>';
   html+=entries.length?entries.map(function(e){
     var k=e[0],t=e[1];
     return '<div class="card"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;"><div style="font-weight:700;font-size:14px;">'+t.description+'</div>'+statusBadge(t.status)+'</div>'
@@ -1435,7 +1435,7 @@ async function assignStaffTask(id,name){
   const dueDate=prompt('Due date (optional, e.g. 15 Aug 2026):')||'';
   const s=await fbG('rn_mall_staff/'+id);if(!s)return;
   const result=await fbP('rn_mall_staff_tasks/'+id,{description:description.trim(),dueDate:dueDate.trim(),assignedBy:sessionStorage.getItem('rnm_admin_ceo_name')||'Admin',status:'pending',date:ds(),ts:Date.now()});
-  if(!result){toast('Could not save the task — check your connection and try again','err');return;}
+  if(!result){toast('Could not save the task, check your connection and try again','err');return;}
   await fbP('rn_mall_staff_notifications/'+id,{type:'task_assigned',description:description.trim(),dueDate:dueDate.trim(),date:ds(),read:false,ts:Date.now()});
   toast('Task assigned to '+name+'!');
   nav('staff',false);
@@ -1461,7 +1461,7 @@ async function addStaffStrike(id,name){
   }
   await fbU('rn_mall_staff/'+id,update);
   await fbP('rn_mall_staff_notifications/'+id,{type:'strike',reason:reason.trim(),strikes:newStrikes,date:ds(),read:false,ts:Date.now()});
-  logActivity('Added strike',name+' ('+newStrikes+'/3) — '+reason.trim());
+  logActivity('Added strike',name+' ('+newStrikes+'/3), '+reason.trim());
   toast(newStrikes>=3?name+' auto-suspended after 3 strikes':'Strike added for '+name);
   nav('staff',false);
 }
@@ -1476,9 +1476,9 @@ async function removeStaffStrike(id,name){
 }
 async function openSalaryRecords(id,name){
   const c=document.getElementById('content-inner')||document.getElementById('content');
-  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Salary Records — '+name+'</div></div><div style="color:var(--mu);">Loading...</div>';
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Salary Records, '+name+'</div></div><div style="color:var(--mu);">Loading...</div>';
   const hist=Object.entries(await fbG('rn_mall_staff_salary_history/'+id)||{}).map(function(e){return Object.assign({_key:e[0]},e[1]);}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
-  var html='<div class="page-hdr"><div class="page-hdr-title">Salary Records — '+name+'</div></div>';
+  var html='<div class="page-hdr"><div class="page-hdr-title">Salary Records, '+name+'</div></div>';
   html+='<div class="card">';
   html+=hist.length?hist.map(function(h){
     return '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid var(--bdr);flex-wrap:wrap;gap:8px;">'
@@ -1504,7 +1504,7 @@ async function addSalaryRecord(id,name){
   const note=(document.getElementById('sr-note').value||'').trim();
   if(!month||amount<=0){toast('Enter a month and a valid amount','err');return;}
   await fbP('rn_mall_staff_salary_history/'+id,{month:month,amount:amount,description:note,status:'pending',date:ds(),ts:Date.now()});
-  logActivity('Added salary record',name+' — '+month+' — '+fmt(amount));
+  logActivity('Added salary record',name+', '+month+', '+fmt(amount));
   toast('Salary record added!');
   openSalaryRecords(id,name);
 }
@@ -1517,7 +1517,7 @@ async function editSalaryRecord(staffId,recordKey,name){
   if(markPaid){
     await fbP('rn_mall_staff_notifications/'+staffId,{type:'salary_paid',amount:parseFloat(newAmount)||rec.amount,description:rec.month||rec.description,date:ds(),read:false,ts:Date.now()});
   }
-  logActivity('Edited salary record',name+' — '+(rec.month||rec.date));
+  logActivity('Edited salary record',name+', '+(rec.month||rec.date));
   toast('Record updated!');
   openSalaryRecords(staffId,name);
 }
@@ -1551,12 +1551,12 @@ async function renderActivityLog(c){
   if(pendingReview.length){
     html+='<div class="card-title" style="margin-bottom:10px;color:var(--or);">⚠ CEO Actions Pending Your Review ('+pendingReview.length+')</div>';
     html+=pendingReview.map(function(l){
-      return '<div class="data-row" style="border-color:rgba(255,106,0,0.35);"><div style="flex:1;"><div class="row-name">'+l.by+'</div><div class="row-meta">'+l.action+(l.detail?' — '+l.detail:'')+'</div><div class="row-meta">'+l.date+'</div></div><button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="markCeoActionReviewed(\''+l._key+'\')">Mark Reviewed</button></div>';
+      return '<div class="data-row" style="border-color:rgba(255,106,0,0.35);"><div style="flex:1;"><div class="row-name">'+l.by+'</div><div class="row-meta">'+l.action+(l.detail?', '+l.detail:'')+'</div><div class="row-meta">'+l.date+'</div></div><button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="markCeoActionReviewed(\''+l._key+'\')">Mark Reviewed</button></div>';
     }).join('');
     html+='<div class="card-title" style="margin:18px 0 10px;">All Activity</div>';
   }
   html+=log.length?log.map(function(l){
-    return '<div class="data-row"><div style="flex:1;"><div class="row-name">'+l.by+(l.needsReview?(l.reviewed?' <span style="font-size:9px;color:var(--su);">✔ reviewed</span>':' <span style="font-size:9px;color:var(--or);">pending review</span>'):'')+'</div><div class="row-meta">'+l.action+(l.detail?' — '+l.detail:'')+'</div></div><div class="row-meta">'+l.date+'</div></div>';
+    return '<div class="data-row"><div style="flex:1;"><div class="row-name">'+l.by+(l.needsReview?(l.reviewed?' <span style="font-size:9px;color:var(--su);">✔ reviewed</span>':' <span style="font-size:9px;color:var(--or);">pending review</span>'):'')+'</div><div class="row-meta">'+l.action+(l.detail?', '+l.detail:'')+'</div></div><div class="row-meta">'+l.date+'</div></div>';
   }).join(''):'<div class="card" style="text-align:center;padding:40px;color:var(--mu);">No activity logged yet.</div>';
   c.innerHTML=html;
 }
@@ -1647,14 +1647,14 @@ async function processInvestorWithdrawal(investorId,key,approve){
   const v=await fbG('rn_mall_investors/'+investorId);if(!v)return;
   const w=await fbG('rn_mall_investor_withdrawals/'+investorId+'/'+key);if(!w)return;
   if(approve){
-    if((v.walletBalance||0)<w.amount){toast('Investor\'s wallet balance is lower than this request — check before approving','err');return;}
+    if((v.walletBalance||0)<w.amount){toast('Investor\'s wallet balance is lower than this request, check before approving','err');return;}
     if(!confirm('Confirm you have sent '+fmt(w.amount)+' to '+v.name+'\'s bank account? This will deduct it from their wallet.'))return;
     const newBalance=(v.walletBalance||0)-w.amount;
     await fbU('rn_mall_investors/'+investorId,{walletBalance:newBalance});
     await fbU('rn_mall_investor_withdrawals/'+investorId+'/'+key,{status:'paid'});
     await fbP('rn_mall_wallet_transactions_investor/'+investorId,{type:'withdrawal',amount:w.amount,description:'Withdrawal to bank',date:ds(),ts:Date.now()});
     await fbP('rn_mall_investor_notifications/'+investorId,{type:'withdrawal_paid',amount:w.amount,date:ds(),read:false,ts:Date.now()});
-    toast('Marked paid — wallet updated!');
+    toast('Marked paid, wallet updated!');
   }else{
     await fbU('rn_mall_investor_withdrawals/'+investorId+'/'+key,{status:'declined'});
     await fbP('rn_mall_investor_notifications/'+investorId,{type:'withdrawal_declined',amount:w.amount,date:ds(),read:false,ts:Date.now()});
@@ -1686,7 +1686,7 @@ async function renderInvestorList(c){
       return '<div class="data-row" style="align-items:flex-start;flex-direction:column;">'
         +'<div style="width:100%;"><div class="row-name">'+v.name+'</div>'
         +'<div class="row-meta">'+(OPTION_LABELS_ADMIN[r.currentOption]||r.currentOption)+' → '+(OPTION_LABELS_ADMIN[r.option]||r.option)+(r.newAmount!==r.currentAmount?' &middot; '+fmt(r.currentAmount)+' → '+fmt(r.newAmount):'')+'</div>'
-        +(topUp>0?'<div class="row-meta">💰 Requires top-up payment of <strong style="color:var(--or);">'+fmt(topUp)+'</strong> — '+(r.paymentConfirmed?'<strong style="color:var(--su);">✔ Payment Confirmed</strong>':'<strong style="color:var(--re);">Not yet confirmed</strong>')+'</div>':'')
+        +(topUp>0?'<div class="row-meta">💰 Requires top-up payment of <strong style="color:var(--or);">'+fmt(topUp)+'</strong>, '+(r.paymentConfirmed?'<strong style="color:var(--su);">✔ Payment Confirmed</strong>':'<strong style="color:var(--re);">Not yet confirmed</strong>')+'</div>':'')
         +'</div>'
         +'<div class="row-actions" style="margin-top:8px;">'
         +(topUp>0&&!r.paymentConfirmed?'<button class="btn btn-gr" style="font-size:10px;padding:5px 10px;" onclick="confirmSwitchPayment(\''+v._id+'\')">✔ Confirm Payment Received</button>':'')
@@ -1708,7 +1708,7 @@ async function confirmSwitchPayment(id){
   const v=await fbG('rn_mall_investors/'+id);if(!v||!v.pendingSwitchRequest)return;
   const req=v.pendingSwitchRequest;req.paymentConfirmed=true;
   await fbU('rn_mall_investors/'+id,{pendingSwitchRequest:req});
-  toast('Payment marked confirmed — you can now approve.');
+  toast('Payment marked confirmed, you can now approve.');
   nav('investors',false);
 }
 async function approveSwitchRequest(id,name,approve){
@@ -1716,12 +1716,12 @@ async function approveSwitchRequest(id,name,approve){
   const req=v.pendingSwitchRequest;
   const topUp=req.newAmount>req.currentAmount?req.newAmount-req.currentAmount:0;
   if(approve){
-    if(topUp>0&&!req.paymentConfirmed){toast('Confirm the top-up payment before approving — cannot approve without it','err');return;}
+    if(topUp>0&&!req.paymentConfirmed){toast('Confirm the top-up payment before approving, cannot approve without it','err');return;}
     if(!confirm('Approve this switch for '+name+'? '+(topUp>0?'This confirms you\'ve received '+fmt(topUp)+' in additional payment. ':'')+'This resets their payout timeline and cannot be undone.'))return;
     await fbU('rn_mall_investors/'+id,{investmentOption:req.option,investmentAmount:req.newAmount,tier:tierFor(req.newAmount),planStartDate:Date.now(),pendingSwitchRequest:null});
     await fbP('rn_mall_investor_switch_log/'+id,{from:req.currentOption,to:req.option,fromAmount:req.currentAmount,toAmount:req.newAmount,date:ds(),ts:Date.now(),approvedByAdmin:true});
     await fbP('rn_mall_investor_notifications/'+id,{type:'switch_approved',option:req.option,date:ds(),read:false,ts:Date.now()});
-    toast('Switch approved — '+name+' is now on '+OPTION_LABELS_ADMIN[req.option]);
+    toast('Switch approved, '+name+' is now on '+OPTION_LABELS_ADMIN[req.option]);
   }else{
     await fbU('rn_mall_investors/'+id,{pendingSwitchRequest:null});
     await fbP('rn_mall_investor_notifications/'+id,{type:'switch_denied',date:ds(),read:false,ts:Date.now()});
@@ -1731,11 +1731,11 @@ async function approveSwitchRequest(id,name,approve){
 }
 function pendingInvestorRow(v){
   return '<div class="card" style="margin-bottom:10px;">'
-    +'<div style="font-weight:800;margin-bottom:6px;">'+v.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(255,106,0,0.12);color:var(--or);">'+tierFor(v.investmentAmount)+' — '+fmt(v.investmentAmount)+'</span></div>'
+    +'<div style="font-weight:800;margin-bottom:6px;">'+v.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(255,106,0,0.12);color:var(--or);">'+tierFor(v.investmentAmount)+', '+fmt(v.investmentAmount)+'</span></div>'
     +'<div style="font-size:12px;color:var(--w2);line-height:2.1;">'
     +iconBadge('mail',14)+' '+v.email+' &middot; '+iconBadge('phone',14)+' '+v.phone+'<br>'
     +iconBadge('home',14)+' '+v.address+', '+(v.lga||'')+', '+(v.country||'')+'<br>'
-    +iconBadge('cake',14)+' <label class="lbl" style="display:inline;text-transform:none;font-weight:700;">Date of Birth:</label> '+(v.dob?new Date(v.dob).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}):'Not provided')+' &middot; Gender: '+(v.gender||'—')+'<br>'
+    +iconBadge('cake',14)+' <label class="lbl" style="display:inline;text-transform:none;font-weight:700;">Date of Birth:</label> '+(v.dob?new Date(v.dob).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}):'Not provided')+' &middot; Gender: '+(v.gender||'N/A')+'<br>'
     +iconBadge('briefcase',14)+' Option: <strong>'+(({profit_share:'Monthly Profit Share',equity:'Equity Ownership',fixed_return:'Fixed Return'})[v.investmentOption]||v.investmentOption)+'</strong>'
     +(v.note?'<br>'+iconBadge('note',14)+' "'+v.note+'"':'')
     +'</div>'
@@ -1754,8 +1754,8 @@ async function approveInvestor(id,name){
   const investorNumber=v.investorNumber||await generateInvestorNumber();
   const bio=generateInvestorBio(name,tier,v.investmentOption,new Date().getFullYear());
   await fbU('rn_mall_investors/'+id,{status:'active',password:pass.trim(),tier:tier,investorNumber:investorNumber,bio:bio,walletBalance:v.walletBalance||0,planStartDate:Date.now()});
-  alert('✅ '+name+' approved as '+investorNumber+'!\n\nSend them these login details:\n\nEmail: '+v.email+'\nPassword: '+pass.trim()+'\n\n(There is no automatic email — please send this to them yourself via WhatsApp/email. Their signed agreement is already recorded digitally in the portal — no physical document needed.)');
-  toast('Approved — credentials shown above');
+  alert('✅ '+name+' approved as '+investorNumber+'!\n\nSend them these login details:\n\nEmail: '+v.email+'\nPassword: '+pass.trim()+'\n\n(There is no automatic email, please send this to them yourself via WhatsApp/email. Their signed agreement is already recorded digitally in the portal, no physical document needed.)');
+  toast('Approved, credentials shown above');
   nav('investors',false);
 }
 async function rejectInvestor(id,name){
@@ -1775,7 +1775,7 @@ function investorRow(v,target){
     +'<div class="row-meta"><label class="lbl" style="display:inline;text-transform:none;font-weight:700;">Date of Birth:</label> '+(v.dob?new Date(v.dob).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}):'Not provided')+'</div>'
     +(equityPct!=null?'<div class="row-meta">Equity stake: <strong style="color:var(--or);">'+equityPct.toFixed(2)+'%</strong> of '+fmt(target||3000000)+' total capital = <strong style="color:var(--wh);">'+fmt(v.investmentAmount)+'</strong> invested</div>':'')
     +'<div class="row-meta">'+iconBadge('money',14)+' Total Paid Out: <strong style="color:var(--su);">'+fmt(v.totalPaid||0)+'</strong> &middot; '+iconBadge('cart',14)+' Wallet: <strong style="color:var(--su);">'+fmt(v.walletBalance||0)+'</strong>'+(v.investorNumber?' &middot; '+v.investorNumber:'')+'</div>'
-    +(v.bankAcctNo?'<div class="row-meta">🏦 '+v.bankName+' — '+v.bankAcctNo+' ('+v.bankAcctName+') '+(v.bankVerified?'<strong style="color:var(--su);">✔ Verified</strong>':'<strong style="color:var(--or);">Awaiting Verification</strong>')+'</div>':'')
+    +(v.bankAcctNo?'<div class="row-meta">🏦 '+v.bankName+', '+v.bankAcctNo+' ('+v.bankAcctName+') '+(v.bankVerified?'<strong style="color:var(--su);">✔ Verified</strong>':'<strong style="color:var(--or);">Awaiting Verification</strong>')+'</div>':'')
     +'<div class="row-meta">Password: <span id="pw-'+v._id+'" style="font-family:monospace;letter-spacing:1px;">••••••••</span> <span onclick="togglePwView(\''+v._id+'\',\''+(v.password||'').replace(/'/g,"\\'")+'\')" style="color:var(--or);cursor:pointer;font-weight:700;">show</span></div>'
     +'</div></div></div>'
     +'<div class="row-actions" style="margin-top:6px;">'
@@ -1793,7 +1793,7 @@ async function openInvestorForm(id){
   const v=await fbG('rn_mall_investors/'+id);if(!v)return;
   const c=document.getElementById('content-inner')||document.getElementById('content');
   c.innerHTML=`
-  <div class="page-hdr"><div class="page-hdr-title">Edit Investor — ${v.name}</div></div>
+  <div class="page-hdr"><div class="page-hdr-title">Edit Investor, ${v.name}</div></div>
   <div class="card">
     <div class="g2"><div class="fg"><label class="lbl">Full Name</label><input class="inp" id="iv-name" value="${v.name||''}"/></div><div class="fg"><label class="lbl">Phone</label><input class="inp" id="iv-phone" value="${v.phone||''}"/></div></div>
     <div class="fg"><label class="lbl">Email</label><input class="inp" id="iv-email" type="email" value="${v.email||''}"/></div>
@@ -1891,7 +1891,7 @@ async function recordVendorPayout(id,name){
   const c=document.getElementById('content-inner')||document.getElementById('content');
   if(!isTodayPayoutDay(schedule)){
     c.innerHTML=`
-    <div class="page-hdr"><div class="page-hdr-title">Record Payout — ${name}</div></div>
+    <div class="page-hdr"><div class="page-hdr-title">Record Payout, ${name}</div></div>
     <div class="card" style="border-color:rgba(244,63,94,0.4);background:rgba(244,63,94,0.06);text-align:center;padding:30px;">
       <div style="font-weight:800;color:var(--re);">Payouts can only be recorded on the scheduled date</div>
       <div style="font-size:12px;color:var(--w2);margin-top:8px;">Your schedule: ${describePayoutSchedule(schedule)}</div>
@@ -1901,7 +1901,7 @@ async function recordVendorPayout(id,name){
     return;
   }
   c.innerHTML=`
-  <div class="page-hdr"><div class="page-hdr-title">Record Payout — ${name}</div></div>
+  <div class="page-hdr"><div class="page-hdr-title">Record Payout, ${name}</div></div>
   <div class="card">
     <div class="fg"><label class="lbl">Amount (₦)</label><input class="inp" type="number" id="vpo-amount" placeholder="0"/></div>
     <div class="fg"><label class="lbl">Description</label><input class="inp" id="vpo-desc" placeholder="e.g. October sales payout"/></div>
@@ -1914,7 +1914,7 @@ async function recordVendorPayout(id,name){
 async function finalizeVendorPayout(id,name){
   const settingsData=await fbG('rn_mall_settings')||{};
   const schedule=settingsData.vendorPayoutSchedule||{type:'monthly',day:1};
-  if(!isTodayPayoutDay(schedule)){toast('Today is not the scheduled payout date — cannot record a payout','err');return;}
+  if(!isTodayPayoutDay(schedule)){toast('Today is not the scheduled payout date, cannot record a payout','err');return;}
   const amount=parseFloat(document.getElementById('vpo-amount').value)||0;
   const description=(document.getElementById('vpo-desc').value||'').trim();
   if(amount<=0){toast('Enter a valid amount','err');return;}
@@ -1936,12 +1936,12 @@ async function recordInvestorPayout(id,name){
   const defaultMsg=s.payoutMessageTemplate||'Payment has been sent. You should receive it between 3 to 7 working days.';
   const c=document.getElementById('content-inner')||document.getElementById('content');
   c.innerHTML=`
-  <div class="page-hdr"><div class="page-hdr-title">Record Payout — ${name}</div></div>
+  <div class="page-hdr"><div class="page-hdr-title">Record Payout, ${name}</div></div>
   <div class="card">
     <div class="fg"><label class="lbl">Amount (₦)</label><input class="inp" type="number" id="po-amount" placeholder="0"/></div>
     <div class="fg"><label class="lbl">Description</label><input class="inp" id="po-desc" placeholder="e.g. October profit share"/></div>
     <div class="fg"><label class="lbl">Expected Arrival Date</label><input class="inp" type="date" id="po-date"/></div>
-    <div class="fg"><label class="lbl">Message to Investor</label><textarea class="ta" id="po-msg" rows="3">${defaultMsg}</textarea><div style="font-size:11px;color:var(--mu);margin-top:4px;">This becomes your default message for next time too — edit it here whenever you want to change the wording.</div></div>
+    <div class="fg"><label class="lbl">Message to Investor</label><textarea class="ta" id="po-msg" rows="3">${defaultMsg}</textarea><div style="font-size:11px;color:var(--mu);margin-top:4px;">This becomes your default message for next time too, edit it here whenever you want to change the wording.</div></div>
     <div style="display:flex;gap:10px;">
       <button class="btn btn-or btn-lg" onclick="finalizeInvestorPayout('${id}','${name.replace(/'/g,"\\'")}')">💰 Record &amp; Notify</button>
       <button class="btn btn-lg" onclick="nav('investors',false)">Cancel</button>
@@ -1962,7 +1962,7 @@ async function finalizeInvestorPayout(id,name){
   await fbP('rn_mall_wallet_transactions_investor/'+id,{type:'payout',amount,description:description||'Investment return',date:ds(),ts:Date.now()});
   await fbPNotify('rn_mall_investor_notifications/'+id,{type:'payout',amount,description,message,expectedDate,date:ds(),read:false,ts:Date.now()});
   if(message)await fbU('rn_mall_settings',{payoutMessageTemplate:message});
-  toast('Payout recorded — '+name+' notified!');
+  toast('Payout recorded, '+name+' notified!');
   nav('investors',false);
 }
 async function toggleSuspendInvestor(id,wasSuspended){
@@ -2026,7 +2026,7 @@ async function renderEquitySettings(c){
   let html='<div class="card"><div class="card-title">Total Capital Target</div><div style="font-size:12px;color:var(--mu);margin:8px 0 12px;">Used to calculate each Equity Ownership investor\'s % stake (their investment ÷ this total). Matches your investment proposal\'s ₦3,000,000 raise target.</div>'
     +'<input class="inp" type="number" id="eq-target" value="'+target+'" style="margin-bottom:10px;"/>'
     +'<button class="btn btn-or" onclick="saveEquityTarget()">Save</button></div>';
-  html+='<div class="card"><div class="card-title">Investment Packages</div><div style="font-size:12px;color:var(--mu);margin:8px 0 14px;">Minimum investment and annual return rate for each tier — shown to applicants live as they type their amount.</div>';
+  html+='<div class="card"><div class="card-title">Investment Packages</div><div style="font-size:12px;color:var(--mu);margin:8px 0 14px;">Minimum investment and annual return rate for each tier, shown to applicants live as they type their amount.</div>';
   ['bronze','silver','gold','platinum'].forEach(function(id){
     const p=pkgs[id];
     html+='<div style="border-top:1px solid var(--bdr);padding:12px 0;"><div style="font-weight:800;font-size:13px;margin-bottom:8px;">'+p.label+'</div><div class="g2"><div class="fg"><label class="lbl">Minimum Investment (₦)</label><input class="inp" type="number" id="pkg-'+id+'-min" value="'+p.min+'"/></div><div class="fg"><label class="lbl">Annual Return Rate (%)</label><input class="inp" type="number" id="pkg-'+id+'-rate" value="'+p.rate+'"/></div></div></div>';
@@ -2084,7 +2084,7 @@ async function renderRiderReportsComplaints(c){
   const urgent=allComplaints.filter(function(c){return c.urgent&&c.status!=='resolved';});
   var html='';
   if(urgent.length){
-    html+='<div class="card-title" style="color:var(--re);margin-bottom:10px;">🚨 Urgent — Needs Immediate Attention ('+urgent.length+')</div>';
+    html+='<div class="card-title" style="color:var(--re);margin-bottom:10px;">🚨 Urgent, Needs Immediate Attention ('+urgent.length+')</div>';
     html+=urgent.map(function(cm){return '<div class="data-row" style="border-color:var(--re);background:rgba(244,63,94,0.06);"><div style="flex:1;"><div class="row-name">'+cm.riderName+'</div><div class="row-meta">'+cm.message+'</div><div class="row-meta">'+cm.date+'</div></div><button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="resolveRiderComplaint(\''+cm.riderId+'\',\''+cm._key+'\')">Resolve</button></div>';}).join('');
   }
   html+='<div class="card-title" style="margin:16px 0 10px;">All Complaints</div>';
@@ -2124,7 +2124,7 @@ async function loadRiderAdminMsgs(riderId){
   const msgs=Object.values(await fbG(key)||{}).sort(function(a,b){return (a.ts||0)-(b.ts||0);});
   const el=document.getElementById('rm-admin-msgs');if(!el)return;
   el.innerHTML=msgs.length?msgs.map(function(m){
-    const label=m.isAdmin?(m.senderName||'Admin')+(m.senderRole?' — '+(ROLE_LABELS[m.senderRole]||m.senderRole):''):(m.senderName||'Rider');
+    const label=m.isAdmin?(m.senderName||'Admin')+(m.senderRole?', '+(ROLE_LABELS[m.senderRole]||m.senderRole):''):(m.senderName||'Rider');
     return '<div style="display:flex;'+(m.isAdmin?'flex-direction:row-reverse;':'')+'gap:10px;margin-bottom:10px;"><div style="width:28px;height:28px;border-radius:99px;background:'+(m.isAdmin?'var(--or)':'rgba(91,155,245,0.15)')+';color:'+(m.isAdmin?'#fff':'var(--bl)')+';font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+ini(m.senderName||(m.isAdmin?'A':'R'))+'</div><div><div style="background:'+(m.isAdmin?'rgba(255,106,0,0.1)':'var(--card2)')+';padding:8px 12px;border-radius:9px;font-size:13px;max-width:100%;color:var(--wh);">'+m.text+'</div><div style="font-size:9px;color:var(--mu);margin-top:2px;'+(m.isAdmin?'text-align:right;':'')+'">'+label+'</div></div></div>';
   }).join(''):'<div style="color:var(--mu);font-size:13px;">No messages yet.</div>';
   el.scrollTop=el.scrollHeight;
@@ -2164,8 +2164,8 @@ function pendingRiderRow(r){
     +'<div style="font-size:12px;color:var(--w2);line-height:1.9;">'
     +'📧 '+r.email+' &middot; 📞 '+r.phone+'<br>'
     +'🏠 '+r.address+', '+(r.lga||'')+', '+(r.country||'')+'<br>'
-    +'🎂 DOB: '+(r.dob||'—')+' &middot; Gender: '+(r.gender||'—')+'<br>'
-    +'🪪 ID: '+(r.idNumber||'—')
+    +'🎂 DOB: '+(r.dob||'N/A')+' &middot; Gender: '+(r.gender||'N/A')+'<br>'
+    +'🪪 ID: '+(r.idNumber||'N/A')
     +(r.note?'<br>📝 "'+r.note+'"':'')
     +'</div>'
     +'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'
@@ -2182,8 +2182,8 @@ async function approveRider(id,name){
   const riderNumber=r.riderNumber||await generateRiderNumber();
   const bio=generateRiderBio(name,r.vehicleType,new Date().getFullYear());
   await fbU('rn_mall_riders/'+id,{status:'active',password:pass.trim(),riderNumber:riderNumber,bio:bio});
-  alert('✅ '+name+' approved as '+riderNumber+'!\n\nSend them these login details:\n\nEmail: '+r.email+'\nPassword: '+pass.trim()+'\n\n(There is no automatic email — please send this to them yourself via WhatsApp/email.)');
-  toast('Approved — credentials shown above');
+  alert('✅ '+name+' approved as '+riderNumber+'!\n\nSend them these login details:\n\nEmail: '+r.email+'\nPassword: '+pass.trim()+'\n\n(There is no automatic email, please send this to them yourself via WhatsApp/email.)');
+  toast('Approved, credentials shown above');
   nav('riders',false);
 }
 async function rejectRider(id,name){
@@ -2203,7 +2203,7 @@ function riderRow(r){
     +'<div><div class="row-name">'+r.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(255,106,0,0.12);color:var(--or);">'+(r.vehicleType||'')+'</span> <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:'+(online?'rgba(34,197,94,0.15)':'rgba(153,153,153,0.15)')+';color:'+(online?'var(--su)':'var(--mu)')+';">'+(online?'● ONLINE':'○ OFFLINE')+'</span>'+(suspended?' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(244,63,94,0.12);color:var(--re);">SUSPENDED</span>':'')+(strikes>0?' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(244,63,94,0.12);color:var(--re);">⚠ '+strikes+'/3 STRIKES</span>':'')+'</div>'
     +'<div class="row-meta">'+r.email+' &middot; '+r.phone+(r.riderNumber?' &middot; '+r.riderNumber:'')+' &middot; Pays: '+(r.payFrequency||'weekly')+'</div>'
     +'<div class="row-meta">💰 Total Paid Out: <strong style="color:var(--su);">'+fmt(r.totalPaid||0)+'</strong>'+(avgRating?' &middot; ⭐ Rating: <strong style="color:var(--or);">'+avgRating+'/5</strong> ('+ratings.length+')':'')+'</div>'
-    +(r.bankAcctNo?'<div class="row-meta">🏦 '+r.bankName+' — '+r.bankAcctNo+' ('+r.bankAcctName+') '+(r.bankVerified?'<strong style="color:var(--su);">✔ Verified</strong>':'<strong style="color:var(--or);">Awaiting Verification</strong>')+'</div>':'')
+    +(r.bankAcctNo?'<div class="row-meta">🏦 '+r.bankName+', '+r.bankAcctNo+' ('+r.bankAcctName+') '+(r.bankVerified?'<strong style="color:var(--su);">✔ Verified</strong>':'<strong style="color:var(--or);">Awaiting Verification</strong>')+'</div>':'')
     +'<div class="row-meta">Password: <span id="pw-'+r._id+'" style="font-family:monospace;letter-spacing:1px;">••••••••</span> <span onclick="togglePwView(\''+r._id+'\',\''+(r.password||'').replace(/'/g,"\\'")+'\')" style="color:var(--or);cursor:pointer;font-weight:700;">show</span></div>'
     +'</div></div>'
     +'<div class="row-actions" style="margin-top:6px;">'
@@ -2263,7 +2263,7 @@ async function recordRiderPayout(id,name){
   const defaultMsg=s.payoutMessageTemplate||'Payment has been sent. You should receive it between 3 to 7 working days.';
   const c=document.getElementById('content-inner')||document.getElementById('content');
   c.innerHTML=`
-  <div class="page-hdr"><div class="page-hdr-title">Record Payout — ${name}</div></div>
+  <div class="page-hdr"><div class="page-hdr-title">Record Payout, ${name}</div></div>
   <div class="card">
     <div class="fg"><label class="lbl">Amount (₦)</label><input class="inp" type="number" id="rp-amount" placeholder="0"/></div>
     <div class="fg"><label class="lbl">Description</label><input class="inp" id="rp-desc" placeholder="e.g. Week of Aug 4 deliveries"/></div>
@@ -2287,7 +2287,7 @@ async function finalizeRiderPayout(id,name){
   await fbP('rn_mall_rider_payouts/'+id,{amount,description,expectedDate,message,date:ds(),ts:Date.now()});
   await fbP('rn_mall_rider_notifications/'+id,{type:'payout',amount,description,message,expectedDate,date:ds(),read:false,ts:Date.now()});
   if(message)await fbU('rn_mall_settings',{payoutMessageTemplate:message});
-  toast('Payout recorded — '+name+' notified!');
+  toast('Payout recorded, '+name+' notified!');
   nav('riders',false);
 }
 async function toggleSuspendRider(id,wasSuspended){
@@ -2305,14 +2305,14 @@ async function renderActiveDeliveries(c){
   c.innerHTML='<div style="color:var(--mu);">Loading...</div>';
   const orders=Object.values(await fbG('rn_mall_orders')||{}).filter(function(o){return o.riderId&&o.deliveryStage&&o.deliveryStage!=='delivered';});
   c.innerHTML=orders.length?orders.map(function(o){
-    return '<div class="data-row"><div style="flex:1;"><div class="row-name">'+o.tracking+' — '+(o.riderName||'')+'</div><div class="row-meta">'+(o.customer?o.customer.name+' &middot; '+o.customer.address:'')+'</div></div><span style="font-size:10px;font-weight:800;padding:3px 9px;border-radius:99px;background:rgba(91,155,245,0.12);color:var(--bl);">'+(STAGE_LABELS_ADMIN[o.deliveryStage]||o.deliveryStage)+'</span></div>';
+    return '<div class="data-row"><div style="flex:1;"><div class="row-name">'+o.tracking+', '+(o.riderName||'')+'</div><div class="row-meta">'+(o.customer?o.customer.name+' &middot; '+o.customer.address:'')+'</div></div><span style="font-size:10px;font-weight:800;padding:3px 9px;border-radius:99px;background:rgba(91,155,245,0.12);color:var(--bl);">'+(STAGE_LABELS_ADMIN[o.deliveryStage]||o.deliveryStage)+'</span></div>';
   }).join(''):'<div class="card" style="text-align:center;padding:40px;color:var(--mu);">No active rider deliveries right now.</div>';
 }
 async function assignRiderToOrder(tracking){
   const riders=await fbG('rn_mall_riders')||{};
   const activeRiders=Object.entries(riders).filter(function(e){return e[1].status==='active';}).sort(function(a,b){return (b[1].online?1:0)-(a[1].online?1:0);});
   if(!activeRiders.length){alert('No active riders available. Approve a rider first under Dispatch Riders.');return;}
-  const list=activeRiders.map(function(e,i){return (i+1)+'. '+(e[1].online?'🟢':'⚪')+' '+e[1].name+' ('+e[1].vehicleType+')'+(e[1].online?' — ONLINE':' — offline');}).join('\n');
+  const list=activeRiders.map(function(e,i){return (i+1)+'. '+(e[1].online?'🟢':'⚪')+' '+e[1].name+' ('+e[1].vehicleType+')'+(e[1].online?', ONLINE':', offline');}).join('\n');
   const choice=prompt('Assign which rider to order '+tracking+'?\n\n'+list+'\n\nEnter the number:');
   if(choice===null)return;
   const idx=parseInt(choice)-1;
@@ -2335,7 +2335,7 @@ async function renderWalletIssues(c){
     if(oa!==ob)return oa-ob;
     return (b.ts||0)-(a.ts||0);
   });
-  var html='<div class="page-hdr"><div><div class="page-hdr-title">Wallet Issues</div><div class="page-hdr-sub">'+list.length+' report(s) — refund requests, mistaken top-ups, and general issues</div></div></div>';
+  var html='<div class="page-hdr"><div><div class="page-hdr-title">Wallet Issues</div><div class="page-hdr-sub">'+list.length+' report(s), refund requests, mistaken top-ups, and general issues</div></div></div>';
   if(!list.length){
     html+='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:36px;">🎫</div><div class="card-title" style="margin-top:12px;">No reports yet</div></div>';
   }else{
@@ -2350,14 +2350,14 @@ function walletIssueRow(iss){
     processing:{label:'PROCESSING PAYOUT',bg:'rgba(91,155,245,0.12)',color:'var(--bl)'},
     paid:{label:'PAID',bg:'rgba(34,197,94,0.12)',color:'var(--su)'},
     declined:{label:'DECLINED',bg:'rgba(244,63,94,0.12)',color:'var(--re)'},
-    declined_mismatch:{label:'NAME MISMATCH — STAYED IN WALLET',bg:'rgba(244,63,94,0.12)',color:'var(--re)'},
+    declined_mismatch:{label:'NAME MISMATCH, STAYED IN WALLET',bg:'rgba(244,63,94,0.12)',color:'var(--re)'},
     resolved:{label:'RESOLVED',bg:'rgba(34,197,94,0.12)',color:'var(--su)'}
   };
   var st=statusMap[iss.status]||{label:iss.status,bg:'rgba(153,153,153,0.12)',color:'var(--mu)'};
   var typeLabel=iss.type==='refund'?'Refund Request':iss.type==='wrong_topup'?'Wrong Top-Up':'General Issue';
   var actions='';
   if(iss.status==='pending'&&(iss.type==='refund'||iss.type==='wrong_topup')){
-    actions='<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="approveWalletIssue(\''+iss._id+'\')">Approve — Request Bank Details</button>'
+    actions='<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="approveWalletIssue(\''+iss._id+'\')">Approve, Request Bank Details</button>'
       +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="declineWalletIssue(\''+iss._id+'\')">Decline</button>';
   }else if(iss.status==='pending'){
     actions='<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="resolveWalletIssue(\''+iss._id+'\')">Reply &amp; Resolve</button>';
@@ -2366,11 +2366,11 @@ function walletIssueRow(iss){
   }
   return '<div class="data-row" style="align-items:flex-start;flex-direction:column;">'
     +'<div style="display:flex;justify-content:space-between;width:100%;flex-wrap:wrap;gap:8px;margin-bottom:6px;">'
-    +'<div><div class="row-name">'+iss.customerName+' — '+typeLabel+(iss.amount?' — '+fmt(iss.amount):'')+'</div><div class="row-meta">'+iss.date+'</div></div>'
+    +'<div><div class="row-name">'+iss.customerName+', '+typeLabel+(iss.amount?', '+fmt(iss.amount):'')+'</div><div class="row-meta">'+iss.date+'</div></div>'
     +'<span style="font-size:10px;font-weight:800;padding:3px 8px;border-radius:5px;background:'+st.bg+';color:'+st.color+';height:fit-content;">'+st.label+'</span>'
     +'</div>'
     +'<div style="font-size:12px;color:var(--w2);margin-bottom:8px;">'+iss.message+'</div>'
-    +(iss.bankAcctNo?'<div style="font-size:11px;color:var(--mu);margin-bottom:8px;">Pay to: <strong style="color:var(--wh);">'+iss.bankAcctName+'</strong> — '+iss.bankName+' ('+iss.bankAcctNo+')</div>':'')
+    +(iss.bankAcctNo?'<div style="font-size:11px;color:var(--mu);margin-bottom:8px;">Pay to: <strong style="color:var(--wh);">'+iss.bankAcctName+'</strong>, '+iss.bankName+' ('+iss.bankAcctNo+')</div>':'')
     +(iss.adminReply?'<div style="font-size:11px;color:var(--w2);margin-bottom:8px;background:var(--card2);padding:6px 8px;border-radius:6px;">Your reply: '+iss.adminReply+'</div>':'')
     +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'+actions+'</div>'
     +'</div>';
@@ -2379,7 +2379,7 @@ async function approveWalletIssue(id){
   const iss=await fbG('rn_mall_wallet_issues/'+id);if(!iss)return;
   await fbU('rn_mall_wallet_issues/'+id,{status:'approved_awaiting_bank'});
   await fbPNotify('rn_mall_customer_notifications/'+iss.customerId,{type:'points_earned',message:'Your refund request was approved! Please go to your Wallet and enter your bank details to receive payment.',date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
-  toast('Approved — customer notified to enter bank details');
+  toast('Approved, customer notified to enter bank details');
   nav('wallet-issues',false);
 }
 async function declineWalletIssue(id){
@@ -2388,7 +2388,7 @@ async function declineWalletIssue(id){
   const iss=await fbG('rn_mall_wallet_issues/'+id);if(!iss)return;
   await fbU('rn_mall_wallet_issues/'+id,{status:'declined',adminReply:reason});
   await fbPNotify('rn_mall_customer_notifications/'+iss.customerId,{type:'points_earned',message:'Your wallet report was declined: '+reason,date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
-  toast('Declined — customer notified');
+  toast('Declined, customer notified');
   nav('wallet-issues',false);
 }
 async function resolveWalletIssue(id){
@@ -2397,7 +2397,7 @@ async function resolveWalletIssue(id){
   const iss=await fbG('rn_mall_wallet_issues/'+id);if(!iss)return;
   await fbU('rn_mall_wallet_issues/'+id,{status:'resolved',adminReply:reply});
   await fbPNotify('rn_mall_customer_notifications/'+iss.customerId,{type:'points_earned',message:'Reply to your report: '+reply,date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
-  toast('Resolved — customer notified');
+  toast('Resolved, customer notified');
   nav('wallet-issues',false);
 }
 async function markWalletIssuePaid(id){
@@ -2405,7 +2405,7 @@ async function markWalletIssuePaid(id){
   if(!confirm('Confirm you have sent '+fmt(iss.amount||0)+' to '+iss.bankAcctName+' ('+iss.bankName+', '+iss.bankAcctNo+')?'))return;
   await fbU('rn_mall_wallet_issues/'+id,{status:'paid'});
   await fbPNotify('rn_mall_customer_notifications/'+iss.customerId,{type:'points_earned',message:fmt(iss.amount||0)+' has been sent to your bank account ('+iss.bankName+', '+iss.bankAcctNo+'). It should reflect shortly.',date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
-  toast('Marked as paid — customer notified');
+  toast('Marked as paid, customer notified');
   nav('wallet-issues',false);
 }
 
@@ -2425,7 +2425,7 @@ async function renderVendors(c){
     +'<div style="margin-bottom:10px;"><label class="lbl">Vendor delivers themselves</label><div style="display:flex;gap:8px;align-items:center;"><input class="inp" type="number" id="vendor-commission-rate" value="'+commissionRate+'" style="width:80px;margin-bottom:0;"/><span>%</span></div></div>'
     +'<div style="margin-bottom:12px;"><label class="lbl">RichNation Mall delivers for them</label><div style="display:flex;gap:8px;align-items:center;"><input class="inp" type="number" id="vendor-logistics-commission-rate" value="'+logisticsCommissionRate+'" style="width:80px;margin-bottom:0;"/><span>%</span></div></div>'
     +'<button class="btn btn-or" style="font-size:11px;padding:8px 14px;" onclick="saveVendorCommissionRate()">Save Both Rates</button></div>';
-  html+='<div class="card" style="max-width:340px;"><div class="card-title">Payout Schedule</div><div style="font-size:11px;color:var(--mu);margin:6px 0 10px;">Payouts can only be recorded on this exact schedule — not before, not after.</div>'
+  html+='<div class="card" style="max-width:340px;"><div class="card-title">Payout Schedule</div><div style="font-size:11px;color:var(--mu);margin:6px 0 10px;">Payouts can only be recorded on this exact schedule, not before, not after.</div>'
     +'<select class="inp" id="vendor-payout-type" style="margin-bottom:10px;" onchange="togglePayoutScheduleFields()"><option value="monthly" '+(schedule.type==='monthly'?'selected':'')+'>Monthly</option><option value="weekly" '+(schedule.type==='weekly'?'selected':'')+'>Weekly</option></select>'
     +'<div id="vendor-payout-monthly-field" style="'+(schedule.type==='weekly'?'display:none;':'')+'"><label class="lbl">Day of Month (1-28)</label><input class="inp" type="number" min="1" max="28" id="vendor-payout-day-monthly" value="'+(schedule.type==='monthly'?schedule.day:1)+'" style="margin-bottom:10px;"/></div>'
     +'<div id="vendor-payout-weekly-field" style="'+(schedule.type==='monthly'?'display:none;':'')+'"><label class="lbl">Day of Week</label><select class="inp" id="vendor-payout-day-weekly" style="margin-bottom:10px;">'+['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].map(function(d,i){return '<option value="'+i+'" '+(schedule.type==='weekly'&&schedule.day===i?'selected':'')+'>'+d+'</option>';}).join('')+'</select></div>'
@@ -2453,10 +2453,10 @@ function vendorRow(v){
     +'<div style="flex:1;min-width:180px;">'
     +'<div class="row-name">'+v.storeName+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;text-transform:uppercase;'+badgeClass+'">'+v.status+'</span></div>'
     +'<div class="row-meta">'+v.ownerName+' &middot; '+v.email+' &middot; '+(v.phone||'No phone')+'</div>'
-    +'<div class="row-meta">Applied '+(v.joinDate||'—')+'</div>'
+    +'<div class="row-meta">Applied '+(v.joinDate||'N/A')+'</div>'
     +'<div class="row-meta">Delivery: <strong style="color:var(--or);">'+(v.logisticsOption==='richnation'?'RichNation Mall delivers':'Vendor delivers themselves')+'</strong></div>'
     +'<div class="row-meta">Password: <span id="pw-'+v._id+'" style="font-family:monospace;letter-spacing:1px;">••••••••</span> <span onclick="togglePwView(\''+v._id+'\',\''+(v.password||'').replace(/'/g,"\\'")+'\')" style="color:var(--or);cursor:pointer;font-weight:700;">show</span></div>'
-    +(v.status==='approved'?'<div class="row-meta">Available Balance: <strong style="color:var(--su);">Calculated live in Payouts tab</strong>'+(v.bankAcctNo?' &middot; '+v.bankName+' — '+v.bankAcctNo+' ('+v.bankAcctName+') '+(v.bankVerified?'<strong style="color:var(--su);">Verified</strong>':'<strong style="color:var(--or);">Awaiting Verification</strong>'):'')+'</div>':'')
+    +(v.status==='approved'?'<div class="row-meta">Available Balance: <strong style="color:var(--su);">Calculated live in Payouts tab</strong>'+(v.bankAcctNo?' &middot; '+v.bankName+', '+v.bankAcctNo+' ('+v.bankAcctName+') '+(v.bankVerified?'<strong style="color:var(--su);">Verified</strong>':'<strong style="color:var(--or);">Awaiting Verification</strong>'):'')+'</div>':'')
     +'<div style="margin-top:10px;background:var(--card2);border-radius:9px;padding:10px;"><div style="font-size:11px;font-weight:700;color:var(--w2);margin-bottom:8px;">Submitted Documents</div>'
       +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
       +(docs.idDocument?'<a href="javascript:void(0)" data-uri="'+docs.idDocument+'" onclick="openDataDoc(this.dataset.uri)" style="text-decoration:none;"><button class="btn btn-dk" style="font-size:10px;padding:5px 10px;">View ID</button></a>':'<span style="font-size:10px;color:var(--re);">No ID uploaded</span>')
@@ -2482,7 +2482,7 @@ async function openVendorForm(id){
   const docs=v.documents||{};
   const c=document.getElementById('content-inner')||document.getElementById('content');
   c.innerHTML=`
-  <div class="page-hdr"><div class="page-hdr-title">Edit Vendor — ${v.storeName}</div></div>
+  <div class="page-hdr"><div class="page-hdr-title">Edit Vendor, ${v.storeName}</div></div>
   <div class="card">
     <div style="text-align:center;margin-bottom:14px;"><div style="width:70px;height:70px;border-radius:99px;background:var(--card2);margin:0 auto;overflow:hidden;display:flex;align-items:center;justify-content:center;">${v.photo?'<img src="'+v.photo+'" style="width:100%;height:100%;object-fit:cover;"/>':'<span style="font-size:10px;color:var(--mu);">No photo</span>'}</div></div>
     <div class="g2"><div class="fg"><label class="lbl">Store Name</label><input class="inp" id="ve-store" value="${v.storeName||''}"/></div><div class="fg"><label class="lbl">Owner Name</label><input class="inp" id="ve-owner" value="${v.ownerName||''}"/></div></div>
@@ -2527,8 +2527,8 @@ async function resetVendorPassword(id,name){
   if(pass===null)return;
   if(!pass.trim()||pass.trim().length<6){toast('Password must be at least 6 characters','err');return;}
   await fbU('rn_mall_vendors/'+id,{password:pass.trim()});
-  alert('✅ Password reset for '+name+'.\n\nNew password: '+pass.trim()+'\n\nSend this to them yourself — there is no automatic email.');
-  toast('Password reset — details shown above');
+  alert('✅ Password reset for '+name+'.\n\nNew password: '+pass.trim()+'\n\nSend this to them yourself, there is no automatic email.');
+  toast('Password reset, details shown above');
   nav('vendors',false);
 }
 async function deleteVendor(id,name){
@@ -2539,7 +2539,7 @@ async function deleteVendor(id,name){
 }
 async function approveVendor(id,name){
   await fbU('rn_mall_vendors/'+id,{status:'approved'});
-  toast(name+' approved — they can now sign in and start selling!');
+  toast(name+' approved, they can now sign in and start selling!');
   nav('vendors',false);
 }
 async function rejectVendor(id,name){
@@ -2623,7 +2623,7 @@ async function renderAnalytics(c){
     +'<div style="display:flex;align-items:flex-end;gap:'+(narrow?'3':'8')+'px;height:170px;margin-top:16px;overflow-x:auto;padding-bottom:4px;">'
     +rows.map(function(r){
       var h=Math.max(4,Math.round((r.rev/maxRev)*120));
-      return '<div style="flex:1;min-width:'+(narrow?'20':'34')+'px;display:flex;flex-direction:column;align-items:center;gap:4px;" title="'+r.label+': '+fmt(r.rev)+' — '+r.orderCount+' orders">'
+      return '<div style="flex:1;min-width:'+(narrow?'20':'34')+'px;display:flex;flex-direction:column;align-items:center;gap:4px;" title="'+r.label+': '+fmt(r.rev)+', '+r.orderCount+' orders">'
         +'<div style="font-size:8px;color:var(--mu);white-space:nowrap;">'+(r.rev>0?fmt(r.rev):'')+'</div>'
         +'<div style="width:100%;background:linear-gradient(180deg,var(--or),var(--gold));border-radius:4px 4px 0 0;height:'+h+'px;min-height:2px;"></div>'
         +'<div style="font-size:9px;color:var(--mu);white-space:nowrap;">'+r.label+'</div>'
@@ -2635,7 +2635,7 @@ async function renderAnalytics(c){
     +'<div class="stat-card"><div class="stat-icon">'+iconBadge('money',22)+'</div><div class="stat-num">'+fmt(totalRev)+'</div><div class="stat-lbl">Revenue this period</div><div class="stat-sub">'+totalOrders+' orders</div></div>'
     +'<div class="stat-card"><div class="stat-icon">'+iconBadge('box',22)+'</div><div class="stat-num">'+totalNewProds+'</div><div class="stat-lbl">New Products</div><div class="stat-sub">'+prods.length+' total live</div></div>'
     +'<div class="stat-card"><div class="stat-icon">'+iconBadge('user',22)+'</div><div class="stat-num">'+totalNewCusts+'</div><div class="stat-lbl">New Customers</div><div class="stat-sub">'+custs.length+' total customers</div></div>'
-    +'<div class="stat-card"><div class="stat-icon">'+iconBadge('star',22)+'</div><div class="stat-num">'+(overallAvgRating!==null?overallAvgRating.toFixed(1):'—')+'</div><div class="stat-lbl">Avg. Satisfaction</div><div class="stat-sub">'+totalReviews+' review(s) this period</div></div>'
+    +'<div class="stat-card"><div class="stat-icon">'+iconBadge('star',22)+'</div><div class="stat-num">'+(overallAvgRating!==null?overallAvgRating.toFixed(1):'N/A')+'</div><div class="stat-lbl">Avg. Satisfaction</div><div class="stat-sub">'+totalReviews+' review(s) this period</div></div>'
     +'<div class="stat-card"><div class="stat-icon">'+iconBadge('return',22)+'</div><div class="stat-num">'+totalCancelled+'</div><div class="stat-lbl">Cancelled Orders</div></div>'
     +'<div class="stat-card"><div class="stat-icon">'+iconBadge('money',22)+'</div><div class="stat-num" style="color:var(--re);">'+fmt(totalRefundValue)+'</div><div class="stat-lbl">Refunded</div><div class="stat-sub">Auto-refunded to customer wallets</div></div>'
     +'</div>';
@@ -2670,12 +2670,12 @@ async function renderDash(c){
   const custToday=Object.values(allCusts).filter(cu=>cu.joinDate===today).length;
   const custYest=Object.values(allCusts).filter(cu=>cu.joinDate===yesterday).length;
   function trendBadge(cur,prev){
-    if(prev===0&&cur===0)return '<span style="font-size:10px;color:var(--mu);font-weight:700;">— no change vs yesterday</span>';
+    if(prev===0&&cur===0)return '<span style="font-size:10px;color:var(--mu);font-weight:700;">No change vs yesterday</span>';
     if(prev===0)return '<span style="font-size:10px;color:var(--su);font-weight:800;">▲ New activity today</span>';
     const pct=Math.round(((cur-prev)/prev)*100);
     if(pct>0)return '<span style="font-size:10px;color:var(--su);font-weight:800;">▲ '+pct+'% vs yesterday</span>';
     if(pct<0)return '<span style="font-size:10px;color:var(--re);font-weight:800;">▼ '+Math.abs(pct)+'% vs yesterday</span>';
-    return '<span style="font-size:10px;color:var(--mu);font-weight:700;">— flat vs yesterday</span>';
+    return '<span style="font-size:10px;color:var(--mu);font-weight:700;">Flat vs yesterday</span>';
   }
 
   c.innerHTML=`
@@ -2716,7 +2716,7 @@ async function renderDash(c){
     </div>
   </div>
 
-  ${lowstock.length?`<div class="alert-box fade-in"><b>Low Stock Alert:</b> ${lowstock.map(p=>`${p.name} (${p.stock} left)`).join(', ')} — <span style="color:var(--or);cursor:pointer;font-weight:700;" onclick="nav('products')">Manage Products</span></div>`:''}
+  ${lowstock.length?`<div class="alert-box fade-in"><b>Low Stock Alert:</b> ${lowstock.map(p=>`${p.name} (${p.stock} left)`).join(', ')}, <span style="color:var(--or);cursor:pointer;font-weight:700;" onclick="nav('products')">Manage Products</span></div>`:''}
 
   <div class="card fade-in">
     <div class="card-title">Recent Orders</div>
@@ -2751,11 +2751,11 @@ function renderProducts(c){
     <div><div class="page-hdr-title">Products</div>
     <div class="page-hdr-sub">${prods.length} product${prods.length!==1?'s':''} in your catalogue</div></div>
     <div class="page-hdr-actions">
-      <button class="btn btn-dk btn-lg" onclick="compressAllProductImages()" title="Shrinks any large/uncompressed photos already saved on your products — run this once to speed up product load time">🗜️ Compress Images</button>
-      <button class="btn btn-or btn-lg" onclick="migrateProductImagesToGithub()" title="Moves your EXISTING product photos out of the database and onto GitHub — this is what actually reduces your Firebase bandwidth usage, not just stops it growing">☁️ Move Images to GitHub</button>
+      <button class="btn btn-dk btn-lg" onclick="compressAllProductImages()" title="Shrinks any large/uncompressed photos already saved on your products, run this once to speed up product load time">🗜️ Compress Images</button>
+      <button class="btn btn-or btn-lg" onclick="migrateProductImagesToGithub()" title="Moves your EXISTING product photos out of the database and onto GitHub, this is what actually reduces your Firebase bandwidth usage, not just stops it growing">☁️ Move Images to GitHub</button>
       <button class="btn btn-or btn-lg" onclick="migrateEverythingElseToGithub()" title="Moves existing staff photos, vendor photos/logos/documents, investor photos, and rider photos onto GitHub too">☁️ Move Staff/Vendor/Investor/Rider Images</button>
-      <button class="btn btn-or btn-lg" onclick="migrateOrderImagesToGithub()" title="Orders freeze a snapshot of each item's image at checkout time — this moves those old frozen images (from before GitHub hosting existed) onto GitHub too">☁️ Move Order Images to GitHub</button>
-      <button class="btn btn-or btn-lg" onclick="migrateSettingsImagesToGithub()" title="Your hero banner, payment icons, and other site-wide images live in one settings record that loads on nearly every page — this moves any of those still stored as raw data onto GitHub">☁️ Move Hero Banner &amp; Site Images to GitHub</button>
+      <button class="btn btn-or btn-lg" onclick="migrateOrderImagesToGithub()" title="Orders freeze a snapshot of each item's image at checkout time, this moves those old frozen images (from before GitHub hosting existed) onto GitHub too">☁️ Move Order Images to GitHub</button>
+      <button class="btn btn-or btn-lg" onclick="migrateSettingsImagesToGithub()" title="Your hero banner, payment icons, and other site-wide images live in one settings record that loads on nearly every page, this moves any of those still stored as raw data onto GitHub">☁️ Move Hero Banner &amp; Site Images to GitHub</button>
       <button class="btn btn-or btn-lg" onclick="openProdForm(null)">+ Add Product</button>
     </div>
   </div>
@@ -2806,7 +2806,7 @@ async function approveVendorProduct(id){
   await fbU('rn_mall_products/'+id,{visible:true,approvalStatus:'approved',rejectionReason:null});
   const p=await fbG('rn_mall_products/'+id);
   if(p&&p.vendorId)await fbP('rn_mall_vendor_notifications/'+p.vendorId,{type:'product_approved',productName:p.name,date:ds(),read:false,ts:Date.now()});
-  toast('Product approved — now live on RichNation Mall!');
+  toast('Product approved, now live on RichNation Mall!');
   nav('products',false);
 }
 async function rejectVendorProduct(id,name){
@@ -2816,7 +2816,7 @@ async function rejectVendorProduct(id,name){
   await fbU('rn_mall_products/'+id,{visible:false,approvalStatus:'rejected',rejectionReason:reason.trim()});
   const p=await fbG('rn_mall_products/'+id);
   if(p&&p.vendorId)await fbP('rn_mall_vendor_notifications/'+p.vendorId,{type:'product_rejected',productName:name,reason:reason.trim(),date:ds(),read:false,ts:Date.now()});
-  toast('Product rejected — vendor notified');
+  toast('Product rejected, vendor notified');
   nav('products',false);
 }
 
@@ -2846,16 +2846,16 @@ async function delProd(id,name){
   const path='rn_mall_products/'+id;
   const prodSnapshot=allProds[id]||await fbG(path)||{};
   const ok=await fbDeleteWithRetry(path);
-  if(!ok){toast('Delete failed after several attempts — check your connection and try again','err');return;}
+  if(!ok){toast('Delete failed after several attempts, check your connection and try again','err');return;}
   const stillThere=await fbG(path); // verify it's actually gone, not just that the request looked successful
   if(stillThere){
-    toast('Delete did not fully complete — retrying…','err');
+    toast('Delete did not fully complete, retrying…','err');
     const ok2=await fbDeleteWithRetry(path);
     const stillThere2=ok2?await fbG(path):true;
-    if(stillThere2){toast('Could not permanently delete this product — please try again','err');return;}
+    if(stillThere2){toast('Could not permanently delete this product, please try again','err');return;}
   }
   fbDeleteWithRetry('rn_mall_reviews/'+id); // best-effort cleanup of this product's reviews, don't block on it
-  // Log the deletion — the product record itself is now permanently gone, so this log
+  // Log the deletion, the product record itself is now permanently gone, so this log
   // is the only way to track "products deleted" over time in Analytics.
   await fbP('rn_mall_deleted_products_log',{productId:id,name:prodSnapshot.name||name,category:prodSnapshot.category||'',price:prodSnapshot.price||0,date:ds(),ts:Date.now()});
   bumpCatalogUpdate();
@@ -2870,7 +2870,7 @@ function renderOrders(c,filter=''){
   c.innerHTML=`
   <div class="page-hdr slide-up">
     <div><div class="page-hdr-title">Orders</div>
-    <div class="page-hdr-sub">${orders.length} order${orders.length!==1?'s':''}${filter?' — '+filter:''}</div></div>
+    <div class="page-hdr-sub">${orders.length} order${orders.length!==1?'s':''}${filter?', '+filter:''}</div></div>
   </div>
   <div class="tabs">
     <div class="tab ${!filter?'active':''}" onclick="renderOrders(document.getElementById('content-inner'),'')">All</div>
@@ -2903,10 +2903,10 @@ function renderCustomerStyleTracker(o){
     :isPOD?['Order Placed','Pay on Delivery Approved','Packed','Shipped','Out for Delivery','Delivered']
     :['Order Placed','Confirmed','Packed','Shipped','Out for Delivery','Delivered'];
   if(o.status==='cancelled'||o.status==='deleted'){
-    return '<div style="font-size:12px;color:var(--re);font-weight:700;">This order was '+(o.status==='deleted'?'deleted':'cancelled')+' — progress tracking stopped.</div>';
+    return '<div style="font-size:12px;color:var(--re);font-weight:700;">This order was '+(o.status==='deleted'?'deleted':'cancelled')+', progress tracking stopped.</div>';
   }
   var tl=o.timeline||[];
-  // Search backward for the last entry that matches an actual step —
+  // Search backward for the last entry that matches an actual step.
   // informational entries (e.g. "Location Update" posts) must not reset
   // progress back to step 0. Mirrors the exact logic on the customer page.
   var curIdx=0;
@@ -2923,8 +2923,8 @@ function renderCustomerStyleTracker(o){
     return '<div style="display:flex;gap:14px;padding-bottom:16px;position:relative;">'
       +(i<STEPS.length-1?'<div style="position:absolute;left:12px;top:26px;width:2px;height:calc(100% - 6px);background:'+lineColor+';"></div>':'')
       +'<div style="width:24px;height:24px;border-radius:99px;border:2px solid '+dotColor+';background:'+bg+';flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#000;z-index:1;">'+(done?'✓':cur?'●':'')+'</div>'
-      +'<div><div style="font-size:12px;font-weight:700;color:'+(done?'var(--su)':cur?'var(--or)':'var(--mu)')+';">'+s+(cur?' — IN PROGRESS':'')+'</div>'
-      +'<div style="font-size:11px;color:var(--mu);">'+(event?new Date(event.time).toLocaleDateString('en-GB')+' — '+(event.note||''):'Pending')+'</div></div></div>';
+      +'<div><div style="font-size:12px;font-weight:700;color:'+(done?'var(--su)':cur?'var(--or)':'var(--mu)')+';">'+s+(cur?', IN PROGRESS':'')+'</div>'
+      +'<div style="font-size:11px;color:var(--mu);">'+(event?new Date(event.time).toLocaleDateString('en-GB')+', '+(event.note||''):'Pending')+'</div></div></div>';
   }).join('');
 }
 let _adminDeliveryMapInstance=null;
@@ -3002,7 +3002,7 @@ async function renderAdminDeliveryMap(order){
   const riderIcon=L.divIcon({html:'<div style="background:#161616;width:30px;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid '+(isLive?'#22c55e':'#FF6A00')+';">'+vehicleEmoji+'</div>',iconSize:[30,30],className:''});
   L.marker([pickup.lat,pickup.lng],{icon:storeIcon}).addTo(map).bindPopup('RichNation Mall');
   L.marker([dest.lat,dest.lng],{icon:homeIcon}).addTo(map).bindPopup(order.customer?.name||'Delivery Address');
-  L.marker([riderPos.lat,riderPos.lng],{icon:riderIcon}).addTo(map).bindPopup((order.riderName||'Rider')+(isLive?' — live location':' — approximate position'));
+  L.marker([riderPos.lat,riderPos.lng],{icon:riderIcon}).addTo(map).bindPopup((order.riderName||'Rider')+(isLive?', live location':', approximate position'));
   L.polyline([[pickup.lat,pickup.lng],[dest.lat,dest.lng]],{color:'#FF6A00',weight:3,dashArray:'6,6'}).addTo(map);
   const toggleBtn=L.control({position:'topright'});
   toggleBtn.onAdd=function(){
@@ -3018,7 +3018,7 @@ async function renderAdminDeliveryMap(order){
   const statusEl=document.getElementById('admin-delivery-map-status');
   const adminEta=estimateDeliveryTimeAdmin(riderPos,dest,order.riderVehicleType);
   const adminEtaText=' &middot; ~'+(adminEta.mins<1?'<1':adminEta.mins)+' min'+(adminEta.mins===1?'':'s')+' away';
-  if(statusEl)statusEl.innerHTML=(isLive?'<span style="color:var(--su);">● Live</span> — rider location updating in real time':'<span style="color:var(--mu);">○ Approximate</span> — waiting for rider\'s live location')+adminEtaText;
+  if(statusEl)statusEl.innerHTML=(isLive?'<span style="color:var(--su);">● Live</span>, rider location updating in real time':'<span style="color:var(--mu);">○ Approximate</span>, waiting for rider\'s live location')+adminEtaText;
 }
 async function openOrder(tracking){
   navStack.push(curNav);updateBackBtn();pushAdminNavState();
@@ -3059,15 +3059,15 @@ async function openOrder(tracking){
         <div class="card-title">Customer &amp; Shipping Destination</div>
         <div style="margin-top:10px;font-size:13px;color:var(--w2);line-height:2.1;">
           <div><b style="color:var(--wh);">${o.customer?.name||'Guest'}</b></div>
-          <div style="color:var(--mu);">${o.customer?.email||'—'}</div>
-          <div style="color:var(--mu);">${o.customer?.phone||'—'}</div>
+          <div style="color:var(--mu);">${o.customer?.email||'N/A'}</div>
+          <div style="color:var(--mu);">${o.customer?.phone||'N/A'}</div>
         </div>
         <div style="margin-top:12px;padding:12px;background:var(--card2);border-radius:8px;border:1px solid var(--bdr);">
           <div style="font-size:10px;font-weight:800;color:var(--or);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">📍 ${o.deliveryMethod==='pickup'?'Pickup Contact (Not a delivery address)':'Delivery Destination'}</div>
           <div style="font-size:13px;color:var(--wh);line-height:1.8;">
-            ${o.customer?.address||'—'}<br>
+            ${o.customer?.address||'N/A'}<br>
             ${[o.customer?.lga,o.customer?.city].filter(Boolean).join(', ')}${o.customer?.city||o.customer?.lga?', ':''}${o.customer?.state||''}<br>
-            ${o.customer?.country||''}${o.customer?.zip?' — '+o.customer.zip:''}
+            ${o.customer?.country||''}${o.customer?.zip?', '+o.customer.zip:''}
           </div>
         </div>
         <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
@@ -3077,7 +3077,7 @@ async function openOrder(tracking){
       </div>
 
       <div class="card fade-in">
-        <div class="card-title">Delivery Progress <span style="font-size:10px;font-weight:600;color:var(--mu);">— exactly what the customer sees on Track Order</span></div>
+        <div class="card-title">Delivery Progress <span style="font-size:10px;font-weight:600;color:var(--mu);">(exactly what the customer sees on Track Order)</span></div>
         <div style="margin-top:14px;">${renderCustomerStyleTracker(o)}</div>
       </div>
 
@@ -3102,7 +3102,7 @@ async function openOrder(tracking){
     <div>
       <div class="card fade-in">
         <div class="card-title">Update Status</div>
-        ${o.riderId&&o.deliveryStage!=='delivered'?`<div style="font-size:11px;color:var(--or);margin-bottom:10px;">🏍️ ${o.riderName} is handling delivery for this order — shipping/delivery statuses are controlled by the rider's own updates to keep the timeline in order.</div>`:''}
+        ${o.riderId&&o.deliveryStage!=='delivered'?`<div style="font-size:11px;color:var(--or);margin-bottom:10px;">🏍️ ${o.riderName} is handling delivery for this order, shipping/delivery statuses are controlled by the rider's own updates to keep the timeline in order.</div>`:''}
         <div class="status-btns">
           ${(o.riderId&&o.deliveryStage!=='delivered'?['pending','confirmed','packed','cancelled']:STATUSES).map(s=>`<div class="status-opt ${o.status===s||(s==='delivered'&&o.status==='delivered confirmed')?'active':''} ${s==='delivered'?'delivered':s==='cancelled'?'cancelled':''}"
             onclick="setOrderStatus('${tracking}','${s}',this)">${s.charAt(0).toUpperCase()+s.slice(1)}</div>`).join('')}
@@ -3116,7 +3116,7 @@ async function openOrder(tracking){
         ${o.riderId&&o.deliveryStage!=='delivered'?`<div id="admin-delivery-map" style="width:100%;height:260px;border-radius:9px;overflow:hidden;background:var(--card2);margin-top:10px;"></div><div id="admin-delivery-map-status" style="font-size:11px;color:var(--mu);margin-top:6px;">Loading location…</div>`:''}
         ${o.deliveryMethod==='pickup'&&o.status!=='ready_for_pickup'&&o.status!=='delivered'&&o.status!=='delivered confirmed'?`<button class="btn btn-or" style="width:100%;padding:12px;margin-top:8px;" onclick="markReadyForPickup('${tracking}')">📍 Mark Ready for Pickup</button>`:''}
         ${o.deliveryMethod==='pickup'&&o.status==='ready_for_pickup'?`<button class="btn btn-gr" style="width:100%;padding:12px;margin-top:8px;" onclick="markPickedUp('${tracking}')">Mark as Picked Up</button>`:''}
-        ${o.deliveryConfirmation?`<button class="btn btn-dk" style="width:100%;padding:12px;margin-top:8px;" onclick="showDeliverySigAdmin('${tracking}')">View Delivery Signature</button>`:o.status==='delivered confirmed'?`<div style="margin-top:8px;font-size:11px;color:var(--su);">Delivered — customer signature confirmed.</div>`:''}
+        ${o.deliveryConfirmation?`<button class="btn btn-dk" style="width:100%;padding:12px;margin-top:8px;" onclick="showDeliverySigAdmin('${tracking}')">View Delivery Signature</button>`:o.status==='delivered confirmed'?`<div style="margin-top:8px;font-size:11px;color:var(--su);">Delivered, customer signature confirmed.</div>`:''}
       </div>
 
       <div class="card fade-in">
@@ -3171,14 +3171,14 @@ async function saveOrderStatus(tracking){
   const status=_pendingStatus[tracking]||o.status||'pending';
   const note=document.getElementById('od-note')?.value.trim()||'';
   if(status==='cancelled'&&o.status!=='cancelled'){
-    if(!note){toast('Please add a reason in the note field before cancelling — the customer will see it.','err');return;}
+    if(!note){toast('Please add a reason in the note field before cancelling, the customer will see it.','err');return;}
     if(!confirm('Cancel this order? '+(o.payMethod!=='pod'?'₦'+parseInt(o.total||0).toLocaleString()+' will be refunded to the customer\'s wallet automatically.':'')+' This cannot be undone.'))return;
   }
   const timeline=o.timeline||[];
   const dispStatus=statusDisplayText(o,status);
   const lastEntry=timeline[timeline.length-1];
   if(lastEntry&&lastEntry.status===dispStatus&&!note){
-    toast('Status is already "'+dispStatus+'" — add a note or pick a different status to log an update.','warn');
+    toast('Status is already "'+dispStatus+'", add a note or pick a different status to log an update.','warn');
     return;
   }
   timeline.push({status:dispStatus,time:new Date().toISOString(),note});
@@ -3210,11 +3210,11 @@ async function saveOrderStatus(tracking){
   });
   if(o.customer&&o.customer.id){
     const msg=status==='cancelled'
-      ?'Your order '+tracking+' was cancelled. Reason: '+note+(updates.refunded?' — ₦'+parseInt(o.total||0).toLocaleString()+' has been refunded to your Wallet.':'')
+      ?'Your order '+tracking+' was cancelled. Reason: '+note+(updates.refunded?', ₦'+parseInt(o.total||0).toLocaleString()+' has been refunded to your Wallet.':'')
       :'Your order '+tracking+' is now: '+dispStatus+(note?'. '+note:'');
     await fbPNotify('rn_mall_customer_notifications/'+o.customer.id,{type:'status_update',orderId:tracking,message:msg,date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
   }
-  toast(status==='cancelled'?'Order cancelled — customer notified and refunded!':'Status updated to: '+dispStatus+' — customer notified!');
+  toast(status==='cancelled'?'Order cancelled, customer notified and refunded!':'Status updated to: '+dispStatus+', customer notified!');
   loadOrderChat(tracking);
   if(o.riderId&&status==='cancelled')nav('orders',false);
 }
@@ -3288,7 +3288,7 @@ async function renderDelivery(c){
   </div>
 
   <div class="card fade-in">
-    <div class="card-title">Nigeria — Delivery Fees by State</div>
+    <div class="card-title">Nigeria, Delivery Fees by State</div>
     <div class="card-sub">Edit any amount below. Click Save to apply.</div>
     <div class="fee-grid">
       ${ngStates.map(s=>`<div class="fee-card">
@@ -3323,7 +3323,7 @@ async function renderDelivery(c){
   <div class="card fade-in">
     <div class="card-title">Delivery Options</div>
     <div class="g2" style="margin-top:12px;">
-      <div class="fg"><label class="lbl">Free Delivery Threshold (NGN) — 0 to disable</label>
+      <div class="fg"><label class="lbl">Free Delivery Threshold (NGN), 0 to disable</label>
         <input class="inp" type="number" id="del-free" value="${settings.freeDeliveryThreshold||0}" placeholder="e.g. 50000"/>
       </div>
       <div class="fg"><label class="lbl">Express Delivery Surcharge (NGN)</label>
@@ -3374,7 +3374,7 @@ async function renderCustomers(c){
       <div class="row-av">${ini(cu.fname+' '+cu.lname)}</div>
       <div style="flex:1;min-width:180px;">
         <div class="row-name">${cu.fname} ${cu.lname} ${cu.accountStatus==='suspended'||cu.accountStatus==='blocked'?'<span style="color:var(--re);font-size:10px;font-weight:800;">('+(cu.suspendReason==='failed_attempts'?'AUTO-LOCKED: 3 FAILED LOGINS':'SUSPENDED')+')</span>':''}</div>
-        <div class="row-meta">${cu.email} &middot; ${cu.phone||'No phone'} &middot; Joined ${cu.joinDate||'—'}</div>
+        <div class="row-meta">${cu.email} &middot; ${cu.phone||'No phone'} &middot; Joined ${cu.joinDate||'N/A'}</div>
         <div class="row-meta" style="margin-top:3px;">Password: <span id="pw-${cu.id}" style="font-family:monospace;letter-spacing:1px;">••••••••</span> <span onclick="togglePwView('${cu.id}','${(cu.password||'').replace(/'/g,"\\'")}')" style="color:var(--or);cursor:pointer;font-weight:700;">show</span></div>
         <div class="row-meta" style="margin-top:3px;">⭐ RichPoints: <strong style="color:var(--or);">${(cu.points||0).toLocaleString()}</strong> &middot; 👛 Wallet: <strong style="color:var(--su);">₦${(cu.walletBalance||0).toLocaleString()}</strong>${cu.wholesaleStatus?' &middot; Wholesale: <strong style="color:'+(cu.wholesaleStatus==='approved'?'var(--su)':'var(--or)')+';">'+cu.wholesaleStatus+'</strong>'+(cu.wholesaleBusiness?' ('+cu.wholesaleBusiness+')':''):''}</div>
       </div>
@@ -3483,9 +3483,9 @@ function showCouponForm(){
     </div>
     <div class="g2">
       <div class="fg"><label class="lbl">Value</label><input class="inp" type="number" id="cp-val" placeholder="e.g. 20 for 20%"/></div>
-      <div class="fg"><label class="lbl">Minimum Order (NGN) — optional</label><input class="inp" type="number" id="cp-min" placeholder="e.g. 10000"/></div>
+      <div class="fg"><label class="lbl">Minimum Order (NGN), optional</label><input class="inp" type="number" id="cp-min" placeholder="e.g. 10000"/></div>
     </div>
-    <div class="fg"><label class="lbl">Expiry Date — optional</label><input class="inp" type="date" id="cp-exp"/></div>
+    <div class="fg"><label class="lbl">Expiry Date, optional</label><input class="inp" type="date" id="cp-exp"/></div>
     <div style="display:flex;gap:8px;margin-top:6px;">
       <button class="btn btn-or" onclick="saveCoupon()">Save Coupon</button>
       <button class="btn btn-dk" onclick="document.getElementById('coupon-form-area').innerHTML=''">Cancel</button>
@@ -3571,7 +3571,7 @@ async function renderChat(c){
     }else if(custById[key]){
       name=custById[key].fname+' '+custById[key].lname;meta=custById[key].email||'General inquiry';type='customer';
     }else if(key==='general'){
-      name='Anonymous Visitor(s)';meta='Not signed in — shared thread';type='anon';
+      name='Anonymous Visitor(s)';meta='Not signed in, shared thread';type='anon';
     }else{
       name='Customer inquiry';meta=key;
     }
@@ -3580,7 +3580,7 @@ async function renderChat(c){
   c.innerHTML=`
   <div class="page-hdr slide-up">
     <div><div class="page-hdr-title">Customer Messages</div>
-    <div class="page-hdr-sub">${threads.length} conversation${threads.length!==1?'s':''} — includes general inquiries, not just order-linked chats</div></div>
+    <div class="page-hdr-sub">${threads.length} conversation${threads.length!==1?'s':''}, includes general inquiries, not just order-linked chats</div></div>
   </div>
   ${threads.length===0?`<div class="card fade-in"><div class="empty"><div class="empty-icon">&#9998;</div><div class="empty-title">No messages yet</div><div class="empty-sub">Chat threads appear here when customers place orders or send any message via the chat widget.</div></div></div>`:
   `<div class="stagger">
@@ -3593,7 +3593,7 @@ async function renderChat(c){
   </div>`}`;
 }
 async function openGeneralChat(chatKey,custName){
-  document.getElementById('content-inner').innerHTML='<div class="page-hdr slide-up"><div><div class="page-hdr-title">'+custName+'</div><div class="page-hdr-sub">General inquiry — not linked to a specific order</div></div><div class="page-hdr-actions"><button class="btn btn-dk" onclick="nav(\'chat\',false)">&#8592; Back to Messages</button></div></div>'
+  document.getElementById('content-inner').innerHTML='<div class="page-hdr slide-up"><div><div class="page-hdr-title">'+custName+'</div><div class="page-hdr-sub">General inquiry, not linked to a specific order</div></div><div class="page-hdr-actions"><button class="btn btn-dk" onclick="nav(\'chat\',false)">&#8592; Back to Messages</button></div></div>'
     +'<div class="card" id="gc-msgs" style="max-height:400px;overflow-y:auto;margin-bottom:14px;"></div>'
     +'<div style="display:flex;gap:8px;"><input class="inp" id="gc-input" placeholder="Type your reply..." onkeydown="if(event.key===\'Enter\')sendGeneralReply(\''+chatKey+'\')" style="flex:1;"/><button class="btn btn-or" onclick="sendGeneralReply(\''+chatKey+'\')">Send</button></div>';
   await loadGeneralChatMsgs(chatKey);
@@ -3629,24 +3629,24 @@ async function renderNotifs(c){
   `<div class="card fade-in"><div class="stagger">
     ${list.slice(0,40).map(([k,n2])=>{
       const ico=n2.type==='new_order'?'&#128722;':n2.type==='chat'?'&#9998;':n2.type==='delivery_confirmed'?'&#9989;':n2.type==='password_reset_request'?'&#128273;':n2.type==='account_locked'?'&#128274;':n2.type==='wallet_topup_request'?'&#128179;':n2.type==='wholesale_application'?'&#128230;':n2.type==='new_vendor_signup'?'&#127970;':n2.type==='wallet_issue'?'&#127890;':n2.type==='wallet_refund_ready'?'&#127974;':n2.type==='new_investor_application'?'&#128176;':n2.type==='investor_chat'?'&#9998;':n2.type==='new_rider_application'?'&#127957;':'&#128230;';
-      const msg=n2.type==='new_order'?`New order from ${n2.customer} — ${fmt(n2.total)} &middot; ${n2.items||0} item(s)`:
+      const msg=n2.type==='new_order'?`New order from ${n2.customer}, ${fmt(n2.total)} &middot; ${n2.items||0} item(s)`:
         n2.type==='chat'?`Message from ${n2.from}: "${n2.preview}"`:
-        n2.type==='delivery_confirmed'?`Delivery confirmed for ${n2.orderId||n2.tracking} — signed by ${n2.receivedBy||n2.receiver||'customer'}`:
+        n2.type==='delivery_confirmed'?`Delivery confirmed for ${n2.orderId||n2.tracking}, signed by ${n2.receivedBy||n2.receiver||'customer'}`:
         n2.type==='password_reset_request'?`Password reset requested by ${n2.email}`:
         n2.type==='account_locked'?`⚠️ ${n2.name} (${n2.email}) was auto-locked after 3 failed sign-in attempts`:
-        n2.type==='wallet_topup_request'?`💰 ${n2.name} sent a bank transfer of ${fmt(n2.amount)} (ref: ${n2.ref}) — verify and use Adjust Wallet to credit`:
-        n2.type==='wholesale_application'?`${n2.name} applied for wholesale pricing (${n2.business}) — review in Customers`:
-        n2.type==='new_vendor_signup'?`${n2.name} applied to become a vendor (owner: ${n2.owner}) — review in Vendors`:
-        n2.type==='wallet_issue'?`🎫 ${n2.name} reported a wallet issue (${n2.issueType}): "${n2.message}" — review in Wallet Issues`:
-        n2.type==='wallet_refund_ready'?`🏦 ${n2.name} submitted bank details for a ${fmt(n2.amount)} refund payout — mark as paid in Wallet Issues once sent`:
-        n2.type==='new_investor_application'?`💰 ${n2.name} applied to invest ${fmt(n2.amount)} (${n2.option}) — review in Investors`:
+        n2.type==='wallet_topup_request'?`💰 ${n2.name} sent a bank transfer of ${fmt(n2.amount)} (ref: ${n2.ref}), verify and use Adjust Wallet to credit`:
+        n2.type==='wholesale_application'?`${n2.name} applied for wholesale pricing (${n2.business}), review in Customers`:
+        n2.type==='new_vendor_signup'?`${n2.name} applied to become a vendor (owner: ${n2.owner}), review in Vendors`:
+        n2.type==='wallet_issue'?`🎫 ${n2.name} reported a wallet issue (${n2.issueType}): "${n2.message}", review in Wallet Issues`:
+        n2.type==='wallet_refund_ready'?`🏦 ${n2.name} submitted bank details for a ${fmt(n2.amount)} refund payout, mark as paid in Wallet Issues once sent`:
+        n2.type==='new_investor_application'?`💰 ${n2.name} applied to invest ${fmt(n2.amount)} (${n2.option}), review in Investors`:
         n2.type==='investor_chat'?`Investor message from ${n2.name}: "${n2.preview}"`:
-        n2.type==='new_rider_application'?`🏍️ ${n2.name} applied as a dispatch rider (${n2.vehicleType}) — review in Dispatch Riders`:n2.type;
+        n2.type==='new_rider_application'?`🏍️ ${n2.name} applied as a dispatch rider (${n2.vehicleType}), review in Dispatch Riders`:n2.type;
       fbU('rn_mall_notifications/'+k,{read:true});
       if(n2.type==='password_reset_request'){
         const resetPageUrl=settings.resetPageUrl||'';
         const resetLink=resetPageUrl?resetPageUrl.replace(/\/?$/,'')+'?id='+(n2.customerId||''):'[Set your Password Reset Page URL in Site Customiser → Store Information first]';
-        const emailMsg='Hi,\\n\\nWe received a request to reset your RichNation Mall password.\\n\\nClick the link below to set a new password:\\n'+resetLink+'\\n\\nIf you did not request this, you can safely ignore this email or contact our support team.\\n\\n— RichNation Mall Support';
+        const emailMsg='Hi,\\n\\nWe received a request to reset your RichNation Mall password.\\n\\nClick the link below to set a new password:\\n'+resetLink+'\\n\\nIf you did not request this, you can safely ignore this email or contact our support team.\\n\\nRichNation Mall Support';
         return `<div style="padding:12px 0;border-bottom:1px solid var(--bdr);">
           <div style="display:flex;gap:12px;align-items:flex-start;">
             <div style="font-size:20px;flex-shrink:0;">${ico}</div>
@@ -3655,7 +3655,7 @@ async function renderNotifs(c){
             <span class="bdg ${n2.read?'bdg-mu':'bdg-or'}">${n2.read?'Read':'New'}</span>
           </div>
           <div style="margin-top:8px;margin-left:32px;display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="navigator.clipboard.writeText(${JSON.stringify(emailMsg)});toast('Reset email message copied — paste into your email client')">📋 Copy Reset Email</button>
+            <button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="navigator.clipboard.writeText(${JSON.stringify(emailMsg)});toast('Reset email message copied, paste into your email client')">📋 Copy Reset Email</button>
             <a href="mailto:${n2.email}?subject=${encodeURIComponent('Reset your RichNation Mall password')}&body=${encodeURIComponent(emailMsg)}" style="text-decoration:none;"><button class="btn btn-dk" style="font-size:10px;padding:5px 10px;">✉️ Open in Email App</button></a>
           </div>
         </div>`;
@@ -3715,7 +3715,7 @@ async function pollNotifsOnce(){
     rdb.textContent=pendRiders;rdb.style.display=pendRiders>0?'flex':'none';
   }
 }
-// Live background polling for admin notifications/order badges — uses
+// Live background polling for admin notifications/order badges, uses
 // setInterval (not a self-chaining setTimeout) so a single failed cycle
 // (network hiccup, timeout) can never permanently kill future polling.
 function pollNotifs(){
@@ -3723,7 +3723,7 @@ function pollNotifs(){
   if(!window._pollNotifsInterval){
     window._pollNotifsInterval=setInterval(function(){
       pollNotifsOnce().catch(function(e){console.warn('Notif poll failed:',e);});
-      // Keep the Notifications page itself live too — otherwise new items
+      // Keep the Notifications page itself live too, otherwise new items
       // only show up once the admin navigates away and back to it.
       if(curNav==='notifications'){
         var ci=document.getElementById('content-inner');
@@ -3782,14 +3782,18 @@ function renderSettings(c){
 
   <div class="card fade-in">
     <div class="card-title">Paystack Integration</div>
-    <div class="card-sub">Enter your Paystack public key to enable online payments. Get it from dashboard.paystack.com — Settings — API Keys.</div>
+    <div class="card-sub">Enter your Paystack public key to enable online payments. Get it from dashboard.paystack.com, Settings, API Keys.</div>
     <div class="fg"><label class="lbl">Paystack Public Key</label>
       <input class="inp" id="set-psk" value="${settings.paystackKey||''}" placeholder="pk_live_... or pk_test_..."/>
     </div>
     <label class="check-row">
       <input type="checkbox" id="set-pod" ${settings.podEnabled!==false?'checked':''} style="accent-color:var(--or);"/>
-      Enable Pay on Delivery option at checkout
+      Enable Pay on Delivery, 50% deposit at checkout
     </label>
+    <div class="card-sub" style="margin-top:14px;">Pay on Delivery is Nigeria-only, and only for states you approve below, and only for products individually marked POD-eligible in the product editor. Customers pay 50% by card to confirm; the rider collects the remaining 50% on delivery.</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;margin-top:10px;max-height:220px;overflow-y:auto;padding:10px;background:var(--card2);border-radius:8px;border:1px solid var(--bdr);">
+      ${NIGERIA_STATE_LIST.map(function(s){return '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--w2);cursor:pointer;"><input type="checkbox" class="pod-state-chk" value="'+s+'" '+((settings.podApprovedStates||[]).includes(s)?'checked':'')+' style="accent-color:var(--or);"/>'+s+'</label>';}).join('')}
+    </div>
     <button class="btn btn-or" style="margin-top:12px;" onclick="savePaySettings()">Save Payment Settings</button>
   </div>
 
@@ -3812,7 +3816,7 @@ function renderSettings(c){
   </div>
 
   <div class="green-box fade-in">
-    <b>RichNation Mall — Build People. Build Platforms. Create Millionaires.</b><br>
+    <b>RichNation Mall, Build People. Build Platforms. Create Millionaires.</b><br>
     Firebase: rn_mall_products / rn_mall_orders / rn_mall_customers / rn_mall_settings / rn_mall_coupons / rn_mall_categories / rn_mall_chat / rn_mall_notifications
   </div>`;
 }
@@ -3823,11 +3827,13 @@ async function saveSetting(key,inputId,isNum,label){
   settings[key]=val;await fbU('rn_mall_settings',{[key]:val});
   toast((label||key)+' saved!');
 }
+const NIGERIA_STATE_LIST=['Lagos','FCT Abuja','Rivers','Akwa Ibom','Anambra','Enugu','Imo','Oyo','Ogun','Kano','Kaduna','Katsina','Borno','Delta','Edo','Cross River','Bayelsa','Abia','Ebonyi','Ekiti','Ondo','Osun','Kwara','Kogi','Benue','Plateau','Nasarawa','Niger','Kebbi','Sokoto','Zamfara','Jigawa','Bauchi','Gombe','Yobe','Adamawa','Taraba'];
 async function savePaySettings(){
   const key=document.getElementById('set-psk')?.value.trim()||'';
   const pod=document.getElementById('set-pod')?.checked;
-  settings.paystackKey=key;settings.podEnabled=pod;
-  await fbU('rn_mall_settings',{paystackKey:key,podEnabled:pod});
+  const podStates=Array.from(document.querySelectorAll('.pod-state-chk:checked')).map(function(el){return el.value;});
+  settings.paystackKey=key;settings.podEnabled=pod;settings.podApprovedStates=podStates;
+  await fbU('rn_mall_settings',{paystackKey:key,podEnabled:pod,podApprovedStates:podStates});
   toast('Payment settings saved!');
 }
 async function saveFlash(){
@@ -3929,7 +3935,7 @@ function renderSiteCustomiser(c){
   var ems=settings.mallEmojis||{trust_secure:'🔒',trust_returns:'↩️',trust_delivery:'🚚',trust_chat:'💬',trust_guarantee:'✅',trust_price:'🔄',why_price:'💰',why_range:'📦',why_security:'🔒',why_verified:'✅',why_fast:'🚀',why_support:'💬',guarantee_order:'✅',guarantee_delivery:'🚚',guarantee_returns:'↩️',guarantee_price:'💲',guarantee_payment:'🔐',guarantee_privacy:'🛡️',account_orders:'📦',account_pay:'💳',account_ship:'🚚',account_receive:'📬',account_refunds:'↩️',account_vouchers:'🎟️',account_addresses:'📍',account_profile:'👤'};
   function eb(key,lbl){return '<div onclick="editEmoji(\''+key+'\')" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(255,106,0,0.12),rgba(255,167,51,0.06));border:1px solid rgba(255,106,0,0.35);border-radius:8px;padding:6px 12px;cursor:pointer;margin:3px;transition:border-color .15s;" onmouseover="this.style.borderColor=\'var(--or)\'" onmouseout="this.style.borderColor=\'rgba(255,106,0,0.35)\'"><span id="em-'+key+'" style="font-size:20px;">'+(ems[key]||'•')+'</span><span style="font-size:10px;color:var(--wh);font-weight:700;">'+lbl+'</span></div>';}
   var html = '<div class="page-hdr"><div><div class="page-hdr-title">Site Customiser</div><div class="page-hdr-sub">Full control over the customer mall</div></div><div class="page-hdr-actions"><button class="btn btn-dk" onclick="refreshData()">↻ Refresh</button></div></div>';
-  html += '<div class="cs-section"><div class="cs-section-title">🎨 Colour Theme — Full Control</div>';
+  html += '<div class="cs-section"><div class="cs-section-title">🎨 Colour Theme, Full Control</div>';
   html += '<div class="g2"><div class="fg"><label class="lbl">Primary / Accent Colour</label>';
   html += '<div style="display:flex;gap:8px;align-items:center;">';
   html += '<input type="color" id="th-pick" value="'+(th.primary||'#FF6A00')+'" style="width:50px;height:38px;border:none;cursor:pointer;border-radius:6px;" oninput="document.getElementById(\'th-hex\').value=this.value"/>';
@@ -3955,16 +3961,16 @@ function renderSiteCustomiser(c){
   html += '<div class="cs-section"><div class="cs-section-title">🏪 Store Information</div>';
   html += '<div class="g2"><div class="fg"><label class="lbl">Store Name</label><input class="inp" id="cs-sn" value="'+(settings.storeName||'RichNation Mall')+'"/></div>';
   html += '<div class="fg"><label class="lbl">Tagline</label><input class="inp" id="cs-tl" value="'+(settings.tagline||'')+'"/></div></div>';
-  html += '<div class="g2"><div class="fg"><label class="lbl">Contact Email</label><input class="inp" id="cs-em" value="'+(settings.contactEmail||'richnationwbpt61@gmail.com')+'"/></div>';
+  html += '<div class="g2"><div class="fg"><label class="lbl">Contact Email</label><input class="inp" id="cs-em" value="'+(settings.contactEmail||'rnm.office@richnationmall.com')+'"/></div>';
   html += '<div class="fg"><label class="lbl">WhatsApp</label><input class="inp" id="cs-wa" value="'+(settings.waNum||'2349164678560')+'"/></div></div>';
-  html += '<div class="fg"><label class="lbl">Live Website URL</label><input class="inp" id="cs-site-url" value="'+(settings.siteUrl||'')+'" placeholder="https://richnationwbpt.com/mall/"/><div style="font-size:11px;color:var(--mu);margin-top:4px;">The exact URL customers use to reach the Mall. Used to build referral and share links correctly — without this, links can break for customers opening the app directly from a downloaded file instead of a real web address.</div></div>';
+  html += '<div class="fg"><label class="lbl">Live Website URL</label><input class="inp" id="cs-site-url" value="'+(settings.siteUrl||'')+'" placeholder="https://richnationwbpt.com/mall/"/><div style="font-size:11px;color:var(--mu);margin-top:4px;">The exact URL customers use to reach the Mall. Used to build referral and share links correctly, without this, links can break for customers opening the app directly from a downloaded file instead of a real web address.</div></div>';
   html += '<div class="fg"><label class="lbl">Password Reset Page URL</label><input class="inp" id="cs-reset-url" value="'+(settings.resetPageUrl||'')+'" placeholder="https://yourdomain.com/reset-password.html"/><div style="font-size:11px;color:var(--mu);margin-top:4px;">Upload the standalone reset-password.html file anywhere (your domain, Netlify, etc.) and paste its exact URL here. This is what customers land on when resetting their password.</div></div>';
   html += '<button class="btn btn-or" style="margin-bottom:16px;" onclick="saveStoreInfo()">Save Store Information</button>';
-  html += '<div class="fg"><label class="lbl">Pickup Location</label><div style="font-size:11px;color:var(--mu);margin-bottom:8px;">Drag the pin to your exact store/warehouse location — this is what the delivery map uses for every order.</div>';
+  html += '<div class="fg"><label class="lbl">Pickup Location</label><div style="font-size:11px;color:var(--mu);margin-bottom:8px;">Drag the pin to your exact store/warehouse location, this is what the delivery map uses for every order.</div>';
   html += '<div id="cs-pickup-map" style="width:100%;height:260px;border-radius:9px;overflow:hidden;background:var(--card2);margin-bottom:8px;"></div>';
   html += '<button class="btn btn-or" style="margin-bottom:6px;" onclick="useMyCurrentLocationForPickup()">🎯 Use My Current Location</button> <button class="btn" style="margin-bottom:6px;" onclick="searchPickupAddress()">🔍 Search an Address</button>';
   html += '<input class="inp" id="cs-pickup-search" placeholder="Type an address and press Enter..." style="margin-bottom:8px;" onkeydown="if(event.key===\'Enter\'){event.preventDefault();searchPickupAddress();}"/>';
-  html += '<div id="cs-pickup-status" style="font-size:11px;color:var(--mu);margin-bottom:8px;">'+((settings.pickupLocation||{}).lat!=null?'✔ Currently set'+((settings.pickupLocation||{}).address?' — '+(settings.pickupLocation||{}).address:'')+'. Drag the pin and hit Save to change it.':'Not set yet — drag the pin to your location, or use one of the buttons above, then Save.')+'</div>';
+  html += '<div id="cs-pickup-status" style="font-size:11px;color:var(--mu);margin-bottom:8px;">'+((settings.pickupLocation||{}).lat!=null?'✔ Currently set'+((settings.pickupLocation||{}).address?', '+(settings.pickupLocation||{}).address:'')+'. Drag the pin and hit Save to change it.':'Not set yet, drag the pin to your location, or use one of the buttons above, then Save.')+'</div>';
   html += '<button class="btn btn-or" onclick="savePickupPinPosition()">💾 Save Pickup Location</button></div>';
   html += '<div class="cs-section"><div class="cs-section-title">🏠 Hero Section</div>';
   html += '<div class="fg"><label class="lbl">Eyebrow</label><input class="inp" id="cs-ey" value="'+(hc.eyebrow||'Delivering Across Nigeria and The World')+'"/></div>';
@@ -3973,8 +3979,8 @@ function renderSiteCustomiser(c){
   html += '<div class="fg"><label class="lbl">Subtitle</label><textarea class="ta" id="cs-sub" rows="2">'+(hc.subtitle||'Top quality products delivered to your door.')+'</textarea></div>';
   html += '<div class="g2"><div class="fg"><label class="lbl">Button 1</label><input class="inp" id="cs-b1" value="'+(hc.btn1||'Shop Now')+'"/></div>';
   html += '<div class="fg"><label class="lbl">Button 2</label><input class="inp" id="cs-b2" value="'+(hc.btn2||'Track My Order')+'"/></div></div>';
-  html += '<div class="g2"><div class="fg"><label class="lbl">Hero Gradient — Start Colour</label><div style="display:flex;gap:8px;"><input type="color" id="hc-c1" value="'+(hc.color1||'#FF6A00')+'" style="width:44px;height:38px;border:none;cursor:pointer;border-radius:6px;"/><input class="inp" id="hc-c1-hex" value="'+(hc.color1||'#FF6A00')+'" oninput="document.getElementById(\'hc-c1\').value=this.value" style="flex:1;"/></div></div>';
-  html += '<div class="fg"><label class="lbl">Hero Gradient — End Colour</label><div style="display:flex;gap:8px;"><input type="color" id="hc-c2" value="'+(hc.color2||'#FFA733')+'" style="width:44px;height:38px;border:none;cursor:pointer;border-radius:6px;"/><input class="inp" id="hc-c2-hex" value="'+(hc.color2||'#FFA733')+'" oninput="document.getElementById(\'hc-c2\').value=this.value" style="flex:1;"/></div></div></div>';
+  html += '<div class="g2"><div class="fg"><label class="lbl">Hero Gradient, Start Colour</label><div style="display:flex;gap:8px;"><input type="color" id="hc-c1" value="'+(hc.color1||'#FF6A00')+'" style="width:44px;height:38px;border:none;cursor:pointer;border-radius:6px;"/><input class="inp" id="hc-c1-hex" value="'+(hc.color1||'#FF6A00')+'" oninput="document.getElementById(\'hc-c1\').value=this.value" style="flex:1;"/></div></div>';
+  html += '<div class="fg"><label class="lbl">Hero Gradient, End Colour</label><div style="display:flex;gap:8px;"><input type="color" id="hc-c2" value="'+(hc.color2||'#FFA733')+'" style="width:44px;height:38px;border:none;cursor:pointer;border-radius:6px;"/><input class="inp" id="hc-c2-hex" value="'+(hc.color2||'#FFA733')+'" oninput="document.getElementById(\'hc-c2\').value=this.value" style="flex:1;"/></div></div></div>';
   html += '<div class="fg"><label class="lbl">Highlight Word Colour (the accent word in Title Line 2)</label><div style="display:flex;gap:8px;max-width:200px;"><input type="color" id="hc-hl" value="'+(hc.highlightColor||'#FFE066')+'" style="width:44px;height:38px;border:none;cursor:pointer;border-radius:6px;"/><input class="inp" id="hc-hl-hex" value="'+(hc.highlightColor||'#FFE066')+'" oninput="document.getElementById(\'hc-hl\').value=this.value" style="flex:1;"/></div></div>';
   html += '<button class="btn btn-or" onclick="saveHeroText()">Save Hero Text &amp; Colours</button></div>';
   html += '<div class="cs-section"><div class="cs-section-title">📢 Announcement Bar</div>';
@@ -4022,17 +4028,17 @@ function renderSiteCustomiser(c){
   html += '<div class="fg"><label class="lbl">Points for free shipping</label><input class="inp" type="number" id="rp-shippingCost" value="'+(rp.shippingCost||200)+'" placeholder="200"/></div>';
   html += '</div><button class="btn btn-or" onclick="saveRichPoints()">Save RichPoints Settings</button></div>';
   html += '<div class="cs-section"><div class="cs-section-title">🏆 Loyalty Tiers</div>';
-  html += '<div style="font-size:12px;color:var(--mu);margin-bottom:12px;line-height:1.6;">Permanent percentage discounts customers unlock based on their lifetime spend — the more they spend over time, the less they pay per order, automatically at checkout.</div>';
+  html += '<div style="font-size:12px;color:var(--mu);margin-bottom:12px;line-height:1.6;">Permanent percentage discounts customers unlock based on their lifetime spend, the more they spend over time, the less they pay per order, automatically at checkout.</div>';
   var tiers=settings.loyaltyTiers||[{name:'Bronze',min:0,pct:0},{name:'Silver',min:50000,pct:3},{name:'Gold',min:150000,pct:5},{name:'Platinum',min:350000,pct:8}];
   tiers.forEach(function(t,i){
     html += '<div class="g2" style="margin-bottom:8px;align-items:end;">';
-    html += '<div class="fg" style="margin-bottom:0;"><label class="lbl">'+t.name+' — min. lifetime spend (₦)</label><input class="inp" type="number" id="lt-min-'+i+'" value="'+t.min+'"/></div>';
-    html += '<div class="fg" style="margin-bottom:0;"><label class="lbl">'+t.name+' — discount %</label><input class="inp" type="number" id="lt-pct-'+i+'" value="'+t.pct+'"/></div>';
+    html += '<div class="fg" style="margin-bottom:0;"><label class="lbl">'+t.name+', min. lifetime spend (₦)</label><input class="inp" type="number" id="lt-min-'+i+'" value="'+t.min+'"/></div>';
+    html += '<div class="fg" style="margin-bottom:0;"><label class="lbl">'+t.name+', discount %</label><input class="inp" type="number" id="lt-pct-'+i+'" value="'+t.pct+'"/></div>';
     html += '</div>';
   });
   html += '<button class="btn btn-or" onclick="saveLoyaltyTiers()" style="margin-top:6px;">Save Loyalty Tiers</button></div>';
   html += '<div class="cs-section"><div class="cs-section-title">📄 Policy Pages</div>';
-  html += '<div style="font-size:12px;color:var(--mu);margin-bottom:12px;line-height:1.6;">Write custom content for any page below — it will replace the default text shown to customers. Leave blank and save to restore the default.</div>';
+  html += '<div style="font-size:12px;color:var(--mu);margin-bottom:12px;line-height:1.6;">Write custom content for any page below, it will replace the default text shown to customers. Leave blank and save to restore the default.</div>';
   html += '<div class="fg"><label class="lbl">Choose Page to Edit</label><select class="inp" id="cs-policy-sel" onchange="loadPolicyEditor()">';
   html += '<option value="about">About Us</option><option value="faq">FAQ</option><option value="returns">Returns &amp; Refund Policy</option><option value="shipping">Shipping &amp; Delivery</option><option value="privacy">Privacy Policy</option><option value="terms">Terms of Use</option><option value="contact">Contact Us</option>';
   html += '</select></div>';
@@ -4111,17 +4117,17 @@ async function initPickupLocationMap(){
   _pickupMapMarker=L.marker([start.lat,start.lng],{icon:pinIcon,draggable:true}).addTo(map);
   _pickupMapMarker.on('dragend',function(){
     const statusEl=document.getElementById('cs-pickup-status');
-    if(statusEl){statusEl.textContent='📍 Pin moved — click Save to confirm this as your pickup location.';statusEl.style.color='var(--or)';}
+    if(statusEl){statusEl.textContent='📍 Pin moved, click Save to confirm this as your pickup location.';statusEl.style.color='var(--or)';}
   });
   map.on('click',function(e){
     _pickupMapMarker.setLatLng(e.latlng);
     const statusEl=document.getElementById('cs-pickup-status');
-    if(statusEl){statusEl.textContent='📍 Pin moved — click Save to confirm this as your pickup location.';statusEl.style.color='var(--or)';}
+    if(statusEl){statusEl.textContent='📍 Pin moved, click Save to confirm this as your pickup location.';statusEl.style.color='var(--or)';}
   });
 }
 function useMyCurrentLocationForPickup(){
   const statusEl=document.getElementById('cs-pickup-status');
-  if(!navigator.geolocation){if(statusEl){statusEl.textContent='Your browser doesn\'t support location detection — drag the pin manually instead.';statusEl.style.color='var(--re)';}return;}
+  if(!navigator.geolocation){if(statusEl){statusEl.textContent='Your browser doesn\'t support location detection, drag the pin manually instead.';statusEl.style.color='var(--re)';}return;}
   if(statusEl){statusEl.textContent='📍 Detecting your current location…';statusEl.style.color='var(--mu);'}
   navigator.geolocation.getCurrentPosition(
     function(pos){
@@ -4130,10 +4136,10 @@ function useMyCurrentLocationForPickup(){
         _pickupMapMarker.setLatLng([lat,lng]);
         _pickupMapInstance.setView([lat,lng],16);
       }
-      if(statusEl){statusEl.textContent='📍 Pin moved to your current location — click Save to confirm.';statusEl.style.color='var(--or)';}
+      if(statusEl){statusEl.textContent='📍 Pin moved to your current location, click Save to confirm.';statusEl.style.color='var(--or)';}
     },
     function(err){
-      if(statusEl){statusEl.textContent='⚠ Could not access your location — check your browser\'s location permission, or drag the pin manually.';statusEl.style.color='var(--re)';}
+      if(statusEl){statusEl.textContent='⚠ Could not access your location, check your browser\'s location permission, or drag the pin manually.';statusEl.style.color='var(--re)';}
     },
     {enableHighAccuracy:true,timeout:15000}
   );
@@ -4149,26 +4155,26 @@ async function searchPickupAddress(){
     if(data&&data[0]){
       const lat=parseFloat(data[0].lat),lng=parseFloat(data[0].lon);
       if(_pickupMapInstance&&_pickupMapMarker){_pickupMapMarker.setLatLng([lat,lng]);_pickupMapInstance.setView([lat,lng],16);}
-      if(statusEl){statusEl.textContent='📍 Found it — click Save to confirm this as your pickup location.';statusEl.style.color='var(--or)';}
+      if(statusEl){statusEl.textContent='📍 Found it, click Save to confirm this as your pickup location.';statusEl.style.color='var(--or)';}
     }else{
-      if(statusEl){statusEl.textContent='⚠ Could not find that address — try a different search, or drag the pin manually.';statusEl.style.color='var(--re)';}
+      if(statusEl){statusEl.textContent='⚠ Could not find that address, try a different search, or drag the pin manually.';statusEl.style.color='var(--re)';}
     }
   }catch(e){
-    if(statusEl){statusEl.textContent='⚠ Search failed — check your connection, or drag the pin manually.';statusEl.style.color='var(--re)';}
+    if(statusEl){statusEl.textContent='⚠ Search failed, check your connection, or drag the pin manually.';statusEl.style.color='var(--re)';}
   }
 }
 async function savePickupPinPosition(){
   const statusEl=document.getElementById('cs-pickup-status');
-  if(!_pickupMapMarker){if(statusEl){statusEl.textContent='Map not ready yet — try again in a moment.';statusEl.style.color='var(--re)';}return;}
+  if(!_pickupMapMarker){if(statusEl){statusEl.textContent='Map not ready yet, try again in a moment.';statusEl.style.color='var(--re)';}return;}
   const pos=_pickupMapMarker.getLatLng();
   const pickupLocation={lat:pos.lat,lng:pos.lng,address:'',city:'',state:''};
-  // Save the coordinates immediately — this is the source of truth the delivery map
+  // Save the coordinates immediately, this is the source of truth the delivery map
   // actually uses, so it never depends on reverse-geocoding succeeding.
   settings.pickupLocation=pickupLocation;
   await fbU('rn_mall_settings',{pickupLocation:pickupLocation});
   if(statusEl){statusEl.textContent='✔ Saved! ('+pos.lat.toFixed(4)+', '+pos.lng.toFixed(4)+')';statusEl.style.color='var(--su)';}
   toast('Pickup location saved!');
-  // Best-effort background label for readability — doesn't block the save above,
+  // Best-effort background label for readability, doesn't block the save above,
   // and if it fails or comes back incomplete, the saved coordinates are unaffected.
   try{
     const res=await fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+pos.lat+'&lon='+pos.lng);
@@ -4180,9 +4186,9 @@ async function savePickupPinPosition(){
       const withLabel={lat:pos.lat,lng:pos.lng,address:address,city:city,state:state};
       settings.pickupLocation=withLabel;
       await fbU('rn_mall_settings',{pickupLocation:withLabel});
-      if(statusEl&&address)statusEl.textContent='✔ Saved — '+address+(city?', '+city:'');
+      if(statusEl&&address)statusEl.textContent='✔ Saved, '+address+(city?', '+city:'');
     }
-  }catch(e){/* label is a nice-to-have — coordinates are already safely saved */}
+  }catch(e){/* label is a nice-to-have, coordinates are already safely saved */}
 }
 async function saveHeroText(){
   var cfg={eyebrow:(document.getElementById('cs-ey')||{}).value||'',title1:(document.getElementById('cs-t1')||{}).value||'Shop Smart.',title2:(document.getElementById('cs-t2')||{}).value||'Shop RichNation.',subtitle:(document.getElementById('cs-sub')||{}).value||'',btn1:(document.getElementById('cs-b1')||{}).value||'Shop Now',btn2:(document.getElementById('cs-b2')||{}).value||'Track My Order',color1:(document.getElementById('hc-c1-hex')||{}).value||'#FF6A00',color2:(document.getElementById('hc-c2-hex')||{}).value||'#FFA733',highlightColor:(document.getElementById('hc-hl-hex')||{}).value||'#FFE066'};
@@ -4258,8 +4264,8 @@ function renderHeroEditor(c){
   html+='<div class="g2"><div class="fg"><label class="lbl">Button 1</label><input class="inp" id="he-b1" value="'+(hc.btn1||'Shop Now')+'"/></div>';
   html+='<div class="fg"><label class="lbl">Button 2</label><input class="inp" id="he-b2" value="'+(hc.btn2||'Track My Order')+'"/></div></div>';
   html+='<button class="btn btn-or" onclick="saveHeroEditor()">Save Hero</button></div>';
-  html+='<div class="cs-section"><div class="cs-section-title">🎨 Hero Banner Designs — optional</div>';
-  html+='<div style="font-size:12px;color:var(--mu);margin-bottom:12px;line-height:1.6;">Upload up to 3 seasonal banners (Happy New Year, Christmas, Black Friday, Valentine, etc.) — if you upload more than one, they automatically rotate behind your hero text every few seconds, just like Jumia\'s homepage banners. Recommended: a wide image (1600×600px or similar).</div>';
+  html+='<div class="cs-section"><div class="cs-section-title">🎨 Hero Banner Designs, optional</div>';
+  html+='<div style="font-size:12px;color:var(--mu);margin-bottom:12px;line-height:1.6;">Upload up to 3 seasonal banners (Happy New Year, Christmas, Black Friday, Valentine, etc.), if you upload more than one, they automatically rotate behind your hero text every few seconds, just like Jumia\'s homepage banners. Recommended: a wide image (1600×600px or similar).</div>';
   html+='<div id="hero-banners-list"></div>';
   html+='<div class="cs-section"><div class="cs-section-title">📢 Announcement Bar</div>';
   html+='<div class="fg"><input class="inp" id="he-ann" value="'+(settings.announcement||'')+'" placeholder="e.g. FREE delivery this week!"/></div>';
@@ -4278,7 +4284,7 @@ function renderHeroBannerRows(){
       +(img?'<img src="'+img+'" style="width:100%;height:100%;object-fit:cover;">':'<span style="font-size:10px;color:var(--mu);">Design '+(i+1)+'</span>')
       +'</div>'
       +'<input type="file" id="hero-banner-file-'+i+'" accept="image/*" style="display:none;" onchange="uploadHeroBanner('+i+',this)">'
-      +'<div style="flex:1;font-size:12px;color:var(--w2);">Design '+(i+1)+(img?'':' — empty')+'</div>'
+      +'<div style="flex:1;font-size:12px;color:var(--w2);">Design '+(i+1)+(img?'':', empty')+'</div>'
       +(img?'<button type="button" onclick="removeHeroBanner('+i+')" style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);color:var(--re);border-radius:6px;padding:6px 10px;cursor:pointer;">🗑</button>':'')
       +'</div>';
   }
@@ -4288,7 +4294,7 @@ async function uploadHeroBanner(slot,inp){
   if(!inp||!inp.files||!inp.files[0])return;
   toast('Uploading design…');
   var b64=await compressImage(inp.files[0],1920,0.9);
-  if(!b64){toast('Upload failed — try a different image','err');return;}
+  if(!b64){toast('Upload failed, try a different image','err');return;}
   var url=isGithubConfigured()?await uploadDataUrlToGithub(b64,'banners'):null;
   if(url)b64=url;
   settings.heroConfig=settings.heroConfig||{};
@@ -4359,7 +4365,7 @@ async function approvePOD(id){
   var tl=(order.timeline||[]).concat([{status:'Pay on Delivery Approved',time:new Date().toISOString(),note:msg}]);
   await fbS('rn_mall_orders/'+id,Object.assign({},order,{status:'confirmed',podApproved:true,timeline:tl}));
   if(order.customer&&order.customer.id){await fbPNotify('rn_mall_customer_notifications/'+order.customer.id,{type:'pod_approved',orderId:id,message:msg,date:new Date().toLocaleDateString(),read:false,ts:Date.now()});}
-  toast('Pay on Delivery approved — customer notified!');nav('pod',false);
+  toast('Pay on Delivery approved, customer notified!');nav('pod',false);
 }
 async function declinePOD(id){
   var msg=prompt('Reason for declining (sent to the customer, you can edit this):','We\'re unable to offer Pay on Delivery for this order. Please place the order again with card/bank transfer payment, or contact support for help.');
@@ -4368,7 +4374,7 @@ async function declinePOD(id){
   var tl=(order.timeline||[]).concat([{status:'Pay on Delivery Declined',time:new Date().toISOString(),note:msg}]);
   await fbS('rn_mall_orders/'+id,Object.assign({},order,{status:'pod_declined',timeline:tl}));
   if(order.customer&&order.customer.id){await fbPNotify('rn_mall_customer_notifications/'+order.customer.id,{type:'pod_cancelled',orderId:id,message:msg,date:new Date().toLocaleDateString(),read:false,ts:Date.now()});}
-  toast('Pay on Delivery declined — customer notified.');nav('pod',false);
+  toast('Pay on Delivery declined, customer notified.');nav('pod',false);
 }
 
 // ── QUICK TOGGLE ──
@@ -4385,7 +4391,7 @@ async function sendAIReply(chatId,inpId){
     var data=await res.json();
     var text=(data.content&&data.content[0]&&data.content[0].text)||'';
     var inp=document.getElementById(inpId);if(inp&&text){inp.value=text;inp.focus();}
-    toast('AI reply ready — review and send!');
+    toast('AI reply ready, review and send!');
   }catch(e){toast('AI reply failed','err');}
   if(btn){btn.textContent='AI Reply';btn.disabled=false;}
 }
@@ -4393,7 +4399,7 @@ async function sendAIReply(chatId,inpId){
 
 
 // ══════════════════════════════════════════════════════════════
-// NEW FEATURES — RichNation Mall Admin
+// NEW FEATURES, RichNation Mall Admin
 // ══════════════════════════════════════════════════════════════
 
 // ── IMAGE UPLOAD (base64 to Firebase) ──
@@ -4406,7 +4412,7 @@ function imgToBase64(file){
   });
 }
 
-// Resize + compress images before storing — raw uncompressed photos were the main
+// Resize + compress images before storing, raw uncompressed photos were the main
 // cause of slow product load times. Caps the longest side at 1280px and re-encodes
 // as JPEG at 0.75 quality (falls back to the original file if anything goes wrong).
 function compressImage(file,maxDim,quality){
@@ -4437,7 +4443,7 @@ function compressImage(file,maxDim,quality){
   });
 }
 
-// ── GitHub-based image hosting — a free, no-card bridge solution while sorting out
+// ── GitHub-based image hosting, a free, no-card bridge solution while sorting out
 // payment for Firebase Blaze / Cloudflare R2. Moves image bandwidth off Firebase
 // entirely, which is the actual goal (not just switching where it's billed).
 //
@@ -4453,7 +4459,7 @@ function isGithubConfigured(){
 }
 async function uploadDataUrlToGithub(dataUrl,folder){
   if(!isGithubConfigured()){
-    console.warn('GitHub image hosting is not configured yet — falling back to inline storage.');
+    console.warn('GitHub image hosting is not configured yet, falling back to inline storage.');
     return null;
   }
   try{
@@ -4472,14 +4478,14 @@ async function uploadDataUrlToGithub(dataUrl,folder){
       },
       body:JSON.stringify({message:'Upload '+path,content:base64Content,branch:GITHUB_CONFIG.branch})
     });
-    if(!res.ok){const errBody=await res.text();throw new Error('GitHub upload failed: '+res.status+' — '+errBody);}
+    if(!res.ok){const errBody=await res.text();throw new Error('GitHub upload failed: '+res.status+', '+errBody);}
     return 'https://raw.githubusercontent.com/'+GITHUB_CONFIG.owner+'/'+GITHUB_CONFIG.repo+'/'+GITHUB_CONFIG.branch+'/'+path;
   }catch(e){
     console.warn('GitHub image upload failed:',e);
     return null;
   }
 }
-// Sensitive documents go to the private repo — returns a github-private: reference
+// Sensitive documents go to the private repo, returns a github-private: reference
 // instead of a public URL, since private content needs authenticated access to view.
 async function uploadDataUrlToGithubPrivate(dataUrl,folder){
   if(!isGithubConfigured())return null;
@@ -4491,7 +4497,7 @@ async function uploadDataUrlToGithubPrivate(dataUrl,folder){
     const path='documents/'+folder+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
     const apiUrl='https://api.github.com/repos/'+GITHUB_DOCS_CONFIG.owner+'/'+GITHUB_DOCS_CONFIG.repo+'/contents/'+path;
     const res=await fetch(apiUrl,{method:'PUT',headers:{'Authorization':'token '+GITHUB_DOCS_CONFIG.token,'Content-Type':'application/json','Accept':'application/vnd.github+json'},body:JSON.stringify({message:'Upload '+path,content:base64Content,branch:GITHUB_DOCS_CONFIG.branch})});
-    if(!res.ok){const errBody=await res.text();throw new Error('GitHub private upload failed: '+res.status+' — '+errBody);}
+    if(!res.ok){const errBody=await res.text();throw new Error('GitHub private upload failed: '+res.status+', '+errBody);}
     return 'github-private:'+path;
   }catch(e){
     console.warn('GitHub private document upload failed:',e);
@@ -4499,7 +4505,7 @@ async function uploadDataUrlToGithubPrivate(dataUrl,folder){
   }
 }
 const FIREBASE_STORAGE_BUCKET='richnation-portal.firebasestorage.app';
-// Uploads a File to Firebase Storage and returns its public download URL — this replaces
+// Uploads a File to Firebase Storage and returns its public download URL, this replaces
 // storing images as base64 text directly inside database records, which was the real
 // driver behind the huge Realtime Database download bandwidth (every product/order fetch
 // was pulling full image data along with it, every single time).
@@ -4546,7 +4552,7 @@ async function uploadProductImages(){
   for(var i=0;i<Math.min(inp.files.length,15);i++){
     try{
       // Compress client-side first to control final resolution and file size, then
-      // upload the RESULT somewhere that isn't Firebase — the database only ever
+      // upload the RESULT somewhere that isn't Firebase, the database only ever
       // stores a short URL either way.
       var b64=await compressImage(inp.files[i],1280,0.8);
       if(!b64)continue;
@@ -4584,15 +4590,15 @@ function recompressDataUrl(dataUrl,maxDim,quality){
 }
 
 // One-time cleanup: shrinks any large/uncompressed photos already saved on
-// existing products — this is what actually fixes slow load time for a
+// existing products, this is what actually fixes slow load time for a
 // catalogue that was built before image compression was added, since new
 // uploads alone don't retroactively shrink old ones.
 async function compressAllProductImages(){
-  if(!confirm('This re-compresses every product photo already saved (shrinks oversized images to speed up product load time). It can take a few minutes for a large catalogue — keep this tab open until it finishes. Continue?'))return;
+  if(!confirm('This re-compresses every product photo already saved (shrinks oversized images to speed up product load time). It can take a few minutes for a large catalogue, keep this tab open until it finishes. Continue?'))return;
   var prods=await fbG('rn_mall_products')||{};
   var pids=Object.keys(prods);
   var totalImgs=0,changed=0,savedBytes=0;
-  toast('Compressing images — please keep this tab open...');
+  toast('Compressing images, please keep this tab open...');
   for(var pi=0;pi<pids.length;pi++){
     var pid=pids[pi],p=prods[pid];
     if(!p.images||!p.images.length)continue;
@@ -4614,20 +4620,20 @@ async function compressAllProductImages(){
       if(allProds[pid])allProds[pid]=Object.assign({},allProds[pid],{images:newImgs});
     }
   }
-  toast('Done — compressed '+changed+' of '+totalImgs+' image(s), saved ~'+(Math.round(savedBytes/1024/1024*10)/10)+'MB');
+  toast('Done, compressed '+changed+' of '+totalImgs+' image(s), saved ~'+(Math.round(savedBytes/1024/1024*10)/10)+'MB');
 }
 
-// The actual fix for CURRENT database size — moves images that are still stored as
+// The actual fix for CURRENT database size, moves images that are still stored as
 // base64 text (from before GitHub hosting existed) onto GitHub, replacing them with a
 // short link. Unlike compression, this is what actually shrinks what's downloaded on
 // every product fetch, not just how big each image is.
 async function migrateProductImagesToGithub(){
-  if(!isGithubConfigured()){toast('GitHub image hosting isn\'t configured yet — set that up first','err');return;}
-  if(!confirm('This moves your EXISTING product photos out of the database and onto GitHub. It can take a while for a large catalogue — keep this tab open until it finishes. Continue?'))return;
+  if(!isGithubConfigured()){toast('GitHub image hosting isn\'t configured yet, set that up first','err');return;}
+  if(!confirm('This moves your EXISTING product photos out of the database and onto GitHub. It can take a while for a large catalogue, keep this tab open until it finishes. Continue?'))return;
   var prods=await fbG('rn_mall_products')||{};
   var pids=Object.keys(prods);
   var totalImgs=0,migrated=0,failed=0;
-  toast('Moving images to GitHub — please keep this tab open...');
+  toast('Moving images to GitHub, please keep this tab open...');
   for(var pi=0;pi<pids.length;pi++){
     var pid=pids[pi],p=prods[pid];
     if(!p.images||!p.images.length)continue;
@@ -4649,16 +4655,16 @@ async function migrateProductImagesToGithub(){
     }
     toast('Migrating… '+migrated+' moved so far ('+(pi+1)+'/'+pids.length+' products checked)');
   }
-  toast('Done — moved '+migrated+' of '+totalImgs+' image(s) to GitHub'+(failed?' ('+failed+' failed, left as-is)':''));
+  toast('Done, moved '+migrated+' of '+totalImgs+' image(s) to GitHub'+(failed?' ('+failed+' failed, left as-is)':''));
   nav('products',false);
 }
 
 // Same idea as the product migration, but for the simpler single-field photos on
 // staff/investor/rider records, plus vendor's photo, logo, and nested documents object.
 async function migrateEverythingElseToGithub(){
-  if(!isGithubConfigured()){toast('GitHub image hosting isn\'t configured yet — set that up first','err');return;}
-  if(!confirm('This moves existing staff, vendor, investor, and rider photos/documents out of the database and onto GitHub. It can take a while — keep this tab open until it finishes. Continue?'))return;
-  toast('Moving images to GitHub — please keep this tab open...');
+  if(!isGithubConfigured()){toast('GitHub image hosting isn\'t configured yet, set that up first','err');return;}
+  if(!confirm('This moves existing staff, vendor, investor, and rider photos/documents out of the database and onto GitHub. It can take a while, keep this tab open until it finishes. Continue?'))return;
+  toast('Moving images to GitHub, please keep this tab open...');
   var totalMoved=0,totalFailed=0;
 
   async function migrateSimplePhoto(path,record,folder){
@@ -4680,7 +4686,7 @@ async function migrateEverythingElseToGithub(){
   var riders=await fbG('rn_mall_riders')||{};
   for(var rid in riders){await migrateSimplePhoto('rn_mall_riders/'+rid,riders[rid],'riders');}
 
-  // Vendors — photo, logo, and the nested documents object
+  // Vendors, photo, logo, and the nested documents object
   var vendors=await fbG('rn_mall_vendors')||{};
   for(var vid in vendors){
     var v=vendors[vid],updates={},dirty=false;
@@ -4716,17 +4722,17 @@ async function migrateEverythingElseToGithub(){
     if(dirty)await fbU('rn_mall_vendors/'+vid,updates);
   }
 
-  toast('Done — moved '+totalMoved+' image(s)/document(s) to GitHub'+(totalFailed?' ('+totalFailed+' failed, left as-is)':''));
+  toast('Done, moved '+totalMoved+' image(s)/document(s) to GitHub'+(totalFailed?' ('+totalFailed+' failed, left as-is)':''));
 }
 
-// Orders freeze a snapshot of each item's image at the moment of checkout — migrating
+// Orders freeze a snapshot of each item's image at the moment of checkout, migrating
 // the PRODUCT afterward doesn't touch orders already placed, so old orders can keep
 // carrying heavy base64 image data indefinitely, getting re-downloaded every time
 // anyone views that order. This moves those frozen images onto GitHub too.
 async function migrateOrderImagesToGithub(){
-  if(!isGithubConfigured()){toast('GitHub image hosting isn\'t configured yet — set that up first','err');return;}
-  if(!confirm('This moves images frozen inside your EXISTING orders onto GitHub. It can take a while for a large order history — keep this tab open until it finishes. Continue?'))return;
-  toast('Moving order images to GitHub — please keep this tab open...');
+  if(!isGithubConfigured()){toast('GitHub image hosting isn\'t configured yet, set that up first','err');return;}
+  if(!confirm('This moves images frozen inside your EXISTING orders onto GitHub. It can take a while for a large order history, keep this tab open until it finishes. Continue?'))return;
+  toast('Moving order images to GitHub, please keep this tab open...');
   var orders=await fbG('rn_mall_orders')||{};
   var oids=Object.keys(orders);
   var totalImgs=0,migrated=0,failed=0;
@@ -4748,16 +4754,16 @@ async function migrateOrderImagesToGithub(){
     if(dirty)await fbU('rn_mall_orders/'+oid,{items:newItems});
     if((oi+1)%20===0)toast('Migrating… '+migrated+' moved so far ('+(oi+1)+'/'+oids.length+' orders checked)');
   }
-  toast('Done — moved '+migrated+' of '+totalImgs+' order image(s) to GitHub'+(failed?' ('+failed+' failed, left as-is)':''));
+  toast('Done, moved '+migrated+' of '+totalImgs+' order image(s) to GitHub'+(failed?' ('+failed+' failed, left as-is)':''));
 }
 
 // The settings record (hero banner, payment icons) loads on nearly every single page
-// of the site, customer homepage included — so an unmigrated image here is one of the
+// of the site, customer homepage included, so an unmigrated image here is one of the
 // single biggest bandwidth costs in the whole app, worse than any individual product.
 async function migrateSettingsImagesToGithub(){
-  if(!isGithubConfigured()){toast('GitHub image hosting isn\'t configured yet — set that up first','err');return;}
+  if(!isGithubConfigured()){toast('GitHub image hosting isn\'t configured yet, set that up first','err');return;}
   if(!confirm('This moves your hero banner images and payment icons out of your settings record and onto GitHub. Continue?'))return;
-  toast('Moving site images to GitHub — please keep this tab open...');
+  toast('Moving site images to GitHub, please keep this tab open...');
   var updates={},totalImgs=0,migrated=0,failed=0;
 
   var hc=settings.heroConfig||{};
@@ -4797,7 +4803,7 @@ async function migrateSettingsImagesToGithub(){
   }
 
   if(Object.keys(updates).length)await fbU('rn_mall_settings',updates);
-  toast('Done — moved '+migrated+' of '+totalImgs+' site image(s) to GitHub'+(failed?' ('+failed+' failed, left as-is)':''));
+  toast('Done, moved '+migrated+' of '+totalImgs+' site image(s) to GitHub'+(failed?' ('+failed+' failed, left as-is)':''));
 }
 
 async function uploadProductVideo(){
@@ -4855,7 +4861,7 @@ function deleteProdVideo(){
   var urlInp=document.getElementById('pf-video-url');if(urlInp)urlInp.value='';
   var upInp=document.getElementById('pf-vid-upload');if(upInp)upInp.value='';
   var prevWrap=document.getElementById('pf-vid-preview');if(prevWrap)prevWrap.innerHTML='';
-  toast('Video removed — click Save to confirm');
+  toast('Video removed, click Save to confirm');
 }
 
 // ── OVERRIDE openProdForm to add image/video upload + free product + pickup ──
@@ -4986,15 +4992,15 @@ function openProdForm(id){
     +'<div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:9px;padding:12px;margin-bottom:14px;">'
     +'<label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;color:var(--wh);">'
     +'<input type="checkbox" id="pf-free" '+(p.price===0?'checked':'')+' style="accent-color:var(--or);width:18px;height:18px;" onchange="toggleFreeProduct(this)"> '
-    +'<span>🎁 <strong>Free Product</strong> — Sets price to ₦0, shows FREE badge & "Get Free" button</span></label>'
+    +'<span>🎁 <strong>Free Product</strong>, Sets price to ₦0, shows FREE badge & "Get Free" button</span></label>'
     +'</div>'
     +'<div class="g3" id="pf-price-row"'+(p.price===0?' style="opacity:.4;pointer-events:none;"':'')+'>'
     +'<div class="fg"><label class="lbl">Price (NGN)</label><input class="inp" type="number" id="pf-price" value="'+(p.price||'')+'" placeholder="e.g. 25000"/></div>'
-    +'<div class="fg"><label class="lbl">Sale Price (NGN) — optional</label><input class="inp" type="number" id="pf-sale" value="'+(p.salePrice||'')+'" placeholder="Leave blank if no sale"/></div>'
+    +'<div class="fg"><label class="lbl">Sale Price (NGN), optional</label><input class="inp" type="number" id="pf-sale" value="'+(p.salePrice||'')+'" placeholder="Leave blank if no sale"/></div>'
     +'<div class="fg"><label class="lbl">Stock Quantity</label><input class="inp" type="number" id="pf-stock" value="'+(p.stock!=null?p.stock:'')+'" placeholder="Blank = unlimited"/></div>'
     +'</div>'
     +'<div class="fg"><label class="lbl">Low Stock Alert (qty)</label><input class="inp" type="number" id="pf-lowstock" value="'+(p.lowStock||5)+'" style="max-width:120px;"/></div>'
-    +'<div class="fg"><label class="lbl">Wholesale Pricing — optional</label>'
+    +'<div class="fg"><label class="lbl">Wholesale Pricing, optional</label>'
     +'<div class="g2">'
     +'<input class="inp" type="number" id="pf-wholesale-price" value="'+((p.wholesalePrice!=null)?p.wholesalePrice:'')+'" placeholder="Wholesale price (₦)"/>'
     +'<input class="inp" type="number" id="pf-wholesale-minqty" value="'+((p.wholesaleMinQty!=null)?p.wholesaleMinQty:'')+'" placeholder="Min. quantity (e.g. 10)"/>'
@@ -5002,35 +5008,35 @@ function openProdForm(id){
     +'<div style="font-size:11px;color:var(--mu);margin-top:5px;">Approved wholesale buyers automatically get this price when they order at least the minimum quantity. Leave blank if this product has no wholesale tier.</div></div>'
 
     +'<div class="sec-hdr">Product Images</div>'
-    +'<div style="font-size:12px;color:var(--mu);margin-bottom:10px;">Upload up to 15 images. The first image is the main/cover image shown in listings — use the arrows on each thumbnail to reorder, or the × to remove.</div>'
+    +'<div style="font-size:12px;color:var(--mu);margin-bottom:10px;">Upload up to 15 images. The first image is the main/cover image shown in listings, use the arrows on each thumbnail to reorder, or the × to remove.</div>'
     +(existImgs?'<div id="pf-existing-imgs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">'+existImgs+'</div>':'<div id="pf-existing-imgs"></div>')
     +'<input type="file" id="pf-img-upload" accept="image/*" multiple style="display:none;" onchange="previewImages()">'
     +'<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">'
     +'<button class="btn btn-dk" onclick="document.getElementById(\'pf-img-upload\').click()">📁 Choose Images</button>'
-    +'<span style="font-size:11px;color:var(--mu);">JPG, PNG, WebP — max 15 files</span></div>'
+    +'<span style="font-size:11px;color:var(--mu);">JPG, PNG, WebP, max 15 files</span></div>'
     +'<div id="pf-img-preview" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;"></div>'
     +'<div class="fg" style="margin-top:8px;"><label class="lbl">Or paste image URLs (one per line)</label>'
-    +'<textarea class="ta" id="pf-imgs" rows="3" placeholder="https://example.com/image.jpg — only for ADDING new image links; existing images above are kept automatically"></textarea></div>'
+    +'<textarea class="ta" id="pf-imgs" rows="3" placeholder="https://example.com/image.jpg, only for ADDING new image links; existing images above are kept automatically"></textarea></div>'
 
-    +'<div class="sec-hdr">Product Video — optional</div>'
+    +'<div class="sec-hdr">Product Video, optional</div>'
     +'<div id="pf-existing-vid">'+(p.videos&&p.videos[0]?'<div style="margin-bottom:10px;">'+videoPreviewHTML(p.videos[0])+'<button type="button" onclick="deleteProdVideo()" style="margin-top:8px;font-size:11px;font-weight:700;padding:6px 12px;border-radius:7px;background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.25);color:var(--re);cursor:pointer;">🗑 Delete Video</button></div>':'')+'</div>'
     +'<div class="fg"><label class="lbl">Video Link (recommended)</label>'
     +'<input class="inp" id="pf-video-url" value="'+(p.videos&&p.videos[0]&&p.videos[0].startsWith('http')?p.videos[0]:'')+'" placeholder="https://youtube.com/watch?v=... or a direct .mp4 link" oninput="_videoRemoved=false;"/>'
-    +'<div style="font-size:11px;color:var(--mu);margin-top:5px;line-height:1.6;">Upload your video to YouTube (can be Unlisted), Google Drive, or any video host — then paste the link here. This is the most reliable way to add a video.</div></div>'
-    +'<div style="font-size:11px;color:var(--mu);margin:12px 0 6px;">— or, for a very short clip only —</div>'
+    +'<div style="font-size:11px;color:var(--mu);margin-top:5px;line-height:1.6;">Upload your video to YouTube (can be Unlisted), Google Drive, or any video host, then paste the link here. This is the most reliable way to add a video.</div></div>'
+    +'<div style="font-size:11px;color:var(--mu);margin:12px 0 6px;">Or, for a very short clip only:</div>'
     +'<input type="file" id="pf-vid-upload" accept="video/*" style="display:none;" onchange="previewVideo()">'
     +'<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">'
     +'<button class="btn btn-dk" onclick="document.getElementById(\'pf-vid-upload\').click()">🎬 Upload Short Clip</button>'
-    +'<span style="font-size:11px;color:var(--re);">Max 1.5MB — most phone videos are bigger. Use the link above if unsure.</span></div>'
+    +'<span style="font-size:11px;color:var(--re);">Max 1.5MB, most phone videos are bigger. Use the link above if unsure.</span></div>'
     +'<div id="pf-vid-preview"></div>'
 
-    +'<div class="sec-hdr">Colour Options — optional</div>'
-    +'<div style="font-size:12px;color:var(--mu);margin-bottom:10px;">Add a colour with its own photo — customers see a colour grid on the product page and the photo switches when they tap one, just like a real store listing. Leave empty if this product has no colour choice.</div>'
+    +'<div class="sec-hdr">Colour Options, optional</div>'
+    +'<div style="font-size:12px;color:var(--mu);margin-bottom:10px;">Add a colour with its own photo, customers see a colour grid on the product page and the photo switches when they tap one, just like a real store listing. Leave empty if this product has no colour choice.</div>'
     +'<div id="pf-colors-list"></div>'
     +'<button type="button" class="btn btn-dk" onclick="addColorRow()">+ Add Colour</button>'
 
-    +'<div class="sec-hdr">Sizes &amp; Stock — optional</div>'
-    +'<div style="font-size:12px;color:var(--mu);margin-bottom:10px;">Add each size with how many are in stock. Customers pick a quantity per size. Leave empty if this product has no size choice — the Stock Quantity field above will be used instead.</div>'
+    +'<div class="sec-hdr">Sizes &amp; Stock, optional</div>'
+    +'<div style="font-size:12px;color:var(--mu);margin-bottom:10px;">Add each size with how many are in stock. Customers pick a quantity per size. Leave empty if this product has no size choice, the Stock Quantity field above will be used instead.</div>'
     +'<div id="pf-sizes-list"></div>'
     +'<button type="button" class="btn btn-dk" onclick="addSizeRow()">+ Add Size</button>'
 
@@ -5041,7 +5047,7 @@ function openProdForm(id){
     +'</div>'
     +'<div style="font-size:11px;color:var(--mu);margin:-4px 0 12px;line-height:1.6;">Tip: set the label to "Colour" and list your colours (e.g. Red, Blue, Black) to show colour swatches customers can pick. If you upload one photo per colour, in the <u>same order</u> as your colour list above, the main photo will automatically switch to match the colour a customer selects.</div>'
     +'<div class="fg"><label class="lbl">Specs (one per line, format: Key: Value)</label><textarea class="ta" id="pf-specs" rows="4" placeholder="Material: Cotton\nWeight: 500g">'+(p.specs?Object.entries(p.specs).map(function(e){return e[0]+': '+e[1];}).join('\n'):'')+'</textarea></div>'
-    +'<div class="fg"><label class="lbl">Dimensions &amp; Weight — optional</label>'
+    +'<div class="fg"><label class="lbl">Dimensions &amp; Weight, optional</label>'
     +'<div class="g3" style="grid-template-columns:1fr 1fr 1fr 1fr;">'
     +'<input class="inp" id="pf-dim-l" value="'+((p.dimensions||{}).length||'')+'" placeholder="Length (cm)"/>'
     +'<input class="inp" id="pf-dim-w" value="'+((p.dimensions||{}).width||'')+'" placeholder="Width (cm)"/>'
@@ -5072,6 +5078,7 @@ function openProdForm(id){
     +'<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;color:var(--wh);"><input type="checkbox" id="pf-flash" '+(p.flashSale?'checked':'')+' style="accent-color:var(--or);"> Flash Sale</label>'
     +'<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;color:var(--wh);"><input type="checkbox" id="pf-preorder" '+(p.preOrder?'checked':'')+' style="accent-color:var(--or);"> Pre-Order</label>'
     +'<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;color:var(--wh);"><input type="checkbox" id="pf-visible" '+(p.visible!==false?'checked':'')+' style="accent-color:var(--or);"> Visible on Mall</label>'
+    +'<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;color:var(--wh);"><input type="checkbox" id="pf-pod" '+(p.podEligible?'checked':'')+' style="accent-color:var(--or);"> Pay on Delivery Eligible (50% deposit)</label>'
     +'</div>'
 
     +'<div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">'
@@ -5190,7 +5197,7 @@ async function saveProd(id){
   var urlPasted=((document.getElementById('pf-imgs')||{}).value||'').split('\n').map(function(s){return s.trim();}).filter(Boolean);
   var allImgs=existing.concat(uploaded).concat(urlPasted).slice(0,15);
 
-  // Video (stored as an array — storefront reads p.videos)
+  // Video (stored as an array, storefront reads p.videos)
   var uploadedVid=await uploadProductVideo();
   var videoUrl=(document.getElementById('pf-video-url')||{}).value||'';
   var prevVid=(id&&!_videoRemoved)?((allProds[id]||{}).videos||[])[0]||null:null;
@@ -5237,6 +5244,7 @@ async function saveProd(id){
     flashSale:!!(document.getElementById('pf-flash')||{}).checked,
     preOrder:!!(document.getElementById('pf-preorder')||{}).checked,
     preOrderNote:((document.getElementById('pf-preorder-note')||{}).value||'').trim()||null,
+    podEligible:!!(document.getElementById('pf-pod')||{}).checked,
     freeProduct:isFree,
     freeShipping:!!(document.getElementById('pf-free-ship')||{}).checked,
     pickupAvailable:!!(document.getElementById('pf-pickup')||{}).checked,
@@ -5297,7 +5305,7 @@ async function showDeliverySigAdmin(tracking){
   overlay.id='admin-sig-overlay';
   overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
   overlay.innerHTML='<div style="background:#111113;border:1px solid #242428;border-radius:14px;padding:20px;max-width:500px;width:100%;">'
-    +'<div style="font-weight:800;font-size:15px;margin-bottom:8px;">Delivery Confirmation — '+tracking+'</div>'
+    +'<div style="font-weight:800;font-size:15px;margin-bottom:8px;">Delivery Confirmation, '+tracking+'</div>'
     +'<div style="font-size:12px;color:#888;margin-bottom:14px;">Signed by: <strong style="color:#fff;">'+sig.receivedBy+'</strong> · '+sig.phone+' · '+new Date(sig.timestamp).toLocaleString('en-GB')+'</div>'
     +'<img loading="lazy" decoding="async" src="'+sig.signature+'" style="width:100%;border:1px solid #242428;border-radius:8px;background:#fff;"/>'
     +'<button onclick="this.closest(\'div\').parentNode.remove()" style="width:100%;margin-top:14px;background:#17171A;border:1px solid #242428;border-radius:8px;padding:10px;color:#fff;cursor:pointer;font-weight:700;">Close</button>'
@@ -5316,7 +5324,7 @@ async function addLocationUpdate(tracking){
   if(order.customer&&order.customer.id){
     await fbPNotify('rn_mall_customer_notifications/'+order.customer.id,{type:'status_update',orderId:tracking,message:'Update on your order '+tracking+': '+loc.trim(),date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
   }
-  toast('Location update posted — customer notified!');
+  toast('Location update posted, customer notified!');
   openOrder(tracking);
 }
 async function markReadyForPickup(tracking){
@@ -5332,7 +5340,7 @@ async function markReadyForPickup(tracking){
   if(order.customer&&order.customer.id){
     await fbPNotify('rn_mall_customer_notifications/'+order.customer.id,{type:'pickup_ready',orderId:tracking,message:'Your order '+tracking+' has arrived and is ready for pickup! Please come collect it at your convenience.',date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
   }
-  toast('Order '+tracking+' marked Ready for Pickup — customer notified');
+  toast('Order '+tracking+' marked Ready for Pickup, customer notified');
   openOrder(tracking);
 }
 async function markPickedUp(tracking){

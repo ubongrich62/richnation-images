@@ -6,7 +6,7 @@
 <meta http-equiv="Expires" content="0"/>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>RichNation Mall — Vendor Dashboard</title>
+<title>RichNation Mall, Vendor Dashboard</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -17,7 +17,7 @@
   --ink:#0B0B0C;--bg:#FFFFFF;--card:#FFFFFF;--card2:#F4F4F3;--bdr:#E4E4E1;
   /* brand accent */
   --or:#FF6A00;--or-dk:#E15E00;--gold:#B8720A;
-  /* text — legacy names kept (--wh/--w2/--mu) so existing inline JS styles re-theme for free */
+  /* text, legacy names kept (--wh/--w2/--mu) so existing inline JS styles re-theme for free */
   --wh:#15151A;--w2:#48484E;--mu:#6B6B71;
   /* status */
   --su:#15803D;--re:#DC2626;--bl:#2054C7;
@@ -115,7 +115,7 @@ button{font-family:inherit;}
   <div class="lcard">
     <div class="llogo">🛒 RichNation Mall</div>
     <div class="ltitle" id="l-title">Vendor Sign In</div>
-    <div class="lsub" id="l-sub">Manage your listings, orders, and sales — all in one place.</div>
+    <div class="lsub" id="l-sub">Manage your listings, orders, and sales, all in one place.</div>
 
     <div id="login-form">
       <input class="fi" id="v-email" type="email" placeholder="Email address"/>
@@ -139,7 +139,7 @@ button{font-family:inherit;}
       <input class="fi" id="r-doc-biz" type="file" accept="image/*,application/pdf"/>
       <div style="font-size:11px;color:var(--mu);margin:10px 0 6px;">License / Permit (only if your product category requires one)</div>
       <input class="fi" id="r-doc-license" type="file" accept="image/*,application/pdf"/>
-      <div style="font-size:11px;color:var(--mu);margin:10px 0 6px;">Any other business documents (optional — additional certificates, proof of address, etc.)</div>
+      <div style="font-size:11px;color:var(--mu);margin:10px 0 6px;">Any other business documents (optional, additional certificates, proof of address, etc.)</div>
       <input class="fi" id="r-doc-other" type="file" accept="image/*,application/pdf" multiple/>
       <div style="font-size:11px;color:var(--mu);margin:14px 0 6px;">How will your orders be delivered?</div>
       <select class="fi" id="r-logistics-option" onchange="updateLogisticsPreview()">
@@ -148,30 +148,30 @@ button{font-family:inherit;}
       </select>
       <div id="logistics-preview" style="font-size:11px;color:var(--mu);margin-bottom:14px;"></div>
       <div style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;margin:14px 0;max-height:220px;overflow-y:auto;">
-        <div style="font-weight:800;font-size:13px;margin-bottom:4px;color:var(--wh);">RichNation Mall — Vendor Terms &amp; Conditions</div>
+        <div style="font-weight:800;font-size:13px;margin-bottom:4px;color:var(--wh);">RichNation Mall, Vendor Terms &amp; Conditions</div>
         <div style="font-size:10px;color:var(--mu);font-style:italic;margin-bottom:10px;">This agreement governs your participation as a vendor on RichNation Mall, a division of RichNation Global Ltd. By applying to sell on RichNation Mall, you agree to be bound by these terms.</div>
         <div style="font-size:10.5px;color:var(--mu);line-height:1.7;">
           <strong style="color:var(--w2);">1. Eligibility &amp; Application</strong><br>
-          1.1 You must provide accurate, truthful information in your vendor application — store name, owner name, contact details, and any documentation requested. False information is grounds for immediate rejection or removal.<br>
+          1.1 You must provide accurate, truthful information in your vendor application, store name, owner name, contact details, and any documentation requested. False information is grounds for immediate rejection or removal.<br>
           1.2 Approval is at RichNation Mall's sole discretion. Approval is not guaranteed, and admin may decline an application without providing a reason.<br>
-          1.3 You must be legally able to sell the products you list — this includes any required licenses, permits, or age restrictions for regulated goods.<br><br>
+          1.3 You must be legally able to sell the products you list, this includes any required licenses, permits, or age restrictions for regulated goods.<br><br>
           <strong style="color:var(--w2);">2. Product Listings</strong><br>
-          2.1 <strong>Accuracy.</strong> Every listing must accurately describe the product — condition, specifications, materials, and true photos of the actual item (not stock photos misrepresenting what a customer will receive).<br>
-          2.2 <strong>Pricing.</strong> You set your own prices, but pricing must be honest — no artificially inflating a price to then show a fake "discount."<br>
+          2.1 <strong>Accuracy.</strong> Every listing must accurately describe the product, condition, specifications, materials, and true photos of the actual item (not stock photos misrepresenting what a customer will receive).<br>
+          2.2 <strong>Pricing.</strong> You set your own prices, but pricing must be honest, no artificially inflating a price to then show a fake "discount."<br>
           2.3 <strong>Prohibited Items.</strong> You may not list: counterfeit or replica goods, stolen goods, weapons or ammunition, illegal drugs or drug paraphernalia, items that infringe another party's intellectual property, adult content, or any item prohibited under Nigerian law.<br>
           2.4 <strong>Stock Accuracy.</strong> Keep your stock levels updated. Repeatedly selling items you don't actually have in stock is a violation of this agreement.<br><br>
           2.5 <strong>Business Documentation.</strong> Before your store goes live, you must upload the following:<br>
           2.5.1 A valid means of identification belonging to the store owner (National ID, Driver's License, International Passport, or Voter's Card).<br>
           2.5.2 A recent passport photograph of the store owner.<br>
           2.5.3 Proof of address (a recent utility bill or bank statement in the owner's name).<br>
-          2.5.4 Business Registration — your CAC (Corporate Affairs Commission) Certificate, or Business Name Registration if registered as a sole proprietorship.<br>
+          2.5.4 Business Registration, your CAC (Corporate Affairs Commission) Certificate, or Business Name Registration if registered as a sole proprietorship.<br>
           2.5.5 Certificate of Incorporation and Memorandum &amp; Articles of Association, if you are a registered limited company.<br>
           2.5.6 Your Tax Identification Number (TIN).<br>
           2.5.7 Your Bank Verification Number (BVN) or a recent bank statement matching the account you'll receive payouts to.<br>
-          2.5.8 Any category-specific license or permit required for what you sell — for example, NAFDAC registration for food, drinks, cosmetics, or health products; SON certification for electronics and regulated equipment; or any other regulatory approval your product category requires under Nigerian law.<br>
+          2.5.8 Any category-specific license or permit required for what you sell, for example, NAFDAC registration for food, drinks, cosmetics, or health products; SON certification for electronics and regulated equipment; or any other regulatory approval your product category requires under Nigerian law.<br>
           2.5.9 A company profile or letterhead, where applicable.<br>
           2.5.10 Any additional documentation admin may reasonably request to verify your business.<br>
-          RichNation Mall reviews every document as part of your application before approval — take your time to gather these properly rather than rush the process. Submitting false, forged, or expired documents is grounds for immediate and permanent removal, and admin reserves the right to request updated documents at any time during your time as a vendor.<br><br>
+          RichNation Mall reviews every document as part of your application before approval, take your time to gather these properly rather than rush the process. Submitting false, forged, or expired documents is grounds for immediate and permanent removal, and admin reserves the right to request updated documents at any time during your time as a vendor.<br><br>
           <strong style="color:var(--w2);">3. Orders &amp; Fulfillment</strong><br>
           3.1 You must process and prepare orders for dispatch within the timeframe shown in your dashboard for each order.<br>
           3.2 Once an order is marked ready, RichNation Mall's dispatch/rider system (or your own agreed fulfillment method) takes over delivery.<br>
@@ -179,7 +179,7 @@ button{font-family:inherit;}
           <strong style="color:var(--w2);">4. Commission &amp; Payments</strong><br>
           4.1 RichNation Mall charges a commission on every sale, shown in your Payouts dashboard. This rate may be adjusted by admin with notice; your existing listings are not retroactively affected for completed sales.<br>
           4.2 Your net earnings (sale price minus commission) accumulate in your available balance, viewable anytime in your Payouts page.<br>
-          4.3 Payouts are processed by admin to the bank details you provide. You are solely responsible for the accuracy of your bank details — RichNation Mall is not liable for funds sent to an incorrect account you provided.<br>
+          4.3 Payouts are processed by admin to the bank details you provide. You are solely responsible for the accuracy of your bank details, RichNation Mall is not liable for funds sent to an incorrect account you provided.<br>
           4.4 RichNation Mall does not guarantee a fixed payout schedule beyond what is communicated to you directly; payouts are recorded and visible in your dashboard as they are made.<br><br>
           <strong style="color:var(--w2);">5. Returns, Refunds &amp; Disputes</strong><br>
           5.1 If a customer returns an item due to your error (wrong item, damaged on arrival, not as described), the cost of that return is your responsibility, and the sale amount may be reversed from your earnings.<br>
@@ -191,7 +191,7 @@ button{font-family:inherit;}
           <strong style="color:var(--w2);">7. Performance Standards</strong><br>
           7.1 Your Cancellation Rate and Order Defect Rate are tracked and shown on your Performance page. Staying at or below 5% on both keeps you in Good Standing.<br>
           7.2 Consistently exceeding these thresholds may result in: reduced visibility of your products, a formal warning from admin, temporary suspension, or in serious/repeated cases, removal from the platform.<br>
-          7.3 RichNation Mall reviews performance holistically — a single unusual event will not automatically penalize you, but a sustained pattern will.<br><br>
+          7.3 RichNation Mall reviews performance holistically, a single unusual event will not automatically penalize you, but a sustained pattern will.<br><br>
           <strong style="color:var(--w2);">8. Suspension &amp; Termination</strong><br>
           8.1 RichNation Mall may suspend or terminate your vendor account for: violation of these terms, sustained poor performance, fraudulent activity, or conduct that harms customers or RichNation Mall's reputation.<br>
           8.2 You may close your store voluntarily at any time by contacting admin. Outstanding earnings owed to you will still be paid out according to Section 4.<br>
@@ -248,7 +248,7 @@ const FB='https://richnation-portal-default-rtdb.firebaseio.com';
 const FIREBASE_CONFIG={apiKey:"AIzaSyDLGnyGB8ZnEc2u6TbVzjIAQi1pgSaZVyQ",authDomain:"richnation-portal.firebaseapp.com",databaseURL:"https://richnation-portal-default-rtdb.firebaseio.com",projectId:"richnation-portal",storageBucket:"richnation-portal.firebasestorage.app",messagingSenderId:"175550692963",appId:"1:175550692963:web:1e3c995b3ed0baaadac256"};
 const RECAPTCHA_SITE_KEY='6Ld2O5EtAAAAAN6fXMnn7kn5a6SWvDpJs97kckGC';
 let appCheckToken=null;
-// App Check isn't enforced yet, so it adds nothing functional right now — loaded only
+// App Check isn't enforced yet, so it adds nothing functional right now, loaded only
 // after the page is fully done loading, so it costs the page nothing while unused.
 function loadAppCheckWhenIdle(){
   function loadScript(src){
@@ -268,7 +268,7 @@ function loadAppCheckWhenIdle(){
         appCheckInstance.getToken().then(function(r){appCheckToken=r.token;}).catch(function(e){console.warn('App Check token fetch failed:',e.message);});
         appCheckInstance.onTokenChanged(function(r){appCheckToken=r.token;});
       }catch(e){
-        console.warn('App Check init failed — requests will proceed without a token:',e.message);
+        console.warn('App Check init failed, requests will proceed without a token:',e.message);
       }
     });
 }
@@ -366,7 +366,7 @@ async function showVendorForgotPassword(){
   overlay.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;width:100%;max-width:380px;padding:20px;text-align:center;">'
     +'<div style="font-size:28px;">🔑</div>'
     +'<div style="font-weight:800;font-size:15px;margin-top:10px;">Forgot Your Password?</div>'
-    +'<div style="font-size:12px;color:var(--w2);line-height:1.7;margin-top:10px;">We don\'t have automatic email reset yet — but RichNation Mall admin can reset it for you directly. Reach out with your store name and registered email.</div>'
+    +'<div style="font-size:12px;color:var(--w2);line-height:1.7;margin-top:10px;">We don\'t have automatic email reset yet, but RichNation Mall admin can reset it for you directly. Reach out with your store name and registered email.</div>'
     +'<a href="https://wa.me/'+waNumber+'?text='+encodeURIComponent('Hi, I forgot my vendor password on RichNation Mall. My store name is: ')+'" target="_blank" style="text-decoration:none;"><button class="lbtn" style="margin-top:16px;">💬 Message Admin on WhatsApp</button></a>'
     +'<div style="font-size:11px;color:var(--mu);margin-top:12px;cursor:pointer;" onclick="document.getElementById(\'vendor-forgot-overlay\').remove()">Close</div>'
     +'</div>';
@@ -377,7 +377,7 @@ function toggleAuthMode(){
   document.getElementById('login-form').style.display=isLogin?'none':'block';
   document.getElementById('register-form').style.display=isLogin?'block':'none';
   document.getElementById('l-title').textContent=isLogin?'Become a RichNation Mall Vendor':'Vendor Sign In';
-  document.getElementById('l-sub').textContent=isLogin?'Apply below — our team reviews every application before you go live.':'Manage your listings, orders, and sales — all in one place.';
+  document.getElementById('l-sub').textContent=isLogin?'Apply below, our team reviews every application before you go live.':'Manage your listings, orders, and sales, all in one place.';
   document.getElementById('toggle-note').innerHTML=isLogin?'Already a vendor? <span onclick="toggleAuthMode()">Sign in</span>':'New vendor? <span onclick="toggleAuthMode()">Apply here</span>';
   if(isLogin)updateLogisticsPreview();
 }
@@ -386,7 +386,7 @@ const GITHUB_DOCS_CONFIG={owner:'ubongrich62',repo:'richnation-documents',branch
 function isGithubConfigured(){return GITHUB_CONFIG.owner!=='YOUR_GITHUB_USERNAME'&&GITHUB_CONFIG.token!=='YOUR_FINE_GRAINED_TOKEN';}
 // Sensitive documents (IDs, business registration, licenses) go to a PRIVATE repo instead
 // of the public images one. Since private content can't be reached via a plain public
-// link, this stores a "github-private:<path>" reference — the admin panel knows to fetch
+// link, this stores a "github-private:<path>" reference, the admin panel knows to fetch
 // that with authentication rather than opening it directly, so these documents are never
 // publicly reachable the way product photos are.
 async function uploadDataUrlToGithubPrivate(dataUrl,folder){
@@ -433,9 +433,9 @@ async function updateLogisticsPreview(){
   const selfRate=settingsData.vendorCommissionRate!=null?settingsData.vendorCommissionRate:10;
   const logisticsRate=settingsData.vendorLogisticsCommissionRate!=null?settingsData.vendorLogisticsCommissionRate:15;
   if(choice==='richnation'){
-    el.innerHTML='RichNation Mall commission for this option: <strong style="color:var(--or);">'+logisticsRate+'%</strong> — our riders handle pickup and delivery for you.';
+    el.innerHTML='RichNation Mall commission for this option: <strong style="color:var(--or);">'+logisticsRate+'%</strong>, our riders handle pickup and delivery for you.';
   }else{
-    el.innerHTML='RichNation Mall commission for this option: <strong style="color:var(--or);">'+selfRate+'%</strong> — you pack and deliver orders yourself.';
+    el.innerHTML='RichNation Mall commission for this option: <strong style="color:var(--or);">'+selfRate+'%</strong>, you pack and deliver orders yourself.';
   }
 }
 async function doVendorRegister(){
@@ -456,7 +456,7 @@ async function doVendorRegister(){
   const all=await fbG('rn_mall_vendors')||{};
   if(Object.values(all).find(v=>v.email===email)){err.textContent='A vendor account with this email already exists.';err.style.display='block';return;}
   err.style.display='none';
-  toast('Uploading your documents — this may take a moment…');
+  toast('Uploading your documents, this may take a moment…');
   const id='vend_'+Date.now();
   let photo=await compressImage(photoFile,600,0.8);
   const photoUrl=isGithubConfigured()?await uploadDataUrlToGithub(photo,'vendor-photos'):null;
@@ -597,7 +597,7 @@ async function renderVPayouts(c){
   const totalPaidOut=payouts.reduce(function(s,p){return s+(p.amount||0);},0);
   const walletBalance=Math.max(0,netEarned-totalPaidOut);
   c.innerHTML=`
-  <div class="page-hdr"><div class="page-hdr-title">Payouts</div><div class="page-hdr-sub">RichNation Mall takes ${commissionRate}% commission per sale — this is what you actually earn.</div></div>
+  <div class="page-hdr"><div class="page-hdr-title">Payouts</div><div class="page-hdr-sub">RichNation Mall takes ${commissionRate}% commission per sale, this is what you actually earn.</div></div>
   <div class="card" style="background:rgba(255,106,0,0.06);border-color:rgba(255,106,0,0.3);">
     <div class="card-title">Payout Schedule</div>
     <div style="font-size:13px;color:var(--w2);margin-top:6px;">${describePayoutSchedule(schedule)}</div>
@@ -630,7 +630,7 @@ async function saveVendorBankDetails(){
   await fbU('rn_mall_vendors/'+vendor.id,{bankName:bankName,bankAcctNo:acctNo,bankAcctName:acctName,bankVerified:false});
   vendor.bankName=bankName;vendor.bankAcctNo=acctNo;vendor.bankAcctName=acctName;vendor.bankVerified=false;
   sessionStorage.setItem('rnm_vendor_session',JSON.stringify(vendor));
-  toast('Bank details saved — awaiting admin verification.');
+  toast('Bank details saved, awaiting admin verification.');
   vnav('payouts');
 }
 
@@ -645,7 +645,7 @@ async function renderVReviews(c){
     Object.entries(revs).forEach(function(e){allReviews.push(Object.assign({_key:e[0],productId:pid,productName:p.name},e[1]));});
   }
   allReviews.sort(function(a,b){return (b.ts||0)-(a.ts||0);});
-  const avgRating=allReviews.length?(allReviews.reduce(function(s,r){return s+(r.rating||0);},0)/allReviews.length).toFixed(1):'—';
+  const avgRating=allReviews.length?(allReviews.reduce(function(s,r){return s+(r.rating||0);},0)/allReviews.length).toFixed(1):'N/A';
   c.innerHTML=`
   <div class="page-hdr"><div class="page-hdr-title">Reviews</div><div class="page-hdr-sub">${allReviews.length} review(s) across your products &middot; ${avgRating} average rating</div></div>
   ${allReviews.length?allReviews.map(function(r){
@@ -672,10 +672,10 @@ async function renderVPromotions(c){
   const allProds=await fbG('rn_mall_products')||{};
   const myProds=Object.entries(allProds).filter(function(e){return e[1].vendorId===vendor.id;});
   c.innerHTML=`
-  <div class="page-hdr"><div class="page-hdr-title">Promotions</div><div class="page-hdr-sub">Put any of your products on sale — they'll show in RichNation Mall's Flash Sale section automatically.</div></div>
+  <div class="page-hdr"><div class="page-hdr-title">Promotions</div><div class="page-hdr-sub">Put any of your products on sale, they'll show in RichNation Mall's Flash Sale section automatically.</div></div>
   ${myProds.length?myProds.map(function(entry){
     const id=entry[0],p=entry[1];
-    return '<div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;"><div><div style="font-weight:800;font-size:13px;">'+p.name+'</div><div style="font-size:11px;color:var(--mu);">'+fmt(p.price)+(p.flashSale?' — currently on sale':'')+'</div></div>'
+    return '<div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;"><div><div style="font-weight:800;font-size:13px;">'+p.name+'</div><div style="font-size:11px;color:var(--mu);">'+fmt(p.price)+(p.flashSale?', currently on sale':'')+'</div></div>'
       +(p.flashSale?'<button class="btn btn-re" style="font-size:11px;padding:6px 14px;" onclick="togglePromo(\''+id+'\',false)">Remove from Sale</button>'
         :'<button class="btn btn-or" style="font-size:11px;padding:6px 14px;" onclick="togglePromo(\''+id+'\',true)">🔥 Put on Sale</button>')
       +'</div>';
@@ -729,10 +729,10 @@ async function renderVNotifications(c){
   Object.keys(data).forEach(function(k){if(!data[k].read)fbU('rn_mall_vendor_notifications/'+vendor.id+'/'+k,{read:true});});
 }
 function vendorNotifMsg(n){
-  if(n.type==='payout')return 'A payout of '+fmt(n.amount)+' was recorded — '+(n.description||'');
+  if(n.type==='payout')return 'A payout of '+fmt(n.amount)+' was recorded, '+(n.description||'');
   if(n.type==='bank_verified')return 'Your bank account details have been verified by admin.';
   if(n.type==='product_approved')return '"'+n.productName+'" was approved and is now live on RichNation Mall.';
-  if(n.type==='product_rejected')return '"'+n.productName+'" was not approved. Reason: '+(n.reason||'—');
+  if(n.type==='product_rejected')return '"'+n.productName+'" was not approved. Reason: '+(n.reason||'N/A');
   return n.message||'New notification';
 }
 async function unreadVendorNotifCount(){
@@ -754,11 +754,11 @@ async function renderVPerformance(c){
   const fulfillmentRate=((delivered/total)*100).toFixed(1);
   const goodStanding=cancellationRate<=5&&defectRate<=5;
   c.innerHTML=`
-  <div class="page-hdr"><div class="page-hdr-title">Performance</div><div class="page-hdr-sub">How your store is doing — this affects your visibility and standing on RichNation Mall.</div></div>
+  <div class="page-hdr"><div class="page-hdr-title">Performance</div><div class="page-hdr-sub">How your store is doing, this affects your visibility and standing on RichNation Mall.</div></div>
   <div class="card" style="text-align:center;background:${goodStanding?'rgba(21,128,61,0.08)':'rgba(220,38,38,0.08)'};border-color:${goodStanding?'rgba(21,128,61,0.3)':'rgba(220,38,38,0.3)'};">
     <div style="font-size:28px;">${goodStanding?'✅':'⚠️'}</div>
     <div style="font-weight:800;font-size:16px;color:${goodStanding?'var(--su)':'var(--re)'};margin-top:6px;">${goodStanding?'Good Standing':'Needs Attention'}</div>
-    <div style="font-size:12px;color:var(--w2);margin-top:6px;">${goodStanding?'Your store is performing well. Keep it up!':'Your cancellation or refund rate is above 5% — this can affect how often your products are shown to customers.'}</div>
+    <div style="font-size:12px;color:var(--w2);margin-top:6px;">${goodStanding?'Your store is performing well. Keep it up!':'Your cancellation or refund rate is above 5%, this can affect how often your products are shown to customers.'}</div>
   </div>
   <div class="stats-grid">
     <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-num">${total===1&&!orders.length?0:orders.length}</div><div class="stat-lbl">Total Orders</div></div>
@@ -769,9 +769,9 @@ async function renderVPerformance(c){
   <div class="card">
     <div class="card-title">What These Mean</div>
     <div style="font-size:12px;color:var(--w2);line-height:1.9;margin-top:8px;">
-      <strong>Fulfillment Rate</strong> — % of your orders successfully delivered.<br>
-      <strong>Cancellation Rate</strong> — % of your orders that got cancelled. Keep this under 5%.<br>
-      <strong>Order Defect Rate</strong> — % of orders that led to a refund request. Keep this under 5% too.<br><br>
+      <strong>Fulfillment Rate</strong>, % of your orders successfully delivered.<br>
+      <strong>Cancellation Rate</strong>, % of your orders that got cancelled. Keep this under 5%.<br>
+      <strong>Order Defect Rate</strong>, % of orders that led to a refund request. Keep this under 5% too.<br><br>
       Staying in Good Standing keeps your products showing normally to customers. Consistently high rates may lead to admin review.
     </div>
   </div>`;
@@ -810,7 +810,7 @@ async function renderVDash(c){
   <div class="card">
     <div class="card-title">Getting Started</div>
     <div style="font-size:13px;color:var(--w2);line-height:2;margin-top:8px;">
-      • Add your products under <strong>My Products</strong> — they'll appear on RichNation Mall labeled "Sold by ${vendor.storeName}"<br>
+      • Add your products under <strong>My Products</strong>, they'll appear on RichNation Mall labeled "Sold by ${vendor.storeName}"<br>
       • Track orders containing your items under <strong>My Orders</strong><br>
       • Update your store details anytime under <strong>Store Profile</strong>
     </div>
@@ -863,7 +863,7 @@ function openVProdForm(id){
         <button class="btn" onclick="document.getElementById('vp-img-upload').click()">📁 Choose Images</button>
       </div>
       <div style="background:var(--card2);border-radius:9px;padding:12px;margin-bottom:16px;font-size:12px;">
-        ${p.approvalStatus==='approved'?'<span style="color:var(--su);font-weight:700;">Approved — live on RichNation Mall</span>':p.approvalStatus==='rejected'?'<span style="color:var(--re);font-weight:700;">Rejected</span>'+(p.rejectionReason?'<div style="color:var(--w2);margin-top:4px;">Reason: '+p.rejectionReason+'</div>':''):'<span style="color:var(--or);font-weight:700;">Pending admin approval</span>'}
+        ${p.approvalStatus==='approved'?'<span style="color:var(--su);font-weight:700;">Approved, live on RichNation Mall</span>':p.approvalStatus==='rejected'?'<span style="color:var(--re);font-weight:700;">Rejected</span>'+(p.rejectionReason?'<div style="color:var(--w2);margin-top:4px;">Reason: '+p.rejectionReason+'</div>':''):'<span style="color:var(--or);font-weight:700;">Pending admin approval</span>'}
         <div style="color:var(--mu);margin-top:4px;">Every new listing and edit is reviewed by admin before it shows to customers.</div>
       </div>
       <div style="display:flex;gap:10px;">
@@ -889,7 +889,7 @@ async function previewVImages(){
   }
   const prev=document.getElementById('vp-img-preview');
   if(prev)prev.innerHTML=(window._vImages||[]).map(function(img,idx){return '<div style="position:relative;width:60px;height:60px;"><img src="'+img+'" style="width:100%;height:100%;object-fit:cover;border-radius:6px;"/><span onclick="removeVImg('+idx+')" style="position:absolute;top:-6px;right:-6px;background:var(--re);color:#fff;border-radius:99px;width:18px;height:18px;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;">×</span></div>';}).join('');
-  toast('Images ready — click Save to confirm');
+  toast('Images ready, click Save to confirm');
 }
 async function saveVProd(id){
   const name=(document.getElementById('vp-name').value||'').trim();
@@ -918,13 +918,13 @@ async function saveVProd(id){
   };
   await fbS('rn_mall_products/'+pid,prod);
   await fbP('rn_mall_notifications',{type:'vendor_product_pending',vendorName:vendor.storeName,productName:name,date:ds(),read:false,ts:Date.now()});
-  toast(id?'Changes submitted — pending admin approval before they go live.':'Product submitted — pending admin approval before it goes live.');
+  toast(id?'Changes submitted, pending admin approval before they go live.':'Product submitted, pending admin approval before it goes live.');
   vnav('products');
 }
 async function delVProd(id,name){
   if(!confirm('Delete "'+name+'"? This cannot be undone.'))return;
   const ok=await fbD('rn_mall_products/'+id);
-  if(!ok){toast('Delete failed — try again','err');return;}
+  if(!ok){toast('Delete failed, try again','err');return;}
   toast(name+' deleted');
   vnav('products');
 }
@@ -947,7 +947,7 @@ async function renderVOrders(c){
         +'<div style="text-align:right;"><div style="font-weight:800;">'+fmt(myTotal)+'</div><div class="row-meta">Order status: '+(o.status||'pending')+'</div></div>'
         +'</div>'
         +myItems.map(function(it){return '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--w2);padding:4px 0;border-top:1px solid var(--bdr);"><span>'+it.name+(it.variant?' ('+it.variant+')':'')+' x'+it.qty+'</span><span>'+fmt(it.price*it.qty)+'</span></div>';}).join('')
-        +'<div style="font-size:11px;color:var(--mu);margin-top:8px;">Deliver to: '+(o.customer?o.customer.address+', '+o.customer.city:'—')+' &middot; '+(o.customer?o.customer.phone:'')+'</div>'
+        +'<div style="font-size:11px;color:var(--mu);margin-top:8px;">Deliver to: '+(o.customer?o.customer.address+', '+o.customer.city:'N/A')+' &middot; '+(o.customer?o.customer.phone:'')+'</div>'
         +'</div>';
     }).join('');
   }
@@ -975,10 +975,10 @@ async function renderVProfile(c){
     <div class="card-title">Delivery Method</div>
     <div style="font-size:11px;color:var(--mu);margin:6px 0 12px;">Currently: <strong style="color:var(--or);">${currentOption==='richnation'?'RichNation Mall delivers for you ('+logisticsRate+'% commission)':'You deliver to customers yourself ('+selfRate+'% commission)'}</strong></div>
     <select class="inp" id="vprof-logistics">
-      <option value="self" ${currentOption==='self'?'selected':''}>I deliver to customers myself — ${selfRate}% commission</option>
-      <option value="richnation" ${currentOption==='richnation'?'selected':''}>RichNation Mall delivers for me — ${logisticsRate}% commission</option>
+      <option value="self" ${currentOption==='self'?'selected':''}>I deliver to customers myself, ${selfRate}% commission</option>
+      <option value="richnation" ${currentOption==='richnation'?'selected':''}>RichNation Mall delivers for me, ${logisticsRate}% commission</option>
     </select>
-    <div style="font-size:11px;color:var(--mu);margin-bottom:12px;">This applies to orders placed after you save — it does not change commission already charged on past sales.</div>
+    <div style="font-size:11px;color:var(--mu);margin-bottom:12px;">This applies to orders placed after you save, it does not change commission already charged on past sales.</div>
     <button class="btn btn-or btn-lg" onclick="saveVendorLogisticsOption()">Save Delivery Method</button>
   </div>
   <div class="card" style="max-width:500px;">
@@ -1007,7 +1007,7 @@ async function uploadVendorImage(input,field){
   const file=input.files[0];if(!file)return;
   toast('Uploading photo…');
   let b64=await compressImage(file,600,0.85);
-  if(!b64){toast('Could not read that image — try another one','err');return;}
+  if(!b64){toast('Could not read that image, try another one','err');return;}
   const url=isGithubConfigured()?await uploadDataUrlToGithub(b64,'vendor-photos'):null;
   if(url)b64=url;
   await fbU('rn_mall_vendors/'+vendor.id,{[field]:b64});

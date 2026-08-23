@@ -6,7 +6,7 @@
 <meta http-equiv="Expires" content="0"/>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>RichNation Mall — Investor Portal</title>
+<title>RichNation Mall, Investor Portal</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -86,7 +86,7 @@ button{font-family:inherit;}
   <div class="lcard">
     <div class="llogo">🛒 RichNation Mall</div>
     <div class="ltitle" id="l-title">Investor Sign In</div>
-    <div class="lsub" id="l-sub">Full transparency into your investment — live stats, revenue charts, updates, and direct access to the founder.</div>
+    <div class="lsub" id="l-sub">Full transparency into your investment, live stats, revenue charts, updates, and direct access to the founder.</div>
 
     <div id="login-form">
       <input class="fi" id="in-email" type="email" placeholder="Email"/>
@@ -111,7 +111,7 @@ button{font-family:inherit;}
         <input class="fi" id="ap-lga" placeholder="Local Government Area"/>
       </div>
       <div class="g2">
-        <input class="fi" id="ap-amount" type="number" min="200000" placeholder="Investment Amount (₦) — min 200,000" oninput="updatePackagePreview()"/>
+        <input class="fi" id="ap-amount" type="number" min="200000" placeholder="Investment Amount (₦), min 200,000" oninput="updatePackagePreview()"/>
         <select class="fi" id="ap-option">
           <option value="">Investment Option</option>
           <option value="profit_share">Monthly Profit Share</option>
@@ -123,14 +123,14 @@ button{font-family:inherit;}
       <div style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;margin-bottom:12px;max-height:180px;overflow-y:auto;">
         <div style="font-weight:800;font-size:12px;margin-bottom:8px;color:var(--wh);">RichNation Mall Investor Agreement</div>
         <div style="font-size:11px;color:var(--mu);line-height:1.7;">
-          By checking "I Agree" below, you enter into this agreement electronically — no physical signature required.<br><br>
+          By checking "I Agree" below, you enter into this agreement electronically, no physical signature required.<br><br>
           <strong>1. Nature of Investment.</strong> This is a business investment in RichNation Mall, not a loan or bank product. Returns depend on your selected package and structure.<br><br>
           <strong>2. Risk Disclosure.</strong> All business investment carries risk. Past performance is not a guarantee of future results.<br><br>
-          <strong>3. Transparency Commitment.</strong> RichNation Mall shows real revenue and order data — not just percentages — in your Live Mall Stats dashboard at all times.<br><br>
+          <strong>3. Transparency Commitment.</strong> RichNation Mall shows real revenue and order data, not just percentages, in your Live Mall Stats dashboard at all times.<br><br>
           <strong>4. Payment of Returns.</strong> Returns are paid directly to your RichNation Investor Wallet on the schedule for your package. From there, you may request a withdrawal to your bank account at any time.<br><br>
           <strong>5. Bank Details.</strong> You are solely responsible for entering accurate bank details for withdrawals. RichNation Mall is not liable for funds lost due to incorrect information you provided.<br><br>
           <strong>6. Confidentiality.</strong> Financial figures and business information shared with you may not be disclosed to third parties without written consent.<br><br>
-          <strong>7. Principal Withdrawal.</strong> Your invested principal is committed for the term of your package. Early exit is not guaranteed and is handled case-by-case through Chat with Founder — separate from your Wallet balance, which is yours to withdraw freely.<br><br>
+          <strong>7. Principal Withdrawal.</strong> Your invested principal is committed for the term of your package. Early exit is not guaranteed and is handled case-by-case through Chat with Founder, separate from your Wallet balance, which is yours to withdraw freely.<br><br>
           <strong>8. Communication.</strong> Official updates come only through this portal.<br><br>
           <strong>9. Management Authority.</strong> RichNation Global Ltd may update platform policies with notice. Your individually agreed package terms are never changed without your consent.
         </div>
@@ -171,7 +171,7 @@ const FB='https://richnation-portal-default-rtdb.firebaseio.com';
 const FIREBASE_CONFIG={apiKey:"AIzaSyDLGnyGB8ZnEc2u6TbVzjIAQi1pgSaZVyQ",authDomain:"richnation-portal.firebaseapp.com",databaseURL:"https://richnation-portal-default-rtdb.firebaseio.com",projectId:"richnation-portal",storageBucket:"richnation-portal.firebasestorage.app",messagingSenderId:"175550692963",appId:"1:175550692963:web:1e3c995b3ed0baaadac256"};
 const RECAPTCHA_SITE_KEY='6Ld2O5EtAAAAAN6fXMnn7kn5a6SWvDpJs97kckGC';
 let appCheckToken=null;
-// App Check isn't enforced yet, so it adds nothing functional right now — loaded only
+// App Check isn't enforced yet, so it adds nothing functional right now, loaded only
 // after the page is fully done loading, so it costs the page nothing while unused.
 function loadAppCheckWhenIdle(){
   function loadScript(src){
@@ -191,7 +191,7 @@ function loadAppCheckWhenIdle(){
         appCheckInstance.getToken().then(function(r){appCheckToken=r.token;}).catch(function(e){console.warn('App Check token fetch failed:',e.message);});
         appCheckInstance.onTokenChanged(function(r){appCheckToken=r.token;});
       }catch(e){
-        console.warn('App Check init failed — requests will proceed without a token:',e.message);
+        console.warn('App Check init failed, requests will proceed without a token:',e.message);
       }
     });
 }
@@ -286,7 +286,7 @@ function updatePackagePreview(){
   const annual=Math.round(amount*(pkg.rate/100));
   const monthly=Math.round(annual/12);
   box.style.display='block';
-  box.innerHTML='<strong style="color:var(--or);">'+pkg.label+' Package</strong> — '+pkg.rate+'% annual return<br>Estimated: <strong style="color:var(--su);">₦'+monthly.toLocaleString()+'/month</strong> (₦'+annual.toLocaleString()+'/year) with Monthly Profit Share or Fixed Return. Equity Ownership works differently — see the agreement above.';
+  box.innerHTML='<strong style="color:var(--or);">'+pkg.label+' Package</strong>, '+pkg.rate+'% annual return<br>Estimated: <strong style="color:var(--su);">₦'+monthly.toLocaleString()+'/month</strong> (₦'+annual.toLocaleString()+'/year) with Monthly Profit Share or Fixed Return. Equity Ownership works differently, see the agreement above.';
 }
 const OPTION_LABELS={profit_share:'Monthly Profit Share',equity:'Equity Ownership',fixed_return:'Fixed Return'};
 
@@ -300,7 +300,7 @@ function toggleApplyMode(){
   document.getElementById('login-form').style.display=isLogin?'none':'block';
   document.getElementById('apply-form').style.display=isLogin?'block':'none';
   document.getElementById('l-title').textContent=isLogin?'Apply to Invest':'Investor Sign In';
-  document.getElementById('l-sub').textContent=isLogin?'Minimum investment ₦200,000. Fill in your details below and our team will follow up with a formal partnership agreement.':'Full transparency into your investment — live stats, revenue charts, updates, and direct access to the founder.';
+  document.getElementById('l-sub').textContent=isLogin?'Minimum investment ₦200,000. Fill in your details below and our team will follow up with a formal partnership agreement.':'Full transparency into your investment, live stats, revenue charts, updates, and direct access to the founder.';
   document.getElementById('toggle-note').innerHTML=isLogin?'Already a partner? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Sign in</span>':'New partner? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Apply to invest</span>';
 }
 async function submitInvestorApplication(){
@@ -391,7 +391,7 @@ async function inav(page){
     if(changed)(routes[page]||renderDashboard)(c);
   }
 }
-// dashboard live-refresh interval removed — was causing a disruptive flash every 15s
+// dashboard live-refresh interval removed, was causing a disruptive flash every 15s
 
 async function renderDashboard(c){
   c.innerHTML='<div class="page-hdr-title">Welcome, '+investor.name+'</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
@@ -412,7 +412,7 @@ async function renderDashboard(c){
     <input type="file" id="dash-photo-upload" accept="image/*" style="display:none;" onchange="uploadMyPhoto('dash-photo-upload')">
     <div>
       <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:18px;">${investor.name}</div>
-      <div style="font-size:12px;color:var(--mu);margin-top:2px;">${tier} &middot; Partner since ${investor.joinDate||'—'}</div>
+      <div style="font-size:12px;color:var(--mu);margin-top:2px;">${tier} &middot; Partner since ${investor.joinDate||'N/A'}</div>
       <div onclick="document.getElementById('dash-photo-upload').click()" style="font-size:11px;color:var(--or);cursor:pointer;margin-top:4px;">Change Photo</div>
     </div>
     </div>
@@ -435,7 +435,7 @@ async function renderDashboard(c){
   <div class="card">
     <div class="card-title">📋 Your Partnership Terms</div>
     <div style="font-size:12px;color:var(--w2);line-height:1.9;margin-top:8px;">
-      ${investor.investmentOption==='profit_share'?'You receive a share of net profits monthly, starting 6 months after the mall reaches full-capacity launch. Your return grows as the business grows — no cap on upside.':
+      ${investor.investmentOption==='profit_share'?'You receive a share of net profits monthly, starting 6 months after the mall reaches full-capacity launch. Your return grows as the business grows, no cap on upside.':
         investor.investmentOption==='equity'?'You hold a permanent ownership stake in RichNation Mall, proportional to your investment vs. the total capital raised. Your stake includes a share of profits and a voice in major decisions.':
         investor.investmentOption==='fixed_return'?'You will receive your capital back plus your agreed fixed return at the end of your term, as specified in your signed partnership agreement.':'See your signed partnership agreement for full terms.'}
     </div>
@@ -500,7 +500,7 @@ async function renderStats(c){
   const maxRev=Math.max.apply(null,months.map(function(m){return m.rev;}).concat([1]));
   c.innerHTML=`
   <div class="page-hdr-title">Live Mall Stats</div>
-  <div class="page-hdr-sub" style="margin-bottom:20px;">Real, unfiltered numbers — updated live.</div>
+  <div class="page-hdr-sub" style="margin-bottom:20px;">Real, unfiltered numbers, updated live.</div>
   <div class="stats-grid">
     <div class="stat-card"><div class="stat-num" style="color:var(--su);">${fmt(totalRev)}</div><div class="stat-lbl">Total Revenue</div></div>
     <div class="stat-card"><div class="stat-num">${orders.length}</div><div class="stat-lbl">Total Orders</div></div>
@@ -519,7 +519,7 @@ async function renderUpdates(c){
   c.innerHTML='<div class="page-hdr-title">Updates from Ubong Rich</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
   const updates=Object.values(await fbG('rn_mall_investor_updates')||{}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
   c.innerHTML='<div class="page-hdr-title">Updates from Ubong Rich</div><div class="page-hdr-sub" style="margin-bottom:20px;">Announcements, milestones, and monthly reports.</div>'
-    +(updates.length?updates.map(function(u){return '<div class="card"><div style="font-size:13px;color:var(--w2);line-height:1.7;">'+u.message+'</div><div style="font-size:10px;color:var(--mu);margin-top:8px;">'+u.date+'</div></div>';}).join(''):'<div class="card" style="text-align:center;padding:40px;color:var(--mu);">No updates yet — check back soon.</div>');
+    +(updates.length?updates.map(function(u){return '<div class="card"><div style="font-size:13px;color:var(--w2);line-height:1.7;">'+u.message+'</div><div style="font-size:10px;color:var(--mu);margin-top:8px;">'+u.date+'</div></div>';}).join(''):'<div class="card" style="text-align:center;padding:40px;color:var(--mu);">No updates yet, check back soon.</div>');
 }
 
 async function renderSwitchPlan(c){
@@ -531,7 +531,7 @@ async function renderSwitchPlan(c){
   const pendingReq=investor.pendingSwitchRequest;
   c.innerHTML=`
   <div class="page-hdr-title">Switch Plan</div>
-  <div class="page-hdr-sub" style="margin-bottom:16px;">Request a change to your investment structure — admin reviews and approves every switch.</div>
+  <div class="page-hdr-sub" style="margin-bottom:16px;">Request a change to your investment structure, admin reviews and approves every switch.</div>
   <div class="card">
     <div class="card-title">Your Current Plan</div>
     <div style="font-size:13px;color:var(--w2);margin-top:8px;">${investor.tier||tierFor(investor.investmentAmount)} &middot; ${OPTION_LABELS[investor.investmentOption]||investor.investmentOption} &middot; ${fmt(investor.investmentAmount)}</div>
@@ -543,7 +543,7 @@ async function renderSwitchPlan(c){
     <div style="font-size:11px;color:var(--mu);margin-top:6px;">${pendingReq.newAmount&&pendingReq.newAmount>investor.investmentAmount?'Admin will confirm your top-up payment before approving.':'We\'ll notify you once admin reviews this.'}</div>
   </div>`:!canSwitch?`<div class="card" style="border-color:rgba(244,63,94,0.4);background:rgba(244,63,94,0.06);">
     <div style="font-weight:800;color:var(--re);">🔒 Not eligible to switch yet</div>
-    <div style="font-size:12px;color:var(--w2);margin-top:6px;">You can request a switch starting <strong>${nextEligible.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}</strong> — plans must be held at least 3 months before switching.</div>
+    <div style="font-size:12px;color:var(--w2);margin-top:6px;">You can request a switch starting <strong>${nextEligible.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}</strong>, plans must be held at least 3 months before switching.</div>
   </div>`:`
   <div class="card">
     <div class="card-title">Request a New Structure</div>
@@ -552,19 +552,19 @@ async function renderSwitchPlan(c){
       <option value="equity" ${investor.investmentOption==='equity'?'disabled':''}>Equity Ownership</option>
       <option value="fixed_return" ${investor.investmentOption==='fixed_return'?'disabled':''}>Fixed Return</option>
     </select></div>
-    <div class="fg"><label class="lbl">New Investment Amount (optional — leave blank to keep ${fmt(investor.investmentAmount)})</label><input class="fi" type="number" id="sw-amount" placeholder="${investor.investmentAmount}"/></div>
-    <div style="font-size:11px;color:var(--mu);margin-bottom:10px;">If your new amount is higher than your current investment, you'll need to make a top-up payment — admin confirms this before your switch is approved.</div>
+    <div class="fg"><label class="lbl">New Investment Amount (optional, leave blank to keep ${fmt(investor.investmentAmount)})</label><input class="fi" type="number" id="sw-amount" placeholder="${investor.investmentAmount}"/></div>
+    <div style="font-size:11px;color:var(--mu);margin-bottom:10px;">If your new amount is higher than your current investment, you'll need to make a top-up payment, admin confirms this before your switch is approved.</div>
     <button class="btn btn-or" onclick="previewPlanSwitch()">Preview Request</button>
     <div id="switch-preview" style="margin-top:14px;"></div>
   </div>`}
   <div class="card">
     <div class="card-title">📜 What Switching Means</div>
     <div style="font-size:12px;color:var(--w2);line-height:1.9;margin-top:8px;">
-      • Every switch request requires admin approval — nothing changes until approved.<br>
-      • If you're increasing your investment amount, admin confirms your top-up payment first — no payment confirmed means the request is denied.<br>
+      • Every switch request requires admin approval, nothing changes until approved.<br>
+      • If you're increasing your investment amount, admin confirms your top-up payment first, no payment confirmed means the request is denied.<br>
       • Your current plan stays active until admin approves the switch.<br>
       • Once approved, your payout timeline resets from that date.<br>
-      • Your Wallet balance (${fmt(investor.walletBalance||0)}) is never affected — it's always yours.<br>
+      • Your Wallet balance (${fmt(investor.walletBalance||0)}) is never affected, it's always yours.<br>
       • Requests can be made once every 3 months.<br>
       • Approved switches cannot be undone.
     </div>
@@ -578,7 +578,7 @@ function previewPlanSwitch(){
   const isTopUp=newAmount>investor.investmentAmount;
   box.innerHTML='<div style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;font-size:12px;color:var(--w2);">'
     +'Requesting <strong style="color:var(--or);">'+OPTION_LABELS[newOption]+'</strong>'+(newAmount!==investor.investmentAmount?' at '+fmt(newAmount):'')+'.<br><br>'
-    +(isTopUp?'⚠ This requires a top-up of <strong style="color:var(--or);">'+fmt(newAmount-investor.investmentAmount)+'</strong> — admin will confirm this payment before approving.<br>':'✔ No additional payment needed for this switch.<br>')
+    +(isTopUp?'⚠ This requires a top-up of <strong style="color:var(--or);">'+fmt(newAmount-investor.investmentAmount)+'</strong>, admin will confirm this payment before approving.<br>':'✔ No additional payment needed for this switch.<br>')
     +'✔ Your Wallet balance of '+fmt(investor.walletBalance||0)+' is unaffected either way<br>'
     +'⚠ Nothing changes until admin approves<br><br>'
     +'<button class="btn btn-or" onclick="submitSwitchRequest(\''+newOption+'\','+newAmount+')">Submit Request</button></div>';
@@ -629,7 +629,7 @@ async function saveInvestorBankDetails(){
   await fbU('rn_mall_investors/'+investor._id,{bankName:bankName,bankAcctNo:acctNo,bankAcctName:acctName,bankVerified:false});
   investor.bankName=bankName;investor.bankAcctNo=acctNo;investor.bankAcctName=acctName;investor.bankVerified=false;
   sessionStorage.setItem('rnm_investor_session',JSON.stringify(investor));
-  toast('Bank details saved — awaiting admin verification.');
+  toast('Bank details saved, awaiting admin verification.');
   inav('wallet');
 }
 async function requestInvestorWithdrawal(){
@@ -647,7 +647,7 @@ async function renderDocuments(c){
   const doc=investor.agreementDoc;
   c.innerHTML='<div class="page-hdr-title">My Documents</div><div class="page-hdr-sub" style="margin-bottom:20px;">Your signed partnership agreement.</div>'
     +(doc?'<div class="card"><div class="card-title">📄 Partnership Agreement</div><div style="font-size:12px;color:var(--mu);margin:8px 0 12px;">Uploaded by RichNation Mall.</div><button class="btn btn-or" onclick="downloadDataDoc(investor.agreementDoc,\'RichNation_Mall_Agreement.pdf\')">Download Agreement</button></div>'
-    :'<div class="card" style="text-align:center;padding:40px;color:var(--mu);">Your signed agreement hasn\'t been uploaded yet — it will appear here once ready.</div>');
+    :'<div class="card" style="text-align:center;padding:40px;color:var(--mu);">Your signed agreement hasn\'t been uploaded yet, it will appear here once ready.</div>');
 }
 
 async function renderChat(c){
@@ -680,7 +680,7 @@ function renderProfile(c){
     <input type="file" id="pf-photo-upload" accept="image/*" style="display:none;" onchange="uploadMyPhoto()">
     <div style="font-size:11px;color:var(--or);cursor:pointer;margin-top:6px;" onclick="document.getElementById('pf-photo-upload').click()">Change Photo</div>
     <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:16px;margin-top:10px;">${investor.name}</div>
-    <div style="font-size:11px;color:var(--or);font-weight:700;margin-top:2px;">${investor.investorNumber||'—'}</div>
+    <div style="font-size:11px;color:var(--or);font-weight:700;margin-top:2px;">${investor.investorNumber||'N/A'}</div>
   </div>
   <div class="card" style="max-width:460px;text-align:left;">
     <div class="card-title">📋 My Bio</div>
@@ -688,14 +688,14 @@ function renderProfile(c){
   </div>
   <div class="card" style="max-width:460px;text-align:left;">
     <div class="card-title">Personal Details</div>
-    <div style="font-size:11px;color:var(--mu);margin:6px 0 12px;">Managed by admin — to request a change, use Chat with Founder.</div>
-    <div class="lbl">Full Name</div><div class="fi" style="color:var(--mu);">${investor.name||'—'}</div>
-    <div class="lbl">Email</div><div class="fi" style="color:var(--mu);">${investor.email||'—'}</div>
-    <div class="lbl">Phone</div><div class="fi" style="color:var(--mu);">${investor.phone||'—'}</div>
+    <div style="font-size:11px;color:var(--mu);margin:6px 0 12px;">Managed by admin, to request a change, use Chat with Founder.</div>
+    <div class="lbl">Full Name</div><div class="fi" style="color:var(--mu);">${investor.name||'N/A'}</div>
+    <div class="lbl">Email</div><div class="fi" style="color:var(--mu);">${investor.email||'N/A'}</div>
+    <div class="lbl">Phone</div><div class="fi" style="color:var(--mu);">${investor.phone||'N/A'}</div>
     <div class="lbl">Date of Birth</div><div class="fi" style="color:var(--mu);">${investor.dob?new Date(investor.dob).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}):'Not provided'}</div>
-    <div class="lbl">Address</div><div class="fi" style="color:var(--mu);">${investor.address||'—'}</div>
-    <div class="lbl">Local Government Area</div><div class="fi" style="color:var(--mu);">${investor.lga||'—'}</div>
-    <div class="lbl">Country</div><div class="fi" style="color:var(--mu);">${investor.country||'—'}</div>
+    <div class="lbl">Address</div><div class="fi" style="color:var(--mu);">${investor.address||'N/A'}</div>
+    <div class="lbl">Local Government Area</div><div class="fi" style="color:var(--mu);">${investor.lga||'N/A'}</div>
+    <div class="lbl">Country</div><div class="fi" style="color:var(--mu);">${investor.country||'N/A'}</div>
     <div class="lbl">New Password (leave blank to keep current)</div><div style="position:relative;"><input class="fi" id="pf-pass" type="password" placeholder="New password" style="padding-right:56px;"/><span onclick="togglePwVisibility('pf-pass',this)" style="position:absolute;right:12px;top:12px;font-size:11px;color:var(--or);cursor:pointer;font-weight:700;">Show</span></div>
     <button class="btn btn-or btn-lg" onclick="saveInvestorProfile()">Save Password</button>
   </div>
@@ -753,11 +753,11 @@ async function uploadMyPhoto(inputId){
   if(!inp.files||!inp.files[0])return;
   toast('Uploading photo…');
   let b64=await compressPhotoFile(inp.files[0]);
-  if(!b64){toast('Could not read that image — try another one','err');return;}
+  if(!b64){toast('Could not read that image, try another one','err');return;}
   const url=isGithubConfigured()?await uploadDataUrlToGithub(b64,'investor-photos'):null;
   if(url)b64=url;
   const ok=await fbUVerified('rn_mall_investors/'+investor._id,{photo:b64});
-  if(!ok){toast('Photo upload failed — check your connection and try again','err');return;}
+  if(!ok){toast('Photo upload failed, check your connection and try again','err');return;}
   investor.photo=b64;
   sessionStorage.setItem('rnm_investor_session',JSON.stringify(investor));
   toast('Photo updated!');
@@ -776,7 +776,7 @@ async function saveInvestorProfile(){
 // ── NOTIFICATIONS ──
 function invNotifMsg(n){
   if(n.type==='investor_chat_reply')return 'Ubong Rich replied: "'+n.preview+'"';
-  if(n.type==='payout')return '💰 A payment of '+fmt(n.amount)+' was recorded for you — '+(n.description||'');
+  if(n.type==='payout')return '💰 A payment of '+fmt(n.amount)+' was recorded for you, '+(n.description||'');
   if(n.type==='update')return '📢 New update posted: "'+n.preview+'"';
   if(n.type==='switch_approved')return '✔ Your switch to '+(OPTION_LABELS[n.option]||n.option)+' was approved and is now active.';
   if(n.type==='switch_denied')return '⚠ Your plan switch request was denied. Contact Chat with Founder for details.';

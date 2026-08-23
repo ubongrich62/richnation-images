@@ -6,7 +6,7 @@
 <meta http-equiv="Expires" content="0"/>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>RichNation Mall — Staff Portal</title>
+<title>RichNation Mall, Staff Portal</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -165,7 +165,7 @@ const FB='https://richnation-portal-default-rtdb.firebaseio.com';
 const FIREBASE_CONFIG={apiKey:"AIzaSyDLGnyGB8ZnEc2u6TbVzjIAQi1pgSaZVyQ",authDomain:"richnation-portal.firebaseapp.com",databaseURL:"https://richnation-portal-default-rtdb.firebaseio.com",projectId:"richnation-portal",storageBucket:"richnation-portal.firebasestorage.app",messagingSenderId:"175550692963",appId:"1:175550692963:web:1e3c995b3ed0baaadac256"};
 const RECAPTCHA_SITE_KEY='6Ld2O5EtAAAAAN6fXMnn7kn5a6SWvDpJs97kckGC';
 let appCheckToken=null;
-// App Check isn't enforced yet, so it adds nothing functional right now — loaded only
+// App Check isn't enforced yet, so it adds nothing functional right now, loaded only
 // after the page is fully done loading, so it costs the page nothing while unused.
 function loadAppCheckWhenIdle(){
   function loadScript(src){
@@ -185,7 +185,7 @@ function loadAppCheckWhenIdle(){
         appCheckInstance.getToken().then(function(r){appCheckToken=r.token;}).catch(function(e){console.warn('App Check token fetch failed:',e.message);});
         appCheckInstance.onTokenChanged(function(r){appCheckToken=r.token;});
       }catch(e){
-        console.warn('App Check init failed — requests will proceed without a token:',e.message);
+        console.warn('App Check init failed, requests will proceed without a token:',e.message);
       }
     });
 }
@@ -275,19 +275,19 @@ const STAFF_ROLES=[
 ];
 const ROLE_LABELS={};STAFF_ROLES.forEach(function(r){ROLE_LABELS[r.id]=r.label;});
 const ROLE_JOB_DESCRIPTIONS={
-  ceo:'Full oversight of RichNation Mall — strategy, final approval on major decisions, sees everything every other role sees.',
-  general_manager:'Full day-to-day operational oversight through the Staff Portal — Orders, Products, Vendors, Analytics, Customers, Wallet Issues, Customer Chat. Reviews staff strikes and conduct, and pending-suspension cases as outlined in the Company Policy.',
+  ceo:'Full oversight of RichNation Mall, strategy, final approval on major decisions, sees everything every other role sees.',
+  general_manager:'Full day-to-day operational oversight through the Staff Portal, Orders, Products, Vendors, Analytics, Customers, Wallet Issues, Customer Chat. Reviews staff strikes and conduct, and pending-suspension cases as outlined in the Company Policy.',
   warehouse_manager:'Manages stock levels, receives new inventory, keeps product quantities accurate, flags low-stock items.',
   accountant:'Tracks revenue and analytics, reviews and approves wallet refund requests, handles financial reporting.',
   hr_manager:'Manages staff records, reviews reports/complaints/leave requests from the team, oversees onboarding of new staff.',
-  logistics_manager:'Oversees the delivery operation — assigns riders to orders, monitors active deliveries, resolves delivery issues.',
+  logistics_manager:'Oversees the delivery operation, assigns riders to orders, monitors active deliveries, resolves delivery issues.',
   dispatch_rider:'Picks up and delivers assigned orders, updates delivery status live so customers can track progress, collects proof of delivery.',
   customer_service:'Responds to customer chat messages, resolves wallet/refund complaints, handles general customer questions.',
   marketer:'Plans and runs promotional campaigns, coordinates with Social Media/Content/Graphics roles, tracks campaign performance.',
   social_media_manager:'Manages RichNation\'s social media presence, schedules posts, engages with followers.',
   content_creator:'Writes product descriptions, blog content, and promotional copy.',
   graphic_designer:'Creates visuals for products, banners, and social media.',
-  product_manager:'Adds and maintains full product listings — pricing, stock, images, descriptions, categories.'
+  product_manager:'Adds and maintains full product listings, pricing, stock, images, descriptions, categories.'
 };
 function accessFor(roleId){const r=STAFF_ROLES.find(function(x){return x.id===roleId;});return r?r.access:'viewer';}
 const ACCESS_NAV={
@@ -368,7 +368,7 @@ async function submitStaffApplication(){
     status:'pending_review',joinDate:ds(),ts:Date.now()
   });
   err.style.display='none';
-  document.getElementById('apply-form').innerHTML='<div style="text-align:center;padding:10px 0;"><div style="font-size:32px;margin-bottom:10px;">✅</div><div style="font-weight:800;margin-bottom:8px;">Application Submitted!</div><div style="font-size:12px;color:var(--mu);line-height:1.7;">Thanks, '+fname+'! Our admin will review your application. Once approved, you\'ll receive your login email and password separately — check with us if you don\'t hear back soon.</div></div>';
+  document.getElementById('apply-form').innerHTML='<div style="text-align:center;padding:10px 0;"><div style="font-size:32px;margin-bottom:10px;">✅</div><div style="font-weight:800;margin-bottom:8px;">Application Submitted!</div><div style="font-size:12px;color:var(--mu);line-height:1.7;">Thanks, '+fname+'! Our admin will review your application. Once approved, you\'ll receive your login email and password separately, check with us if you don\'t hear back soon.</div></div>';
 }
 async function doStaffLogin(){
   const email=document.getElementById('s-email').value.trim().toLowerCase();
@@ -392,7 +392,7 @@ function checkStaffSession(){const s=sessionStorage.getItem('rnm_staff_session')
 function startApp(){
   document.getElementById('login').style.display='none';
   document.getElementById('app').style.display='block';
-  document.getElementById('tb-role-badge').textContent=staff.name+' — '+(ROLE_LABELS[staff.role]||staff.role);
+  document.getElementById('tb-role-badge').textContent=staff.name+', '+(ROLE_LABELS[staff.role]||staff.role);
   buildSidebar();
   snav('dashboard');
   loadStaffNotifs();
@@ -435,7 +435,7 @@ function maybeShowWelcomeSetup(){
   if(!staff.policyRead)missing.push('Read and confirm the Company Policy');
   if(!missing.length)return;
   showInfoModal('👋 Welcome, '+staff.name.split(' ')[0]+'!',`
-    <div style="font-size:13px;color:var(--w2);line-height:1.7;margin-bottom:14px;">Let's finish setting up your dashboard — a few things left:</div>
+    <div style="font-size:13px;color:var(--w2);line-height:1.7;margin-bottom:14px;">Let's finish setting up your dashboard, a few things left:</div>
     <div style="margin-bottom:16px;">${missing.map(function(m){return '<div style="padding:8px 0;border-top:1px solid var(--bdr);font-size:13px;color:var(--w2);">☐ '+m+'</div>';}).join('')}</div>
     <button class="btn btn-or btn-lg" onclick="closeInfoModal();snav('profile');" style="width:100%;">Complete My Setup</button>
   `);
@@ -483,7 +483,7 @@ async function snav(page){
     leave:renderLeave,messages:renderMessages,activity:renderMyActivity,policy:renderCompanyPolicy,profile:renderProfile,
     submissions:renderSubmissions,approvals:renderApprovals,fleet:renderFleet
   };
-  // Render right away with whatever staff data is already cached — never make the
+  // Render right away with whatever staff data is already cached, never make the
   // person wait on a network round-trip just to see the page they clicked into.
   (routes[page]||renderDashboard)(c);
   // Then quietly check for anything admin changed, and only re-render if this is
@@ -493,7 +493,7 @@ async function snav(page){
     const changed=JSON.stringify(fresh)!==JSON.stringify(Object.assign({},staff,{_id:undefined}));
     staff=Object.assign({_id:staff._id},fresh);
     sessionStorage.setItem('rnm_staff_session',JSON.stringify(staff));
-    document.getElementById('tb-role-badge').textContent=staff.name+' — '+(ROLE_LABELS[staff.role]||staff.role);
+    document.getElementById('tb-role-badge').textContent=staff.name+', '+(ROLE_LABELS[staff.role]||staff.role);
     if(changed)(routes[page]||renderDashboard)(c);
   }
 }
@@ -518,7 +518,7 @@ async function loadMyTasks(){
         +'<input class="fi" id="tc-file-'+e[0]+'" type="file" style="margin-bottom:6px;"/>'
         +'<button class="btn btn-or" style="font-size:11px;padding:6px 14px;" onclick="submitTaskCompletion(\''+e[0]+'\')">Submit for Approval</button></div>';
     }else if(mode==='submitted'){
-      completionBlock='<div style="font-size:11px;color:var(--or);margin-top:6px;">⏳ Sent to admin — awaiting approval</div>'
+      completionBlock='<div style="font-size:11px;color:var(--or);margin-top:6px;">⏳ Sent to admin, awaiting approval</div>'
         +(t.completionNote?'<div style="font-size:12px;color:var(--w2);margin-top:4px;">'+t.completionNote+'</div>':'')
         +(t.completionLink?'<div style="margin-top:6px;"><a href="javascript:void(0)" data-uri="'+t.completionLink+'" onclick="openDataDoc(this.dataset.uri)" style="color:var(--or);font-size:11px;">View Link</a></div>':'')
         +(t.completionFile?'<div style="margin-top:6px;"><a href="javascript:void(0)" data-uri="'+t.completionFile+'" onclick="openDataDoc(this.dataset.uri)" style="color:var(--or);font-size:11px;">View File</a></div>':'');
@@ -562,16 +562,16 @@ async function renderDashboard(c){
   </div>
   ${staff.role==='ceo'?(staff.adminPanelAccess?`<div class="card" style="border-color:rgba(255,140,0,0.4);background:rgba(255,140,0,0.06);">
     <div style="font-weight:800;color:var(--or);font-size:14px;">🖥️ You have full Admin Panel access</div>
-    <div style="font-size:12px;color:var(--w2);margin-top:6px;line-height:1.7;">This Staff Portal is for your day-to-day tasks — salary, points, messages, your own reports. For company-wide access (all products, orders, vendors, investors, riders, promotions, settings — everything Admin sees), log into the <strong>Admin Panel</strong> with these same email and password. Every action you take there is visible to Admin for review.</div>
+    <div style="font-size:12px;color:var(--w2);margin-top:6px;line-height:1.7;">This Staff Portal is for your day-to-day tasks, salary, points, messages, your own reports. For company-wide access (all products, orders, vendors, investors, riders, promotions, settings, everything Admin sees), log into the <strong>Admin Panel</strong> with these same email and password. Every action you take there is visible to Admin for review.</div>
   </div>`:`<div class="card" style="border-color:rgba(255,140,0,0.4);background:rgba(255,140,0,0.06);">
     <div style="font-weight:800;color:var(--or);font-size:14px;">🖥️ Full Admin Panel access not yet granted</div>
-    <div style="font-size:12px;color:var(--w2);margin-top:6px;line-height:1.7;">This Staff Portal only shows a limited view. For the full company-wide experience — same as Admin sees — ask Admin to grant you Admin Panel Access from Staff & Roles.</div>
+    <div style="font-size:12px;color:var(--w2);margin-top:6px;line-height:1.7;">This Staff Portal only shows a limited view. For the full company-wide experience, same as Admin sees, ask Admin to grant you Admin Panel Access from Staff & Roles.</div>
   </div>`):''}
   ${accessFor(staff.role)==='exec'?`<div class="card-title" style="margin:16px 0 10px;">🏢 Company Overview</div><div class="stats-grid" id="ceo-overview-grid"><div style="color:var(--mu);font-size:12px;">Loading...</div></div>`:''}
   <div class="stats-grid">
     <div class="stat-card"><div class="stat-num" style="color:var(--su);">${fmt(staff.salary||0)}</div><div class="stat-lbl">Monthly Salary</div><div class="stat-sub">Status: ${staff.salaryStatus||'pending'}</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--or);">${staff.points||0} pts</div><div class="stat-lbl">StaffPoints</div><div class="stat-sub">Bonus points from admin</div></div>
-    <div class="stat-card"><div class="stat-num">${roleObj?roleObj.label:staff.role}</div><div class="stat-lbl">Your Role</div><div class="stat-sub">Since ${staff.joinDate||'—'}</div></div>
+    <div class="stat-card"><div class="stat-num">${roleObj?roleObj.label:staff.role}</div><div class="stat-lbl">Your Role</div><div class="stat-sub">Since ${staff.joinDate||'N/A'}</div></div>
     <div class="stat-card"><div class="stat-num" style="font-size:15px;">${staff.workingHours||'Not set'}</div><div class="stat-lbl">Working Hours</div><div class="stat-sub">Set by admin</div></div>
     <div class="stat-card" id="tasks-stat-card"><div class="stat-num" style="color:var(--su);">${staff.tasksDone||0}</div><div class="stat-lbl">Tasks Done</div><div class="stat-sub">${staff.tasksPending||0} pending</div></div>
     <div class="stat-card"><div class="stat-num" style="color:${(staff.strikes||0)>0?'var(--re)':'var(--su)'};">${staff.strikes||0}/3</div><div class="stat-lbl">Strikes</div><div class="stat-sub">${(staff.strikes||0)>=3?'Suspended pending review':'Stay clean of these'}</div></div>
@@ -607,12 +607,12 @@ async function renderDashboard(c){
   }
   loadMyTasks();
   fbG('rn_mall_announcements').then(function(data){
-    if(curNav!=='dashboard')return; // they've already navigated away — don't overwrite whatever's there now
+    if(curNav!=='dashboard')return; // they've already navigated away, don't overwrite whatever's there now
     const entries=Object.entries(data||{}).sort(function(a,b){return (b[1].ts||0)-(a[1].ts||0);}).slice(0,5);
     const el=document.getElementById('dash-anns');
     if(!el)return;
     el.innerHTML=entries.length?entries.map(function(e){return '<div style="padding:8px 0;border-top:1px solid var(--bdr);font-size:13px;color:var(--w2);">'+e[1].message+'<div style="font-size:10px;color:var(--mu);margin-top:2px;">'+e[1].date+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No announcements yet.</div>';
-    // Read receipt — record that this staff member has now seen each of these.
+    // Read receipt, record that this staff member has now seen each of these.
     entries.forEach(function(e){fbU('rn_mall_announcement_reads/'+e[0],{[staff._id]:{name:staff.name,ts:Date.now()}});});
   });
 }
@@ -676,7 +676,7 @@ async function requestStaffWithdrawal(){
 function showSalaryFaq(type){
   const content={
     calc:'Your monthly salary amount is set directly by admin and shown at the top of this page. If you believe there\'s an error, use Complaints to raise it.',
-    when:'Admin marks your salary as paid when it\'s sent, along with an expected arrival date — usually a few working days depending on your bank. You\'ll get a notification the moment it\'s recorded.',
+    when:'Admin marks your salary as paid when it\'s sent, along with an expected arrival date, usually a few working days depending on your bank. You\'ll get a notification the moment it\'s recorded.',
     contact:'Use the Complaints tab to reach out about any payment question, or message admin directly from Messages.'
   };
   showInfoModal(iconBadge('money',18)+' Payment Info',`<div style="font-size:13px;color:var(--w2);line-height:1.8;">${content[type]||''}</div>`);
@@ -690,7 +690,7 @@ async function renderPoints(c){
   <div class="page-hdr"><div class="page-hdr-title">My StaffPoints</div></div>
   <div class="card" style="text-align:center;">
     <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:32px;color:var(--or);">${staff.points||0} pts</div>
-    <div style="font-size:12px;color:var(--mu);margin-top:4px;">Awarded by admin as bonuses/recognition — can factor into future salary reviews.</div>
+    <div style="font-size:12px;color:var(--mu);margin-top:4px;">Awarded by admin as bonuses/recognition, can factor into future salary reviews.</div>
   </div>
   <div class="card"><div class="card-title">Points History</div><div style="margin-top:8px;">${hist.length?hist.map(function(h){return '<div style="padding:8px 0;border-top:1px solid var(--bdr);font-size:12px;"><div style="display:flex;justify-content:space-between;"><span style="color:var(--w2);">'+(h.reason||'Bonus')+'</span><span style="font-weight:700;color:var(--su);">+'+h.amount+'</span></div><div style="font-size:10px;color:var(--mu);">'+h.date+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No points yet.</div>'}</div></div>`;
 }
@@ -702,12 +702,12 @@ async function renderReports(c){
   const typeIcon={daily:'clock',weekly:'chart',monthly:'note'};
   const typeLabel={daily:'Daily',weekly:'Weekly',monthly:'Monthly'};
   c.innerHTML=`
-  <div class="page-hdr"><div class="page-hdr-title">Reports</div><div class="page-hdr-sub">Keep it short and readable — a clear headline says more than a wall of text.</div></div>
+  <div class="page-hdr"><div class="page-hdr-title">Reports</div><div class="page-hdr-sub">Keep it short and readable, a clear headline says more than a wall of text.</div></div>
   <div class="card">
     <div class="fg"><label class="lbl">Report Type</label><select class="inp" id="rp-type"><option value="daily">Daily Report</option><option value="weekly">Weekly Report</option><option value="monthly">Monthly Report</option></select></div>
-    <div class="fg"><label class="lbl">Headline</label><input class="inp" id="rp-headline" placeholder="One clear line — what's this report about?" maxlength="80"/></div>
+    <div class="fg"><label class="lbl">Headline</label><input class="inp" id="rp-headline" placeholder="One clear line, what's this report about?" maxlength="80"/></div>
     <div class="fg"><label class="lbl">Subtitle</label><input class="inp" id="rp-subtitle" placeholder="A short one-line summary" maxlength="120"/></div>
-    <div class="fg"><label class="lbl">Body</label><textarea class="ta" id="rp-msg" rows="5" placeholder="${staff.role==='logistics_manager'?"Deliveries completed, any delays and why, vehicle or rider issues, what's next...":"The details — what you did, any blockers, what's next..."}"></textarea></div>
+    <div class="fg"><label class="lbl">Body</label><textarea class="ta" id="rp-msg" rows="5" placeholder="${staff.role==='logistics_manager'?"Deliveries completed, any delays and why, vehicle or rider issues, what's next...":"The details, what you did, any blockers, what's next..."}"></textarea></div>
     <button class="btn btn-or" onclick="submitReport()">${iconBadge('note',14)} Submit Report</button>
   </div>
   <div class="card-title" style="margin:16px 0 10px;">My Past Reports</div>
@@ -777,7 +777,7 @@ async function renderFleet(c){
   </div>
   <div class="card">
     <div class="card-title">Add a Vehicle</div>
-    <div class="g2"><div class="fg"><label class="lbl">Vehicle Name / Plate</label><input class="inp" id="veh-name" placeholder="e.g. Bike 04 — ABC123XY"/></div><div class="fg"><label class="lbl">Type</label><select class="inp" id="veh-type"><option>Motorcycle</option><option>Bicycle</option><option>Car</option><option>Van/Truck</option></select></div></div>
+    <div class="g2"><div class="fg"><label class="lbl">Vehicle Name / Plate</label><input class="inp" id="veh-name" placeholder="e.g. Bike 04, ABC123XY"/></div><div class="fg"><label class="lbl">Type</label><select class="inp" id="veh-type"><option>Motorcycle</option><option>Bicycle</option><option>Car</option><option>Van/Truck</option></select></div></div>
     <div class="fg"><label class="lbl">Assign to Rider (optional)</label><select class="inp" id="veh-rider"><option value="">Unassigned</option>${riders.map(function(r){return '<option value="'+r._id+'">'+r.name+'</option>';}).join('')}</select></div>
     <button class="btn btn-or" onclick="addVehicle()">${iconBadge('box',14)} Add Vehicle</button>
   </div>
@@ -790,7 +790,7 @@ async function renderFleet(c){
     }).join(''):'<div style="color:var(--mu);font-size:12px;">No vehicles added yet.</div>'}</div>
   </div>
   <div class="card">
-    <div class="card-title">Riders — Message Directly</div>
+    <div class="card-title">Riders, Message Directly</div>
     <div style="margin-top:8px;">${riders.length?riders.map(function(r){
       var isLive=r.liveLat!=null&&r.liveTs&&(Date.now()-r.liveTs)<2*60*1000;
       return '<div style="padding:10px 0;border-top:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><div><div style="font-weight:700;font-size:13px;color:var(--wh);">'+r.name+'</div><div style="font-size:11px;color:var(--mu);">'+(r.online?'<span style="color:var(--su);">● Online</span>':'<span style="color:var(--mu);">○ Offline</span>')+(isLive?' &middot; Live location active':'')+'</div></div><button class="btn btn-dk" style="font-size:11px;padding:6px 14px;" onclick="openFleetRiderChat(\''+r._id+'\',\''+r.name.replace(/'/g,"\\'")+'\')">'+iconBadge('chat',12)+' Message</button></div>';
@@ -838,7 +838,7 @@ async function initFleetMap(allRiders){
     var pickup=(settingsData||{}).pickupLocation;
     if(pickup&&pickup.lat!=null){
       var storeIcon=L.divIcon({html:'<div style="background:#FF6A00;width:28px;height:28px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid #fff;">🏬</div>',iconSize:[28,28],className:''});
-      L.marker([pickup.lat,pickup.lng],{icon:storeIcon}).addTo(map).bindPopup('Pickup Point — RichNation Mall');
+      L.marker([pickup.lat,pickup.lng],{icon:storeIcon}).addTo(map).bindPopup('Pickup Point, RichNation Mall');
       bounds.push([pickup.lat,pickup.lng]);
       if(bounds.length>1)map.fitBounds(L.latLngBounds(bounds),{padding:[40,40]});
     }
@@ -847,7 +847,7 @@ async function initFleetMap(allRiders){
     var isLive=r.liveTs&&(Date.now()-r.liveTs)<2*60*1000;
     var minsAgo=r.liveTs?Math.round((Date.now()-r.liveTs)/60000):null;
     const icon=L.divIcon({html:'<div style="background:#161616;width:30px;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:15px;border:2px solid '+(isLive?'#22c55e':'#FF6A00')+';">🏍️</div>',iconSize:[30,30],className:''});
-    L.marker([r.liveLat,r.liveLng],{icon:icon}).addTo(map).bindPopup(r.name+(isLive?' — live':' — last seen '+(minsAgo!=null?minsAgo+' min ago':'a while ago')));
+    L.marker([r.liveLat,r.liveLng],{icon:icon}).addTo(map).bindPopup(r.name+(isLive?', live':', last seen '+(minsAgo!=null?minsAgo+' min ago':'a while ago')));
     bounds.push([r.liveLat,r.liveLng]);
   });
   if(bounds.length>1)map.fitBounds(L.latLngBounds(bounds),{padding:[40,40]});
@@ -875,7 +875,7 @@ async function searchFleetMapLocation(query){
     }else{
       toast('Location not found','err');
     }
-  }catch(e){toast('Search failed — check your connection','err');}
+  }catch(e){toast('Search failed, check your connection','err');}
 }
 async function addVehicle(){
   const name=(document.getElementById('veh-name').value||'').trim();
@@ -901,7 +901,7 @@ async function loadFleetChat(riderId){
   const el=document.getElementById('fc-msgs');if(!el)return;
   el.innerHTML=msgs.length?msgs.map(function(m){
     const senderRole=m.senderRole?(ROLE_LABELS[m.senderRole]||m.senderRole):(m.isAdmin?'Admin':'Rider');
-    const label=m.isAdmin?(m.senderName?m.senderName+' — '+senderRole:'Admin'):(m.senderName||'Rider');
+    const label=m.isAdmin?(m.senderName?m.senderName+', '+senderRole:'Admin'):(m.senderName||'Rider');
     return '<div style="display:flex;'+(m.isAdmin?'flex-direction:row-reverse;':'')+'gap:10px;margin-bottom:10px;"><div style="width:28px;height:28px;border-radius:99px;background:'+(m.isAdmin?'var(--or)':'var(--card2)')+';color:'+(m.isAdmin?'#fff':'var(--w2)')+';font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+(m.senderName||'R').charAt(0)+'</div><div><div style="background:'+(m.isAdmin?'rgba(255,106,0,0.1)':'var(--card2)')+';padding:8px 12px;border-radius:9px;font-size:13px;max-width:100%;">'+m.text+'</div><div style="font-size:9px;color:var(--mu);margin-top:2px;'+(m.isAdmin?'text-align:right;':'')+'">'+label+'</div></div></div>';
   }).join(''):'<div style="color:var(--mu);font-size:13px;">No messages yet.</div>';
   el.scrollTop=el.scrollHeight;
@@ -922,7 +922,7 @@ async function renderSubmissions(c){
   <div class="card">
     <div class="fg"><label class="lbl">Title</label><input class="inp" id="sub-title" placeholder="What is this work?" maxlength="80"/></div>
     <div class="fg"><label class="lbl">Description</label><textarea class="ta" id="sub-desc" rows="3" placeholder="A short note on what this is and where it's meant to go..."></textarea></div>
-    <div class="fg"><label class="lbl">Google Link (Drive, Docs, Sheets — optional)</label><input class="inp" id="sub-link" placeholder="https://drive.google.com/..."/></div>
+    <div class="fg"><label class="lbl">Google Link (Drive, Docs, Sheets, optional)</label><input class="inp" id="sub-link" placeholder="https://drive.google.com/..."/></div>
     <div class="fg"><label class="lbl">Or Upload a File (optional)</label><input class="inp" id="sub-file" type="file"/></div>
     <button class="btn btn-or" onclick="submitWork()">${iconBadge('file',14)} Send for Approval</button>
   </div>
@@ -959,14 +959,14 @@ async function renderApprovals(c){
     return '<div class="card" style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;"><div><div style="font-weight:800;font-size:14px;color:var(--wh);">'+s.title+'</div><div style="font-size:11px;color:var(--mu);margin-top:2px;">'+(s.staffName||'Unknown')+' &middot; '+(ROLE_LABELS[s.role]||s.role)+'</div></div><span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;text-transform:uppercase;background:'+statusColor[s.status||'pending']+'22;color:'+statusColor[s.status||'pending']+';">'+(s.status||'pending')+'</span></div>'
       +(s.description?'<div style="font-size:13px;color:var(--w2);margin-top:8px;">'+s.description+'</div>':'')
       +(s.link?'<div style="margin-top:8px;"><a href="javascript:void(0)" data-uri="'+s.link+'" onclick="openDataDoc(this.dataset.uri)" style="color:var(--or);font-size:12px;">'+iconBadge('file',12)+' Open Link</a></div>':'')
-      +(s.fileData?'<div style="margin-top:8px;"><a href="javascript:void(0)" data-uri="'+s.fileData+'" onclick="openDataDoc(this.dataset.uri)" style="color:var(--or);font-size:12px;">'+iconBadge('file',12)+' Open File'+(s.fileName?' — '+s.fileName:'')+'</a></div>':'')
+      +(s.fileData?'<div style="margin-top:8px;"><a href="javascript:void(0)" data-uri="'+s.fileData+'" onclick="openDataDoc(this.dataset.uri)" style="color:var(--or);font-size:12px;">'+iconBadge('file',12)+' Open File'+(s.fileName?', '+s.fileName:'')+'</a></div>':'')
       +(s.reviewNote?'<div style="background:var(--card2);border-radius:8px;padding:10px;margin-top:10px;"><div style="font-size:10px;color:'+statusColor[s.status||'pending']+';font-weight:700;margin-bottom:4px;">Your note:</div><div style="font-size:12px;color:var(--w2);">'+s.reviewNote+'</div></div>':'')
       +'<div style="font-size:10px;color:var(--mu);margin-top:8px;">'+s.date+'</div>'
       +((s.status||'pending')==='pending'?'<div style="display:flex;gap:8px;margin-top:12px;"><button class="btn btn-or" style="font-size:11px;padding:6px 14px;" onclick="reviewSubmission(\''+s._id+'\',\'approved\')">Approve</button><button class="btn btn-re" style="font-size:11px;padding:6px 14px;" onclick="reviewSubmission(\''+s._id+'\',\'rejected\')">Reject</button></div>':'')
       +'</div>';
   }
   c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Approvals</div><div class="page-hdr-sub">Work submitted by the content team, waiting on your review.</div></div>'
-    +(pending.length?pending.map(card).join(''):'<div class="card" style="text-align:center;padding:30px;color:var(--mu);">Nothing pending — you\'re all caught up.</div>')
+    +(pending.length?pending.map(card).join(''):'<div class="card" style="text-align:center;padding:30px;color:var(--mu);">Nothing pending, you\'re all caught up.</div>')
     +(reviewed.length?'<div class="card-title" style="margin:20px 0 10px;">Reviewed</div>'+reviewed.map(card).join(''):'');
 }
 async function reviewSubmission(id,decision){
@@ -976,7 +976,7 @@ async function reviewSubmission(id,decision){
   const s=await fbG('rn_mall_staff_submissions/'+id);if(!s)return;
   await fbU('rn_mall_staff_submissions/'+id,{status:decision,reviewNote:note.trim()||null,reviewedBy:staff.name,reviewedAt:Date.now()});
   await fbP('rn_mall_staff_notifications/'+s.staffId,{type:decision==='approved'?'submission_approved':'submission_rejected',title:s.title,note:note.trim()||null,date:ds(),read:false,ts:Date.now()});
-  toast(decision==='approved'?'Approved!':'Rejected — feedback sent');
+  toast(decision==='approved'?'Approved!':'Rejected, feedback sent');
   snav('approvals');
 }
 async function renderComplaints(c){
@@ -1099,8 +1099,8 @@ async function loadChannelMsgs(key,elId,isDM){
     const mine=m.senderId===staff._id;
     const senderRole=m.senderRole?(ROLE_LABELS[m.senderRole]||m.senderRole):'';
     const tick=isDM&&mine?'<div style="font-size:9px;color:'+(m.readByRecipient?'#5b9bf5':'var(--mu)')+';margin-top:2px;">'+(m.readByRecipient?'✔✔ Read':'✔ Sent')+'</div>':'';
-    return '<div class="chat-msg'+(mine?' own':'')+'"><div class="chat-av">'+ini(m.senderName)+'</div><div><div class="chat-bubble">'+m.text+'</div><div style="font-size:9px;color:var(--mu);margin-top:2px;">'+(mine?'You':m.senderName+(senderRole?' — '+senderRole:''))+'</div>'+tick+'</div></div>';
-  }).join(''):'<div style="color:var(--mu);font-size:12px;text-align:center;padding:20px;">No messages yet — say hello!</div>';
+    return '<div class="chat-msg'+(mine?' own':'')+'"><div class="chat-av">'+ini(m.senderName)+'</div><div><div class="chat-bubble">'+m.text+'</div><div style="font-size:9px;color:var(--mu);margin-top:2px;">'+(mine?'You':m.senderName+(senderRole?', '+senderRole:''))+'</div>'+tick+'</div></div>';
+  }).join(''):'<div style="color:var(--mu);font-size:12px;text-align:center;padding:20px;">No messages yet, say hello!</div>';
   el.scrollTop=el.scrollHeight;
   if(isDM){
     entries.forEach(function(e){if(e[1].senderId!==staff._id&&!e[1].readByRecipient)fbU(key+'/'+e[0],{readByRecipient:true});});
@@ -1111,31 +1111,31 @@ async function loadChannelMsgs(key,elId,isDM){
 async function renderMyActivity(c){
   c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">My Activity</div></div><div style="color:var(--mu);">Loading...</div>';
   const log=Object.values(await fbG('rn_mall_activity_log')||{}).filter(function(l){return l.by===staff.email;}).sort(function(a,b){return (b.ts||0)-(a.ts||0);}).slice(0,50);
-  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">My Activity</div><div class="page-hdr-sub">Your own action history — full transparency.</div></div>'
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">My Activity</div><div class="page-hdr-sub">Your own action history, full transparency.</div></div>'
     +(log.length?log.map(function(l){return '<div class="data-row"><div style="flex:1;"><div class="row-name">'+l.action+'</div><div class="row-meta">'+(l.detail||'')+'</div></div><div class="row-meta">'+l.date+'</div></div>';}).join(''):'<div class="card" style="text-align:center;padding:40px;color:var(--mu);">No activity logged yet.</div>');
 }
 
 // ── PROFILE ──
 async function renderCompanyPolicy(c){
   c.innerHTML=`
-  <div class="page-hdr"><div class="page-hdr-title">Company Policy</div><div class="page-hdr-sub">RichNation Global Ltd — Staff Terms &amp; Conditions — Effective 2026</div></div>
+  <div class="page-hdr"><div class="page-hdr-title">Company Policy</div><div class="page-hdr-sub">RichNation Global Ltd, Staff Terms &amp; Conditions, Effective 2026</div></div>
   ${!staff.policyRead?`<div class="card" style="border-color:rgba(255,140,0,0.4);background:rgba(255,140,0,0.06);"><div style="font-size:13px;color:var(--or);font-weight:700;">Please read this in full, then confirm below.</div></div>`:''}
   <div class="card"><div class="card-title">Who We Are</div><div style="font-size:12px;color:var(--w2);line-height:1.8;margin-top:8px;">RichNation Global Ltd (RC 8998019) is a digital media, education, and growth company founded by Ubong Rich, operating six divisions: RichNation Academy, RichNation Music, RichNation Animation, RichNation Podcast (WBPT), RichNation Stories, and RichNation Mall. Our mission: <strong style="color:var(--wh);">Build People. Build Platforms. Create Millionaires.</strong></div></div>
   ${[
     ['1. Core Hours','You must be reachable during your assigned working hours, set by management and shown on your dashboard. Unavailability without prior notice is a strike-eligible offence.'],
     ['2. Weekly Reports','A work report is due every Friday by 8:00 PM. No report, no notice = strike. This is not negotiable case-by-case.'],
-    ['3. Deadlines','Deadlines are binding. Extensions require written management approval at least 48 hours in advance — not a last-minute message.'],
+    ['3. Deadlines','Deadlines are binding. Extensions require written management approval at least 48 hours in advance, not a last-minute message.'],
     ['4. Absence','2+ consecutive working days absent without notice is strike-eligible. Medical emergencies require documentation submitted as soon as reasonably possible.'],
-    ['5. Confidentiality','Sharing company data, customer information, product/pricing details, or internal discussions outside the company — with anyone, for any reason — is grounds for immediate suspension, no strikes needed.'],
-    ['6. Customer Data Protection','You may only access customer information relevant to your role and current task. Browsing customer records out of curiosity, sharing a customer\'s order/address/payment info with anyone outside the company, or using customer data for personal reasons is treated the same as a confidentiality breach — immediate suspension.'],
-    ['7. Financial Integrity','Any manipulation of prices, discounts, refunds, wallet balances, or payouts — for yourself, a friend, or anyone — outside your authorized role is treated as fraud and results in immediate termination and may be reported to authorities.'],
+    ['5. Confidentiality','Sharing company data, customer information, product/pricing details, or internal discussions outside the company, with anyone, for any reason, is grounds for immediate suspension, no strikes needed.'],
+    ['6. Customer Data Protection','You may only access customer information relevant to your role and current task. Browsing customer records out of curiosity, sharing a customer\'s order/address/payment info with anyone outside the company, or using customer data for personal reasons is treated the same as a confidentiality breach, immediate suspension.'],
+    ['7. Financial Integrity','Any manipulation of prices, discounts, refunds, wallet balances, or payouts, for yourself, a friend, or anyone, outside your authorized role is treated as fraud and results in immediate termination and may be reported to authorities.'],
     ['8. Order & Inventory Accuracy','Product listings, stock counts, and order statuses must be accurate and truthful at all times. Deliberately falsifying any of these to hit a target or avoid a conversation with a customer is a strike-eligible offence.'],
     ['9. Salary & Earnings','Compensation is reviewed monthly by management and is not open to individual negotiation outside that review. All payments go to registered, verified bank accounts only.'],
     ['10. Bank Account Details','You must submit accurate bank details through your dashboard. Management is not liable for failed or misdirected transfers caused by incorrect information you supplied. Unverified accounts do not get paid.'],
     ['11. Strikes, Suspension &amp; Termination','3 confirmed strikes = automatic suspension, pending full review by the General Manager. Suspended staff are not paid until reinstatement is confirmed. Violations after reinstatement = permanent termination. No second reinstatement.'],
     ['12. Management Authority','Management (Admin/CEO) retains full authority to review, edit, or override any staff record, task, or entry on this platform at any time. This is absolute and not open to dispute.'],
     ['13. Conduct','You represent RichNation in every interaction. Disrespect, harassment, or dishonesty toward a customer or teammate is strike-eligible and may be immediate termination depending on severity.'],
-    ['14. System Use','Your login is yours alone — never share it. Actions taken under your login are your responsibility, whether you performed them or not.']
+    ['14. System Use','Your login is yours alone, never share it. Actions taken under your login are your responsibility, whether you performed them or not.']
   ].map(function(item){return '<div class="card"><div class="card-title">'+item[0]+'</div><div style="font-size:12px;color:var(--w2);line-height:1.8;margin-top:8px;">'+item[1]+'</div></div>';}).join('')}
   <div class="card" style="text-align:center;">
     ${staff.policyRead?`<div style="color:var(--su);font-weight:700;font-size:13px;">✔ You confirmed reading this on ${staff.policyReadDate||''}</div>`:`<button class="btn btn-or btn-lg" onclick="confirmPolicyRead()">I've Read and Understood This Policy</button>`}
@@ -1163,14 +1163,14 @@ function renderProfile(c){
     </div>
     <div style="text-align:center;margin-bottom:16px;">
       <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:18px;">${staff.name}</div>
-      <div style="font-size:12px;color:var(--or);font-weight:700;margin-top:2px;">${staff.staffNumber||'—'}</div>
-      <div style="font-size:11px;color:var(--mu);margin-top:2px;">${roleObj?roleObj.label:staff.role} &middot; ${staff.department||'—'}</div>
+      <div style="font-size:12px;color:var(--or);font-weight:700;margin-top:2px;">${staff.staffNumber||'N/A'}</div>
+      <div style="font-size:11px;color:var(--mu);margin-top:2px;">${roleObj?roleObj.label:staff.role} &middot; ${staff.department||'N/A'}</div>
     </div>
-    <div class="fg"><label class="lbl">Full Name</label><div class="inp" style="color:var(--mu);">${staff.name||'—'}</div></div>
-    <div class="fg"><label class="lbl">Email</label><div class="inp" style="color:var(--mu);">${staff.email||'—'}</div></div>
-    <div class="fg"><label class="lbl">Phone</label><div class="inp" style="color:var(--mu);">${staff.phone||'—'}</div></div>
-    <div class="fg"><label class="lbl">Address</label><div class="inp" style="color:var(--mu);">${staff.address||'—'}</div></div>
-    <div class="fg"><label class="lbl">Date of Birth</label><div class="inp" style="color:var(--mu);">${staff.dob||'—'}</div></div>
+    <div class="fg"><label class="lbl">Full Name</label><div class="inp" style="color:var(--mu);">${staff.name||'N/A'}</div></div>
+    <div class="fg"><label class="lbl">Email</label><div class="inp" style="color:var(--mu);">${staff.email||'N/A'}</div></div>
+    <div class="fg"><label class="lbl">Phone</label><div class="inp" style="color:var(--mu);">${staff.phone||'N/A'}</div></div>
+    <div class="fg"><label class="lbl">Address</label><div class="inp" style="color:var(--mu);">${staff.address||'N/A'}</div></div>
+    <div class="fg"><label class="lbl">Date of Birth</label><div class="inp" style="color:var(--mu);">${staff.dob||'N/A'}</div></div>
     <div style="font-size:11px;color:var(--mu);margin-bottom:14px;">These details are managed by admin. To request a change, use Complaints.</div>
     <div class="fg"><label class="lbl">New Password (leave blank to keep current)</label><div style="position:relative;"><input class="inp" id="pf-pass" type="password" placeholder="New password" style="padding-right:56px;"/><span onclick="togglePwVisibility('pf-pass',this)" style="position:absolute;right:12px;top:12px;font-size:11px;color:var(--or);cursor:pointer;font-weight:700;">Show</span></div></div>
     <button class="btn btn-or btn-lg" onclick="saveMyProfile()">Save Password</button>
@@ -1226,11 +1226,11 @@ async function uploadMyPhoto(inputId){
   if(!inp.files||!inp.files[0])return;
   toast('Uploading photo…');
   let b64=await compressPhotoFile(inp.files[0]);
-  if(!b64){toast('Could not read that image — try another one','err');return;}
+  if(!b64){toast('Could not read that image, try another one','err');return;}
   const url=isGithubConfigured()?await uploadDataUrlToGithub(b64,'staff-photos'):null;
   if(url)b64=url;
   const ok=await fbUVerified('rn_mall_staff/'+staff._id,{photo:b64});
-  if(!ok){toast('Photo upload failed — check your connection and try again','err');return;}
+  if(!ok){toast('Photo upload failed, check your connection and try again','err');return;}
   staff.photo=b64;
   sessionStorage.setItem('rnm_staff_session',JSON.stringify(staff));
   toast('Photo updated!');
@@ -1257,7 +1257,7 @@ async function saveMyProfile(){
 async function renderOrders(c){
   c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Orders</div></div><div style="color:var(--mu);">Loading...</div>';
   const orders=Object.values(await fbG('rn_mall_orders')||{}).sort(function(a,b){return new Date(b.createdAt||0)-new Date(a.createdAt||0);}).slice(0,50);
-  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Orders</div><div class="page-hdr-sub">Most recent 50 orders — tap one to update its status</div></div>'
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Orders</div><div class="page-hdr-sub">Most recent 50 orders, tap one to update its status</div></div>'
     +orders.map(function(o){return '<div class="data-row" onclick="openStaffOrder(\''+o.tracking+'\')" style="cursor:pointer;"><div style="flex:1;"><div class="row-name">'+o.tracking+'</div><div class="row-meta">'+(o.customer?o.customer.name:'')+' &middot; '+o.date+' &middot; '+fmt(o.total)+'</div></div><div class="row-meta">'+(o.status||'pending')+'</div></div>';}).join('');
 }
 const STAFF_STATUSES=['pending','confirmed','packed','shipped','out for delivery','delivered','cancelled'];
@@ -1276,11 +1276,11 @@ async function openStaffOrder(tracking){
   </div>
   <div class="card">
     <div class="card-title">Delivery Address</div>
-    <div style="font-size:12px;color:var(--w2);margin-top:8px;">${o.customer?o.customer.address+', '+o.customer.city:'—'}<br>${o.customer?o.customer.phone:''}</div>
+    <div style="font-size:12px;color:var(--w2);margin-top:8px;">${o.customer?o.customer.address+', '+o.customer.city:'N/A'}<br>${o.customer?o.customer.phone:''}</div>
   </div>
   <div class="card">
     <div class="card-title">Update Status</div>
-    ${hasRider?`<div style="font-size:11px;color:var(--or);margin-bottom:10px;">🏍️ ${o.riderName} is handling delivery for this order — shipping/delivery statuses are controlled by the rider's own updates to keep the timeline in order.</div>`:''}
+    ${hasRider?`<div style="font-size:11px;color:var(--or);margin-bottom:10px;">🏍️ ${o.riderName} is handling delivery for this order, shipping/delivery statuses are controlled by the rider's own updates to keep the timeline in order.</div>`:''}
     <select class="inp" id="so-status" style="margin:10px 0;">${opts}</select>
     <button class="btn btn-or btn-lg" onclick="saveStaffOrderStatus('${tracking}')">Save Status</button>
     <button class="btn btn-lg" onclick="snav('orders')" style="margin-left:8px;">← Back</button>
@@ -1308,7 +1308,7 @@ async function renderProducts(c){
   let prodsData;
   try{prodsData=await fbG('rn_mall_products');}catch(e){prodsData=null;}
   clearTimeout(stallTimer);
-  if(timedOut)return; // the retry UI already took over — don't overwrite it with a late response
+  if(timedOut)return; // the retry UI already took over, don't overwrite it with a late response
   const prods=Object.entries(prodsData||{});
   var html='<div class="page-hdr" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;"><div><div class="page-hdr-title">Products</div><div class="page-hdr-sub">'+prods.length+' product(s)</div></div><button class="btn btn-or" onclick="openStaffProductForm(null)">+ Add Product</button></div>';
   html+=prods.map(function(e){var pid=e[0],p=e[1];return '<div class="data-row" onclick="openStaffProductForm(\''+pid+'\')" style="cursor:pointer;"><div class="chat-av">'+(p.images&&p.images[0]?'<img src="'+p.images[0]+'" style="width:100%;height:100%;object-fit:cover;border-radius:99px;"/>':ini(p.name))+'</div><div style="flex:1;"><div class="row-name">'+p.name+'</div><div class="row-meta">'+fmt(p.price)+' &middot; Stock: '+(p.stock!=null?p.stock:'∞')+' &middot; '+(p.visible!==false?'Visible':'Hidden')+'</div></div></div>';}).join('');
@@ -1363,7 +1363,7 @@ async function uploadStaffProdImages(){
   }
   const prev=document.getElementById('sp-img-preview');
   if(prev)prev.innerHTML=(window._spImages||[]).map(function(img,idx){return '<div style="position:relative;width:60px;height:60px;"><img src="'+img+'" style="width:100%;height:100%;object-fit:cover;border-radius:6px;"/><span onclick="removeStaffProdImg('+idx+')" style="position:absolute;top:-6px;right:-6px;background:var(--re);color:#fff;border-radius:99px;width:18px;height:18px;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;">×</span></div>';}).join('');
-  toast('Images ready — click Save to confirm');
+  toast('Images ready, click Save to confirm');
 }
 async function saveStaffProduct(id){
   const name=(document.getElementById('sp-name').value||'').trim();
@@ -1399,7 +1399,7 @@ async function deleteStaffProduct(id){
   if(!confirm('Delete this product? This cannot be undone.'))return;
   const p=await fbG('rn_mall_products/'+id);
   const r=await fbFetchTimeout(FB+'/rn_mall_products/'+id+'.json',{method:'DELETE'},8000);
-  if(!r||!r.ok){toast('Delete failed — try again','err');return;}
+  if(!r||!r.ok){toast('Delete failed, try again','err');return;}
   await fbU('rn_mall_settings',{lastCatalogUpdate:Date.now()});
   await logStaffActivity('Deleted product',p?p.name:id);
   toast('Product deleted');
@@ -1502,7 +1502,7 @@ async function renderWalletIssuesView(c){
     }else if(iss.status==='processing'){
       actions='<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="staffMarkIssuePaid(\''+iss._id+'\')">Mark as Paid</button>';
     }
-    return '<div class="data-row"><div style="flex:1;"><div class="row-name">'+iss.customerName+' — '+iss.type+(iss.amount?' — '+fmt(iss.amount):'')+'</div><div class="row-meta">'+iss.message+'</div><div class="row-meta">'+iss.status+'</div></div>'+actions+'</div>';
+    return '<div class="data-row"><div style="flex:1;"><div class="row-name">'+iss.customerName+', '+iss.type+(iss.amount?', '+fmt(iss.amount):'')+'</div><div class="row-meta">'+iss.message+'</div><div class="row-meta">'+iss.status+'</div></div>'+actions+'</div>';
   }).join('');
 }
 async function staffApproveIssue(id){
@@ -1530,15 +1530,15 @@ function notifMsg(n){
   if(n.type==='role_community')return n.from+' posted in your team channel: "'+n.preview+'"';
   if(n.type==='salary_paid')return fmt(n.amount)+' salary payment sent'+(n.description?' ('+n.description+')':'')+'. '+(n.message||'');
   if(n.type==='salary_set')return 'Your monthly salary was set to '+fmt(n.amount);
-  if(n.type==='points_awarded')return 'You earned '+n.amount+' StaffPoints — '+(n.reason||'');
+  if(n.type==='points_awarded')return 'You earned '+n.amount+' StaffPoints, '+(n.reason||'');
   if(n.type==='hours_set')return 'Your working hours were set to: '+n.hours;
   if(n.type==='strike')return n.strikes>=3?'You have been automatically suspended after 3 strikes, pending review. Last strike: '+n.reason:'You received a strike ('+n.strikes+'/3): '+n.reason;
   if(n.type==='bank_verified')return 'Your bank account details have been verified by admin.';
   if(n.type==='withdrawal_paid')return 'Your withdrawal of '+fmt(n.amount)+' has been paid.';
   if(n.type==='withdrawal_declined')return 'Your withdrawal request for '+fmt(n.amount)+' was declined.';
-  if(n.type==='submission_approved')return '"'+n.title+'" was approved'+(n.note?' — '+n.note:'')+'.';
-  if(n.type==='submission_rejected')return '"'+n.title+'" needs changes — '+(n.note||'see feedback in My Submissions')+'.';
-  if(n.type==='task_assigned')return 'New task assigned: '+n.description+(n.dueDate?' — due '+n.dueDate:'')+'.';
+  if(n.type==='submission_approved')return '"'+n.title+'" was approved'+(n.note?', '+n.note:'')+'.';
+  if(n.type==='submission_rejected')return '"'+n.title+'" needs changes, '+(n.note||'see feedback in My Submissions')+'.';
+  if(n.type==='task_assigned')return 'New task assigned: '+n.description+(n.dueDate?', due '+n.dueDate:'')+'.';
   if(n.type==='task_approved')return 'Your task completion was approved.';
   return n.preview||'New notification';
 }

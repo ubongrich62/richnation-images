@@ -7,7 +7,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
 <meta name="theme-color" content="#FF4747">
-<title>RichNation Mall — Shop Smart. Shop RichNation.</title>
+<title>RichNation Mall, Shop Smart. Shop RichNation.</title>
 <meta name="description" content="Nigeria's trusted online mall. Affordable prices, 7-day returns, secure payment, nationwide delivery.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23FF6A00'/%3E%3Ctext x='50' y='68' font-size='55' font-family='Arial,sans-serif' font-weight='900' fill='white' text-anchor='middle'%3ER%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,12 +15,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  /* structural */
-  --ink:#0B0B0C;--bg:#FFFFFF;--card:#FFFFFF;--card2:#F4F4F3;--bdr:#E4E4E1;
+  /* structural, ink2 gives dark surfaces a slight warm depth instead of flat black */
+  --ink:#0B0B0C;--ink2:#1A1410;--bg:#FFFFFF;--card:#FFFFFF;--card2:#F4F4F3;--bdr:#E4E4E1;
   /* brand accent */
-  --or:#FF6A00;--or-dk:#E15E00;--gold:#B8720A;
-  /* text — legacy names kept (--wh/--w2/--mu) so existing inline JS styles re-theme for free */
-  --wh:#15151A;--w2:#48484E;--mu:#6B6B71;
+  --or:#FF6A00;--or-dk:#E15E00;--gold:#B8720A;--amber:#FFB05A;
+  /* text, legacy names kept (--wh/--w2/--mu) so existing inline JS styles re-theme for free */
+  --wh:#15151A;--w2:#48484E;--mu:#83838A;
   /* status */
   --su:#15803D;--re:#DC2626;--bl:#2054C7;
   /* system */
@@ -29,13 +29,15 @@
   --sh-md:0 8px 24px rgba(15,15,20,.10);
   --sh-lg:0 24px 64px rgba(15,15,20,.16);
   --container:1360px;
+  --ease:cubic-bezier(.22,.9,.32,1);
 }
 *{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
 html,body{background:var(--bg);color:var(--wh);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100%;overflow-x:hidden;}
 h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .container{max-width:var(--container);margin:0 auto;}
 /* TOPBAR */
-.topbar{background:var(--ink);border-bottom:1px solid #000;position:sticky;top:0;z-index:100;box-shadow:var(--sh-sm);}
+.topbar{background:linear-gradient(165deg,var(--ink),var(--ink2) 130%);border-bottom:1px solid #000;position:sticky;top:0;z-index:100;box-shadow:var(--sh-sm);}
 .tb-top{display:flex;align-items:center;height:64px;max-width:var(--container);margin:0 auto;padding:0 20px;gap:14px;}
 .tb-logo{height:38px;max-width:150px;object-fit:contain;cursor:pointer;flex-shrink:0;}
 .tb-search{flex:1;max-width:520px;display:flex;gap:0;background:#fff;border-radius:var(--r-sm);overflow:hidden;}
@@ -67,13 +69,15 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .cat-nav-item{padding:11px 14px;font-size:12.5px;font-weight:600;color:var(--w2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;transition:color .15s,border-color .15s;}
 .cat-nav-item:hover,.cat-nav-item.active{color:var(--or);border-bottom-color:var(--or);}
 /* HERO */
-.hero{background:var(--ink);padding:64px 24px 48px;position:relative;overflow:hidden;}
+.hero{background:linear-gradient(160deg,var(--ink),var(--ink2) 150%);padding:64px 24px 48px;position:relative;overflow:hidden;}
 .hero::after{content:'';position:absolute;right:-8%;top:-30%;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(255,106,0,.16),transparent 68%);pointer-events:none;}
 .hero-inner{max-width:var(--container);margin:0 auto;position:relative;text-align:left;}
 .hero-eyebrow{font-size:11px;font-weight:700;letter-spacing:3px;color:var(--or);text-transform:uppercase;margin-bottom:16px;}
 .hero-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:44px;line-height:1.12;margin-bottom:16px;color:#fff;max-width:640px;}
 .hero-sub{font-size:15px;color:rgba(255,255,255,.72);max-width:480px;margin:0 0 30px;line-height:1.7;}
 .hero-btns{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:40px;}
+.hero-btn,.add-cart-btn,.cart-checkout-btn,.auth-btn,.place-btn,.prod-add-btn,.modal-btn,.vendor-cta-btn,.newsletter-form button,.buy-now-btn{transition:background .15s,border-color .15s,color .15s,transform .1s ease;}
+.hero-btn:active,.add-cart-btn:active,.cart-checkout-btn:active,.auth-btn:active,.place-btn:active,.prod-add-btn:active,.modal-btn:active,.vendor-cta-btn:active,.newsletter-form button:active,.buy-now-btn:active{transform:scale(.97);}
 .hero-btn{padding:14px 26px;border-radius:var(--r-md);font-weight:800;font-size:14px;cursor:pointer;border:none;transition:background .15s,border-color .15s,color .15s;}
 .hero-btn-or{background:var(--or);color:#fff;}
 .hero-btn-or:hover{background:var(--or-dk);}
@@ -97,14 +101,17 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .view-all-btn:hover{text-decoration:underline;}
 /* CATEGORIES */
 .cats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;}
-.cat-card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);padding:16px 10px;text-align:center;cursor:pointer;transition:box-shadow .15s,border-color .15s,transform .15s;}
+.cat-card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);padding:16px 10px;text-align:center;cursor:pointer;transition:box-shadow .15s,border-color .15s,transform .15s;animation:fadeInUp .35s var(--ease) both;}
+.cat-card:active{transform:scale(.96);}
 .cat-card:hover{border-color:var(--wh);box-shadow:var(--sh-sm);transform:translateY(-1px);}
 .cat-ico{font-size:22px;margin-bottom:8px;}
 .cat-name{font-size:12px;font-weight:700;color:var(--wh);}
 .cat-count{font-size:10.5px;color:var(--mu);margin-top:2px;}
 /* PRODUCTS */
 .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;}
-.prod-card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);overflow:hidden;cursor:pointer;transition:box-shadow .15s,transform .15s,border-color .15s;}
+.prod-card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);overflow:hidden;cursor:pointer;transition:box-shadow .15s,transform .15s,border-color .15s;animation:fadeInUp .35s var(--ease) both;}
+.prod-card:active{transform:scale(.98);}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 .prod-card:hover{border-color:rgba(21,21,26,.35);box-shadow:var(--sh-md);transform:translateY(-2px);}
 .prod-card.prod-disabled{opacity:.55;cursor:default;}
 .prod-img-wrap{position:relative;aspect-ratio:1;max-height:280px;overflow:hidden;background:var(--card2);}
@@ -142,7 +149,8 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 /* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(11,11,12,0.7);z-index:500;display:none;align-items:center;justify-content:center;padding:16px;}
 .modal-overlay.open{display:flex;}
-.modal{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-lg);width:100%;max-width:900px;max-height:92vh;overflow-y:auto;box-shadow:var(--sh-lg);}
+.modal{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-lg);width:100%;max-width:900px;max-height:92vh;overflow-y:auto;box-shadow:var(--sh-lg);animation:modalIn .22s var(--ease);}
+@keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(10px);}to{opacity:1;transform:scale(1) translateY(0);}}
 .modal-grid{display:grid;grid-template-columns:1fr 1fr;}
 .modal-imgs{border-radius:var(--r-lg) 0 0 var(--r-lg);overflow:hidden;background:var(--card2);padding:16px 16px 0;}
 .modal-info{padding:26px;overflow-y:auto;}
@@ -309,7 +317,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .widget-inp{flex:1;background:#fff;border:1px solid var(--bdr);border-radius:var(--r-sm);padding:8px 10px;color:var(--wh);font-size:12px;outline:none;}
 .send-btn{background:var(--or);border:none;border-radius:var(--r-sm);width:34px;cursor:pointer;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;}
 /* FOOTER */
-.footer{background:var(--ink);padding:48px 20px 20px;margin-top:48px;}
+.footer{background:linear-gradient(175deg,var(--ink),var(--ink2) 140%);padding:48px 20px 20px;margin-top:48px;}
 .footer-grid{max-width:var(--container);margin:0 auto;display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr;gap:28px;margin-bottom:32px;}
 .footer-brand{font-size:12.5px;color:rgba(255,255,255,.55);line-height:1.9;}
 .footer-col-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:13px;margin-bottom:14px;color:#fff;}
@@ -321,13 +329,13 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .newsletter-inner{max-width:640px;margin:0 auto;text-align:center;}
 .newsletter-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px;color:var(--wh);margin-bottom:8px;}
 .newsletter-sub{font-size:13px;color:var(--w2);margin-bottom:20px;}
-.newsletter-form{display:flex;gap:10px;max-width:420px;margin:0 auto;}
-.newsletter-form input{flex:1;background:#fff;border:1.5px solid var(--bdr);border-radius:var(--r-sm);padding:12px 14px;font-size:13px;color:var(--wh);outline:none;}
+.newsletter-form{display:flex;flex-wrap:wrap;gap:10px;max-width:520px;margin:0 auto;}
+.newsletter-form input{flex:1 1 160px;min-width:0;background:#fff;border:1.5px solid var(--bdr);border-radius:var(--r-sm);padding:12px 14px;font-size:13px;color:var(--wh);outline:none;}
 .newsletter-form input:focus{border-color:var(--or);}
 .newsletter-form button{background:var(--ink);color:#fff;border:none;border-radius:var(--r-sm);padding:12px 22px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap;}
 .newsletter-form button:hover{background:var(--or);}
 /* VENDOR / SELL WITH US */
-.vendor-cta{background:linear-gradient(100deg,#141416,var(--ink) 55%);border-radius:var(--r-lg);padding:36px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;position:relative;overflow:hidden;}
+.vendor-cta{background:linear-gradient(110deg,var(--ink2),var(--ink) 60%);border-radius:var(--r-lg);padding:36px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;position:relative;overflow:hidden;}
 .vendor-cta::after{content:'';position:absolute;right:-6%;bottom:-40%;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(255,106,0,.18),transparent 70%);}
 .vendor-cta-text{position:relative;max-width:520px;}
 .vendor-cta-eyebrow{font-size:11px;font-weight:700;letter-spacing:2px;color:var(--or);text-transform:uppercase;margin-bottom:10px;}
@@ -389,7 +397,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
   .hero-title{font-size:24px;}
   .footer-grid{grid-template-columns:1fr;}
 }
-/* ── PRODUCT MODAL — full styling ── */
+/* ── PRODUCT MODAL, full styling ── */
 .modal-thumbs{display:flex;gap:8px;flex-wrap:wrap;}
 .modal-thumb{width:56px;height:56px;flex-shrink:0;border-radius:7px;overflow:hidden;cursor:pointer;border:2px solid var(--bdr);background:var(--card2);}
 .modal-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
@@ -544,7 +552,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
    <div class="hero-inner">
     <div class="hero-eyebrow" id="hero-eyebrow">Delivering Across Nigeria and The World</div>
     <h1 class="hero-title"><span id="hero-t1">Shop Smart.</span><br><span id="hero-t2">Shop <span id="hero-highlight" style="color:var(--or);">RichNation.</span></span></h1>
-    <p class="hero-sub" id="hero-sub">Top quality products at affordable prices — delivered to your door with real-time tracking.</p>
+    <p class="hero-sub" id="hero-sub">Top quality products at affordable prices, delivered to your door with real-time tracking.</p>
     <div class="hero-btns">
       <button class="hero-btn hero-btn-or" id="hero-btn1" onclick="scrollToProds()">Shop Now</button>
       <button class="hero-btn hero-btn-dk" id="hero-btn2" onclick="showPage('track')">Track My Order</button>
@@ -619,7 +627,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
       <div class="vendor-cta-text">
         <div class="vendor-cta-eyebrow">RichNation Marketplace</div>
         <div class="vendor-cta-title">Sell on RichNation Mall</div>
-        <div class="vendor-cta-sub">Join verified vendors reaching shoppers nationwide. List products, manage orders and get paid — all from one dashboard.</div>
+        <div class="vendor-cta-sub">Join verified vendors reaching shoppers nationwide. List products, manage orders and get paid, all from one dashboard.</div>
       </div>
       <button class="vendor-cta-btn" onclick="window.open('vendor.html','_blank')">Become a Vendor →</button>
     </div>
@@ -628,12 +636,12 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
   <div class="sec-wrap" style="padding-bottom:28px;">
     <div class="sec-hdr2"><div class="sec-title">Why Choose RichNation?</div></div>
     <div class="why-grid">
-      <div class="why-card"><div class="why-icon" id="e-why-price">💰</div><div class="why-title">Affordable Prices</div><div class="why-desc">Real prices with no hidden charges. We sell affordable — always.</div></div>
+      <div class="why-card"><div class="why-icon" id="e-why-price">💰</div><div class="why-title">Affordable Prices</div><div class="why-desc">Real prices with no hidden charges. We sell affordable, always.</div></div>
       <div class="why-card"><div class="why-icon" id="e-why-range">📦</div><div class="why-title">Wide Range</div><div class="why-desc">Thousands of verified products across every category.</div></div>
-      <div class="why-card"><div class="why-icon" id="e-why-security">🔒</div><div class="why-title">100% Secure</div><div class="why-desc">All payments powered by Paystack — CBN-licensed and PCI-DSS certified.</div></div>
+      <div class="why-card"><div class="why-icon" id="e-why-security">🔒</div><div class="why-title">100% Secure</div><div class="why-desc">All payments powered by Paystack, CBN-licensed and PCI-DSS certified.</div></div>
       <div class="why-card"><div class="why-icon" id="e-why-verified">✅</div><div class="why-title">Verified Products</div><div class="why-desc">Every product is quality-checked before we list it.</div></div>
       <div class="why-card"><div class="why-icon" id="e-why-fast">🚀</div><div class="why-title">Fast Delivery</div><div class="why-desc">Same-day dispatch in Lagos. Nationwide within 1–5 days.</div></div>
-      <div class="why-card"><div class="why-icon" id="e-why-support">💬</div><div class="why-title">Real Support</div><div class="why-desc">Real people on WhatsApp and live chat — not just bots.</div></div>
+      <div class="why-card"><div class="why-icon" id="e-why-support">💬</div><div class="why-title">Real Support</div><div class="why-desc">Real people on WhatsApp and live chat, not just bots.</div></div>
     </div>
   </div>
 
@@ -641,7 +649,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
     <div class="sec-hdr2"><div class="sec-title">Our Guarantees</div></div>
     <div class="guarantee-grid">
       <div class="guarantee-card"><div class="guarantee-icon" id="e-gu-order">✅</div><div class="guarantee-title">Order Protection</div><div class="guarantee-desc">Every order is protected from payment to delivery.</div></div>
-      <div class="guarantee-card"><div class="guarantee-icon" id="e-gu-delivery">🚚</div><div class="guarantee-title">Delivery Guarantee</div><div class="guarantee-desc">Lost in transit? We resend or fully refund — no hassle.</div></div>
+      <div class="guarantee-card"><div class="guarantee-icon" id="e-gu-delivery">🚚</div><div class="guarantee-title">Delivery Guarantee</div><div class="guarantee-desc">Lost in transit? We resend or fully refund, no hassle.</div></div>
       <div class="guarantee-card"><div class="guarantee-icon" id="e-gu-returns">↩️</div><div class="guarantee-title">7-Day Returns</div><div class="guarantee-desc">Return within 7 days of delivery. Quick and easy.</div></div>
       <div class="guarantee-card"><div class="guarantee-icon" id="e-gu-price">💲</div><div class="guarantee-title">Affordable Always</div><div class="guarantee-desc">We keep prices low so everyone can shop with us.</div></div>
       <div class="guarantee-card"><div class="guarantee-icon" id="e-gu-payment">🔐</div><div class="guarantee-title">Secure Payments</div><div class="guarantee-desc">Bank-level encryption on every single transaction.</div></div>
@@ -652,9 +660,10 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
   <div class="newsletter">
     <div class="newsletter-inner">
       <div class="newsletter-title">Stay in the loop</div>
-      <div class="newsletter-sub">New arrivals, restocks and offers — straight to your inbox. No spam.</div>
+      <div class="newsletter-sub">New arrivals, restocks and offers, straight to your inbox. No spam.</div>
       <form class="newsletter-form" onsubmit="event.preventDefault();subscribeNewsletter(this)">
-        <input type="email" placeholder="Enter your email address" required>
+        <input type="text" name="name" placeholder="Your name" required>
+        <input type="email" name="email" placeholder="Your email address" required>
         <button type="submit">Subscribe</button>
       </form>
     </div>
@@ -803,7 +812,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 
 
 const FB='https://richnation-portal-default-rtdb.firebaseio.com';
-// App Check — verifies requests come from this real app, not a bot or a copy.
+// App Check, verifies requests come from this real app, not a bot or a copy.
 // Deliberately fails safe: if init fails or the token can't be fetched, requests
 // just go out without the header, same as before this was added. Nothing breaks
 // this from working exactly as it did previously, even before enforcement is
@@ -811,7 +820,7 @@ const FB='https://richnation-portal-default-rtdb.firebaseio.com';
 const FIREBASE_CONFIG={apiKey:"AIzaSyDLGnyGB8ZnEc2u6TbVzjIAQi1pgSaZVyQ",authDomain:"richnation-portal.firebaseapp.com",databaseURL:"https://richnation-portal-default-rtdb.firebaseio.com",projectId:"richnation-portal",storageBucket:"richnation-portal.firebasestorage.app",messagingSenderId:"175550692963",appId:"1:175550692963:web:1e3c995b3ed0baaadac256"};
 const RECAPTCHA_SITE_KEY='6Ld2O5EtAAAAAN6fXMnn7kn5a6SWvDpJs97kckGC';
 let appCheckToken=null;
-// App Check isn't enforced yet, so it adds nothing functional right now — loaded only
+// App Check isn't enforced yet, so it adds nothing functional right now, loaded only
 // after the page is fully done loading, so it costs the page nothing while unused.
 function loadAppCheckWhenIdle(){
   function loadScript(src){
@@ -831,7 +840,7 @@ function loadAppCheckWhenIdle(){
         appCheckInstance.getToken().then(function(r){appCheckToken=r.token;}).catch(function(e){console.warn('App Check token fetch failed:',e.message);});
         appCheckInstance.onTokenChanged(function(r){appCheckToken=r.token;});
       }catch(e){
-        console.warn('App Check init failed — requests will proceed without a token:',e.message);
+        console.warn('App Check init failed, requests will proceed without a token:',e.message);
       }
     });
 }
@@ -903,11 +912,27 @@ function toast(m,type='ok'){
   el.style.borderLeftColor=type==='err'?'#f43f5e':type==='warn'?'#FFA733':'#22c55e';
   el.style.display='block';void el.offsetWidth;setTimeout(()=>el.style.display='none',3200);
 }
-function subscribeNewsletter(form){
-  const email=form.querySelector('input[type="email"]').value.trim();
-  if(!email)return;
-  toast('Subscribed! Watch your inbox for offers.');
-  form.reset();
+async function subscribeNewsletter(form){
+  const name=form.querySelector('input[name="name"]').value.trim();
+  const email=form.querySelector('input[name="email"]').value.trim();
+  if(!name||!email)return;
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){toast('Please enter a valid email address','err');return;}
+  const already=JSON.parse(localStorage.getItem('rnm_newsletter_subs')||'[]');
+  if(already.includes(email.toLowerCase())){toast('You\'re already subscribed with this email!');form.reset();return;}
+  const btn=form.querySelector('button');
+  const origLabel=btn.textContent;
+  btn.disabled=true;btn.textContent='Subscribing…';
+  try{
+    await fbP('rn_mall_newsletter_subscribers',{name,email,date:ds(),ts:Date.now()});
+    already.push(email.toLowerCase());
+    localStorage.setItem('rnm_newsletter_subs',JSON.stringify(already));
+    toast('Subscribed! Watch your inbox for offers.');
+    form.reset();
+  }catch(e){
+    toast('Something went wrong, please try again','err');
+  }finally{
+    btn.disabled=false;btn.textContent=origLabel;
+  }
 }
 function trackRecentlyViewed(id){
   let viewed=JSON.parse(localStorage.getItem('rnm_recently_viewed')||'[]');
@@ -958,13 +983,13 @@ function showRefundPolicy(){
     </div>
     <div style="font-size:13px;font-weight:800;color:var(--wh);margin-bottom:8px;">2. When a bank refund is not available</div>
     <div style="font-size:12px;color:var(--w2);line-height:1.9;margin-bottom:16px;">
-      If money is already sitting in your Wallet from any other source — a previous refund already processed to Wallet, RichPoints converted to cash, or general top-ups — that balance can only be refunded back to your Wallet, not paid out to a bank account.
+      If money is already sitting in your Wallet from any other source, a previous refund already processed to Wallet, RichPoints converted to cash, or general top-ups, that balance can only be refunded back to your Wallet, not paid out to a bank account.
     </div>
     <div style="font-size:13px;font-weight:800;color:var(--wh);margin-bottom:8px;">3. How to request it</div>
     <div style="font-size:12px;color:var(--w2);line-height:1.9;margin-bottom:16px;">
       • Go to your Wallet → "Report an Issue" and explain your situation<br>
       • Our team reviews your request and approves or declines it<br>
-      • Once approved, you'll enter your bank details — the account name must match your RichNation Mall profile name, or we can't pay out to that account (you get one retry)
+      • Once approved, you'll enter your bank details, the account name must match your RichNation Mall profile name, or we can't pay out to that account (you get one retry)
     </div>
     <div style="font-size:13px;font-weight:800;color:var(--wh);margin-bottom:8px;">4. Timing</div>
     <div style="font-size:12px;color:var(--w2);line-height:1.9;">
@@ -975,14 +1000,14 @@ function showRefundPolicy(){
 function showWalletInfo(){
   showInfoModal(iconBadge('wallet',18)+' How the Wallet Works',`
     <div style="font-size:12px;color:var(--w2);line-height:1.9;">
-      Your RichNation Wallet is a safe place to keep money for faster shopping — no card, no OTP, no waiting.<br><br>
+      Your RichNation Wallet is a safe place to keep money for faster shopping, no card, no OTP, no waiting.<br><br>
       <strong style="color:var(--wh);">Adding Money</strong><br>
-      • <strong>Card Top-Up</strong> — instant. Enter an amount and pay securely with your card; your balance updates right away.<br>
-      • <strong>Bank Transfer Top-Up</strong> — make a transfer, then submit the amount and your transfer reference below. Our team confirms your transfer and credits your wallet, usually within a few hours.<br><br>
+      • <strong>Card Top-Up</strong>, instant. Enter an amount and pay securely with your card; your balance updates right away.<br>
+      • <strong>Bank Transfer Top-Up</strong>, make a transfer, then submit the amount and your transfer reference below. Our team confirms your transfer and credits your wallet, usually within a few hours.<br><br>
       <strong style="color:var(--wh);">Paying with Your Wallet</strong><br>
-      At checkout, choose "Pay with Wallet" if your balance covers the order. Payment is instant — no card, no OTP, no delays.<br><br>
+      At checkout, choose "Pay with Wallet" if your balance covers the order. Payment is instant, no card, no OTP, no delays.<br><br>
       <strong style="color:var(--wh);">Refunds</strong><br>
-      If an order is cancelled, your refund can be sent straight to your wallet instead of a bank refund — faster, and ready to use on your next order right away.<br><br>
+      If an order is cancelled, your refund can be sent straight to your wallet instead of a bank refund, faster, and ready to use on your next order right away.<br><br>
       <strong style="color:var(--wh);">Your money, your history</strong><br>
       Every top-up, purchase, and refund shows up in your Transaction History below, so you always know where your balance stands.
     </div>
@@ -1001,8 +1026,8 @@ function showRichPointsInfo(){
     </div>
     <div style="font-size:13px;font-weight:800;color:var(--wh);margin-bottom:8px;">How to Redeem RichPoints</div>
     <div style="font-size:13px;color:var(--w2);line-height:2.1;">
-      • Discount on any future order — redeem at checkout<br>
-      • Free shipping on selected orders — redeem at checkout<br>
+      • Discount on any future order, redeem at checkout<br>
+      • Free shipping on selected orders, redeem at checkout<br>
       • Redeem for selected free products <span style="color:var(--mu);">(coming soon)</span><br>
       • Entry into monthly loyalty prize draws <span style="color:var(--mu);">(coming soon)</span><br>
       • Exclusive access to member-only flash sales <span style="color:var(--mu);">(coming soon)</span><br>
@@ -1051,7 +1076,7 @@ function closeInfoModal(){const el=document.getElementById('info-modal-overlay')
 function getSiteBaseUrl(){
   if(settings.siteUrl)return settings.siteUrl.replace(/\/$/,'')+'/';
   if(location.protocol&&location.protocol.startsWith('http'))return location.origin+location.pathname;
-  return null; // no reliable URL available — caller should handle this gracefully
+  return null; // no reliable URL available, caller should handle this gracefully
 }
 function fmt(n){const num=parseFloat(n)||0;if(currency==='USD')return '$'+(num/exchangeRate).toFixed(2);if(currency==='EUR')return '€'+((num/exchangeRate)*0.92).toFixed(2);if(currency==='GBP')return '£'+((num/exchangeRate)*0.79).toFixed(2);return '₦'+parseInt(num).toLocaleString();}
 
@@ -1166,24 +1191,24 @@ async function requestBankTransferTopUp(){
 function renderWalletIssueRow(iss){
   const statusMap={
     pending:{label:'Under Review',color:'var(--or)'},
-    approved_awaiting_bank:{label:'Approved — Enter Bank Details',color:'var(--su)'},
+    approved_awaiting_bank:{label:'Approved, Enter Bank Details',color:'var(--su)'},
     processing:{label:'Processing (up to 7 working days)',color:'var(--bl)'},
     paid:{label:'Paid to Bank Account',color:'var(--su)'},
     declined:{label:'Declined',color:'var(--re)'},
-    declined_mismatch:{label:'Name Mismatch — Stays in Wallet',color:'var(--re)'},
+    declined_mismatch:{label:'Name Mismatch, Stays in Wallet',color:'var(--re)'},
     resolved:{label:'Resolved',color:'var(--su)'}
   };
   const st=statusMap[iss.status]||{label:iss.status,color:'var(--mu)'};
   const typeLabel=iss.type==='refund'?'Refund Request':iss.type==='wrong_topup'?'Wrong Top-Up':'General Issue';
   return `<div style="padding:10px 0;border-top:1px solid var(--bdr);">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
-      <div style="font-size:12px;font-weight:700;color:var(--wh);">${typeLabel}${iss.amount?' — '+fmt(iss.amount):''}</div>
+      <div style="font-size:12px;font-weight:700;color:var(--wh);">${typeLabel}${iss.amount?', '+fmt(iss.amount):''}</div>
       <div style="font-size:10px;font-weight:800;color:${st.color};">${st.label}</div>
     </div>
     <div style="font-size:11px;color:var(--mu);margin-top:3px;">${iss.message}</div>
     ${iss.adminReply?`<div style="font-size:11px;color:var(--w2);margin-top:4px;background:var(--card2);padding:6px 8px;border-radius:6px;">Reply: ${iss.adminReply}</div>`:''}
     ${iss.status==='approved_awaiting_bank'?`<button onclick="showBankDetailsForm('${iss._id}')" style="margin-top:6px;font-size:11px;font-weight:700;padding:6px 12px;border-radius:6px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--su);cursor:pointer;">Enter Bank Details</button>`:''}
-    ${iss.status==='processing'||iss.status==='paid'?`<div style="font-size:11px;color:var(--mu);margin-top:4px;">Sending to: ${iss.bankAcctName} — ${iss.bankName} (${iss.bankAcctNo})</div>`:''}
+    ${iss.status==='processing'||iss.status==='paid'?`<div style="font-size:11px;color:var(--mu);margin-top:4px;">Sending to: ${iss.bankAcctName}, ${iss.bankName} (${iss.bankAcctNo})</div>`:''}
   </div>`;
 }
 function showWalletIssueForm(){
@@ -1209,7 +1234,7 @@ async function submitWalletIssue(){
   await fbS('rn_mall_wallet_issues/'+id,{id,customerId:currUser.id,customerName:currUser.name,type,amount,message,status:'pending',date:ds(),ts:Date.now()});
   await fbP('rn_mall_notifications',{type:'wallet_issue',name:currUser.name,issueType:type,message:message.slice(0,80),date:ds(),read:false,ts:Date.now()});
   closeInfoModal();
-  toast('Report submitted — our team will review it shortly.');
+  toast('Report submitted, our team will review it shortly.');
   accTab('wallet',null);
 }
 function showBankDetailsForm(issueId){
@@ -1237,7 +1262,7 @@ async function submitRefundBankDetails(issueId){
     if(attempts>=2){
       await fbU('rn_mall_wallet_issues/'+issueId,{status:'declined_mismatch',nameMismatchAttempts:attempts});
       closeInfoModal();
-      toast('Account name still doesn\'t match after 2 tries — this refund will stay in your Wallet.','err');
+      toast('Account name still doesn\'t match after 2 tries, this refund will stay in your Wallet.','err');
       accTab('wallet',null);
       return;
     }
@@ -1334,7 +1359,7 @@ const NIGERIA_LGAS={
 'Taraba':['Jalingo','Ardo Kola','Bali','Donga','Gashaka','Gassol','Ibi','Karim Lamido','Kurmi','Lau','Sardauna','Takum','Ussa','Wukari','Yorro','Zing']
 };
 
-function onCountry(){const country=document.getElementById('co-country')?.value;const wrap=document.getElementById('co-state-wrap');const sel=document.getElementById('co-state');if(!wrap||!sel){calcDel();return;}const data=INTL_STATES[country];if(!data){wrap.style.display='none';const lw=document.getElementById('co-lga-wrap');if(lw)lw.style.display='none';calcDel();return;}sel.innerHTML='<option value="">Select State / Region</option>'+data.states.map(s=>`<option value="${s}">${s}</option>`).join('');wrap.style.display='block';const lw=document.getElementById('co-lga-wrap');if(lw)lw.style.display='none';calcDel();}
+function onCountry(){const country=document.getElementById('co-country')?.value;const wrap=document.getElementById('co-state-wrap');const sel=document.getElementById('co-state');if(!wrap||!sel){calcDel();updatePodOptionVisibility();return;}const data=INTL_STATES[country];if(!data){wrap.style.display='none';const lw=document.getElementById('co-lga-wrap');if(lw)lw.style.display='none';calcDel();updatePodOptionVisibility();return;}sel.innerHTML='<option value="">Select State / Region</option>'+data.states.map(s=>`<option value="${s}">${s}</option>`).join('');wrap.style.display='block';const lw=document.getElementById('co-lga-wrap');if(lw)lw.style.display='none';calcDel();updatePodOptionVisibility();}
 function onState(){
   const country=document.getElementById('co-country')?.value;
   const state=document.getElementById('co-state')?.value;
@@ -1344,6 +1369,28 @@ function onState(){
     lw.style.display='block';
   }else if(lw){lw.style.display='none';}
   calcDel();
+  updatePodOptionVisibility();
+}
+function checkoutGrandTotal(){
+  const sub=cartTotal();
+  const effDeliveryFee=(deliveryMethod==='pickup'||pointsShippingRedeemed)?0:(settings.freeShippingAll?0:deliveryFee);
+  const loyaltyPct=currUser?getLoyaltyTier(currUser).pct:0;const loyaltyDisc=Math.round(sub*loyaltyPct/100);
+  const bundleDisc=window._bundleDiscount||0;const promoPct=activePromo?activePromo.discountPct:0;const promoDisc=Math.round(sub*promoPct/100);
+  const disc=(discount.amount||0)+pointsDiscount+loyaltyDisc+bundleDisc+promoDisc;
+  return Math.max(0,sub+effDeliveryFee-disc);
+}
+function updatePodOptionVisibility(){
+  const opt=document.getElementById('pay-pod');if(!opt)return;
+  const country=document.getElementById('co-country')?.value;
+  const state=document.getElementById('co-state')?.value;
+  const eligible=podEligibleForCart(country,state);
+  opt.style.display=eligible?'':'none';
+  if(eligible){
+    const sub=document.getElementById('pay-pod-sub');
+    const half=Math.round(checkoutGrandTotal()/2);
+    if(sub)sub.textContent='Pay '+fmt(half)+' now to confirm, our rider collects the remaining '+fmt(half)+' (cash or transfer) when your order arrives.';
+  }
+  if(!eligible&&payMethod==='pod')setPayMethod('card');
 }
 
 const NG_FEES={lagos:1500,'fct abuja':1500,rivers:1500,akwa_ibom:2000,anambra:2500,enugu:2500,imo:2500,oyo:2000,ogun:2000,kano:3000,kaduna:3000,katsina:3500,borno:4000,delta:2000,edo:2000,cross_river:2500,bayelsa:2500,abia:2500,ebonyi:2500,ekiti:2500,ondo:2500,osun:2500,kwara:3000,kogi:3000,benue:3000,plateau:3000,nasarawa:3000,niger:3000,kebbi:3500,sokoto:3500,zamfara:3500,jigawa:3500,bauchi:3500,gombe:3500,yobe:4000,adamawa:4000,taraba:4000};
@@ -1360,10 +1407,10 @@ function calcDel(){
   if(country==='NG'&&stateRaw){
     const key='ng_'+state;
     deliveryFee=custom[key]||NG_FEES[stateRaw.toLowerCase()]||NG_FEES[state]||2500;
-    if(info){info.style.display='block';info.innerHTML='📍 Delivery to <strong>'+(lga?lga+', ':'')+stateRaw+'</strong> — estimated shipping fee: <strong>₦'+deliveryFee.toLocaleString()+'</strong>'+(lga?'':'<br><span style="color:var(--mu);">Tip: select your Local Government Area above for more accurate delivery estimates.</span>');}
+    if(info){info.style.display='block';info.innerHTML='📍 Delivery to <strong>'+(lga?lga+', ':'')+stateRaw+'</strong>, estimated shipping fee: <strong>₦'+deliveryFee.toLocaleString()+'</strong>'+(lga?'':'<br><span style="color:var(--mu);">Tip: select your Local Government Area above for more accurate delivery estimates.</span>');}
   }else if(country&&country!=='NG'){
     deliveryFee=custom['intl_'+country]||INTL_FEES[country]||35000;
-    if(info){info.style.display='block';info.innerHTML='📍 International delivery to <strong>'+(stateRaw||country)+'</strong> — estimated shipping fee: <strong>₦'+deliveryFee.toLocaleString()+'</strong>';}
+    if(info){info.style.display='block';info.innerHTML='📍 International delivery to <strong>'+(stateRaw||country)+'</strong>, estimated shipping fee: <strong>₦'+deliveryFee.toLocaleString()+'</strong>';}
   }else{
     deliveryFee=0;
     if(info)info.style.display='none';
@@ -1421,7 +1468,7 @@ async function init(){
   exchangeRate=settings.exchangeRate||1600;
   if(settings.paystackKey)PAYSTACK_KEY=settings.paystackKey;
   if(settings.theme)applyTheme(settings.theme);
-  // Only replace what we already have if the fresh fetch actually returned something —
+  // Only replace what we already have if the fresh fetch actually returned something.
   // a failed/timed-out fetch must never wipe out good cached data with an empty state.
   if(cats)allCategories=Object.values(cats).sort((a,b)=>(a.order||99)-(b.order||99));
   else if(!hadCache)allCategories=[];
@@ -1433,7 +1480,7 @@ async function init(){
       localStorage.setItem('rnm_cache_categories',JSON.stringify(allCategories));
       localStorage.setItem('rnm_cache_settings',JSON.stringify(settings));
     }
-  }catch(cacheWriteErr){/* storage full or unavailable — skip caching */}
+  }catch(cacheWriteErr){/* storage full or unavailable, skip caching */}
   applyHeroConfig(settings);
   if(settings.announcement){const ab=document.getElementById('announce-bar');if(ab){ab.textContent=settings.announcement;ab.style.display='block';}}
   computeActivePromo().then(function(){
@@ -1453,9 +1500,9 @@ async function init(){
     if(settings.totalOrdersCount!=null){
       so.textContent=settings.totalOrdersCount;
     }else{
-      // One-time backfill for sites that predate this counter — after this it's
+      // One-time backfill for sites that predate this counter, after this it's
       // never needed again, since saveOrder() keeps the count accurate directly.
-      so.textContent='—';
+      so.textContent='N/A';
       fbG('rn_mall_orders').then(function(orders){
         const count=orders?Object.keys(orders).length:0;
         so.textContent=count;
@@ -1630,7 +1677,7 @@ async function openProduct(id){
       </div>
       ${!isFree&&currency==='NGN'?`<div style="font-size:11px;color:var(--mu);margin-bottom:10px;">≈ $${(price/exchangeRate).toFixed(0)} USD</div>`:''}
       <div class="modal-desc">${formatDescription(p.description)}</div>
-      ${preorder?`<div class="pre-order-box"><strong style="color:var(--or);">PRE-ORDER</strong><br>${p.preOrderNote||'Reserve now — we contact you when ready.'}</div>`:''}
+      ${preorder?`<div class="pre-order-box"><strong style="color:var(--or);">PRE-ORDER</strong><br>${p.preOrderNote||'Reserve now, we contact you when ready.'}</div>`:''}
       ${p.colors&&p.colors.length?renderColorGrid(p):(p.variants&&p.variants.length?`<div class="var-title">${p.variantLabel||'Select Option'}</div><div class="var-opts">${p.variants.map(v=>{
         const isColor=/colou?r/i.test(p.variantLabel||'');
         const colorMap={black:'#1a1a1a',white:'#ffffff',red:'#e53935',blue:'#1e88e5',green:'#43a047',yellow:'#fdd835',orange:'#fb8c00',pink:'#ec407a',purple:'#8e24aa',grey:'#9e9e9e',gray:'#9e9e9e',brown:'#6d4c41',navy:'#1a237e',beige:'#d7c4a3',gold:'#d4af37',silver:'#c0c0c0',khaki:'#c3b091',maroon:'#800000',cyan:'#00bcd4',teal:'#00897b'};
@@ -1649,7 +1696,7 @@ async function openProduct(id){
       </div>
       <button onclick="shareProduct('${p.id}','${(p.name||'').replace(/'/g,"\\'")}')" style="width:100%;margin-top:8px;background:var(--card2);border:1px solid var(--bdr);border-radius:8px;padding:10px;color:var(--w2);font-size:12px;font-weight:700;cursor:pointer;">📤 Share &amp; Earn RichPoints</button>
       ${window._mBundle?`<div style="margin-top:14px;background:rgba(255,140,0,0.06);border:1px solid rgba(255,140,0,0.25);border-radius:10px;padding:14px;">
-        <div style="font-weight:800;font-size:13px;color:var(--or);margin-bottom:6px;">${iconBadge('gift',18)} ${window._mBundle.name} — Save ${window._mBundle.discountPct}%</div>
+        <div style="font-weight:800;font-size:13px;color:var(--or);margin-bottom:6px;">${iconBadge('gift',18)} ${window._mBundle.name}, Save ${window._mBundle.discountPct}%</div>
         <div style="font-size:11px;color:var(--mu);margin-bottom:10px;">Buy all ${(window._mBundle.productIds||[]).length} items in this bundle together and get ${window._mBundle.discountPct}% off automatically at checkout.</div>
         <button onclick="addBundleToCart('${window._mBundle.id}')" style="width:100%;background:linear-gradient(135deg,var(--or),var(--gold));border:none;border-radius:8px;padding:10px;color:#000;font-weight:800;font-size:12px;cursor:pointer;">Add Whole Bundle to Cart</button>
       </div>`:''}
@@ -1662,7 +1709,7 @@ async function openProduct(id){
       </div>
       ${p.sold||p.stock!==null?`<div style="font-size:11px;color:var(--mu);margin-top:10px;">${p.sold?`<span style="color:var(--or);font-weight:700;">${p.sold}</span> sold · `:''}${p.stock!==null&&p.stock!==undefined?`<span style="color:var(--or);font-weight:700;">${p.stock}</span> remaining`:''}</div>`:''}
       ${(p.dimensions||p.specs)?`<div class="specs-table"><div style="font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:1px;margin:12px 0 8px;">Specifications</div>
-        ${p.dimensions&&(p.dimensions.length||p.dimensions.width||p.dimensions.height)?`<div class="spec-row"><span class="spec-key">Dimensions (L×W×H)</span><span class="spec-val">${p.dimensions.length||'—'} × ${p.dimensions.width||'—'} × ${p.dimensions.height||'—'} cm</span></div>`:''}
+        ${p.dimensions&&(p.dimensions.length||p.dimensions.width||p.dimensions.height)?`<div class="spec-row"><span class="spec-key">Dimensions (L×W×H)</span><span class="spec-val">${p.dimensions.length||'N/A'} × ${p.dimensions.width||'N/A'} × ${p.dimensions.height||'N/A'} cm</span></div>`:''}
         ${p.dimensions&&p.dimensions.weight?`<div class="spec-row"><span class="spec-key">Weight</span><span class="spec-val">${p.dimensions.weight} kg</span></div>`:''}
         ${p.specs?Object.entries(p.specs).map(([k,v])=>`<div class="spec-row"><span class="spec-key">${k}</span><span class="spec-val">${v}</span></div>`).join(''):''}
       </div>`:''}
@@ -1679,7 +1726,7 @@ async function openProduct(id){
       <div class="star-select" id="star-sel">${[1,2,3,4,5].map(n=>`<span class="star-opt" onclick="setStars(${n},'star-sel')" data-val="${n}" style="color:var(--or);">&#9733;</span>`).join('')}</div>
       <input class="fi" id="rev-name" placeholder="Your name" autocomplete="off" style="margin-top:10px;"/>
       <textarea class="fi" id="rev-text" rows="3" placeholder="Share your experience..." style="resize:vertical;min-height:80px;margin-top:8px;line-height:1.7;"></textarea>
-      <div class="upload-area" onclick="document.getElementById('rev-imgs').click()" style="margin-top:8px;"><input type="file" id="rev-imgs" accept="image/*" multiple onchange="handleRevImgs(this,'rev-previews')" style="display:none;"/><div style="font-size:12px;color:var(--mu);">Upload photos (optional) — max 5</div><div class="upload-previews" id="rev-previews"></div></div>
+      <div class="upload-area" onclick="document.getElementById('rev-imgs').click()" style="margin-top:8px;"><input type="file" id="rev-imgs" accept="image/*" multiple onchange="handleRevImgs(this,'rev-previews')" style="display:none;"/><div style="font-size:12px;color:var(--mu);">Upload photos (optional), max 5</div><div class="upload-previews" id="rev-previews"></div></div>
       <button class="auth-btn" style="max-width:200px;margin-top:10px;" onclick="submitReview('${id}')">${t('submitReview')}</button>
       <div id="rev-msg" style="font-size:11px;margin-top:8px;display:none;"></div>
     </div>
@@ -1890,7 +1937,7 @@ function openReviewModal(productId,productName,productImage){
     <div class="star-select" id="srev-star-sel">${[1,2,3,4,5].map(n=>`<span class="star-opt" onclick="setStars(${n},'srev-star-sel')" data-val="${n}" style="color:var(--or);font-size:24px;cursor:pointer;">&#9733;</span>`).join('')}</div>
     <input class="fi" id="srev-name" placeholder="Your name" autocomplete="off" style="margin-top:10px;" value="${currUser?.fname||''}"/>
     <textarea class="fi" id="srev-text" rows="3" placeholder="Share your experience... (optional)" style="resize:vertical;min-height:80px;margin-top:8px;line-height:1.7;"></textarea>
-    <div class="upload-area" onclick="document.getElementById('srev-imgs').click()" style="margin-top:8px;cursor:pointer;"><input type="file" id="srev-imgs" accept="image/*" multiple onchange="handleRevImgs(this,'srev-previews')" style="display:none;"/><div style="font-size:12px;color:var(--mu);">📷 Upload photos of the product (optional) — max 5</div><div class="upload-previews" id="srev-previews"></div></div>
+    <div class="upload-area" onclick="document.getElementById('srev-imgs').click()" style="margin-top:8px;cursor:pointer;"><input type="file" id="srev-imgs" accept="image/*" multiple onchange="handleRevImgs(this,'srev-previews')" style="display:none;"/><div style="font-size:12px;color:var(--mu);">📷 Upload photos of the product (optional), max 5</div><div class="upload-previews" id="srev-previews"></div></div>
     <div style="display:flex;gap:8px;margin-top:14px;">
       <button class="auth-btn" style="flex:1;" onclick="submitReview('${productId}',true)">Submit Review</button>
       <button onclick="document.getElementById('standalone-review-overlay').remove()" style="padding:0 18px;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;color:var(--mu);font-weight:700;font-size:13px;cursor:pointer;">Skip</button>
@@ -2011,7 +2058,7 @@ function updateCartUI(){
 }
 async function applyCouponCart(){const code=(document.getElementById('cart-coupon')?.value||'').trim().toUpperCase();if(!code){toast('Enter a coupon code','err');return;}const coupons=await fbG('rn_mall_coupons')||{};const c=Object.values(coupons).find(x=>x.code===code&&x.active);if(!c){toast('Invalid or expired coupon','err');return;}const sub=cartTotal();if(c.minOrder&&sub<c.minOrder){toast('Min order ₦'+c.minOrder.toLocaleString()+' required','err');return;}discount={code,amount:c.type==='percent'?Math.round(sub*c.value/100):c.value,type:c.type};if(currUser)awardPoints(currUser.id,rpRates().coupon,'using a promo code');toast('Coupon applied! Saving ₦'+discount.amount.toLocaleString());updateCartUI();}
 
-// ── CHECKOUT — requires login ──
+// ── CHECKOUT, requires login ──
 function goCheckout(){
   if(!cart.length){toast('Your cart is empty','err');return;}
   if(!currUser){toast('Please sign in to checkout','warn');openAuth('register');return;}
@@ -2042,7 +2089,7 @@ async function addBundleToCart(bundleId){
     const p=allProducts.find(x=>x.id===pid)||await fbG('rn_mall_products/'+pid);
     if(p)addToCart(p,1,'');
   }
-  toast('Bundle added to cart — '+bundle.discountPct+'% off applied at checkout!');
+  toast('Bundle added to cart, '+bundle.discountPct+'% off applied at checkout!');
 }
 
 
@@ -2067,8 +2114,8 @@ function renderCheckout(isPreorder=false){
       ${!isPreorder&&cart.some(i=>i.pickupAvailable)?`
       <div class="co-card">
         <div class="co-title">Delivery Method</div>
-        <div class="pay-opt active" id="dm-delivery" onclick="setDeliveryMethod('delivery')"><div class="pay-radio"></div><div>${iconBadge('truck',22)}</div><div><div class="pay-lbl">Home Delivery</div><div class="pay-sub">We deliver to your address — delivery fee applies</div></div></div>
-        <div class="pay-opt" id="dm-pickup" onclick="setDeliveryMethod('pickup')"><div class="pay-radio"></div><div>${iconBadge('box',22)}</div><div><div class="pay-lbl">Pick Up In Person</div><div class="pay-sub">Collect your order yourself before dispatch — no delivery fee</div></div></div>
+        <div class="pay-opt active" id="dm-delivery" onclick="setDeliveryMethod('delivery')"><div class="pay-radio"></div><div>${iconBadge('truck',22)}</div><div><div class="pay-lbl">Home Delivery</div><div class="pay-sub">We deliver to your address, delivery fee applies</div></div></div>
+        <div class="pay-opt" id="dm-pickup" onclick="setDeliveryMethod('pickup')"><div class="pay-radio"></div><div>${iconBadge('box',22)}</div><div><div class="pay-lbl">Pick Up In Person</div><div class="pay-sub">Collect your order yourself before dispatch, no delivery fee</div></div></div>
       </div>`:''}
       <div class="co-card" id="co-address-card">
         <div class="co-title" id="co-addr-title">Delivery Information</div>
@@ -2116,7 +2163,7 @@ function renderCheckout(isPreorder=false){
       ${!isPreorder?`
       <div class="co-card" id="co-free-note" style="display:none;background:rgba(34,197,94,0.07);border-color:rgba(34,197,94,0.25);">
         <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;color:var(--su);font-size:13px;">This order is FREE</div>
-        <div style="font-size:12px;color:var(--mu);margin-top:4px;">No payment is required — just confirm your delivery details and place the order.</div>
+        <div style="font-size:12px;color:var(--mu);margin-top:4px;">No payment is required, just confirm your delivery details and place the order.</div>
       </div>
       <div class="co-card" style="background:linear-gradient(135deg,#1a1a1a,#0e0e0e);border:1px solid rgba(255,106,0,0.35);display:flex;align-items:center;gap:14px;">
         <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--or),var(--gold));display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;box-shadow:0 4px 14px rgba(255,106,0,0.35);">⚡</div>
@@ -2127,7 +2174,7 @@ function renderCheckout(isPreorder=false){
       </div>
       <div class="co-card" id="co-pay-card">
         <div class="co-title">Payment Method</div>
-        <div class="pay-opt active" id="pay-card" onclick="setPayMethod('card')"><div class="pay-radio"></div><div>${iconBadge('card',22)}</div><div><div class="pay-lbl">Pay with Card / Bank Transfer</div><div class="pay-sub">Secure payment via Paystack — all Nigerian banks &amp; cards supported</div>
+        <div class="pay-opt active" id="pay-card" onclick="setPayMethod('card')"><div class="pay-radio"></div><div>${iconBadge('card',22)}</div><div><div class="pay-lbl">Pay with Card / Bank Transfer</div><div class="pay-sub">Secure payment via Paystack, all Nigerian banks &amp; cards supported</div>
           <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;align-items:center;">
             ${payIconOrBadge('visa','VISA','#1a1f71')}
             ${payIconOrBadge('mastercard','MASTERCARD','#eb001b')}
@@ -2136,11 +2183,11 @@ function renderCheckout(isPreorder=false){
             ${payIconOrBadge('paystack','Secured by Paystack','rgba(0,197,224,0.12)',true)}
           </div>
         </div></div>
-        ${settings.podEnabled!==false?`<div class="pay-opt" id="pay-pod" onclick="setPayMethod('pod')"><div class="pay-radio"></div><div>${iconBadge('card',22)}</div><div><div class="pay-lbl">Pay on Delivery (Request)</div><div class="pay-sub">Send a Pay on Delivery request — admin approves before dispatch. Nigeria only.</div></div></div>`:''}
-        ${currUser&&currUser.walletBalance>0?`<div class="pay-opt" id="pay-wallet" onclick="setPayMethod('wallet')"><div class="pay-radio"></div><div>${iconBadge('wallet',22)}</div><div><div class="pay-lbl">Pay with Wallet</div><div class="pay-sub">Instant, no OTP needed — your balance: ${fmt(currUser.walletBalance)}</div></div></div>`:''}
+        ${settings.podEnabled!==false?`<div class="pay-opt" id="pay-pod" onclick="setPayMethod('pod')" style="display:none;"><div class="pay-radio"></div><div>${iconBadge('card',22)}</div><div><div class="pay-lbl">Pay on Delivery, 50% Deposit</div><div class="pay-sub" id="pay-pod-sub">Pay 50% now to confirm, our rider collects the remaining 50% (cash or transfer) when your order arrives.</div></div></div>`:''}
+        ${currUser&&currUser.walletBalance>0?`<div class="pay-opt" id="pay-wallet" onclick="setPayMethod('wallet')"><div class="pay-radio"></div><div>${iconBadge('wallet',22)}</div><div><div class="pay-lbl">Pay with Wallet</div><div class="pay-sub">Instant, no OTP needed, your balance: ${fmt(currUser.walletBalance)}</div></div></div>`:''}
       </div>
       ${currUser&&getLoyaltyTier(currUser).pct>0?`<div class="co-card" style="border-color:rgba(255,140,0,0.3);">
-        <div style="font-size:12px;color:var(--w2);">${iconBadge('trophy',16)} <strong style="color:var(--or);">${getLoyaltyTier(currUser).name} Tier</strong> — ${getLoyaltyTier(currUser).pct}% loyalty discount automatically applied to this order</div>
+        <div style="font-size:12px;color:var(--w2);">${iconBadge('trophy',16)} <strong style="color:var(--or);">${getLoyaltyTier(currUser).name} Tier</strong>, ${getLoyaltyTier(currUser).pct}% loyalty discount automatically applied to this order</div>
       </div>`:''}
       <div id="bundle-discount-note"></div>
       <div id="promo-discount-note"></div>
@@ -2150,7 +2197,7 @@ function renderCheckout(isPreorder=false){
         <div id="coupon-result" style="font-size:11px;display:none;margin-top:6px;"></div>
       </div>
       ${currUser&&currUser.points>0?`<div class="co-card">
-        <div class="co-title">${iconBadge('star',18)} Redeem RichPoints — you have ${(currUser.points||0).toLocaleString()} pts</div>
+        <div class="co-title">${iconBadge('star',18)} Redeem RichPoints, you have ${(currUser.points||0).toLocaleString()} pts</div>
         <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
           <input class="coupon-inp" id="co-points-redeem" type="number" min="0" max="${currUser.points||0}" placeholder="Points to redeem for discount" style="flex:1;"/>
           <button class="coupon-btn" onclick="applyPointsDiscount()">Apply</button>
@@ -2160,7 +2207,7 @@ function renderCheckout(isPreorder=false){
       </div>`:''}
       <div class="co-card">
         <div class="co-title">Terms & Conditions</div>
-        <div style="font-size:12px;color:var(--mu);line-height:1.9;margin-bottom:12px;max-height:110px;overflow-y:auto;background:var(--card2);border-radius:7px;padding:10px;border:1px solid var(--bdr);">By placing this order you agree to RichNation Mall's terms. All sales are subject to availability. Returns accepted within 7 days for undamaged items. Pay on Delivery orders require admin approval. Late deliveries will be compensated. Price adjustment available within 30 days of payment.</div>
+        <div style="font-size:12px;color:var(--mu);line-height:1.9;margin-bottom:12px;max-height:110px;overflow-y:auto;background:var(--card2);border-radius:7px;padding:10px;border:1px solid var(--bdr);">By placing this order you agree to RichNation Mall's terms. All sales are subject to availability. Returns accepted within 7 days for undamaged items. Pay on Delivery orders require a 50% deposit at checkout, with the balance collected by the rider on delivery. Late deliveries will be compensated. Price adjustment available within 30 days of payment.</div>
         <label style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--mu);cursor:pointer;">
           <input type="checkbox" id="terms-check" style="accent-color:var(--or);margin-top:2px;"/>
           <span>I agree to the <span style="color:var(--or);cursor:pointer;" onclick="showPolicyPage('terms')">Terms</span>, <span style="color:var(--or);cursor:pointer;" onclick="showPolicyPage('returns')">Refund Policy</span> and <span style="color:var(--or);cursor:pointer;" onclick="showPolicyPage('payment')">Payment Policy</span>.</span>
@@ -2205,7 +2252,18 @@ function setDeliveryMethod(m){
   if(m==='pickup'){deliveryFee=0;}else{calcDel();}
   updateCOSummary();
 }
-function setPayMethod(m){payMethod=m;['card','pod'].forEach(id=>{const el=document.getElementById('pay-'+id);if(el)el.classList.toggle('active',id===m);});}
+function setPayMethod(m){payMethod=m;['card','pod','wallet'].forEach(id=>{const el=document.getElementById('pay-'+id);if(el)el.classList.toggle('active',id===m);});}
+// Pay on Delivery is a 50% deposit paid now (card/transfer via Paystack), balance collected
+// by the rider on delivery. Only available in Nigeria, in a state the admin has approved,
+// and only when every item in the cart is individually marked POD-eligible by the admin.
+function podEligibleForCart(country,state){
+  if(settings.podEnabled===false)return false;
+  if(country&&country!=='NG')return false;
+  const approvedStates=settings.podApprovedStates||[];
+  if(!state||!approvedStates.includes(state))return false;
+  if(!cart.length||!cart.every(i=>{const p=allProducts.find(x=>x.id===i.id);return p&&p.podEligible;}))return false;
+  return true;
+}
 function updateCOSummary(){
   const co=document.getElementById('co-items');if(!co)return;
   co.innerHTML=cart.map(i=>`<div class="os-item"><div class="os-img">${i.image?`<img loading="lazy" decoding="async" src="${i.image}" alt="${i.name}" style="width:100%;height:100%;object-fit:cover;display:block;"/>`:'<span style="color:var(--or);font-weight:900;font-size:14px;">📦</span>'}</div><div style="flex:1;"><div class="os-name">${i.name}${i.preOrder?' [PRE-ORDER]':''}</div><div class="os-var">${i.variant||''} x${i.qty}</div></div><div class="os-price">${i.free?'FREE':fmt(i.price*i.qty)}</div></div>`).join('');
@@ -2217,9 +2275,9 @@ function updateCOSummary(){
   if(disc>0){if(g('co-disc-row'))g('co-disc-row').style.display='flex';if(g('co-disc'))g('co-disc').textContent='-₦'+disc.toLocaleString();}
   else if(g('co-disc-row'))g('co-disc-row').style.display='none';
   const bdNote=g('bundle-discount-note');
-  if(bdNote)bdNote.innerHTML=(bundleDisc>0)?'<div class="co-card" style="border-color:rgba(255,140,0,0.3);"><div style="font-size:12px;color:var(--w2);">'+iconBadge('gift',16)+' <strong style="color:var(--or);">Bundle Deal</strong> — '+(window._bundleDiscountNames||[]).join(', ')+' saved you '+fmt(bundleDisc)+'</div></div>':'';
+  if(bdNote)bdNote.innerHTML=(bundleDisc>0)?'<div class="co-card" style="border-color:rgba(255,140,0,0.3);"><div style="font-size:12px;color:var(--w2);">'+iconBadge('gift',16)+' <strong style="color:var(--or);">Bundle Deal</strong>, '+(window._bundleDiscountNames||[]).join(', ')+' saved you '+fmt(bundleDisc)+'</div></div>':'';
   const promoNote=g('promo-discount-note');
-  if(promoNote)promoNote.innerHTML=(promoDisc>0)?'<div class="co-card" style="border-color:rgba(255,140,0,0.3);"><div style="font-size:12px;color:var(--w2);">'+iconBadge('gift',16)+' <strong style="color:var(--or);">'+activePromo.name+'</strong> — '+promoPct+'% off saved you '+fmt(promoDisc)+'</div></div>':'';
+  if(promoNote)promoNote.innerHTML=(promoDisc>0)?'<div class="co-card" style="border-color:rgba(255,140,0,0.3);"><div style="font-size:12px;color:var(--w2);">'+iconBadge('gift',16)+' <strong style="color:var(--or);">'+activePromo.name+'</strong>, '+promoPct+'% off saved you '+fmt(promoDisc)+'</div></div>':'';
   const isFreeOrder=tot<=0;
   if(g('co-free-note'))g('co-free-note').style.display=isFreeOrder?'block':'none';
   if(g('co-pay-card'))g('co-pay-card').style.display=isFreeOrder?'none':'block';
@@ -2262,7 +2320,10 @@ async function placeOrder(isPreorder=false){
   const g=id=>document.getElementById(id)?.value.trim();
   const fn=g('co-fn'),ln=g('co-ln'),email=g('co-email'),phone=g('co-phone'),addr=g('co-addr'),city=g('co-city'),country=g('co-country'),state=g('co-state'),zip=g('co-zip'),lga=g('co-lga');
   if(!fn||!ln||!email||!phone||!addr||!city||!country){toast('Please fill all required delivery fields','err');return;}
+  if(!isPreorder&&payMethod==='pod'&&!podEligibleForCart(country,state)){toast('Pay on Delivery is not available for this order, please choose Card or Wallet','err');return;}
   const sub=cartTotal();const effDeliveryFee=(deliveryMethod==='pickup'||pointsShippingRedeemed)?0:deliveryFee;const loyaltyTier=getLoyaltyTier(currUser);const loyaltyDisc=Math.round(sub*loyaltyTier.pct/100);const bundleDisc=window._bundleDiscount||0;const promoPct=activePromo?activePromo.discountPct:0;const promoDisc=Math.round(sub*promoPct/100);const tot=sub+effDeliveryFee-(discount.amount||0)-pointsDiscount-loyaltyDisc-bundleDisc-promoDisc;
+  const isPod=!isPreorder&&payMethod==='pod';
+  const depositAmt=isPod?Math.round(tot/2):0;
   const tracking=genTracking(country);
   const order={
     id:tracking,tracking,
@@ -2276,12 +2337,12 @@ async function placeOrder(isPreorder=false){
     pointsRedeemed:pointsRedeemed||0,pointsShippingRedeemed:pointsShippingRedeemed||false,
     total:tot,
     payMethod:isPreorder?'preorder':payMethod,
-    status:isPreorder?'preorder':payMethod==='pod'?'pending_pod':'pending',
+    status:isPreorder?'preorder':'pending',
     preOrder:isPreorder,preOrderNote:g('co-note')||'',
-    podApproved:payMethod==='pod'?false:null,
+    podDepositAmount:isPod?depositAmt:null,podBalanceDue:isPod?(tot-depositAmt):null,podBalanceCollected:isPod?false:null,
     timeline:[{status:isPreorder?'Pre-Order Placed':'Order Placed',
       time:new Date().toISOString(),
-      note:isPreorder?'Pre-order received.':payMethod==='pod'?'Pay on Delivery request sent — awaiting admin approval.':(deliveryMethod==='pickup'?'Order received — customer will collect in person.':'Order received and being processed.')}],
+      note:isPreorder?'Pre-order received.':isPod?('Pay on Delivery selected, 50% deposit of '+fmt(depositAmt)+' required to confirm.'):(deliveryMethod==='pickup'?'Order received, customer will collect in person.':'Order received and being processed.')}],
     createdAt:new Date().toISOString(),date:ds(),currency,userId:currUser.id,
   };
   if(document.getElementById('save-addr')?.checked){
@@ -2289,10 +2350,26 @@ async function placeOrder(isPreorder=false){
     await fbU('rn_mall_customers/'+currUser.id,addrUpdate);
     currUser={...currUser,...addrUpdate};localStorage.setItem('rnm_user',JSON.stringify(currUser));
   }
-  if(isPreorder||payMethod==='pod'){saveOrder(order);}
+  if(isPreorder){saveOrder(order);}
+  else if(isPod){
+    try{
+      if(typeof PaystackPop==='undefined')throw new Error('Paystack script not loaded');
+      const handler=PaystackPop.setup({
+        key:PAYSTACK_KEY,email,amount:Math.round(depositAmt)*100,currency:'NGN',ref:tracking,
+        metadata:{order_id:tracking,customer:fn+' '+ln,type:'pod_deposit'},
+        callback:function(response){
+          order.podDepositPaid=true;order.podDepositRef=response.reference;order.status='confirmed';
+          order.timeline.push({status:'Deposit Paid',time:new Date().toISOString(),note:'50% deposit of '+fmt(depositAmt)+' paid via Paystack. Reference: '+response.reference+'. Balance of '+fmt(tot-depositAmt)+' due on delivery.'});
+          saveOrder(order);
+        },
+        onClose:function(){toast('Deposit payment window closed','warn');}
+      });
+      handler.openIframe();
+    }catch(e){toast('Payment error: '+e.message,'err');}
+  }
   else if(tot<=0){
     order.status='confirmed';
-    order.timeline.push({status:'Payment Confirmed',time:new Date().toISOString(),note:'Free order — no payment required.'});
+    order.timeline.push({status:'Payment Confirmed',time:new Date().toISOString(),note:'Free order, no payment required.'});
     saveOrder(order);
   }
   else if(payMethod==='wallet'){
@@ -2355,8 +2432,8 @@ async function saveOrder(order){
   const isPOD=order.payMethod==='pod';
   pg.innerHTML=`<div style="text-align:center;padding:40px 20px;max-width:580px;margin:0 auto;">
     <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:56px;color:var(--or);animation:scaleIn 0.6s cubic-bezier(0.22,1,0.36,1);">✓</div>
-    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:24px;color:var(--su);margin:12px 0 8px;">${order.preOrder?'Pre-Order Placed!':isPOD?'Pay on Delivery Request Sent!':'Order Confirmed!'}</div>
-    <div style="font-size:13px;color:var(--mu);margin-bottom:24px;line-height:1.9;">${order.preOrder?'We will contact you via WhatsApp and email when your item is ready.':isPOD?'Your Pay on Delivery request is awaiting admin approval. We will contact you before dispatch.':'Your order has been received and is being processed.'}<br><strong style="color:var(--wh);">Total: ₦${parseInt(order.total).toLocaleString()}</strong></div>
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:24px;color:var(--su);margin:12px 0 8px;">${order.preOrder?'Pre-Order Placed!':isPOD?'Deposit Paid, Order Confirmed!':'Order Confirmed!'}</div>
+    <div style="font-size:13px;color:var(--mu);margin-bottom:24px;line-height:1.9;">${order.preOrder?'We will contact you via WhatsApp and email when your item is ready.':isPOD?('You paid a 50% deposit of '+fmt(order.podDepositAmount)+'. Our rider will collect the remaining '+fmt(order.podBalanceDue)+' (cash or transfer) when your order arrives.'):'Your order has been received and is being processed.'}<br><strong style="color:var(--wh);">Total: ₦${parseInt(order.total).toLocaleString()}</strong></div>
     <div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:22px;margin-bottom:18px;">
       <div style="font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;">Tracking Number</div>
       <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:22px;color:var(--or);letter-spacing:2px;margin-bottom:8px;">${order.tracking}</div>
@@ -2473,7 +2550,7 @@ let _deliveryMapInstance=null;
 const VEHICLE_ICONS={motorcycle:'🏍️',bicycle:'🚲',car:'🚗','van/truck':'🚚','on foot':'🚶'};
 const VEHICLE_AVG_SPEED_KMH={motorcycle:32,bicycle:15,car:26,'van/truck':22,'on foot':5};
 function estimateDeliveryTime(pickup,dest,vehicleType){
-  // Straight-line (haversine) distance — a real route will run longer than this since
+  // Straight-line (haversine) distance, a real route will run longer than this since
   // roads aren't straight lines, so we pad the estimate to keep it realistic.
   const R=6371,dLat=(dest.lat-pickup.lat)*Math.PI/180,dLng=(dest.lng-pickup.lng)*Math.PI/180;
   const a=Math.sin(dLat/2)**2+Math.cos(pickup.lat*Math.PI/180)*Math.cos(dest.lat*Math.PI/180)*Math.sin(dLng/2)**2;
@@ -2484,7 +2561,10 @@ function estimateDeliveryTime(pickup,dest,vehicleType){
 }
 async function geocodeAddress(address){
   try{
-    const res=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(address));
+    const ctrl=new AbortController();
+    const timer=setTimeout(function(){ctrl.abort();},7000);
+    const res=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ng&email=rnm.office@richnationmall.com&q='+encodeURIComponent(address),{signal:ctrl.signal});
+    clearTimeout(timer);
     const data=await res.json();
     if(data&&data[0])return {lat:parseFloat(data[0].lat),lng:parseFloat(data[0].lon)};
   }catch(e){}
@@ -2506,7 +2586,7 @@ async function searchCustMapLocation(query,map){
     }else{
       toast('Location not found','err');
     }
-  }catch(e){toast('Search failed — check your connection','err');}
+  }catch(e){toast('Search failed, check your connection','err');}
 }
 function toggleMapView(order){
   _mapViewMode=_mapViewMode==='street'?'satellite':'street';
@@ -2523,7 +2603,7 @@ function loadLeafletIfNeeded(){
     const script=document.createElement('script');
     script.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
     script.onload=function(){resolve();};
-    script.onerror=function(){resolve();}; // still resolve — renderDeliveryMap's typeof-check handles the failure gracefully
+    script.onerror=function(){resolve();}; // still resolve, renderDeliveryMap's typeof-check handles the failure gracefully
     document.head.appendChild(script);
   });
   return window._leafletLoadPromise;
@@ -2536,20 +2616,13 @@ async function renderDeliveryMap(order,force){
     return;
   }
   const needsFullRebuild=force||!_deliveryMapInstance||_deliveryMapOrderId!==order.tracking;
-  // Hard throttle on the expensive full rebuild only — quiet marker-only updates
+  // Hard throttle on the expensive full rebuild only, quiet marker-only updates
   // below are cheap and safe to run on every poll.
   if(needsFullRebuild&&!force&&_deliveryMapInstance&&(Date.now()-_lastMapRenderTs)<15000)return;
-  // Delivery point — geocode once and cache on the order so we never re-geocode on every poll.
-  // Note: the pickup/store location is intentionally never used or shown here — customers
-  // only ever see their own delivery point and the rider's live position, not the store.
-  let dest=order.deliveryLat!=null?{lat:order.deliveryLat,lng:order.deliveryLng}:null;
-  if(!dest&&order.customer?.address){
-    dest=await geocodeAddress(order.customer.address+', '+(order.customer.city||'')+', Nigeria');
-    if(dest){fbU('rn_mall_orders/'+order.tracking,{deliveryLat:dest.lat,deliveryLng:dest.lng});}
-  }
-  if(!dest)return; // couldn't place the delivery address — skip the map rather than show something wrong
-  // Rider's live position — read fresh every time this runs (the track page already
+  // Rider's live position, read fresh every time this runs (the track page already
   // polls every 8s), so the marker genuinely moves as the rider's phone reports in.
+  // Fetched first so we still have something to show even if the delivery address
+  // below fails to geocode.
   let riderPos=null,isLive=false;
   if(order.riderId){
     const riderRec=await fbG('rn_mall_riders/'+order.riderId);
@@ -2557,10 +2630,26 @@ async function renderDeliveryMap(order,force){
       riderPos={lat:riderRec.liveLat,lng:riderRec.liveLng};isLive=true;
     }
   }
-  const etaText=isLive?' &middot; ~'+(function(){const m=estimateDeliveryTime(riderPos,dest,order.riderVehicleType).mins;return (m<1?'<1':m)+' min'+(m===1?'':'s');})()+' away':'';
+  // Delivery point, geocode once and cache on the order so we never re-geocode on every poll.
+  // Note: the pickup/store location is intentionally never used or shown here, customers
+  // only ever see their own delivery point and the rider's live position, not the store.
+  let dest=order.deliveryLat!=null?{lat:order.deliveryLat,lng:order.deliveryLng}:null;
+  if(!dest&&order.customer?.address){
+    dest=await geocodeAddress(order.customer.address+', '+(order.customer.city||'')+', Nigeria');
+    if(dest){fbU('rn_mall_orders/'+order.tracking,{deliveryLat:dest.lat,deliveryLng:dest.lng});}
+  }
   const statusEl=document.getElementById('delivery-map-status');
+  if(!dest&&!riderPos){
+    // Neither the delivery address nor the rider's position could be placed on a
+    // map yet, rather than leave the container silently blank forever, say so and
+    // keep retrying on the next poll (this re-runs every ~8s from the track page).
+    if(statusEl)statusEl.innerHTML='<span class="live-dot"></span> Setting up live tracking for this order, checking again shortly…';
+    return;
+  }
+  const centerPos=dest||riderPos;
+  const etaText=(isLive&&dest)?' &middot; ~'+(function(){const m=estimateDeliveryTime(riderPos,dest,order.riderVehicleType).mins;return (m<1?'<1':m)+' min'+(m===1?'':'s');})()+' away':'';
   if(!needsFullRebuild){
-    // Quiet update — just glide the existing marker to its new spot, no rebuild,
+    // Quiet update, just glide the existing marker to its new spot, no rebuild,
     // no black flash, no tile reload. This is what runs on almost every poll.
     if(isLive&&_deliveryRiderMarker){
       _deliveryRiderMarker.setLatLng([riderPos.lat,riderPos.lng]);
@@ -2568,13 +2657,13 @@ async function renderDeliveryMap(order,force){
     }else if(_deliveryRiderMarker){
       _deliveryRiderMarker.setOpacity(0);
     }
-    if(statusEl)statusEl.innerHTML='<span class="live-dot'+(isLive?' on':'')+'"></span> '+(isLive?'<strong style="color:var(--wh);">Live</strong> — rider location updating in real time':'Waiting for rider\'s live location')+(etaText?'<strong style="color:var(--or);margin-left:auto;">'+etaText.replace(' &middot; ~','~')+'</strong>':'');
+    if(statusEl)statusEl.innerHTML='<span class="live-dot'+(isLive?' on':'')+'"></span> '+(isLive?'<strong style="color:var(--wh);">Live</strong> rider location updating in real time':'Waiting for rider\'s live location')+(!dest?' (still pinpointing your delivery address)':'')+(etaText?'<strong style="color:var(--or);margin-left:auto;">'+etaText.replace(' &middot; ~','~')+'</strong>':'');
     return;
   }
   _lastMapRenderTs=Date.now();
   _deliveryMapOrderId=order.tracking;
   if(_deliveryMapInstance){_deliveryMapInstance.remove();_deliveryMapInstance=null;}
-  const map=L.map('delivery-map',{zoomControl:false,attributionControl:true}).setView([dest.lat,dest.lng],14);
+  const map=L.map('delivery-map',{zoomControl:false,attributionControl:true}).setView([centerPos.lat,centerPos.lng],14);
   _deliveryMapInstance=map;
   window._deliveryMapTileLoaded=false;
   if(_mapViewMode==='satellite'){
@@ -2599,35 +2688,35 @@ async function renderDeliveryMap(order,force){
       if(primaryErrorCount>3)switchToFallback();
     });
     // Watchdog: some network blocks (ad-blockers, corporate firewalls, ISP filtering)
-    // silently hang a request instead of firing a load error — waiting forever for an
+    // silently hang a request instead of firing a load error, waiting forever for an
     // error that never comes is exactly how a map stays black indefinitely. If nothing
     // has loaded within 4 seconds, switch proactively rather than keep waiting.
     setTimeout(function(){if(!window._deliveryMapTileLoaded)switchToFallback();},4000);
   }
   // Leaflet can render a black/blank map if it calculates its size before the container
-  // has actually settled into place — forcing a resize check right after fixes it.
+  // has actually settled into place, forcing a resize check right after fixes it.
   setTimeout(function(){if(map)map.invalidateSize();},150);
   let tileErrorCount=0;
   map.on('tileerror',function(){
     tileErrorCount++;
     if(tileErrorCount>4){
       const statusEl2=document.getElementById('delivery-map-status');
-      if(statusEl2)statusEl2.innerHTML='<span style="color:var(--or);">⚠ Some map tiles had trouble loading — trying a backup source</span>';
+      if(statusEl2)statusEl2.innerHTML='<span style="color:var(--or);">⚠ Some map tiles had trouble loading, trying a backup source</span>';
     }
   });
-  // Final safety net — if nothing has rendered after both providers had a real chance,
+  // Final safety net, if nothing has rendered after both providers had a real chance,
   // show something the customer can actually act on instead of a silent black box.
   setTimeout(function(){
     if(!window._deliveryMapTileLoaded){
       const mapEl=document.getElementById('delivery-map');
-      if(mapEl)mapEl.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;padding:16px;text-align:center;background:var(--card2);"><div style="font-size:12px;color:var(--mu);">Map couldn\'t load — this can happen on a slow connection or with certain browser extensions.</div><button style="background:var(--or);color:#fff;border:none;border-radius:var(--r-sm);font-weight:700;font-size:12px;padding:8px 16px;cursor:pointer;" onclick="renderDeliveryMap(window._lastTrackedOrder,true)">Reload Map</button></div>';
+      if(mapEl)mapEl.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;padding:16px;text-align:center;background:var(--card2);"><div style="font-size:12px;color:var(--mu);">Map couldn\'t load, this can happen on a slow connection or with certain browser extensions.</div><button style="background:var(--or);color:#fff;border:none;border-radius:var(--r-sm);font-weight:700;font-size:12px;padding:8px 16px;cursor:pointer;" onclick="renderDeliveryMap(window._lastTrackedOrder,true)">Reload Map</button></div>';
     }
   },9000);
   const homeIcon=L.divIcon({html:'<div style="background:#22c55e;width:26px;height:26px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid #fff;">📍</div>',iconSize:[26,26],className:''});
   const vehicleEmoji=VEHICLE_ICONS[(order.riderVehicleType||'motorcycle').toLowerCase()]||'🏍️';
   const riderIcon=L.divIcon({html:'<div style="background:#161616;width:30px;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid #22c55e;">'+vehicleEmoji+'</div>',iconSize:[30,30],className:''});
-  L.marker([dest.lat,dest.lng],{icon:homeIcon}).addTo(map).bindPopup('Delivery Address (You)');
-  _deliveryRiderMarker=L.marker(isLive?[riderPos.lat,riderPos.lng]:[dest.lat,dest.lng],{icon:riderIcon,opacity:isLive?1:0}).addTo(map).bindPopup((order.riderName||'Your rider')+' — live location');
+  if(dest)L.marker([dest.lat,dest.lng],{icon:homeIcon}).addTo(map).bindPopup('Delivery Address (You)');
+  _deliveryRiderMarker=L.marker(isLive?[riderPos.lat,riderPos.lng]:[centerPos.lat,centerPos.lng],{icon:riderIcon,opacity:isLive?1:0}).addTo(map).bindPopup((order.riderName||'Your rider')+', live location');
   // Satellite/street toggle button, overlaid on the map.
   const toggleBtn=L.control({position:'topright'});
   toggleBtn.onAdd=function(){
@@ -2650,11 +2739,11 @@ async function renderDeliveryMap(order,force){
     const s=document.getElementById('cust-map-search');
     if(s)s.addEventListener('keydown',function(e){if(e.key==='Enter')searchCustMapLocation(e.target.value,map);});
   },100);
-  if(isLive){
+  if(isLive&&dest){
     map.fitBounds(L.latLngBounds([[riderPos.lat,riderPos.lng],[dest.lat,dest.lng]]),{padding:[40,40]});
   }
   setTimeout(function(){if(map){map.invalidateSize();}},350);
-  if(statusEl)statusEl.innerHTML='<span class="live-dot'+(isLive?' on':'')+'"></span> '+(isLive?'<strong style="color:var(--wh);">Live</strong> — rider location updating in real time':'Waiting for rider\'s live location')+(etaText?'<strong style="color:var(--or);margin-left:auto;">'+etaText.replace(' &middot; ~','~')+'</strong>':'');
+  if(statusEl)statusEl.innerHTML='<span class="live-dot'+(isLive?' on':'')+'"></span> '+(isLive?'<strong style="color:var(--wh);">Live</strong> rider location updating in real time':'Waiting for rider\'s live location')+(!dest?' (still pinpointing your delivery address)':'')+(etaText?'<strong style="color:var(--or);margin-left:auto;">'+etaText.replace(' &middot; ~','~')+'</strong>':'');
 }
 function stopTrackPoll(){if(_trackPollTimer){clearInterval(_trackPollTimer);_trackPollTimer=null;}}
 async function trackOrder(silentNum){
@@ -2670,9 +2759,11 @@ async function trackOrder(silentNum){
     <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:16px;color:var(--or);">${order.tracking}</div>
     <div style="font-size:12px;color:var(--mu);margin:4px 0 16px;">${order.customer?.name} · ${order.date} · ${order.items?.length} item(s) · ₦${parseInt(order.total||0).toLocaleString()}</div>
     ${isPOD&&!order.podApproved&&order.status==='pending_pod'?'<div style="background:rgba(255,140,0,0.07);border:1px solid rgba(255,140,0,0.2);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--or);margin-bottom:14px;"><strong>PAY ON DELIVERY PENDING:</strong> Awaiting admin approval.</div>':''}
-    ${order.status==='pod_declined'?'<div style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--re);margin-bottom:14px;"><strong>PAY ON DELIVERY DECLINED</strong> — '+(order.timeline?.[order.timeline.length-1]?.note||'Please contact support or pay online.')+'</div>':''}
+    ${isPOD&&order.podDepositAmount!=null&&order.status!=='delivered'&&!order.podBalanceCollected?'<div style="background:rgba(255,140,0,0.07);border:1px solid rgba(255,140,0,0.2);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--or);margin-bottom:14px;"><strong>50% DEPOSIT PAID</strong> ('+fmt(order.podDepositAmount)+'). Balance of '+fmt(order.podBalanceDue)+' due to the rider on delivery.</div>':''}
+    ${isPOD&&order.podBalanceCollected?'<div style="background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.2);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--su);margin-bottom:14px;"><strong>PAID IN FULL</strong>, balance collected on delivery.</div>':''}
+    ${order.status==='pod_declined'?'<div style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--re);margin-bottom:14px;"><strong>PAY ON DELIVERY DECLINED</strong>, '+(order.timeline?.[order.timeline.length-1]?.note||'Please contact support or pay online.')+'</div>':''}
     ${order.lastLocation&&order.status!=='delivered'&&order.status!=='delivered confirmed'?`<div style="background:rgba(91,155,245,0.08);border:1px solid rgba(91,155,245,0.25);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--bl);margin-bottom:14px;"><strong>📍 Latest Update:</strong> ${order.lastLocation}</div>`:''}
-    ${order.status==='ready_for_pickup'?'<div style="background:rgba(255,106,0,0.1);border:1px solid rgba(255,106,0,0.3);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--or);margin-bottom:14px;"><strong>📍 READY FOR PICKUP</strong> — Your order has arrived! Please come collect it at your convenience.</div>':''}
+    ${order.status==='ready_for_pickup'?'<div style="background:rgba(255,106,0,0.1);border:1px solid rgba(255,106,0,0.3);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--or);margin-bottom:14px;"><strong>📍 READY FOR PICKUP</strong>, Your order has arrived! Please come collect it at your convenience.</div>':''}
     ${order.riderId&&order.riderName&&order.deliveryStage!=='delivered'&&order.status!=='cancelled'&&order.status!=='deleted'?`<div style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
       <div><div style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:0.5px;">🏍️ Your Dispatch Rider</div><div style="font-size:13px;font-weight:800;color:var(--wh);margin-top:2px;">${order.riderName}</div>${order.riderPhone?`<div style="font-size:11px;color:var(--mu);">${order.riderPhone}</div>`:''}</div>
       ${order.riderPhone?`<a href="tel:${order.riderPhone}" style="text-decoration:none;"><button style="background:var(--or);border:none;color:#000;font-weight:800;font-size:11px;padding:8px 14px;border-radius:7px;cursor:pointer;">📞 Call</button></a>`:''}
@@ -2681,9 +2772,9 @@ async function trackOrder(silentNum){
       <div id="delivery-map" style="width:100%;height:260px;border-radius:9px 9px 0 0;overflow:hidden;background:var(--card2);"></div>
       <div id="delivery-map-status" class="live-map-status"><span class="live-dot"></span> Loading location…</div>
     </div>`:''}
-    ${order.status==='cancelled'?'<div style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--re);margin-bottom:14px;"><strong>ORDER CANCELLED</strong> — '+(order.cancelReason||order.timeline?.[order.timeline.length-1]?.note||'This order was cancelled.')+'</div>':''}
-    ${order.status==='deleted'?'<div style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--re);margin-bottom:14px;"><strong>ORDER DELETED</strong> — This order was removed by our team. Please contact support if you have questions.</div>':''}
-    ${order.deliveryConfirmed?`<div style="background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.2);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--su);margin-bottom:14px;"><strong>DELIVERED</strong> — Signed by ${order.deliveryConfirmation?.receivedBy} on ${new Date(order.deliveryConfirmation?.timestamp||'').toLocaleDateString('en-GB')}</div>`:''}
+    ${order.status==='cancelled'?'<div style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--re);margin-bottom:14px;"><strong>ORDER CANCELLED</strong>, '+(order.cancelReason||order.timeline?.[order.timeline.length-1]?.note||'This order was cancelled.')+'</div>':''}
+    ${order.status==='deleted'?'<div style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--re);margin-bottom:14px;"><strong>ORDER DELETED</strong>, This order was removed by our team. Please contact support if you have questions.</div>':''}
+    ${order.deliveryConfirmed?`<div style="background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.2);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--su);margin-bottom:14px;"><strong>DELIVERED</strong>, Signed by ${order.deliveryConfirmation?.receivedBy} on ${new Date(order.deliveryConfirmation?.timestamp||'').toLocaleDateString('en-GB')}</div>`:''}
     <div style="font-size:14px;font-weight:800;color:var(--wh);margin-bottom:10px;">Order Timeline</div>
     <div style="margin-bottom:16px;">
       ${(order.timeline||[]).map((t,ti,arr)=>{
@@ -2693,11 +2784,11 @@ async function trackOrder(silentNum){
           ${ti<arr.length-1?`<div style="position:absolute;left:15px;top:22px;width:2px;height:calc(100% - 4px);background:${color};"></div>`:''}
           <div style="width:10px;height:10px;border-radius:99px;background:${color};box-shadow:0 0 0 3px ${color}22;margin-top:4px;flex-shrink:0;"></div>
           <div style="padding-bottom:6px;"><div style="font-size:12px;font-weight:700;color:${color};">${t.status}</div>
-          <div style="font-size:11px;color:var(--mu);margin-top:2px;">${new Date(t.time).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})} — ${t.note||''}</div></div>
+          <div style="font-size:11px;color:var(--mu);margin-top:2px;">${new Date(t.time).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}, ${t.note||''}</div></div>
         </div>`;
       }).join('')||'<div style="color:var(--mu);font-size:12px;">No timeline yet</div>'}
     </div>
-    ${(order.status==='shipped'||order.status==='out for delivery')&&order.deliveryMethod!=='pickup'&&!order.deliveryConfirmed?`<button onclick="showDeliveryConfirm('${num}')" style="width:100%;background:linear-gradient(135deg,var(--su),#0f7a49);color:#fff;border:none;padding:12px;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:13px;cursor:pointer;margin-bottom:10px;">CONFIRM DELIVERY — Sign to Confirm Receipt</button>`:''}
+    ${(order.status==='shipped'||order.status==='out for delivery')&&order.deliveryMethod!=='pickup'&&!order.deliveryConfirmed?`<button onclick="showDeliveryConfirm('${num}')" style="width:100%;background:linear-gradient(135deg,var(--su),#0f7a49);color:#fff;border:none;padding:12px;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:13px;cursor:pointer;margin-bottom:10px;">CONFIRM DELIVERY, Sign to Confirm Receipt</button>`:''}
     <button style="width:100%;background:#25D366;color:#fff;border:none;padding:12px;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:13px;cursor:pointer;margin-top:8px;" onclick="window.open('https://wa.me/${WA_NUM}?text='+encodeURIComponent('Hi RichNation Mall! My tracking number is ${num}. Please update me.'),'_blank')">WhatsApp Update</button>
   </div>`;
   if(order.riderId&&order.deliveryStage!=='delivered'&&order.status!=='cancelled'&&order.status!=='deleted'){window._lastTrackedOrder=order;renderDeliveryMap(order);}
@@ -2740,14 +2831,14 @@ function showPolicyPage(type){
       +'<div style="font-weight:900;font-size:22px;color:var(--wh);">RichNation Mall</div>'
       +'<div style="font-size:12px;color:var(--mu);margin-top:4px;">RC 8998019 · RichNation Global Ltd</div></div>'
       +card('<p style="font-size:13px;color:var(--w2);line-height:1.9;">RichNation Mall is Nigeria\'s fastest-growing online shopping destination, proudly owned and operated by <strong style="color:var(--wh);">RichNation Global Ltd (RC 8998019)</strong>.</p>'
-        +'<p style="font-size:13px;color:var(--w2);line-height:1.9;margin-top:10px;">We started with a bold idea — that every Nigerian, no matter where they live, deserves access to quality products at prices that make sense. From Lagos to Kano, from Uyo to Enugu, from Abuja to the diaspora — RichNation Mall was built for you.</p>')
+        +'<p style="font-size:13px;color:var(--w2);line-height:1.9;margin-top:10px;">We started with a bold idea, that every Nigerian, no matter where they live, deserves access to quality products at prices that make sense. From Lagos to Kano, from Uyo to Enugu, from Abuja to the diaspora, RichNation Mall was built for you.</p>')
       +card(orange('What makes us different')
-        +'<div style="font-size:13px;color:var(--w2);line-height:2.2;">✅ We sell affordable — real prices, no hidden charges<br>✅ We verify every product before it goes live<br>✅ We deliver nationwide with real-time tracking<br>✅ We back every order with buyer protection<br>✅ We have a human support team — not just bots</div>')
+        +'<div style="font-size:13px;color:var(--w2);line-height:2.2;">✅ We sell affordable, real prices, no hidden charges<br>✅ We verify every product before it goes live<br>✅ We deliver nationwide with real-time tracking<br>✅ We back every order with buyer protection<br>✅ We have a human support team, not just bots</div>')
       +card(orange('RichNation Global Ltd family')
-        +'<div style="font-size:13px;color:var(--w2);line-height:2.4;">🎓 <strong style="color:var(--wh);">RichNation Academy</strong> — world-class digital education<br>🎵 <strong style="color:var(--wh);">RichNation Music</strong> — faith-inspired music for Africa<br>🎬 <strong style="color:var(--wh);">RichNation Animation</strong> — creative storytelling<br>🎙️ <strong style="color:var(--wh);">WBPT Podcast</strong> — We Bring People Together<br>📖 <strong style="color:var(--wh);">RichNation Stories</strong> — content that builds and inspires</div>')
+        +'<div style="font-size:13px;color:var(--w2);line-height:2.4;">🎓 <strong style="color:var(--wh);">RichNation Academy</strong>, world-class digital education<br>🎵 <strong style="color:var(--wh);">RichNation Music</strong>, faith-inspired music for Africa<br>🎬 <strong style="color:var(--wh);">RichNation Animation</strong>, creative storytelling<br>🎙️ <strong style="color:var(--wh);">WBPT Podcast</strong>, We Bring People Together<br>📖 <strong style="color:var(--wh);">RichNation Stories</strong>, content that builds and inspires</div>')
       +'<div style="background:rgba(255,140,0,0.08);border:1px solid rgba(255,140,0,0.25);border-radius:12px;padding:16px;text-align:center;">'
       +'<div style="font-weight:900;color:var(--or);font-size:15px;margin-bottom:8px;">"Build People · Build Platforms · Create Millionaires"</div>'
-      +'<div style="font-size:12px;color:var(--mu);">📱 +234 916 467 8560 · 📧 richnationwbpt61@gmail.com</div></div>';
+      +'<div style="font-size:12px;color:var(--mu);">📱 +234 916 467 8560 · 📧 rnm.office@richnationmall.com</div></div>';
   }
   else if(type==='faq'){
     var faqs=[
@@ -2755,12 +2846,12 @@ function showPolicyPage(type){
       ['Do I need an account?','You can browse freely, but you must sign in or create a free account before adding items to cart or tracking your orders.'],
       ['What payment methods do you accept?','All Nigerian debit/credit cards, international cards, bank transfers, and USSD via Paystack. Pay on Delivery is available in select locations.'],
       ['How long does delivery take?','Lagos: 1–2 days. Most states: 2–5 days. International: 7–21 days. See our Shipping page for the full breakdown.'],
-      ['How do I track my order?','Every order gets a unique tracking number (e.g. RNM-NG-2026-XXXXX). Enter it on our Track Order page — available 24 hours a day.'],
-      ['What if my item arrives damaged?','Contact us on WhatsApp within 7 days of delivery with photos. We resolve it immediately — replacement or refund.'],
+      ['How do I track my order?','Every order gets a unique tracking number (e.g. RNM-NG-2026-XXXXX). Enter it on our Track Order page, available 24 hours a day.'],
+      ['What if my item arrives damaged?','Contact us on WhatsApp within 7 days of delivery with photos. We resolve it immediately, replacement or refund.'],
       ['Can I cancel my order?','Only before dispatch. Once shipping begins the order cannot be cancelled or refunded.'],
-      ['Is my card information safe?','Yes. We never store card details. All transactions go through Paystack — CBN-licensed and PCI-DSS certified.'],
+      ['Is my card information safe?','Yes. We never store card details. All transactions go through Paystack, CBN-licensed and PCI-DSS certified.'],
       ['Do you sell internationally?','Yes. We ship to Ghana, Kenya, South Africa, UK, USA, Canada, Europe and more.'],
-      ['Are your prices negotiable?','Our prices are already as affordable as possible. We run regular flash sales — follow us to stay updated.']
+      ['Are your prices negotiable?','Our prices are already as affordable as possible. We run regular flash sales, follow us to stay updated.']
     ];
     content='<div class="faq-list">'+faqs.map(function(qa,i){return '<div class="faq-item">'
       +'<button class="faq-q" onclick="toggleFaq(this)">'+qa[0]+'<span class="faq-chevron">&#9662;</span></button>'
@@ -2774,7 +2865,7 @@ function showPolicyPage(type){
       +'<div style="font-size:12px;color:var(--mu);margin-top:4px;">Returns must be requested within 7 days of confirmed delivery</div></div>'
       +'<div style="background:rgba(244,63,94,0.07);border:1px solid rgba(244,63,94,0.2);border-radius:10px;padding:14px;margin-bottom:14px;">'
       +'<div style="font-weight:800;color:#f43f5e;margin-bottom:6px;">⚠️ Important</div>'
-      +'<div style="font-size:13px;color:var(--w2);line-height:1.9;">Once your order has been <strong>shipped and dispatched</strong>, it cannot be cancelled. No refunds are issued after the 7-day window — no exceptions.</div></div>'
+      +'<div style="font-size:13px;color:var(--w2);line-height:1.9;">Once your order has been <strong>shipped and dispatched</strong>, it cannot be cancelled. No refunds are issued after the 7-day window, no exceptions.</div></div>'
       +card(orange('You are eligible for a return if:')
         +'<div style="font-size:13px;color:var(--w2);line-height:2.2;">✅ Your item arrived damaged or defective<br>✅ You received the wrong item or wrong variant<br>✅ The item does not match the product description</div>')
       +card(orange('How to return:')
@@ -2800,7 +2891,7 @@ function showPolicyPage(type){
       +card(orange('Information We Collect')
         +'<div style="font-size:13px;color:var(--w2);line-height:2.2;">• Name, email, and phone when you create an account<br>• Delivery address when you place an order<br>• Order history and product preferences<br>• Payment transaction references (not card numbers)<br>• Device and browser type for technical purposes only</div>')
       +card(orange('How We Use Your Information')
-        +'<div style="font-size:13px;color:var(--w2);line-height:2.2;">• To process, fulfill, and deliver your orders<br>• To send order confirmations and delivery updates<br>• To provide fast customer support<br>• To personalise your shopping experience<br>• To send promotions — only if you choose to receive them</div>')
+        +'<div style="font-size:13px;color:var(--w2);line-height:2.2;">• To process, fulfill, and deliver your orders<br>• To send order confirmations and delivery updates<br>• To provide fast customer support<br>• To personalise your shopping experience<br>• To send promotions, only if you choose to receive them</div>')
       +'<div style="background:rgba(244,63,94,0.07);border:1px solid rgba(244,63,94,0.2);border-radius:10px;padding:14px;margin-bottom:14px;">'
       +'<div style="font-weight:800;color:#f43f5e;margin-bottom:8px;">What We Will Never Do</div>'
       +'<div style="font-size:13px;color:var(--w2);line-height:2.2;">❌ Sell your personal data to any third party<br>❌ Store your card number, PIN, or banking credentials<br>❌ Share your information without your consent</div></div>'
@@ -2808,7 +2899,7 @@ function showPolicyPage(type){
         +'<div style="font-size:13px;color:var(--w2);line-height:1.9;">Your personal information is protected using industry-standard security protocols and encryption. Access to customer data is strictly limited to authorised RichNation personnel on a need-to-know basis. We conduct regular security reviews to ensure your data remains safe at all times.</div>')
       +card(orange('Your Rights')
         +'<div style="font-size:13px;color:var(--w2);line-height:2.2;">• Request a copy of the data we hold about you<br>• Request correction of any inaccurate information<br>• Request deletion of your account and all data<br>• Withdraw consent for marketing at any time</div>')
-      +'<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:14px;font-size:12px;color:var(--mu);">To exercise your rights: 📧 richnationwbpt61@gmail.com · support@richnationwbpt.com · 📱 +234 916 467 8560</div>';
+      +'<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:14px;font-size:12px;color:var(--mu);">To exercise your rights: 📧 rnm.office@richnationmall.com · 📱 +234 916 467 8560</div>';
   }
   else if(type==='terms'){
     var clauses=[
@@ -2827,16 +2918,15 @@ function showPolicyPage(type){
       +clauses.map(function(c){return card(orange(c[0])+body(c[1]));}).join('');
   }
   else if(type==='contact'){
-    content='<p style="font-size:14px;color:var(--w2);line-height:1.8;margin-bottom:20px;text-align:center;">We are real people and we are here for you. Reach us any time — we respond fast.</p>'
+    content='<p style="font-size:14px;color:var(--w2);line-height:1.8;margin-bottom:20px;text-align:center;">We are real people and we are here for you. Reach us any time, we respond fast.</p>'
       +'<div style="background:rgba(37,211,102,0.08);border:1px solid rgba(37,211,102,0.25);border-radius:12px;padding:18px;margin-bottom:14px;">'
-      +'<div style="font-weight:800;color:#25D366;margin-bottom:8px;font-size:14px;">📱 WhatsApp — Fastest Response</div>'
+      +'<div style="font-weight:800;color:#25D366;margin-bottom:8px;font-size:14px;">📱 WhatsApp, Fastest Response</div>'
       +'<div style="font-size:16px;font-weight:900;color:var(--wh);margin-bottom:4px;">+234 916 467 8560</div>'
-      +'<div style="font-size:12px;color:var(--mu);">Monday – Saturday · 8:00am – 9:00pm WAT</div>'
+      +'<div style="font-size:12px;color:var(--mu);">Monday to Saturday · 8:00am to 9:00pm WAT</div>'
       +'<div style="font-size:11px;color:var(--mu);margin-top:6px;font-style:italic;">For order issues, send your order number and a photo if applicable</div>'
       +'<a href="https://wa.me/2349164678560" target="_blank" style="display:inline-block;margin-top:12px;background:#25D366;color:#fff;padding:9px 20px;border-radius:8px;font-size:12px;font-weight:800;text-decoration:none;">Open WhatsApp</a></div>'
       +card(orange('📧 Email')
-        +'<div style="font-size:13px;color:var(--wh);margin-bottom:3px;">richnationwbpt61@gmail.com</div>'
-        +'<div style="font-size:13px;color:var(--wh);margin-bottom:8px;">support@richnationwbpt.com</div>'
+        +'<div style="font-size:13px;color:var(--wh);margin-bottom:8px;">rnm.office@richnationmall.com</div>'
         +'<div style="font-size:12px;color:var(--mu);">We respond within 24 hours on business days</div>')
       +card(orange('🌐 Online')
         +'<div style="font-size:13px;color:var(--w2);line-height:2.2;">🌐 richnationwbpt.com<br>📺 YouTube: @richnationwbpt</div>')
@@ -2885,7 +2975,7 @@ function switchAuth(tab){
     <button class="auth-btn" onclick="doForgotPassword()" style="margin-top:6px;">Send Reset Request</button>
     <div style="text-align:center;font-size:12px;color:var(--mu);margin-top:12px;">Remembered it? <span style="color:var(--or);cursor:pointer;font-weight:700;" onclick="switchAuth('login')">Sign In</span></div>
     <div style="text-align:center;font-size:11px;color:var(--mu);margin-top:14px;line-height:1.7;">Prefer to talk to someone? <span style="color:var(--or);cursor:pointer;font-weight:700;" onclick="closeAuth();toggleChat();">Contact Support</span></div>`;}
-  else{body.innerHTML=`<div class="auth-sub">Create your free account — required to shop</div>
+  else{body.innerHTML=`<div class="auth-sub">Create your free account, required to shop</div>
     <div class="g2"><input class="fi" id="reg-fn" placeholder="First name" autocomplete="off"/><input class="fi" id="reg-ln" placeholder="Last name" autocomplete="off"/></div>
     <input class="fi" id="reg-email" type="email" placeholder="Email address" autocomplete="off"/>
     <input class="fi" id="reg-phone" placeholder="Phone number" autocomplete="off"/>
@@ -2929,10 +3019,10 @@ async function doLogin(){
     if(attempts>=3){
       await fbU('rn_mall_customers/'+custId,{loginAttempts:0,accountStatus:'suspended',suspendReason:'failed_attempts'});
       await fbP('rn_mall_notifications',{type:'account_locked',name:found.fname+' '+found.lname,email:found.email,customerId:custId,date:ds(),read:false,ts:Date.now()});
-      err.innerHTML='Too many failed attempts — this account is now locked for security. '+unlockLink+' to unlock it.';
+      err.innerHTML='Too many failed attempts, this account is now locked for security. '+unlockLink+' to unlock it.';
     }else{
       await fbU('rn_mall_customers/'+custId,{loginAttempts:attempts});
-      err.textContent='Incorrect email or password. ('+attempts+'/3 attempts — the account locks after 3 failed tries.)';
+      err.textContent='Incorrect email or password. ('+attempts+'/3 attempts, the account locks after 3 failed tries.)';
     }
     err.style.display='block';return;
   }
@@ -2999,22 +3089,22 @@ function startFlashTimer(end){const tick=()=>{const diff=new Date(end)-new Date(
 
 // ── CHAT WIDGET ──
 const BOT_KNOWLEDGE=[
-  {topic:'mission',keywords:['mission','about richnation','who are you','richnation mean','what is richnation','tell me about','what is this company','what do you sell','what is this site','is this a real company'],answer:'RichNation Mall is Nigeria\'s digital shopping destination — part of RichNation Global Ltd, founded by Ubong Rich. Our mission is to Build People, Build Platforms, and Create Millionaires. We sell quality products at fair prices, deliver reliably across Nigeria and internationally, and back every order with real customer support.'},
-  {topic:'legit',keywords:['is this legit','is this safe','is this a scam','can i trust','is it real','are you real','trust this site'],answer:'Yes — RichNation Mall is operated by RichNation Global Ltd, a registered company (RC 8998019). Payments are secured through Paystack, every order is tracked, and we offer 7-day returns. You\'re in safe hands.'},
-  {topic:'track',keywords:['track my order','tracking','where is my order','order status','get my order','how do i get my order','get my package','receive my order','when will i get','when will i receive','when will my order arrive','delivery status','check my order','find my order'],answer:'You can track any order from the "Track My Order" button on our homepage, or from My Orders in your account — just enter your tracking number. It shows live status, right down to the dispatch rider handling it.'},
-  {topic:'shipping',keywords:['shipping','delivery time','how long','how many days','arrive','nationwide','international shipping','do you deliver','delivery fee','delivery cost','ship to','deliver to'],answer:'We deliver across all 36 Nigerian states and internationally. Delivery fees and estimated times depend on your location — you\'ll see the exact fee and timeframe at checkout before you pay, and every order can be tracked live once it ships.'},
+  {topic:'mission',keywords:['mission','about richnation','who are you','richnation mean','what is richnation','tell me about','what is this company','what do you sell','what is this site','is this a real company'],answer:'RichNation Mall is Nigeria\'s digital shopping destination, part of RichNation Global Ltd, founded by Ubong Rich. Our mission is to Build People, Build Platforms, and Create Millionaires. We sell quality products at fair prices, deliver reliably across Nigeria and internationally, and back every order with real customer support.'},
+  {topic:'legit',keywords:['is this legit','is this safe','is this a scam','can i trust','is it real','are you real','trust this site'],answer:'Yes, RichNation Mall is operated by RichNation Global Ltd, a registered company (RC 8998019). Payments are secured through Paystack, every order is tracked, and we offer 7-day returns. You\'re in safe hands.'},
+  {topic:'track',keywords:['track my order','tracking','where is my order','order status','get my order','how do i get my order','get my package','receive my order','when will i get','when will i receive','when will my order arrive','delivery status','check my order','find my order'],answer:'You can track any order from the "Track My Order" button on our homepage, or from My Orders in your account, just enter your tracking number. It shows live status, right down to the dispatch rider handling it.'},
+  {topic:'shipping',keywords:['shipping','delivery time','how long','how many days','arrive','nationwide','international shipping','do you deliver','delivery fee','delivery cost','ship to','deliver to'],answer:'We deliver across all 36 Nigerian states and internationally. Delivery fees and estimated times depend on your location, you\'ll see the exact fee and timeframe at checkout before you pay, and every order can be tracked live once it ships.'},
   {topic:'returns',keywords:['return policy','refund policy','send back','exchange','can i return','how do returns work','damaged item','wrong item','faulty product'],answer:'Items can be returned within 7 days of delivery if unused and in original packaging. If something arrived damaged, faulty, or wrong, start a chat here with your order number and we\'ll sort it out.'},
   {topic:'payment',keywords:['payment method','pay with','paystack','card payment','pay on delivery','pod','how do i pay','ways to pay','accept payment'],answer:'We accept card payments via Paystack, and Pay on Delivery is available in select areas. You can also pay with your RichNation Wallet at checkout for instant, no-OTP payment.'},
   {topic:'wallet',keywords:['wallet','top up','topup','fund my wallet','add money','load my wallet'],answer:'Your RichNation Wallet lets you top up via card or bank transfer, then pay instantly at checkout with no card or OTP needed. Manage it anytime from your Account → Wallet tab.'},
-  {topic:'richpoints',keywords:['richpoint','loyalty point','reward point','points','earn points','redeem points'],answer:'RichPoints are our loyalty rewards — you earn them on purchases, reviews, referrals, and more, then redeem them for discounts or free shipping. Check your balance and referral link under Account → RichPoints.'},
+  {topic:'richpoints',keywords:['richpoint','loyalty point','reward point','points','earn points','redeem points'],answer:'RichPoints are our loyalty rewards, you earn them on purchases, reviews, referrals, and more, then redeem them for discounts or free shipping. Check your balance and referral link under Account → RichPoints.'},
   {topic:'wholesale',keywords:['wholesale','bulk order','bulk price','buy in bulk','discount for many'],answer:'We offer wholesale pricing for bulk buyers on select products. You can apply for wholesale status from your Account → Profile tab, and our team will review your application.'},
-  {topic:'refund_money',keywords:['refund my money','want a refund','cancel my order','money back','get my money back','stop my order'],answer:'If your order hasn\'t shipped yet, you can request a cancellation and refund. If money is already in your Wallet, you can request a payout to your bank from Wallet → Report an Issue — our team reviews every request.'},
+  {topic:'refund_money',keywords:['refund my money','want a refund','cancel my order','money back','get my money back','stop my order'],answer:'If your order hasn\'t shipped yet, you can request a cancellation and refund. If money is already in your Wallet, you can request a payout to your bank from Wallet → Report an Issue, our team reviews every request.'},
   {topic:'order_how',keywords:['how do i order','how to order','how do i buy','how to buy','place an order','make an order','how does this work','how do i shop'],answer:'It\'s simple: browse or search for what you want, tap Add to Cart (or Buy Now), fill in your delivery details at checkout, and pay by card, Wallet, or Pay on Delivery. You\'ll get a tracking number right after.'},
-  {topic:'account',keywords:['create account','sign up','make an account','register','do i need an account','need to sign up'],answer:'You can shop as a guest, but creating a free account lets you track orders, earn RichPoints, save addresses, and use the Wallet. Tap Sign Up at the top of the page — it takes less than a minute.'},
-  {topic:'products',keywords:['do you have','do you sell','looking for','is there','availability','in stock'],answer:'Use the search bar at the top to check — we add new products regularly across many categories. If you can\'t find something specific, tell me what you\'re looking for and I\'ll flag it for the team.'},
-  {topic:'price',keywords:['too expensive','discount code','coupon','price adjustment','cheaper','lower price'],answer:'We run seasonal promotions and bundle discounts regularly — check the homepage banner for current offers. If a price drops after you buy, our Price Adjustment policy may apply — chat with our team with your order number.'},
-  {topic:'contact',keywords:['contact','phone number','email address','reach you','whatsapp','customer care','support number'],answer:'You can reach us right here in chat anytime, or check our Contact page for other ways to get in touch — we usually respond fast!'},
-  {topic:'human',keywords:['human','real person','agent','representative','talk to someone','speak to someone','live agent'],answer:'No problem — go ahead and type your question below. A real team member will see it and reply as soon as possible.'}
+  {topic:'account',keywords:['create account','sign up','make an account','register','do i need an account','need to sign up'],answer:'You can shop as a guest, but creating a free account lets you track orders, earn RichPoints, save addresses, and use the Wallet. Tap Sign Up at the top of the page, it takes less than a minute.'},
+  {topic:'products',keywords:['do you have','do you sell','looking for','is there','availability','in stock'],answer:'Use the search bar at the top to check, we add new products regularly across many categories. If you can\'t find something specific, tell me what you\'re looking for and I\'ll flag it for the team.'},
+  {topic:'price',keywords:['too expensive','discount code','coupon','price adjustment','cheaper','lower price'],answer:'We run seasonal promotions and bundle discounts regularly, check the homepage banner for current offers. If a price drops after you buy, our Price Adjustment policy may apply, chat with our team with your order number.'},
+  {topic:'contact',keywords:['contact','phone number','email address','reach you','whatsapp','customer care','support number'],answer:'You can reach us right here in chat anytime, or check our Contact page for other ways to get in touch, we usually respond fast!'},
+  {topic:'human',keywords:['human','real person','agent','representative','talk to someone','speak to someone','live agent'],answer:'No problem, go ahead and type your question below. A real team member will see it and reply as soon as possible.'}
 ];
 function matchBotKnowledge(text){
   const stopwords=new Set(['i','a','an','the','is','are','my','me','to','of','for','on','in','do','does','how','can','you','your','it','this','that','and','or','please','want','need']);
@@ -3024,7 +3114,7 @@ function matchBotKnowledge(text){
   BOT_KNOWLEDGE.forEach(function(entry){
     let score=0;
     entry.keywords.forEach(function(kw){
-      if(lower.indexOf(kw)!==-1){score+=kw.split(' ').length*3;return;} // full phrase match — strong signal
+      if(lower.indexOf(kw)!==-1){score+=kw.split(' ').length*3;return;} // full phrase match, strong signal
       const kwWords=kw.split(' ').filter(function(w){return !stopwords.has(w);});
       const matchedWords=kwWords.filter(function(w){return inputWords.indexOf(w)!==-1;});
       if(matchedWords.length){score+=matchedWords.length;}
@@ -3052,7 +3142,7 @@ async function showBotGreeting(){
   const box=document.getElementById('widget-msgs');if(!box)return;
   const online=isBusinessHours();
   const bh=(settings.businessHours)||{start:8,end:20};
-  const greetingText='Hi! I\'m the RichNation Mall assistant — I can answer most questions instantly. '+(online?'Our team is also online now if you need a human.':'Our team is offline right now (usually here '+bh.start+':00–'+bh.end+':00), but I can still help, or leave a message and we\'ll reply once we\'re back.');
+  const greetingText='Hi! I\'m the RichNation Mall assistant, I can answer most questions instantly. '+(online?'Our team is also online now if you need a human.':'Our team is offline right now (usually here '+bh.start+':00–'+bh.end+':00), but I can still help, or leave a message and we\'ll reply once we\'re back.');
   const path='rn_mall_chat/'+(chatOrderId||currUser?.id||getGuestChatId());
   await fbP(path,{text:greetingText,senderId:'bot',isAdmin:true,isBot:true,ts:Date.now(),date:ds(),time:ts2()});
   await loadWidgetMsgs();
@@ -3076,7 +3166,7 @@ async function botQuickReply(topic){
 async function botReplyToFreeText(text){
   const path='rn_mall_chat/'+(chatOrderId||currUser?.id||getGuestChatId());
   const match=matchBotKnowledge(text);
-  const answer=match?match.answer:'Good question — I\'m not fully sure on that one, so I\'ve flagged it for a real team member to answer here shortly.';
+  const answer=match?match.answer:'Good question, I\'m not fully sure on that one, so I\'ve flagged it for a real team member to answer here shortly.';
   await fbP(path,{text:answer,senderId:'bot',isAdmin:true,isBot:true,ts:Date.now(),date:ds(),time:ts2()});
   loadWidgetMsgs();
 }
@@ -3209,7 +3299,7 @@ async function accTab(tab,el,silent){
       </div>
       <div class="card" style="margin-bottom:14px;">
         <div class="card-title">${iconBadge('card',18)} Top Up via Card</div>
-        <div style="font-size:12px;color:var(--mu);margin:8px 0 10px;">Instant top-up — funds are available immediately, secured by Paystack.</div>
+        <div style="font-size:12px;color:var(--mu);margin:8px 0 10px;">Instant top-up, funds are available immediately, secured by Paystack.</div>
         <div style="display:flex;gap:8px;">
           <input class="inp" id="wallet-topup-amt" type="number" min="100" placeholder="Amount (₦)" style="flex:1;"/>
           <button class="auth-btn" style="max-width:140px;margin:0;" onclick="topUpWalletCard()">Top Up Now</button>
@@ -3217,7 +3307,7 @@ async function accTab(tab,el,silent){
       </div>
       <div class="card" style="margin-bottom:14px;">
         <div class="card-title">${iconBadge('bank',18)} Top Up via Bank Transfer</div>
-        <div style="font-size:12px;color:var(--mu);margin:8px 0 10px;">Send a bank transfer, then submit the details below — our team confirms and credits your wallet, usually within a few hours.</div>
+        <div style="font-size:12px;color:var(--mu);margin:8px 0 10px;">Send a bank transfer, then submit the details below, our team confirms and credits your wallet, usually within a few hours.</div>
         ${(settings.bankDetails&&settings.bankDetails.acctNo)?`<div style="background:var(--card2);border:1px dashed var(--bdr);border-radius:8px;padding:12px 14px;margin-bottom:12px;">
           <div style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:0.5px;font-weight:700;margin-bottom:6px;">Send your transfer to:</div>
           <div style="font-size:13px;color:var(--w2);line-height:1.9;">
@@ -3225,7 +3315,7 @@ async function accTab(tab,el,silent){
             Account Number: <strong style="color:var(--or);font-family:monospace;letter-spacing:1px;">${settings.bankDetails.acctNo}</strong> <span onclick="navigator.clipboard.writeText('${settings.bankDetails.acctNo}');toast('Account number copied!')" style="color:var(--or);cursor:pointer;font-weight:700;font-size:11px;">Copy</span><br>
             Account Name: <strong style="color:var(--wh);">${settings.bankDetails.acctName||''}</strong>
           </div>
-        </div>`:`<div style="font-size:12px;color:var(--re);margin-bottom:12px;">Bank transfer details haven't been set up yet — please use Card Top-Up above, or contact support for account details.</div>`}
+        </div>`:`<div style="font-size:12px;color:var(--re);margin-bottom:12px;">Bank transfer details haven't been set up yet, please use Card Top-Up above, or contact support for account details.</div>`}
         <input class="inp" id="wallet-bt-amt" type="number" min="100" placeholder="Amount transferred (₦)" style="margin-bottom:8px;"/>
         <input class="inp" id="wallet-bt-ref" placeholder="Transfer reference / description" style="margin-bottom:8px;"/>
         <button class="auth-btn" style="max-width:220px;" onclick="requestBankTransferTopUp()">Submit Transfer for Review</button>
@@ -3235,7 +3325,7 @@ async function accTab(tab,el,silent){
           <div class="card-title">${iconBadge('info',18)} Report an Issue</div>
           <button class="btn" style="font-size:11px;padding:6px 12px;background:var(--card2);border:1px solid var(--bdr);border-radius:7px;color:var(--w2);cursor:pointer;" onclick="showWalletIssueForm()">+ New Report</button>
         </div>
-        <div style="font-size:12px;color:var(--mu);margin:8px 0 0;">Requesting a refund to your bank account, reporting a mistaken top-up, or any other wallet issue — start here.</div>
+        <div style="font-size:12px;color:var(--mu);margin:8px 0 0;">Requesting a refund to your bank account, reporting a mistaken top-up, or any other wallet issue, start here.</div>
         <div id="wallet-issues-list" style="margin-top:10px;">${issuesList.length?issuesList.map(renderWalletIssueRow).join(''):'<div style="color:var(--mu);font-size:12px;">No reports yet.</div>'}</div>
       </div>
       <div class="card">
@@ -3261,21 +3351,21 @@ async function accTab(tab,el,silent){
       <div class="card" style="margin-bottom:14px;">
         <div class="card-title">${iconBadge('trophy',18)} Loyalty Tier: ${tier.name}</div>
         <div style="font-size:13px;color:var(--w2);margin-top:8px;">You get a permanent <strong style="color:var(--or);">${tier.pct}% discount</strong> on every order, automatically applied at checkout.</div>
-        <div style="font-size:12px;color:var(--mu);margin-top:6px;">Lifetime spend: ${fmt(tier.spend)}${tier.next?' — spend '+fmt(tier.next.min-tier.spend)+' more to reach '+tier.next.name+' ('+tier.next.pct+'% off)':' — you have reached the top tier!'}</div>
+        <div style="font-size:12px;color:var(--mu);margin-top:6px;">Lifetime spend: ${fmt(tier.spend)}${tier.next?', spend '+fmt(tier.next.min-tier.spend)+' more to reach '+tier.next.name+' ('+tier.next.pct+'% off)':', you have reached the top tier!'}</div>
       </div>
       <div class="card" style="margin-bottom:14px;text-align:center;">
-        <div onclick="showRichPointsInfo()" style="cursor:pointer;color:var(--or);font-weight:700;font-size:13px;">${iconBadge('info',16)} How RichPoints Works — Earning &amp; Redeeming →</div>
+        <div onclick="showRichPointsInfo()" style="cursor:pointer;color:var(--or);font-weight:700;font-size:13px;">${iconBadge('info',16)} How RichPoints Works, Earning &amp; Redeeming →</div>
       </div>
       <div class="card">
         <div class="card-title">Your Referral Code</div>
-        <div style="font-size:12px;color:var(--mu);margin:8px 0 10px;">Share your code${refLink?' or link':''} — when a friend signs up and makes their first purchase, you earn ${rpRates().referral} RichPoints.</div>
+        <div style="font-size:12px;color:var(--mu);margin:8px 0 10px;">Share your code${refLink?' or link':''}, when a friend signs up and makes their first purchase, you earn ${rpRates().referral} RichPoints.</div>
         <div style="text-align:center;background:var(--card2);border:1px dashed var(--bdr);border-radius:8px;padding:14px;margin-bottom:12px;">
           <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:22px;letter-spacing:2px;color:var(--or);">${currUser.referralCode}</div>
         </div>
         ${refLink?`<div style="display:flex;gap:8px;">
           <input class="inp" readonly value="${refLink}" style="flex:1;font-size:11px;" onclick="this.select()"/>
           <button class="auth-btn" style="max-width:100px;margin:0;" onclick="navigator.clipboard.writeText('${refLink}');toast('Referral link copied!')">Copy Link</button>
-        </div>`:`<div style="font-size:11px;color:var(--mu);text-align:center;">Just share the code above — your friend can enter it when they sign up.</div>`}
+        </div>`:`<div style="font-size:11px;color:var(--mu);text-align:center;">Just share the code above, your friend can enter it when they sign up.</div>`}
       </div>
     </div>`;
   }else if(tab==='vouchers'){c.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:24px;text-align:center;"><div style="margin-bottom:12px;display:flex;justify-content:center;">'+iconBadge('ticket',40)+'</div><div style="font-weight:700;margin-bottom:8px;">My Vouchers</div><div style="font-size:13px;color:var(--mu);">No active vouchers. Vouchers from promotions appear here.</div></div>';}
@@ -3303,7 +3393,7 @@ async function accTab(tab,el,silent){
   else if(tab==='profile'){c.innerHTML=`<div style="max-width:480px;"><div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;margin-bottom:14px;">My Profile</div><div class="g2"><div class="fg"><label class="lbl">First Name</label><input class="inp" id="pf-fn" value="${currUser.fname||''}"/></div><div class="fg"><label class="lbl">Last Name</label><input class="inp" id="pf-ln" value="${currUser.lname||''}"/></div></div><div class="fg"><label class="lbl">Email</label><input class="inp" type="email" id="pf-em" value="${currUser.email||''}"/></div><div class="fg"><label class="lbl">Phone</label><input class="inp" id="pf-ph" value="${currUser.phone||''}"/></div><div class="fg"><label class="lbl">New Password (leave blank to keep current)</label><div class="pw-wrap"><input class="inp" id="pf-pw" type="password" placeholder="New password" style="margin-bottom:0;"/><button class="pw-eye" onclick="this.previousElementSibling.type=this.previousElementSibling.type==='password'?'text':'password'">Show</button></div></div><button class="auth-btn" style="max-width:180px;" onclick="saveProfile()">Save Profile</button>
     <div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:16px;margin-top:20px;">
       <div style="font-weight:800;margin-bottom:6px;">📦 Wholesale Pricing</div>
-      ${currUser.wholesaleStatus==='approved'?'<div style="font-size:12px;color:var(--su);">✅ You are an approved wholesale buyer — bulk pricing applies automatically on eligible products.</div>'
+      ${currUser.wholesaleStatus==='approved'?'<div style="font-size:12px;color:var(--su);">✅ You are an approved wholesale buyer, bulk pricing applies automatically on eligible products.</div>'
         :currUser.wholesaleStatus==='pending'?'<div style="font-size:12px;color:var(--or);">⏳ Your wholesale application is under review.</div>'
         :`<div style="font-size:12px;color:var(--mu);margin-bottom:10px;">Are you a small business, reseller, or institutional buyer? Apply for wholesale pricing on eligible bulk orders.</div>
           <input class="inp" id="wh-business" placeholder="Business name" style="margin-bottom:8px;"/>
@@ -3365,7 +3455,7 @@ async function cancelMyOrder(trackingNum){
   if(order.riderId){
     await fbP('rn_mall_rider_notifications/'+order.riderId,{type:'order_cancelled',orderId:trackingNum,reason:'Cancelled by customer',date:ds(),read:false,ts:Date.now()});
   }
-  toast(willRefund?'Order cancelled — refunded to your Wallet!':'Order cancelled!');
+  toast(willRefund?'Order cancelled, refunded to your Wallet!':'Order cancelled!');
   accTab('orders',null);
 }
 function openAskSellerModal(vendorId,vendorName){
@@ -3415,7 +3505,7 @@ function showPage(page,fromBack){
 // ── BROWSER BACK BUTTON SUPPORT ──
 // Makes the phone/browser's own back button behave like an "invisible" back
 // button: it closes whatever's open (product modal, cart, auth, chat) first,
-// then steps back through the app's own pages — instead of leaving the site.
+// then steps back through the app's own pages, instead of leaving the site.
 function pushNavState(state){
   try{history.pushState(Object.assign({rnm:true},state||{}),'',location.pathname+location.search);}catch(e){}
 }
@@ -3458,7 +3548,7 @@ async function manualRefreshProducts(btn){
     else renderAllProducts(currentCatFilter?allProducts.filter(p=>p.category===currentCatFilter):null);
     applyBrandIcons();
     toast('Updated!');
-  }catch(e){toast('Refresh failed — check your connection','err');}
+  }catch(e){toast('Refresh failed, check your connection','err');}
   btn.innerHTML=orig;btn.disabled=false;
 }
 async function syncLiveData(){
@@ -3569,7 +3659,7 @@ function goBack(){if(pageHistory.length>0){var prev=pageHistory.pop();showPage(p
 
 // ── STARTUP ──
 
-// (Delivery signature confirmation lives in showDeliveryConfirm()/submitDeliveryConfirm() above —
+// (Delivery signature confirmation lives in showDeliveryConfirm()/submitDeliveryConfirm() above,
 // used by both the Track Order page and the Account "My Orders" list.)
 
 

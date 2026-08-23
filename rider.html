@@ -6,7 +6,7 @@
 <meta http-equiv="Expires" content="0"/>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>RichNation Mall — Dispatch Rider Portal</title>
+<title>RichNation Mall, Dispatch Rider Portal</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -127,12 +127,12 @@ button{font-family:inherit;}
       </div>
       <textarea class="fi" id="ap-note" rows="2" placeholder="Anything else you'd like us to know (optional)" style="resize:vertical;"></textarea>
       <div style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;margin:14px 0;max-height:220px;overflow-y:auto;">
-        <div style="font-weight:800;font-size:13px;margin-bottom:8px;color:var(--wh);">A Direct Word From the Founder — Please Read</div>
+        <div style="font-weight:800;font-size:13px;margin-bottom:8px;color:var(--wh);">A Direct Word From the Founder, Please Read</div>
         <div style="font-size:10.5px;color:var(--mu);line-height:1.7;">
           You are the last person our customer sees before they hold what they paid for. To them, you are RichNation. Customers have complained before about riders being rude, impatient, or rough with packages. This will not be taken lightly.<br><br>
           <strong>What I expect:</strong> wait patiently if a customer needs a moment. Answer questions calmly and politely, even the same one for the hundredth time. Carry every package the way you would carry something you paid for yourself.<br><br>
           <strong>If a customer treats you badly:</strong> do not argue back and do not respond anyhow. Stay professional, finish the delivery, and report it to your logistics manager or to management directly. We will handle it from there, and if you handled it the right way, we stand behind you.<br><br>
-          <strong>Consequences that are not negotiable:</strong> confirmed rudeness, impatience, or careless handling follows our strike system — a formal strike on the first confirmed report, another on the second, and automatic suspension on the third. Running away with a customer's product, or anything close to theft, is not a strike matter. It is immediate termination, treated as theft.<br><br>
+          <strong>Consequences that are not negotiable:</strong> confirmed rudeness, impatience, or careless handling follows our strike system, a formal strike on the first confirmed report, another on the second, and automatic suspension on the third. Running away with a customer's product, or anything close to theft, is not a strike matter. It is immediate termination, treated as theft.<br><br>
           This is written because I respect you enough to tell you exactly what is expected, before you sign, not after a mistake.
         </div>
       </div>
@@ -171,7 +171,7 @@ const FB='https://richnation-portal-default-rtdb.firebaseio.com';
 const FIREBASE_CONFIG={apiKey:"AIzaSyDLGnyGB8ZnEc2u6TbVzjIAQi1pgSaZVyQ",authDomain:"richnation-portal.firebaseapp.com",databaseURL:"https://richnation-portal-default-rtdb.firebaseio.com",projectId:"richnation-portal",storageBucket:"richnation-portal.firebasestorage.app",messagingSenderId:"175550692963",appId:"1:175550692963:web:1e3c995b3ed0baaadac256"};
 const RECAPTCHA_SITE_KEY='6Ld2O5EtAAAAAN6fXMnn7kn5a6SWvDpJs97kckGC';
 let appCheckToken=null;
-// App Check isn't enforced yet, so it adds nothing functional right now — loaded only
+// App Check isn't enforced yet, so it adds nothing functional right now, loaded only
 // after the page is fully done loading, so it costs the page nothing while unused.
 function loadAppCheckWhenIdle(){
   function loadScript(src){
@@ -191,7 +191,7 @@ function loadAppCheckWhenIdle(){
         appCheckInstance.getToken().then(function(r){appCheckToken=r.token;}).catch(function(e){console.warn('App Check token fetch failed:',e.message);});
         appCheckInstance.onTokenChanged(function(r){appCheckToken=r.token;});
       }catch(e){
-        console.warn('App Check init failed — requests will proceed without a token:',e.message);
+        console.warn('App Check init failed, requests will proceed without a token:',e.message);
       }
     });
 }
@@ -258,7 +258,7 @@ function toggleApplyMode(){
   document.getElementById('login-form').style.display=isLogin?'none':'block';
   document.getElementById('apply-form').style.display=isLogin?'block':'none';
   document.getElementById('l-title').textContent=isLogin?'Apply to Become a Rider':'Dispatch Rider Sign In';
-  document.getElementById('l-sub').textContent=isLogin?'Fill in your details — our team reviews every application before you start receiving deliveries.':'Manage your deliveries and update your status in real time.';
+  document.getElementById('l-sub').textContent=isLogin?'Fill in your details, our team reviews every application before you start receiving deliveries.':'Manage your deliveries and update your status in real time.';
   document.getElementById('toggle-note').innerHTML=isLogin?'Already a rider? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Sign in</span>':'New rider? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Apply here</span>';
 }
 async function submitRiderApplication(){
@@ -342,7 +342,7 @@ function maybeShowRiderWelcomeSetup(){
   if(!rider.policyRead)missing.push('Read and confirm the Rider Policy');
   if(!missing.length)return;
   showInfoModal('👋 Welcome, '+rider.name.split(' ')[0]+'!',`
-    <div style="font-size:13px;color:var(--w2);line-height:1.7;margin-bottom:14px;">Let's finish setting up your dashboard — a few things left:</div>
+    <div style="font-size:13px;color:var(--w2);line-height:1.7;margin-bottom:14px;">Let's finish setting up your dashboard, a few things left:</div>
     <div style="margin-bottom:16px;">${missing.map(function(m){return '<div style="padding:8px 0;border-top:1px solid var(--bdr);font-size:13px;color:var(--w2);">☐ '+m+'</div>';}).join('')}</div>
     <button class="btn btn-or btn-lg" onclick="closeInfoModal();rnav('profile');" style="width:100%;">Complete My Setup</button>
   `);
@@ -370,7 +370,7 @@ async function rnav(page){
     if(changed)(routes[page]||renderDashboard)(c);
   }
 }
-// dashboard live-refresh interval removed — was causing a disruptive flash every 15s
+// dashboard live-refresh interval removed, was causing a disruptive flash every 15s
 
 let _locationWatchId=null;
 let _lastLocationWriteTs=0;
@@ -380,7 +380,7 @@ function startLiveLocationSharing(){
   const badge=document.getElementById('live-loc-badge');if(badge)badge.style.display='flex';
   _locationWatchId=navigator.geolocation.watchPosition(
     function(pos){
-      // Throttle actual writes — the device can report position changes far more
+      // Throttle actual writes, the device can report position changes far more
       // often than we need; updating every ~15s is plenty for a delivery map.
       if(Date.now()-_lastLocationWriteTs<15000)return;
       _lastLocationWriteTs=Date.now();
@@ -470,14 +470,14 @@ async function toggleMyAvailability(){
   await fbU('rn_mall_riders/'+rider._id,{online:newState});
   rider.online=newState;
   sessionStorage.setItem('rnm_rider_session',JSON.stringify(rider));
-  toast(newState?'You\'re online — ready for deliveries!':'You\'re offline now.');
+  toast(newState?'You\'re online, ready for deliveries!':'You\'re offline now.');
   rnav('dashboard');
 }
 async function renderDeliveries(c){
   c.innerHTML='<div class="page-hdr-title">My Deliveries</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
   const orders=await getMyOrders();
   const active=orders.filter(function(o){return o.deliveryStage&&o.deliveryStage!=='delivered';});
-  c.innerHTML='<div class="page-hdr-title">My Deliveries</div><div class="page-hdr-sub" style="margin-bottom:20px;">Tap through each stage as it happens — customers see this live on their tracking page.</div>'
+  c.innerHTML='<div class="page-hdr-title">My Deliveries</div><div class="page-hdr-sub" style="margin-bottom:20px;">Tap through each stage as it happens, customers see this live on their tracking page.</div>'
     +(active.length?active.map(deliveryCard).join(''):'<div class="card" style="text-align:center;padding:40px;color:var(--mu);">No active deliveries right now.</div>');
 }
 function deliveryCard(o){
@@ -489,6 +489,7 @@ function deliveryCard(o){
     +'<span class="stage-badge" style="background:rgba(255,255,255,0.06);color:'+STAGE_COLORS[stage]+';">'+STAGE_LABELS[stage]+'</span>'
     +'</div>'
     +'<div style="font-size:12px;color:var(--mu);margin-bottom:10px;">📍 '+(o.customer?o.customer.address+', '+o.customer.city:'')+'</div>'
+    +(o.payMethod==='pod'&&o.podDepositAmount!=null&&!o.podBalanceCollected?'<div style="background:rgba(255,106,0,0.08);border:1px solid rgba(255,106,0,0.3);border-radius:7px;padding:8px 10px;margin-bottom:10px;font-size:12px;color:var(--or);font-weight:700;">💵 Collect '+fmt(o.podBalanceDue)+' balance on delivery (Pay on Delivery order)</div>':'')
     +'<button class="btn" style="margin-bottom:8px;" onclick="showDeliveryMapModal(\''+o.tracking+'\')">🗺️ View Map</button>'
     +(nextStage?'<button class="btn btn-or" onclick="advanceStage(\''+o.tracking+'\',\''+nextStage+'\')">Mark as '+STAGE_LABELS[nextStage]+'</button>':'<div style="color:var(--su);font-size:12px;font-weight:700;">✅ Delivered</div>')
     +'</div>';
@@ -496,7 +497,10 @@ function deliveryCard(o){
 let _riderMapInstance=null;
 async function geocodeAddress(address){
   try{
-    const res=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(address));
+    const ctrl=new AbortController();
+    const timer=setTimeout(function(){ctrl.abort();},7000);
+    const res=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ng&email=rnm.office@richnationmall.com&q='+encodeURIComponent(address),{signal:ctrl.signal});
+    clearTimeout(timer);
     const data=await res.json();
     if(data&&data[0])return {lat:parseFloat(data[0].lat),lng:parseFloat(data[0].lon)};
   }catch(e){}
@@ -555,7 +559,7 @@ async function showDeliveryMapModal(tracking){
   const homeIcon=L.divIcon({html:'<div style="background:#22c55e;width:26px;height:26px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid #fff;">📍</div>',iconSize:[26,26],className:''});
   L.marker([pickup.lat,pickup.lng],{icon:storeIcon}).addTo(map).bindPopup('RichNation Mall');
   const deliveryMarker=L.marker([dest.lat,dest.lng],{icon:homeIcon,draggable:true}).addTo(map).bindPopup(order.customer?.name||'Delivery Address');
-  // Show the rider's own position too — prefer a fresh device reading, fall back to
+  // Show the rider's own position too, prefer a fresh device reading, fall back to
   // their last-shared live location so they can always see themselves on the map.
   function placeSelfMarker(lat,lng){
     const vehicleEmoji=VEHICLE_ICONS_RIDER_SELF[(rider.vehicleType||'motorcycle').toLowerCase()]||'🏍️';
@@ -576,7 +580,7 @@ async function showDeliveryMapModal(tracking){
   deliveryMarker.on('dragstart',function(){if(pinHint)pinHint.style.display='block';});
   deliveryMarker.on('dragend',function(e){
     const pos=e.target.getLatLng();
-    if(pinHint)pinHint.innerHTML='📍 Pin moved — <button onclick="saveDeliveryPinPosition(\''+tracking+'\','+pos.lat+','+pos.lng+')" style="background:var(--or);border:none;color:#000;font-weight:800;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;">Save New Location</button>';
+    if(pinHint)pinHint.innerHTML='📍 Pin moved, <button onclick="saveDeliveryPinPosition(\''+tracking+'\','+pos.lat+','+pos.lng+')" style="background:var(--or);border:none;color:#000;font-weight:800;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;">Save New Location</button>';
   });
   L.polyline([[pickup.lat,pickup.lng],[dest.lat,dest.lng]],{color:'#FF6A00',weight:3,dashArray:'6,6'}).addTo(map);
   const toggleBtn=L.control({position:'topright'});
@@ -592,10 +596,18 @@ async function showDeliveryMapModal(tracking){
   setTimeout(function(){if(map){map.invalidateSize();}},350);
 }
 async function advanceStage(tracking,newStage){
-  if(!confirm('Mark this delivery as "'+STAGE_LABELS[newStage]+'"?'))return;
   const order=await fbG('rn_mall_orders/'+tracking);if(!order)return;
-  const tl=(order.timeline||[]).concat([{status:STAGE_TIMELINE_TEXT[newStage]||STAGE_LABELS[newStage],time:new Date().toISOString(),note:'Updated by dispatch rider '+rider.name}]);
-  await fbU('rn_mall_orders/'+tracking,{deliveryStage:newStage,timeline:tl});
+  const hasPodBalance=order.payMethod==='pod'&&order.podDepositAmount!=null&&!order.podBalanceCollected;
+  const update={deliveryStage:newStage};
+  if(newStage==='delivered'&&hasPodBalance){
+    if(!confirm('This order still has a Pay on Delivery balance of '+fmt(order.podBalanceDue)+' to collect. Confirm you have collected this balance (cash or transfer) from the customer, then mark as delivered?'))return;
+    update.podBalanceCollected=true;
+  }else{
+    if(!confirm('Mark this delivery as "'+STAGE_LABELS[newStage]+'"?'))return;
+  }
+  const tl=(order.timeline||[]).concat([{status:STAGE_TIMELINE_TEXT[newStage]||STAGE_LABELS[newStage],time:new Date().toISOString(),note:'Updated by dispatch rider '+rider.name+(update.podBalanceCollected?'. POD balance of '+fmt(order.podBalanceDue)+' collected.':'')}]);
+  update.timeline=tl;
+  await fbU('rn_mall_orders/'+tracking,update);
   await fbP('rn_mall_rider_activity_log/'+rider._id,{action:'Updated delivery status',detail:tracking+' → '+STAGE_LABELS[newStage],date:ds(),ts:Date.now()});
   if(order.customer&&order.customer.id){
     await fbP('rn_mall_customer_notifications/'+order.customer.id,{type:'status_update',orderId:tracking,message:'Your order '+tracking+' is now: '+STAGE_LABELS[newStage],date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
@@ -629,7 +641,7 @@ async function renderRiderPoints(c){
 async function renderRiderReports(c){
   c.innerHTML='<div class="page-hdr-title">Reports</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
   const reports=Object.values(await fbG('rn_mall_rider_reports/'+rider._id)||{}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
-  c.innerHTML='<div class="page-hdr-title">Reports</div><div class="page-hdr-sub" style="margin-bottom:16px;">Submit a work report — daily, weekly, or whenever needed</div>'
+  c.innerHTML='<div class="page-hdr-title">Reports</div><div class="page-hdr-sub" style="margin-bottom:16px;">Submit a work report, daily, weekly, or whenever needed</div>'
     +'<div class="card"><textarea class="fi" id="rr-text" rows="4" placeholder="What happened today? Deliveries, issues, anything admin should know..."></textarea><button class="btn btn-or" style="margin-top:10px;" onclick="submitRiderReport()">Submit Report</button></div>'
     +'<div class="card"><div class="card-title">My Past Reports</div><div style="margin-top:8px;">'+(reports.length?reports.map(function(r){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);font-size:13px;color:var(--w2);">'+r.message+'<div style="font-size:10px;color:var(--mu);margin-top:3px;">'+r.date+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No reports submitted yet.</div>')+'</div></div>';
 }
@@ -657,7 +669,7 @@ async function submitRiderComplaint(){
   if(!text){toast('Describe what happened first','err');return;}
   await fbP('rn_mall_rider_complaints/'+rider._id,{riderId:rider._id,riderName:rider.name,message:text,urgent:urgent,status:'pending',date:ds(),ts:Date.now()});
   await fbP('rn_mall_notifications',{type:urgent?'urgent_rider_complaint':'rider_complaint',riderName:rider.name,preview:text.slice(0,60),date:ds(),read:false,ts:Date.now()});
-  toast(urgent?'Urgent complaint sent — admin has been alerted!':'Complaint submitted!');
+  toast(urgent?'Urgent complaint sent, admin has been alerted!':'Complaint submitted!');
   rnav('complaints');
 }
 async function renderRiderLeave(c){
@@ -678,7 +690,7 @@ async function submitRiderLeave(){
 }
 async function renderRiderMessages(c){
   c.innerHTML='<div class="page-hdr-title">Messages</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
-  c.innerHTML='<div class="page-hdr-title">Messages</div><div class="page-hdr-sub" style="margin-bottom:16px;">Direct line to admin — for anything, anytime</div>'
+  c.innerHTML='<div class="page-hdr-title">Messages</div><div class="page-hdr-sub" style="margin-bottom:16px;">Direct line to admin, for anything, anytime</div>'
     +'<div class="card"><div id="rm-msgs" style="margin-bottom:12px;max-height:360px;overflow-y:auto;"></div><div style="display:flex;gap:8px;"><input class="fi" id="rm-input" placeholder="Type a message..." style="flex:1;" onkeydown="if(event.key===\'Enter\')sendRiderMessage()"/><button class="btn btn-or" onclick="sendRiderMessage()">Send</button></div></div>';
   await loadRiderMessages();
 }
@@ -688,9 +700,9 @@ async function loadRiderMessages(){
   const el=document.getElementById('rm-msgs');if(!el)return;
   const roleLabels={ceo:'CEO',general_manager:'General Manager',logistics_manager:'Logistics Manager',customer_service:'Customer Service',hr_manager:'HR Manager'};
   el.innerHTML=msgs.length?msgs.map(function(m){
-    const label=m.isAdmin?(m.senderName?m.senderName+(m.senderRole?' — '+(roleLabels[m.senderRole]||m.senderRole):' — Admin'):'Admin'):'You';
+    const label=m.isAdmin?(m.senderName?m.senderName+(m.senderRole?', '+(roleLabels[m.senderRole]||m.senderRole):', Admin'):'Admin'):'You';
     return '<div class="chat-msg'+(m.isAdmin?'':' own')+'"><div class="chat-av">'+(m.isAdmin?(m.senderName?m.senderName.charAt(0):'A'):ini(rider.name))+'</div><div><div class="chat-bubble">'+m.text+'</div><div style="font-size:9px;color:var(--mu);margin-top:2px;">'+label+'</div></div></div>';
-  }).join(''):'<div style="color:var(--mu);font-size:12px;text-align:center;padding:20px;">No messages yet — say hello!</div>';
+  }).join(''):'<div style="color:var(--mu);font-size:12px;text-align:center;padding:20px;">No messages yet, say hello!</div>';
   el.scrollTop=el.scrollHeight;
 }
 async function sendRiderMessage(){
@@ -704,23 +716,23 @@ async function renderRiderActivity(c){
   c.innerHTML='<div class="page-hdr-title">My Activity</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
   const log=Object.values(await fbG('rn_mall_rider_activity_log/'+rider._id)||{}).sort(function(a,b){return (b.ts||0)-(a.ts||0);}).slice(0,50);
   c.innerHTML='<div class="page-hdr-title">My Activity</div><div class="page-hdr-sub" style="margin-bottom:16px;">Your recent actions</div>'
-    +'<div class="card">'+(log.length?log.map(function(l){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);font-size:13px;color:var(--w2);">'+l.action+(l.detail?' — '+l.detail:'')+'<div style="font-size:10px;color:var(--mu);margin-top:3px;">'+l.date+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No activity logged yet.</div>')+'</div>';
+    +'<div class="card">'+(log.length?log.map(function(l){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);font-size:13px;color:var(--w2);">'+l.action+(l.detail?', '+l.detail:'')+'<div style="font-size:10px;color:var(--mu);margin-top:3px;">'+l.date+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No activity logged yet.</div>')+'</div>';
 }
 async function renderRiderPolicy(c){
   c.innerHTML=`
   <div class="page-hdr-title">Rider Policy</div>
-  <div class="page-hdr-sub" style="margin-bottom:16px;">RichNation Global Ltd — Dispatch Rider Terms — Effective 2026</div>
+  <div class="page-hdr-sub" style="margin-bottom:16px;">RichNation Global Ltd, Dispatch Rider Terms, Effective 2026</div>
   ${!rider.policyRead?`<div class="card" style="border-color:rgba(255,140,0,0.4);background:rgba(255,140,0,0.06);"><div style="font-size:13px;color:var(--or);font-weight:700;">Please read this in full, then confirm below.</div></div>`:''}
-  <div class="card"><div class="card-title">Who We Are</div><div style="font-size:12px;color:var(--w2);line-height:1.8;margin-top:8px;">RichNation Global Ltd (RC 8998019) operates RichNation Mall — Nigeria's digital shopping destination. Our mission: <strong style="color:var(--wh);">Build People. Build Platforms. Create Millionaires.</strong> As a rider, you're the last and most visible step of that promise to every customer.</div></div>
+  <div class="card"><div class="card-title">Who We Are</div><div style="font-size:12px;color:var(--w2);line-height:1.8;margin-top:8px;">RichNation Global Ltd (RC 8998019) operates RichNation Mall, Nigeria's digital shopping destination. Our mission: <strong style="color:var(--wh);">Build People. Build Platforms. Create Millionaires.</strong> As a rider, you're the last and most visible step of that promise to every customer.</div></div>
   ${[
     ['1. Pickup Confirmation','Riders must confirm pickup before marking any order "In Transit". Do not advance a stage you haven\'t actually completed.'],
-    ['2. Accurate Status Updates','Delivery status must be updated at each real stage as it happens — no skipping straight to "Delivered". False status updates are a strike-eligible offence.'],
+    ['2. Accurate Status Updates','Delivery status must be updated at each real stage as it happens, no skipping straight to "Delivered". False status updates are a strike-eligible offence.'],
     ['3. Proof of Delivery','A customer signature or confirmation is required to close out every order. Deliveries without proof may be disputed and reversed.'],
-    ['4. Data Privacy','You may only view the address and phone number for orders assigned to you — nothing else. Sharing a customer\'s delivery details with anyone outside RichNation is grounds for immediate suspension.'],
+    ['4. Data Privacy','You may only view the address and phone number for orders assigned to you, nothing else. Sharing a customer\'s delivery details with anyone outside RichNation is grounds for immediate suspension.'],
     ['5. Professional Conduct','You represent RichNation at the customer\'s door. Be respectful, presentable, and on time. Harassment or dishonesty toward a customer is a strike-eligible offence and may be immediate termination.'],
     ['6. Availability','Go Online when you\'re available for deliveries and Offline when you\'re not, from your Dashboard. Repeated unavailability after accepting assignments is strike-eligible.'],
     ['7. Vehicle &amp; Documentation','You must maintain a valid means of identification and keep your vehicle details up to date in your Profile at all times.'],
-    ['8. Earnings','You choose your payout frequency (daily/weekly/monthly) from your Profile. Payments go to your verified bank account only — unverified accounts do not get paid.'],
+    ['8. Earnings','You choose your payout frequency (daily/weekly/monthly) from your Profile. Payments go to your verified bank account only, unverified accounts do not get paid.'],
     ['9. Strikes, Suspension &amp; Termination','3 confirmed strikes = automatic suspension pending review. Suspended riders are not paid and cannot receive new deliveries until reinstated. Violations after reinstatement result in permanent termination.'],
     ['10. Management Authority','Management retains full authority to review, edit, or override any rider record or delivery assignment at any time.']
   ].map(function(item){return '<div class="card"><div class="card-title">'+item[0]+'</div><div style="font-size:12px;color:var(--w2);line-height:1.8;margin-top:8px;">'+item[1]+'</div></div>';}).join('')}
@@ -819,11 +831,11 @@ async function uploadMyPhoto(inputId){
   if(!inp.files||!inp.files[0])return;
   toast('Uploading photo…');
   let b64=await compressPhotoFile(inp.files[0]);
-  if(!b64){toast('Could not read that image — try another one','err');return;}
+  if(!b64){toast('Could not read that image, try another one','err');return;}
   const url=isGithubConfigured()?await uploadDataUrlToGithub(b64,'rider-photos'):null;
   if(url)b64=url;
   const ok=await fbUVerified('rn_mall_riders/'+rider._id,{photo:b64});
-  if(!ok){toast('Photo upload failed — check your connection and try again','err');return;}
+  if(!ok){toast('Photo upload failed, check your connection and try again','err');return;}
   rider.photo=b64;
   sessionStorage.setItem('rnm_rider_session',JSON.stringify(rider));
   toast('Photo updated!');
@@ -855,10 +867,10 @@ async function saveRiderProfile(){
 
 // ── NOTIFICATIONS ──
 function riderNotifMsg(n){
-  if(n.type==='payout')return '💰 A payment of '+fmt(n.amount)+' was recorded for you — '+(n.description||'')+'. '+(n.message||'');
+  if(n.type==='payout')return '💰 A payment of '+fmt(n.amount)+' was recorded for you, '+(n.description||'')+'. '+(n.message||'');
   if(n.type==='strike')return n.strikes>=3?'🚫 You have been automatically suspended after 3 strikes, pending review. Last strike: '+n.reason:'⚠ You received a strike ('+n.strikes+'/3): '+n.reason;
   if(n.type==='bank_verified')return '✔ Your bank account details have been verified by admin.';
-  if(n.type==='points_awarded')return '⭐ You earned '+n.amount+' StaffPoints — '+(n.reason||'');
+  if(n.type==='points_awarded')return '⭐ You earned '+n.amount+' StaffPoints, '+(n.reason||'');
   if(n.type==='admin_reply')return '💬 Admin replied: '+(n.preview||'');
   return n.message||'New notification';
 }
