@@ -20,7 +20,7 @@
   /* brand accent */
   --or:#FF6A00;--or-dk:#E15E00;--gold:#B8720A;
   /* text — legacy names kept (--wh/--w2/--mu) so existing inline JS styles re-theme for free */
-  --wh:#15151A;--w2:#48484E;--mu:#7B7B81;
+  --wh:#15151A;--w2:#48484E;--mu:#6B6B71;
   /* status */
   --su:#15803D;--re:#DC2626;--bl:#2054C7;
   /* system */
@@ -449,10 +449,35 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
   .modal-title{font-size:16px;}
   .modal-price{font-size:22px;}
 }
+/* POLICY PAGES */
+@keyframes policyFadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.policy-fade{animation:policyFadeIn .25s ease;}
+.policy-nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--bdr);}
+.policy-nav-btn{background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-pill);padding:7px 14px;font-size:12px;font-weight:600;color:var(--w2);cursor:pointer;transition:background .15s,border-color .15s,color .15s;}
+.policy-nav-btn:hover{border-color:var(--wh);color:var(--wh);}
+.policy-nav-btn.active{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:700;}
+.faq-list{display:flex;flex-direction:column;gap:10px;}
+.faq-item{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);overflow:hidden;transition:border-color .15s;}
+.faq-item.open{border-color:rgba(21,21,26,.25);}
+.faq-q{width:100%;text-align:left;background:none;border:none;padding:16px 18px;font-size:13.5px;font-weight:700;color:var(--wh);cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;font-family:'Plus Jakarta Sans',sans-serif;}
+.faq-chevron{color:var(--or);font-size:14px;transition:transform .2s ease;flex-shrink:0;}
+.faq-item.open .faq-chevron{transform:rotate(180deg);}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .25s ease;}
+.faq-item.open .faq-a{max-height:220px;}
+.faq-a-inner{padding:0 18px 16px;font-size:13px;color:var(--w2);line-height:1.8;}
+/* LIVE TRACKING MAP */
+.live-map-card{border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-bottom:14px;}
+.live-map-status{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;color:var(--w2);padding:9px 12px;background:var(--card);border-top:1px solid var(--bdr);}
+.live-dot{width:8px;height:8px;border-radius:99px;background:var(--mu);flex-shrink:0;}
+.live-dot.on{background:var(--su);animation:liveDotPulse 1.6s ease-in-out infinite;}
+@keyframes liveDotPulse{0%,100%{box-shadow:0 0 0 0 rgba(21,128,61,.45);}50%{box-shadow:0 0 0 5px rgba(21,128,61,0);}}
+.leaflet-marker-icon{transition:transform 1s linear;}
 </style>
 <link rel="preconnect" href="https://richnation-portal-default-rtdb.firebaseio.com"/>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin/>
 <link rel="preconnect" href="https://basemaps.cartocdn.com"/>
 <link rel="dns-prefetch" href="https://unpkg.com"/>
+<link rel="dns-prefetch" href="https://js.paystack.co"/>
 </head>
 <body>
 <!-- ANNOUNCE BAR -->
@@ -464,7 +489,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 <!-- TOPBAR -->
 <div class="topbar">
   <div class="tb-top">
-    <img class="tb-logo" src="images/branding/richnation-logo.png" alt="RichNation Mall" onclick="showPage('home')" style="cursor:pointer;">
+    <img class="tb-logo" src="images/branding/richnation-logo-v2.png" alt="RichNation Mall" onclick="showPage('home')" style="cursor:pointer;" fetchpriority="high">
     <div class="tb-search">
       <input type="text" id="search-inp" placeholder="Search products..." oninput="liveSearch(this.value)" onkeydown="if(event.key==='Enter')doSearch()" autocomplete="off">
       <button onclick="doSearch()">Search</button>
@@ -525,8 +550,6 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
       <button class="hero-btn hero-btn-dk" id="hero-btn2" onclick="showPage('track')">Track My Order</button>
     </div>
     <div class="hero-stats">
-      <div class="hero-stat"><div class="hero-stat-num" id="stat-count">0</div><div class="hero-stat-lbl">Products</div></div>
-      <div class="hero-stat"><div class="hero-stat-num" id="stat-orders">0</div><div class="hero-stat-lbl">Orders</div></div>
       <div class="hero-stat"><div class="hero-stat-num">36</div><div class="hero-stat-lbl">States</div></div>
       <div class="hero-stat"><div class="hero-stat-num">INT'L</div><div class="hero-stat-lbl">Worldwide</div></div>
     </div>
@@ -591,7 +614,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
     </div>
   </div>
 
-  <div class="sec-wrap">
+  <div class="sec-wrap" id="vendor-cta-sec">
     <div class="vendor-cta">
       <div class="vendor-cta-text">
         <div class="vendor-cta-eyebrow">RichNation Marketplace</div>
@@ -640,7 +663,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
   <footer class="footer" id="site-footer">
     <div class="footer-grid">
       <div>
-        <img src="images/branding/richnation-logo.png" style="height:34px;margin-bottom:12px;display:block;">
+        <img src="images/branding/richnation-logo-v2.png" style="height:34px;margin-bottom:12px;display:block;">
         <div class="footer-brand" id="footer-brand">Nigeria's trusted online mall. Quality products at affordable prices, fast delivery, real support.</div>
         <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
           <a href="https://wa.me/2349164678560" target="_blank" style="color:#25D366;font-size:11px;font-weight:700;text-decoration:none;">📱 WhatsApp</a>
@@ -724,7 +747,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 <div class="auth-overlay" id="auth-modal" onclick="if(event.target===this)closeAuth()">
   <div class="auth-card">
     <div class="auth-hdr">
-      <img src="images/branding/richnation-logo.png" class="auth-logo" style="height:32px;" alt="RichNation">
+      <img src="images/branding/richnation-logo-v2.png" class="auth-logo" style="height:32px;" alt="RichNation">
       <button class="auth-close" onclick="closeAuth()">✕</button>
     </div>
     <div style="padding:12px 22px 0;">
@@ -1423,6 +1446,7 @@ async function init(){
   document.querySelectorAll('.curr-btn').forEach(el=>el.classList.toggle('active',el.dataset.curr===currency));
   updateAuthUI();updateCartBadge();updateWishBadge();
   if(settings.flashSaleEnd)startFlashTimer(settings.flashSaleEnd);
+  const vcSec=document.getElementById('vendor-cta-sec');if(vcSec)vcSec.style.display=settings.showVendorCta===false?'none':'';
   const sc=document.getElementById('stat-count');if(sc)sc.textContent=allProducts.length;
   const so=document.getElementById('stat-orders');
   if(so){
@@ -2098,7 +2122,7 @@ function renderCheckout(isPreorder=false){
         <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--or),var(--gold));display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;box-shadow:0 4px 14px rgba(255,106,0,0.35);">⚡</div>
         <div>
           <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:15px;color:var(--or);letter-spacing:0.3px;">RichNation Mall Express</div>
-          <div style="font-size:11.5px;color:var(--w2);margin-top:3px;line-height:1.6;">The BEST products, delivered faster.<br>Now <strong style="color:var(--su);">PAY on DELIVERY</strong>, Cash or Bank Transfer Anywhere, Zero problem!</div>
+          <div style="font-size:11.5px;color:rgba(255,255,255,.72);margin-top:3px;line-height:1.6;">The BEST products, delivered faster.<br>Now <strong style="color:var(--su);">PAY on DELIVERY</strong>, Cash or Bank Transfer Anywhere, Zero problem!</div>
         </div>
       </div>
       <div class="co-card" id="co-pay-card">
@@ -2544,7 +2568,7 @@ async function renderDeliveryMap(order,force){
     }else if(_deliveryRiderMarker){
       _deliveryRiderMarker.setOpacity(0);
     }
-    if(statusEl)statusEl.innerHTML=(isLive?'<span style="color:var(--su);">● Live</span> — rider location updating in real time':'<span style="color:var(--mu);">○ Waiting for rider\'s live location</span>')+etaText;
+    if(statusEl)statusEl.innerHTML='<span class="live-dot'+(isLive?' on':'')+'"></span> '+(isLive?'<strong style="color:var(--wh);">Live</strong> — rider location updating in real time':'Waiting for rider\'s live location')+(etaText?'<strong style="color:var(--or);margin-left:auto;">'+etaText.replace(' &middot; ~','~')+'</strong>':'');
     return;
   }
   _lastMapRenderTs=Date.now();
@@ -2596,7 +2620,7 @@ async function renderDeliveryMap(order,force){
   setTimeout(function(){
     if(!window._deliveryMapTileLoaded){
       const mapEl=document.getElementById('delivery-map');
-      if(mapEl)mapEl.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;padding:16px;text-align:center;"><div style="font-size:12px;color:var(--mu);">Map couldn\'t load — this can happen on a slow connection or with certain browser extensions.</div><button class="btn btn-or" style="font-size:12px;padding:8px 16px;" onclick="renderDeliveryMap(window._lastTrackedOrder,true)">Reload Map</button></div>';
+      if(mapEl)mapEl.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;padding:16px;text-align:center;background:var(--card2);"><div style="font-size:12px;color:var(--mu);">Map couldn\'t load — this can happen on a slow connection or with certain browser extensions.</div><button style="background:var(--or);color:#fff;border:none;border-radius:var(--r-sm);font-weight:700;font-size:12px;padding:8px 16px;cursor:pointer;" onclick="renderDeliveryMap(window._lastTrackedOrder,true)">Reload Map</button></div>';
     }
   },9000);
   const homeIcon=L.divIcon({html:'<div style="background:#22c55e;width:26px;height:26px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid #fff;">📍</div>',iconSize:[26,26],className:''});
@@ -2630,7 +2654,7 @@ async function renderDeliveryMap(order,force){
     map.fitBounds(L.latLngBounds([[riderPos.lat,riderPos.lng],[dest.lat,dest.lng]]),{padding:[40,40]});
   }
   setTimeout(function(){if(map){map.invalidateSize();}},350);
-  if(statusEl)statusEl.innerHTML=(isLive?'<span style="color:var(--su);">● Live</span> — rider location updating in real time':'<span style="color:var(--mu);">○ Waiting for rider\'s live location</span>')+etaText;
+  if(statusEl)statusEl.innerHTML='<span class="live-dot'+(isLive?' on':'')+'"></span> '+(isLive?'<strong style="color:var(--wh);">Live</strong> — rider location updating in real time':'Waiting for rider\'s live location')+(etaText?'<strong style="color:var(--or);margin-left:auto;">'+etaText.replace(' &middot; ~','~')+'</strong>':'');
 }
 function stopTrackPoll(){if(_trackPollTimer){clearInterval(_trackPollTimer);_trackPollTimer=null;}}
 async function trackOrder(silentNum){
@@ -2653,8 +2677,10 @@ async function trackOrder(silentNum){
       <div><div style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:0.5px;">🏍️ Your Dispatch Rider</div><div style="font-size:13px;font-weight:800;color:var(--wh);margin-top:2px;">${order.riderName}</div>${order.riderPhone?`<div style="font-size:11px;color:var(--mu);">${order.riderPhone}</div>`:''}</div>
       ${order.riderPhone?`<a href="tel:${order.riderPhone}" style="text-decoration:none;"><button style="background:var(--or);border:none;color:#000;font-weight:800;font-size:11px;padding:8px 14px;border-radius:7px;cursor:pointer;">📞 Call</button></a>`:''}
     </div>
-    <div id="delivery-map" style="width:100%;height:220px;border-radius:9px;overflow:hidden;background:var(--card2);display:${order.riderId&&order.deliveryStage!=='delivered'&&order.status!=='cancelled'&&order.status!=='deleted'?'block':'none'};"></div>
-    ${order.riderId&&order.deliveryStage!=='delivered'?`<div id="delivery-map-status" style="font-size:11px;color:var(--mu);margin:6px 0 14px;">Loading location…</div>`:''}`:''}
+    <div class="live-map-card" style="display:${order.riderId&&order.deliveryStage!=='delivered'&&order.status!=='cancelled'&&order.status!=='deleted'?'block':'none'};">
+      <div id="delivery-map" style="width:100%;height:260px;border-radius:9px 9px 0 0;overflow:hidden;background:var(--card2);"></div>
+      <div id="delivery-map-status" class="live-map-status"><span class="live-dot"></span> Loading location…</div>
+    </div>`:''}
     ${order.status==='cancelled'?'<div style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--re);margin-bottom:14px;"><strong>ORDER CANCELLED</strong> — '+(order.cancelReason||order.timeline?.[order.timeline.length-1]?.note||'This order was cancelled.')+'</div>':''}
     ${order.status==='deleted'?'<div style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--re);margin-bottom:14px;"><strong>ORDER DELETED</strong> — This order was removed by our team. Please contact support if you have questions.</div>':''}
     ${order.deliveryConfirmed?`<div style="background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.2);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--su);margin-bottom:14px;"><strong>DELIVERED</strong> — Signed by ${order.deliveryConfirmation?.receivedBy} on ${new Date(order.deliveryConfirmation?.timestamp||'').toLocaleDateString('en-GB')}</div>`:''}
@@ -2736,7 +2762,10 @@ function showPolicyPage(type){
       ['Do you sell internationally?','Yes. We ship to Ghana, Kenya, South Africa, UK, USA, Canada, Europe and more.'],
       ['Are your prices negotiable?','Our prices are already as affordable as possible. We run regular flash sales — follow us to stay updated.']
     ];
-    content=faqs.map(function(qa){return card(orange(qa[0])+body(qa[1]));}).join('');
+    content='<div class="faq-list">'+faqs.map(function(qa,i){return '<div class="faq-item">'
+      +'<button class="faq-q" onclick="toggleFaq(this)">'+qa[0]+'<span class="faq-chevron">&#9662;</span></button>'
+      +'<div class="faq-a"><div class="faq-a-inner">'+qa[1]+'</div></div>'
+      +'</div>';}).join('')+'</div>';
   }
   else if(type==='returns'){
     content='<div style="background:rgba(255,140,0,0.08);border:1px solid rgba(255,140,0,0.25);border-radius:12px;padding:16px;margin-bottom:16px;text-align:center;">'
@@ -2820,11 +2849,20 @@ function showPolicyPage(type){
   showPage('policy');
   var pp=document.getElementById('policy-page');
   if(!pp)return;
-  pp.innerHTML='<div style="padding:20px 0 60px;max-width:720px;margin:0 auto;">'
-    +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">'
+  var navOrder=['about','faq','returns','shipping','privacy','terms','contact'];
+  var policyNav='<div class="policy-nav">'+navOrder.map(function(k){return '<button class="policy-nav-btn'+(k===type?' active':'')+'" onclick="showPolicyPage(\''+k+'\')">'+pages[k].title+'</button>';}).join('')+'</div>';
+  pp.innerHTML='<div class="policy-fade" style="padding:20px 0 60px;max-width:720px;margin:0 auto;">'
+    +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">'
     +'<button onclick="goBack()" style="background:none;border:1px solid var(--bdr);border-radius:8px;color:var(--or);font-size:12px;font-weight:700;cursor:pointer;padding:7px 14px;flex-shrink:0;">← Back</button>'
     +'<h2 style="font-weight:900;font-size:20px;color:var(--wh);">'+page.title+'</h2>'
-    +'</div>'+content+'</div>';
+    +'</div>'+policyNav+content+'</div>';
+  pp.scrollTop=0;
+}
+function toggleFaq(btn){
+  var item=btn.closest('.faq-item');
+  var wasOpen=item.classList.contains('open');
+  item.parentElement.querySelectorAll('.faq-item.open').forEach(function(el){if(el!==item)el.classList.remove('open');});
+  item.classList.toggle('open',!wasOpen);
 }
 
 function openAuth(tab='login'){document.getElementById('auth-modal').classList.add('open');document.body.style.overflow='hidden';switchAuth(tab);pushNavState({modal:'auth'});}
@@ -3098,13 +3136,13 @@ async function showAccountPage(){
       <div onclick="accTab('wallet',null)" style="cursor:pointer;background:linear-gradient(135deg,#1a1a1a,#0e0e0e);border:1px solid rgba(34,197,94,0.3);border-radius:12px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;">
         <div style="display:flex;align-items:center;gap:12px;">
           <div>${iconBadge('wallet',26)}</div>
-          <div><div style="font-size:11px;color:var(--mu);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Wallet Balance</div><div data-live-wallet style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:20px;color:var(--su);">${fmt(currUser.walletBalance||0)}</div></div>
+          <div><div style="font-size:11px;color:rgba(255,255,255,.55);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Wallet Balance</div><div data-live-wallet style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:20px;color:var(--su);">${fmt(currUser.walletBalance||0)}</div></div>
         </div>
       </div>
       <div onclick="accTab('richpoints',null)" style="cursor:pointer;background:linear-gradient(135deg,#1a1a1a,#0e0e0e);border:1px solid rgba(255,140,0,0.3);border-radius:12px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;">
         <div style="display:flex;align-items:center;gap:12px;">
           <div>${iconBadge('star',26)}</div>
-          <div><div style="font-size:11px;color:var(--mu);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">RichPoints</div><div data-live-points style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:20px;color:var(--or);">${(currUser.points||0).toLocaleString()} pts</div></div>
+          <div><div style="font-size:11px;color:rgba(255,255,255,.55);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">RichPoints</div><div data-live-points style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:20px;color:var(--or);">${(currUser.points||0).toLocaleString()} pts</div></div>
         </div>
       </div>
     </div>
@@ -3161,7 +3199,7 @@ async function accTab(tab,el,silent){
       <div style="background:linear-gradient(135deg,#1a1a1a,#0e0e0e);border:1px solid rgba(34,197,94,0.3);border-radius:12px;padding:20px;margin-bottom:16px;text-align:center;">
         <div>${iconBadge('wallet',32)}</div>
         <div data-live-wallet style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:28px;color:var(--su);margin-top:4px;">${fmt(currUser.walletBalance||0)}</div>
-        <div style="font-size:12px;color:var(--mu);margin-top:2px;">Available wallet balance</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.55);margin-top:2px;">Available wallet balance</div>
       </div>
       <div class="card" style="margin-bottom:14px;text-align:center;">
         <div onclick="showWalletInfo()" style="cursor:pointer;color:var(--or);font-weight:700;font-size:13px;">${iconBadge('info',16)} How the Wallet Works →</div>
@@ -3218,7 +3256,7 @@ async function accTab(tab,el,silent){
       <div style="background:linear-gradient(135deg,#1a1a1a,#0e0e0e);border:1px solid rgba(255,140,0,0.3);border-radius:12px;padding:20px;margin-bottom:16px;text-align:center;">
         <div>${iconBadge('star',32)}</div>
         <div data-live-points style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:28px;color:var(--or);margin-top:4px;">${(currUser.points||0).toLocaleString()} pts</div>
-        <div style="font-size:12px;color:var(--mu);margin-top:2px;">≈ ${fmt((currUser.points||0)*rpRates().redeemRate)} in discounts</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.55);margin-top:2px;">≈ ${fmt((currUser.points||0)*rpRates().redeemRate)} in discounts</div>
       </div>
       <div class="card" style="margin-bottom:14px;">
         <div class="card-title">${iconBadge('trophy',18)} Loyalty Tier: ${tier.name}</div>
@@ -3501,7 +3539,7 @@ function payIconOrBadge(key,label,color,isText){
   const img=(settings.paymentIcons||{})[key];
   if(img)return '<img loading="lazy" decoding="async" src="'+img+'" alt="'+label+'" style="height:18px;max-width:60px;object-fit:contain;background:#fff;border-radius:3px;padding:2px 4px;"/>';
   return isText
-    ?'<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;background:'+color+';border:1px solid rgba(0,197,224,0.4);color:#00c5e0;letter-spacing:0.3px;">'+label+'</span>'
+    ?'<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;background:'+color+';border:1px solid rgba(0,143,163,0.4);color:#00707F;letter-spacing:0.3px;">'+label+'</span>'
     :'<span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:4px;background:'+color+';color:#fff;letter-spacing:0.5px;">'+label+'</span>';
 }
 function iconBadge(name,size){

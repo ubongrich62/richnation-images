@@ -349,7 +349,7 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
 <!-- LOGIN -->
 <div id="login" style="display:flex;min-height:100vh;align-items:center;justify-content:center;padding:20px;">
   <div class="lcard">
-    <img class="llogo" src="images/branding/richnation-logo.png" style="height:44px;max-width:180px;object-fit:contain;display:block;margin:0 auto 18px;"/>
+    <img class="llogo" src="images/branding/richnation-logo-v2.png" style="height:44px;max-width:180px;object-fit:contain;display:block;margin:0 auto 18px;"/>
     <div class="ltitle">Admin Control Panel</div>
     <div class="lsub">RichNation Mall — Authorised Access Only</div>
     <input class="fi" id="li-e" type="email" placeholder="Admin email" autocomplete="off"/>
@@ -367,7 +367,7 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
   <!-- TOPBAR -->
   <div class="topbar">
     <div class="tb-left"><button id="mob-btn" onclick="toggleSidebar()" style="display:none;background:none;border:none;color:var(--or);font-size:24px;cursor:pointer;padding:2px 8px;margin-right:4px;">☰</button>
-      <img class="tb-logo" src="images/branding/richnation-logo.png" style="height:32px;max-width:120px;object-fit:contain;cursor:pointer;"/>
+      <img class="tb-logo" src="images/branding/richnation-logo-v2.png" style="height:32px;max-width:120px;object-fit:contain;cursor:pointer;"/>
       <button class="tb-back" id="tb-back" onclick="goBack()">&#8592; Back</button>
     </div>
     <div class="tb-title">Mall Admin Control Panel</div>
@@ -3986,6 +3986,7 @@ function renderSiteCustomiser(c){
   html += '<label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--wh);cursor:pointer;"><input type="checkbox" id="cs-pod" '+(settings.podEnabled!==false?'checked':'')+' style="accent-color:var(--or);width:18px;height:18px;"/> Allow Pay on Delivery</label>';
   html += '<label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--wh);cursor:pointer;"><input type="checkbox" id="cs-rev" '+(settings.reviewsEnabled!==false?'checked':'')+' style="accent-color:var(--or);width:18px;height:18px;"/> Allow Customer Reviews</label>';
   html += '<label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--wh);cursor:pointer;"><input type="checkbox" id="cs-chat" '+(settings.chatEnabled!==false?'checked':'')+' style="accent-color:var(--or);width:18px;height:18px;"/> Show Live Chat Widget</label>';
+  html += '<label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--wh);cursor:pointer;"><input type="checkbox" id="cs-vendor-cta" '+(settings.showVendorCta!==false?'checked':'')+' style="accent-color:var(--or);width:18px;height:18px;"/> Show "Become a Vendor" section on homepage</label>';
   html += '</div><button class="btn btn-or" onclick="saveStoreSettings()" style="margin-top:14px;">Save Settings</button></div>';
   html += '<div class="cs-section"><div class="cs-section-title">🕒 Business Hours</div>';
   html += '<div style="font-size:12px;color:var(--mu);margin-bottom:12px;line-height:1.6;">Outside these hours, the chat widget greets customers with an automatic assistant offering quick answers, instead of leaving them waiting for a reply.</div>';
@@ -4202,7 +4203,7 @@ async function saveBusinessHours(){
   toast('Business hours saved!');
 }
 async function saveStoreSettings(){
-  var u={freeShippingAll:!!(document.getElementById('cs-fs')||{}).checked,podEnabled:!!(document.getElementById('cs-pod')||{}).checked,reviewsEnabled:!!(document.getElementById('cs-rev')||{}).checked,chatEnabled:!!(document.getElementById('cs-chat')||{}).checked};
+  var u={freeShippingAll:!!(document.getElementById('cs-fs')||{}).checked,podEnabled:!!(document.getElementById('cs-pod')||{}).checked,reviewsEnabled:!!(document.getElementById('cs-rev')||{}).checked,chatEnabled:!!(document.getElementById('cs-chat')||{}).checked,showVendorCta:!!(document.getElementById('cs-vendor-cta')||{}).checked};
   Object.assign(settings,u);await fbU('rn_mall_settings',u);toast('Settings saved!');
 }
 async function editEmoji(key){
