@@ -97,6 +97,10 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
 .tb-user{font-size:11px;color:var(--mu);}
 .tb-out{font-size:11px;color:var(--mu);background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:color 0.15s;}
 .tb-out:hover{color:var(--re);}
+.curr-row{display:flex;gap:3px;background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:2px;}
+.curr-btn{background:none;border:none;border-radius:4px;color:var(--mu);font-size:11px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;padding:5px 8px;transition:all 0.15s;}
+.curr-btn:hover{color:var(--wh);}
+.curr-btn.active{background:var(--or);color:#fff;}
 
 /* ── LAYOUT ── */
 .layout{flex:1;display:flex;overflow:hidden;}
@@ -334,6 +338,7 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
   .topbar{padding:0 10px;}
   .tb-title{display:none;}
   .tb-user{display:none;}
+  .curr-row{order:1;}
 }
 @media(max-width:480px){.stats-grid{grid-template-columns:1fr;}}
 .lcard{opacity:1!important;}
@@ -372,6 +377,12 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
     </div>
     <div class="tb-title">Mall Admin Control Panel</div>
     <div class="tb-right">
+      <div class="curr-row" id="curr-row">
+        <button class="curr-btn" data-curr="NGN" onclick="setCurr('NGN')">₦</button>
+        <button class="curr-btn" data-curr="USD" onclick="setCurr('USD')">$</button>
+        <button class="curr-btn" data-curr="EUR" onclick="setCurr('EUR')">€</button>
+        <button class="curr-btn" data-curr="GBP" onclick="setCurr('GBP')">£</button>
+      </div>
       <button class="tb-notif" id="notif-btn" onclick="nav('notifications')">
         &#128276;<span class="notif-badge" id="notif-badge"></span>
       </button>
@@ -512,6 +523,8 @@ const DEFAULT_PASS='UbRNGL2026';
 let curNav='dashboard';
 let navStack=[];
 let allProds={};let allOrders={};let allCats={};let allCusts={};let settings={};
+let currency=localStorage.getItem('rnm_currency')||'NGN';
+document.querySelectorAll('.curr-btn').forEach(el=>el.classList.toggle('active',el.dataset.curr===currency));
 
 function fbFetchTimeout(url,opts,ms=8000){
   const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('timed out after '+ms+'ms')),ms));
@@ -599,7 +612,12 @@ function toast(m,t='ok'){
   setTimeout(()=>el.style.display='none',3200);
 }
 function ds(){return new Date().toLocaleDateString('en-GB');}
-function fmt(n){return '\u20a6'+parseInt(n||0).toLocaleString();}
+function fmt(n){const num=parseFloat(n)||0;const rate=(settings&&settings.exchangeRate)||1600;if(currency==='USD')return '$'+(num/rate).toFixed(2);if(currency==='EUR')return '\u20ac'+((num/rate)*0.92).toFixed(2);if(currency==='GBP')return '\u00a3'+((num/rate)*0.79).toFixed(2);return '\u20a6'+parseInt(num).toLocaleString();}
+function setCurr(c){
+  currency=c;localStorage.setItem('rnm_currency',c);
+  document.querySelectorAll('.curr-btn').forEach(el=>el.classList.toggle('active',el.dataset.curr===c));
+  nav(curNav||'dashboard',false);
+}
 function ini(n){return(n||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
 function svgIconPaths(name){
   var icons={

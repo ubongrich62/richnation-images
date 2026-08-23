@@ -675,8 +675,8 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
         <img src="images/branding/richnation-logo-v2.png" style="height:34px;margin-bottom:12px;display:block;">
         <div class="footer-brand" id="footer-brand">Nigeria's trusted online mall. Quality products at affordable prices, fast delivery, real support.</div>
         <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
-          <a href="https://wa.me/2349164678560" target="_blank" style="color:#25D366;font-size:11px;font-weight:700;text-decoration:none;">📱 WhatsApp</a>
-          <a href="https://www.youtube.com/@richnationwbpt" target="_blank" style="color:#FF6A00;font-size:11px;font-weight:700;text-decoration:none;">▶ YouTube</a>
+          <a href="https://wa.me/2349164678560" target="_blank" style="color:#25D366;font-size:11px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#25D366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h4l2 6-3 2a13 13 0 006 6l2-3 6 2v4a2 2 0 01-2 2C10.5 22 2 13.5 2 5a2 2 0 012-2z"/></svg>WhatsApp</a>
+          <a href="https://www.youtube.com/@richnationwbpt" target="_blank" style="color:#FF6A00;font-size:11px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#FF6A00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4l14 8-14 8z"/></svg>YouTube</a>
         </div>
         <div id="footer-cats"></div>
       </div>
@@ -736,7 +736,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 <div class="cart-overlay" id="cart-overlay" onclick="toggleCart()"></div>
 <div class="cart-drawer" id="cart-drawer">
   <div class="cart-hdr">
-    <div class="cart-title">🛒 My Cart</div>
+    <div class="cart-title" style="display:flex;align-items:center;gap:7px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--or)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.3"/><circle cx="18" cy="20" r="1.3"/><path d="M2 3h3l2.4 12.2a2 2 0 002 1.8h8.6a2 2 0 002-1.7L22 8H6"/></svg>My Cart</div>
     <button class="cart-close" onclick="toggleCart()">✕</button>
   </div>
   <div class="cart-body" id="cart-items-list"></div>
@@ -784,7 +784,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 
 <!-- CHAT -->
 <div class="chat-float">
-  <button class="chat-trigger" onclick="toggleChat()" title="Chat with us">💬</button>
+  <button class="chat-trigger" onclick="toggleChat()" title="Chat with us"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 11-3.5-6.6L21 4l-1 4.5A7.9 7.9 0 0121 12z"/></svg></button>
 </div>
 <div class="chat-panel" id="chat-panel">
   <div class="chat-hdr">
@@ -1694,7 +1694,7 @@ async function openProduct(id){
         </button>
         ${!oos&&!preorder&&!isFree?`<button class="modal-btn modal-btn-dk" onclick="buyNow()">${t('buyNow')}</button>`:''}
       </div>
-      <button onclick="shareProduct('${p.id}','${(p.name||'').replace(/'/g,"\\'")}')" style="width:100%;margin-top:8px;background:var(--card2);border:1px solid var(--bdr);border-radius:8px;padding:10px;color:var(--w2);font-size:12px;font-weight:700;cursor:pointer;">📤 Share &amp; Earn RichPoints</button>
+      <button onclick="shareProduct('${p.id}','${(p.name||'').replace(/'/g,"\\'")}')" style="width:100%;margin-top:8px;background:var(--card2);border:1px solid var(--bdr);border-radius:8px;padding:10px;color:var(--w2);font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>Share &amp; Earn RichPoints</button>
       ${window._mBundle?`<div style="margin-top:14px;background:rgba(255,140,0,0.06);border:1px solid rgba(255,140,0,0.25);border-radius:10px;padding:14px;">
         <div style="font-weight:800;font-size:13px;color:var(--or);margin-bottom:6px;">${iconBadge('gift',18)} ${window._mBundle.name}, Save ${window._mBundle.discountPct}%</div>
         <div style="font-size:11px;color:var(--mu);margin-bottom:10px;">Buy all ${(window._mBundle.productIds||[]).length} items in this bundle together and get ${window._mBundle.discountPct}% off automatically at checkout.</div>
@@ -1713,8 +1713,8 @@ async function openProduct(id){
         ${p.dimensions&&p.dimensions.weight?`<div class="spec-row"><span class="spec-key">Weight</span><span class="spec-val">${p.dimensions.weight} kg</span></div>`:''}
         ${p.specs?Object.entries(p.specs).map(([k,v])=>`<div class="spec-row"><span class="spec-key">${k}</span><span class="spec-val">${v}</span></div>`).join(''):''}
       </div>`:''}
-      <button onclick="openProductChat('${id}','${p.name.replace(/'/g,'')}')" style="width:100%;margin-top:12px;background:rgba(255,140,0,0.06);border:1px solid rgba(255,140,0,0.2);border-radius:8px;padding:10px;font-size:12px;font-weight:700;color:var(--or);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all 0.15s;">
-        💬 Chat with support about this product
+      <button onclick="openProductChat('${id}','${p.name.replace(/'/g,'')}')" style="width:100%;margin-top:12px;background:rgba(255,140,0,0.06);border:1px solid rgba(255,140,0,0.2);border-radius:8px;padding:10px;font-size:12px;font-weight:700;color:var(--or);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:7px;">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--or)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 11-3.5-6.6L21 4l-1 4.5A7.9 7.9 0 0121 12z"/></svg>Chat with support about this product
       </button>
     </div>
   </div>
@@ -2838,7 +2838,7 @@ function showPolicyPage(type){
         +'<div style="font-size:13px;color:var(--w2);line-height:2.4;">🎓 <strong style="color:var(--wh);">RichNation Academy</strong>, world-class digital education<br>🎵 <strong style="color:var(--wh);">RichNation Music</strong>, faith-inspired music for Africa<br>🎬 <strong style="color:var(--wh);">RichNation Animation</strong>, creative storytelling<br>🎙️ <strong style="color:var(--wh);">WBPT Podcast</strong>, We Bring People Together<br>📖 <strong style="color:var(--wh);">RichNation Stories</strong>, content that builds and inspires</div>')
       +'<div style="background:rgba(255,140,0,0.08);border:1px solid rgba(255,140,0,0.25);border-radius:12px;padding:16px;text-align:center;">'
       +'<div style="font-weight:900;color:var(--or);font-size:15px;margin-bottom:8px;">"Build People · Build Platforms · Create Millionaires"</div>'
-      +'<div style="font-size:12px;color:var(--mu);">📱 +234 916 467 8560 · 📧 rnm.office@richnationmall.com</div></div>';
+      +'<div style="font-size:12px;color:var(--mu);display:flex;align-items:center;gap:14px;flex-wrap:wrap;"><span style="display:inline-flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--mu)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h4l2 6-3 2a13 13 0 006 6l2-3 6 2v4a2 2 0 01-2 2C10.5 22 2 13.5 2 5a2 2 0 012-2z"/></svg>+234 916 467 8560</span><span style="display:inline-flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--mu)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18v14H3z"/><path d="M3 6l9 7 9-7"/></svg>rnm.office@richnationmall.com</span></div></div>';
   }
   else if(type==='faq'){
     var faqs=[
@@ -2920,7 +2920,7 @@ function showPolicyPage(type){
   else if(type==='contact'){
     content='<p style="font-size:14px;color:var(--w2);line-height:1.8;margin-bottom:20px;text-align:center;">We are real people and we are here for you. Reach us any time, we respond fast.</p>'
       +'<div style="background:rgba(37,211,102,0.08);border:1px solid rgba(37,211,102,0.25);border-radius:12px;padding:18px;margin-bottom:14px;">'
-      +'<div style="font-weight:800;color:#25D366;margin-bottom:8px;font-size:14px;">📱 WhatsApp, Fastest Response</div>'
+      +'<div style="font-weight:800;color:#25D366;margin-bottom:8px;font-size:14px;display:flex;align-items:center;gap:6px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#25D366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h4l2 6-3 2a13 13 0 006 6l2-3 6 2v4a2 2 0 01-2 2C10.5 22 2 13.5 2 5a2 2 0 012-2z"/></svg>WhatsApp, Fastest Response</div>'
       +'<div style="font-size:16px;font-weight:900;color:var(--wh);margin-bottom:4px;">+234 916 467 8560</div>'
       +'<div style="font-size:12px;color:var(--mu);">Monday to Saturday · 8:00am to 9:00pm WAT</div>'
       +'<div style="font-size:11px;color:var(--mu);margin-top:6px;font-style:italic;">For order issues, send your order number and a photo if applicable</div>'
@@ -3621,7 +3621,18 @@ function svgIconPaths(name){
     bank:'<path d="M3 10l9-6 9 6"/><path d="M4 10v9M9 10v9M15 10v9M20 10v9"/><path d="M2 21h20"/>',
     heart:'<path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0112 6a5.5 5.5 0 019.5 6c-2.5 4.5-9.5 9-9.5 9z"/>',
     bell:'<path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/>',
-    cart:'<circle cx="9" cy="20" r="1.3"/><circle cx="18" cy="20" r="1.3"/><path d="M2 3h3l2.4 12.2a2 2 0 002 1.8h8.6a2 2 0 002-1.7L22 8H6"/>'
+    cart:'<circle cx="9" cy="20" r="1.3"/><circle cx="18" cy="20" r="1.3"/><path d="M2 3h3l2.4 12.2a2 2 0 002 1.8h8.6a2 2 0 002-1.7L22 8H6"/>',
+    check:'<path d="M20 6L9 17l-5-5"/>',
+    close:'<path d="M18 6L6 18M6 6l12 12"/>',
+    warning:'<path d="M12 2L2 20h20L12 2z"/><path d="M12 9v5M12 17v.01"/>',
+    envelope:'<path d="M3 5h18v14H3z"/><path d="M3 6l9 7 9-7"/>',
+    phone:'<path d="M4 3h4l2 6-3 2a13 13 0 006 6l2-3 6 2v4a2 2 0 01-2 2C10.5 22 2 13.5 2 5a2 2 0 012-2z"/>',
+    globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/>',
+    key:'<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M14 9l2 2"/>',
+    sparkle:'<path d="M12 2l1.8 5.6L19 9l-5.2 1.4L12 16l-1.8-5.6L5 9l5.2-1.4z"/><path d="M19 15l.7 2.1L22 18l-2.3.9L19 21l-.7-2.1L16 18l2.3-.9z"/>',
+    send:'<path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/>',
+    play:'<path d="M6 4l14 8-14 8z"/>',
+    map:'<path d="M9 4L3 6v14l6-2m0-14l6 2m-6-2v14m6-12l6-2v14l-6 2m0-14v14"/>'
   };
   return icons[name]||icons.star;
 }

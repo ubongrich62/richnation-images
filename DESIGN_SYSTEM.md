@@ -16,6 +16,7 @@ premium, trustworthy weight.
 | Token | Value | Role |
 |---|---|---|
 | `--ink` | `#0B0B0C` | Structural black — header, footer, footer-adjacent bands |
+| `--ink2` | `#1A1410` | Warm secondary dark — paired with `--ink` in a subtle gradient on large black surfaces so they read as a considered surface, not flat pure black |
 | `--bg` | `#FFFFFF` | Page background |
 | `--card` | `#FFFFFF` | Card / surface background |
 | `--card2` | `#F4F4F3` | Secondary surface — inputs, hovers, skeleton loaders, chips |
@@ -23,9 +24,10 @@ premium, trustworthy weight.
 | `--or` | `#FF6A00` | Brand orange — primary CTA, active state, price, badges |
 | `--or-dk` | `#E15E00` | Orange hover/pressed |
 | `--gold` | `#B8720A` | Secondary accent — ratings, small highlights (used sparingly) |
+| `--amber` | `#FFB05A` | Light warm accent for tinting on dark surfaces (rare use) |
 | `--wh` | `#15151A` | Primary text (legacy name; holds the *primary text* role) |
 | `--w2` | `#48484E` | Secondary text |
-| `--mu` | `#7B7B81` | Muted / tertiary text, placeholders, timestamps |
+| `--mu` | `#83838A` | Muted / tertiary text, placeholders, timestamps, lightened from an earlier darker pass per explicit direction, kept just past WCAG AA on white |
 | `--su` | `#15803D` | Success (in stock, confirmed, delivered) |
 | `--re` | `#DC2626` | Error / destructive / out of stock |
 | `--bl` | `#2054C7` | Informational (pre-order, tracking, links) |
@@ -33,7 +35,16 @@ premium, trustworthy weight.
 **Usage rule:** orange never fills large surfaces. It marks the single
 primary action per screen, prices, and the handful of state indicators
 (badges, active tab, focus ring). Everything else resolves in black, white
-or grey. Gradients are avoided outside of one restrained flash-sale accent.
+or grey, with `--ink`/`--ink2` giving black surfaces a subtle warm gradient
+rather than sitting perfectly flat. Gradients are avoided outside of that
+and one restrained flash-sale accent.
+
+**Text on dark cards:** a handful of components sit on `--ink`/`--ink2`
+surfaces inside an otherwise light page (the checkout "Express" banner,
+account Wallet/RichPoints cards). Those never use `--w2`/`--mu` for body
+text, both tokens are tuned for light backgrounds and go low-contrast on
+dark, use `rgba(255,255,255,.55–.72)` directly instead, same as the
+portal dark-console text already does.
 
 ## 2. Typography
 

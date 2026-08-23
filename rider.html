@@ -44,6 +44,9 @@ button{font-family:inherit;}
 #mob-btn{display:none;background:none;border:none;color:var(--or);font-size:24px;cursor:pointer;padding:8px 10px;min-width:44px;min-height:44px;align-items:center;justify-content:center;}
 .tb-btn{background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:10px 16px;font-size:12px;font-weight:600;color:var(--wh);cursor:pointer;min-height:40px;transition:background .15s,border-color .15s;}
 .tb-btn:hover{background:var(--bdr);}
+.curr-row{display:flex;gap:3px;}
+.curr-btn{background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-sm);color:var(--w2);font-size:12px;font-weight:700;cursor:pointer;padding:6px 9px;min-width:32px;min-height:32px;}
+.curr-btn.active{background:var(--or);color:#fff;border-color:var(--or);}
 .wrap{display:flex;min-height:calc(100vh - 56px);}
 .sb{width:200px;min-width:200px;background:var(--card);border-right:1px solid var(--bdr);padding:16px 0;display:flex;flex-direction:column;gap:1px;}
 .sb-sec{font-size:10px;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;padding:16px 16px 6px;}
@@ -86,6 +89,7 @@ button{font-family:inherit;}
   .stats-grid{grid-template-columns:1fr;}
   .g2{grid-template-columns:1fr;}
   .content{padding:14px;}
+  .curr-row{order:5;flex-basis:100%;justify-content:flex-end;}
 }
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -152,6 +156,12 @@ button{font-family:inherit;}
       <div class="tb-logo">🛒 RichNation Mall</div>
       <div class="tb-status">🏍️ Rider</div>
     </div>
+    <div class="curr-row" id="curr-row">
+      <button class="curr-btn active" data-curr="NGN" onclick="setCurr('NGN')">₦</button>
+      <button class="curr-btn" data-curr="USD" onclick="setCurr('USD')">$</button>
+      <button class="curr-btn" data-curr="EUR" onclick="setCurr('EUR')">€</button>
+      <button class="curr-btn" data-curr="GBP" onclick="setCurr('GBP')">£</button>
+    </div>
     <div style="display:flex;align-items:center;gap:10px;position:relative;">
       <button class="tb-btn" style="position:relative;" onclick="toggleRiderNotifPanel()">🔔<span id="rider-notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--re);color:#fff;font-size:9px;font-weight:800;min-width:15px;height:15px;border-radius:99px;align-items:center;justify-content:center;padding:0 3px;">0</span></button>
       <div id="rider-notif-panel" style="display:none;position:absolute;top:44px;right:0;width:280px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--bdr);border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,0.6);z-index:500;padding:8px;"></div>
@@ -198,6 +208,7 @@ function loadAppCheckWhenIdle(){
 if(document.readyState==='complete'){setTimeout(loadAppCheckWhenIdle,2000);}
 else window.addEventListener('load',function(){setTimeout(loadAppCheckWhenIdle,2000);});
 let rider=null;
+let currency=localStorage.getItem('rnm_currency')||'NGN';let exchangeRate=1600;
 
 async function fbFetchTimeout(url,opts,ms){
   ms=ms||8000;const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),ms);
@@ -217,7 +228,12 @@ function toast(msg,type){
   clearTimeout(window._toastT);window._toastT=setTimeout(()=>{t.style.display='none';},3000);
 }
 function ds(){return new Date().toLocaleDateString('en-GB');}
-function fmt(n){return '₦'+parseInt(n||0).toLocaleString();}
+function fmt(n){const num=parseFloat(n)||0;if(currency==='USD')return '$'+(num/exchangeRate).toFixed(2);if(currency==='EUR')return '€'+((num/exchangeRate)*0.92).toFixed(2);if(currency==='GBP')return '£'+((num/exchangeRate)*0.79).toFixed(2);return '₦'+parseInt(num).toLocaleString();}
+function setCurr(c){
+  currency=c;localStorage.setItem('rnm_currency',c);
+  document.querySelectorAll('.curr-btn').forEach(el=>el.classList.toggle('active',el.dataset.curr===c));
+  if(typeof curRNav!=='undefined'&&rider)rnav(curRNav);
+}
 function ini(name){return (name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
 function svgIconPaths(name){
   var icons={
@@ -330,6 +346,7 @@ function closeInfoModal(){const el=document.getElementById('info-modal-overlay')
 function startApp(){
   document.getElementById('login').style.display='none';
   document.getElementById('app').style.display='block';
+  document.querySelectorAll('.curr-btn').forEach(el=>el.classList.toggle('active',el.dataset.curr===currency));
   buildRiderSidebar();
   rnav('dashboard');
   loadRiderNotifs();

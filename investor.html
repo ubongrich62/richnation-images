@@ -43,6 +43,9 @@ button{font-family:inherit;}
 #mob-btn{display:none;background:none;border:none;color:#fff;font-size:24px;cursor:pointer;padding:2px 8px;}
 .tb-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:var(--r-sm);padding:8px 14px;font-size:12px;color:#fff;cursor:pointer;transition:background .15s;}
 .tb-btn:hover{background:rgba(255,255,255,.16);}
+.curr-row{display:flex;gap:3px;}
+.curr-btn{background:none;border:1px solid rgba(255,255,255,.25);border-radius:var(--r-sm);color:rgba(255,255,255,.75);font-size:11px;font-weight:700;cursor:pointer;padding:5px 8px;}
+.curr-btn.active{background:var(--or);color:#fff;border-color:var(--or);}
 .wrap{display:flex;min-height:calc(100vh - 56px);}
 .sb{width:210px;min-width:210px;background:var(--card);border-right:1px solid var(--bdr);padding:16px 0;display:flex;flex-direction:column;gap:1px;}
 .sb-item{display:flex;align-items:center;gap:9px;padding:10px 16px;font-size:13px;color:var(--w2);cursor:pointer;border-left:3px solid transparent;transition:background .15s,color .15s;}
@@ -153,6 +156,12 @@ button{font-family:inherit;}
       <div class="tb-tier" id="tb-tier-badge"></div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;position:relative;">
+      <div class="curr-row" id="curr-row">
+        <button class="curr-btn" data-curr="NGN" onclick="setCurr('NGN')">₦</button>
+        <button class="curr-btn" data-curr="USD" onclick="setCurr('USD')">$</button>
+        <button class="curr-btn" data-curr="EUR" onclick="setCurr('EUR')">€</button>
+        <button class="curr-btn" data-curr="GBP" onclick="setCurr('GBP')">£</button>
+      </div>
       <button class="tb-btn" style="position:relative;" onclick="toggleInvestorNotifPanel()">🔔<span id="inv-notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--re);color:#fff;font-size:9px;font-weight:800;min-width:15px;height:15px;border-radius:99px;align-items:center;justify-content:center;padding:0 3px;">0</span></button>
       <div id="inv-notif-panel" style="display:none;position:absolute;top:44px;right:0;width:300px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--bdr);border-radius:10px;box-shadow:var(--sh-lg);z-index:500;padding:8px;"></div>
       <button class="tb-btn" onclick="investorLogout()">Sign Out</button>
@@ -199,6 +208,7 @@ if(document.readyState==='complete'){setTimeout(loadAppCheckWhenIdle,2000);}
 else window.addEventListener('load',function(){setTimeout(loadAppCheckWhenIdle,2000);});
 let investor=null;
 let curNav='dashboard';
+let currency=localStorage.getItem('rnm_currency')||'NGN';
 
 async function fbFetchTimeout(url,opts,ms){
   ms=ms||8000;const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),ms);
@@ -236,7 +246,19 @@ function toast(msg,type){
   clearTimeout(window._toastT);window._toastT=setTimeout(()=>{t.style.display='none';},3000);
 }
 function ds(){return new Date().toLocaleDateString('en-GB');}
-function fmt(n){return '₦'+parseInt(n||0).toLocaleString();}
+function fmt(n){
+  const num=parseFloat(n)||0;
+  const exchangeRate=(window._settings&&window._settings.exchangeRate)||1600;
+  if(currency==='USD')return '$'+(num/exchangeRate).toFixed(2);
+  if(currency==='EUR')return '€'+((num/exchangeRate)*0.92).toFixed(2);
+  if(currency==='GBP')return '£'+((num/exchangeRate)*0.79).toFixed(2);
+  return '₦'+parseInt(num).toLocaleString();
+}
+function setCurr(c){
+  currency=c;localStorage.setItem('rnm_currency',c);
+  document.querySelectorAll('.curr-btn').forEach(el=>el.classList.toggle('active',el.dataset.curr===c));
+  if(investor)inav(curNav);
+}
 function svgIconPaths(name){
   var icons={
     home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
@@ -363,6 +385,7 @@ function startApp(){
   document.getElementById('login').style.display='none';
   document.getElementById('app').style.display='block';
   document.getElementById('tb-tier-badge').textContent=investor.tier||tierFor(investor.investmentAmount);
+  document.querySelectorAll('.curr-btn').forEach(el=>el.classList.toggle('active',el.dataset.curr===currency));
   buildInvestorSidebar();
   inav('dashboard');
   loadInvestorNotifs();
