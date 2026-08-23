@@ -25,7 +25,7 @@
   /* text */
   --wh:#fff;--w2:#e0e0e0;--mu:#84848d;
   /* status */
-  --su:#22c55e;--re:#f43f5e;--bl:#3b82f6;
+  --su:#FF6A00;--re:#f43f5e;--bl:#3b82f6;
   /* system */
   --r-sm:6px;--r-md:10px;--r-lg:14px;--r-pill:999px;
   --sh-sm:0 1px 3px rgba(0,0,0,.5);
@@ -171,8 +171,8 @@ html,body{color-scheme:dark;height:100%;font-family:'Inter',sans-serif;backgroun
 .btn-or:hover{background:var(--or-dk);transform:translateY(-1px);box-shadow:var(--sh-sm);}
 .btn-dk{background:var(--card2);color:var(--mu);border:1px solid var(--bdr);}
 .btn-dk:hover{border-color:var(--or);color:var(--or);}
-.btn-gr{background:rgba(34,197,94,0.1);color:var(--su);border:1px solid rgba(34,197,94,0.3);}
-.btn-gr:hover{background:rgba(34,197,94,0.16);}
+.btn-gr{background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.25);}
+.btn-gr:hover{background:rgba(255,255,255,0.14);}
 .btn-re{background:rgba(244,63,94,0.1);color:var(--re);border:1px solid rgba(244,63,94,0.3);}
 .btn-re:hover{background:rgba(244,63,94,0.16);}
 .btn-bl{background:rgba(59,130,246,0.1);color:var(--bl);border:1px solid rgba(59,130,246,0.3);}
@@ -224,7 +224,7 @@ html,body{color-scheme:dark;height:100%;font-family:'Inter',sans-serif;backgroun
 /* ── BADGES ── */
 .bdg{display:inline-block;padding:3px 9px;border-radius:var(--r-pill);font-size:9px;font-weight:700;letter-spacing:0.3px;}
 .bdg-or{background:rgba(255,106,0,0.12);color:var(--or);}
-.bdg-gr{background:rgba(34,197,94,0.12);color:var(--su);}
+.bdg-gr{background:rgba(255,255,255,0.10);color:#fff;}
 .bdg-re{background:rgba(244,63,94,0.12);color:var(--re);}
 .bdg-bl{background:rgba(59,130,246,0.12);color:var(--bl);}
 .bdg-mu{background:rgba(255,255,255,0.06);color:var(--mu);}
@@ -233,8 +233,8 @@ html,body{color-scheme:dark;height:100%;font-family:'Inter',sans-serif;backgroun
 /* ── INFO BOXES ── */
 .info-box{background:rgba(255,106,0,0.05);border:1px solid rgba(255,106,0,0.18);border-left:3px solid var(--or);border-radius:var(--r-sm);padding:12px 14px;font-size:12px;color:var(--w2);line-height:1.8;margin:10px 0;}
 .info-box b{color:var(--or);}
-.green-box{background:rgba(34,197,94,0.05);border:1px solid rgba(34,197,94,0.2);border-left:3px solid var(--su);border-radius:var(--r-sm);padding:12px 14px;font-size:12px;color:var(--w2);line-height:1.8;margin:10px 0;}
-.green-box b{color:var(--su);}
+.green-box{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.14);border-left:3px solid #fff;border-radius:var(--r-sm);padding:12px 14px;font-size:12px;color:var(--w2);line-height:1.8;margin:10px 0;}
+.green-box b{color:#fff;}
 .alert-box{background:rgba(244,63,94,0.05);border:1px solid rgba(244,63,94,0.2);border-left:3px solid var(--re);border-radius:var(--r-sm);padding:12px 14px;font-size:12px;color:var(--w2);line-height:1.8;margin:10px 0;}
 
 /* ── SECTION HEADER ── */
@@ -275,7 +275,7 @@ html,body{color-scheme:dark;height:100%;font-family:'Inter',sans-serif;backgroun
 .status-opt{padding:7px 14px;border-radius:var(--r-sm);font-size:11px;font-weight:700;cursor:pointer;border:2px solid var(--bdr);color:var(--mu);background:var(--card2);transition:border-color 0.15s,color 0.15s,background 0.15s;text-transform:capitalize;}
 .status-opt:hover{border-color:rgba(255,106,0,0.45);}
 .status-opt.active{border-color:var(--or);background:rgba(255,106,0,0.1);color:var(--or);}
-.status-opt.delivered{border-color:var(--su);color:var(--su);background:rgba(34,197,94,0.08);}
+.status-opt.delivered{border-color:#fff;color:#fff;background:rgba(255,255,255,0.08);}
 .status-opt.cancelled{border-color:var(--re);color:var(--re);background:rgba(244,63,94,0.08);}
 
 /* ── TIMELINE ── */
@@ -607,7 +607,7 @@ async function fbD(p){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:
 
 function toast(m,t='ok'){
   const el=document.getElementById('toast');el.textContent=m;
-  el.style.borderColor=t==='err'?'#f43f5e':t==='ok'?'#22c55e':'#FF6A00';
+  el.style.borderColor=t==='err'?'#f43f5e':t==='ok'?'#fff':'#FF6A00';
   el.style.display='block';
   el.style.animation='none';void el.offsetWidth;el.style.animation='toastIn 0.3s ease';
   setTimeout(()=>el.style.display='none',3200);
@@ -776,7 +776,7 @@ async function renderPromos(c){
     html+=list.map(function(p){
       const isLive=promoIsActive(p);
       return '<div class="data-row">'
-        +'<div style="flex:1;min-width:180px;"><div class="row-name">'+p.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;'+(isLive?'background:rgba(34,197,94,0.12);color:var(--su);':'background:rgba(153,153,153,0.12);color:var(--mu);')+'">'+(isLive?'LIVE NOW':(p.active===false?'PAUSED':'SCHEDULED'))+'</span></div>'
+        +'<div style="flex:1;min-width:180px;"><div class="row-name">'+p.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;'+(isLive?'background:rgba(255,106,0,0.12);color:var(--su);':'background:rgba(153,153,153,0.12);color:var(--mu);')+'">'+(isLive?'LIVE NOW':(p.active===false?'PAUSED':'SCHEDULED'))+'</span></div>'
         +'<div class="row-meta">'+p.startDate+' to '+p.endDate+' &middot; '+p.discountPct+'% off sitewide</div></div>'
         +'<button class="btn" onclick="openPromoForm(\''+p._id+'\')">Edit</button>'
         +'<button class="btn btn-re" onclick="delPromo(\''+p._id+'\',\''+p.name.replace(/'/g,"\\'")+'\')">Delete</button>'
@@ -843,7 +843,7 @@ async function renderBundles(c){
   }else{
     html+=list.map(function(b){
       return '<div class="data-row" style="align-items:flex-start;">'
-        +'<div style="flex:1;min-width:180px;"><div class="row-name">'+b.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;'+(b.active!==false?'background:rgba(34,197,94,0.12);color:var(--su);':'background:rgba(153,153,153,0.12);color:var(--mu);')+'">'+(b.active!==false?'ACTIVE':'PAUSED')+'</span></div>'
+        +'<div style="flex:1;min-width:180px;"><div class="row-name">'+b.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;'+(b.active!==false?'background:rgba(255,106,0,0.12);color:var(--su);':'background:rgba(153,153,153,0.12);color:var(--mu);')+'">'+(b.active!==false?'ACTIVE':'PAUSED')+'</span></div>'
         +'<div class="row-meta">'+(b.productIds||[]).length+' products &middot; '+b.discountPct+'% off when bought together</div></div>'
         +'<button class="btn" onclick="openBundleForm(\''+b._id+'\')">Edit</button>'
         +'<button class="btn btn-re" onclick="delBundle(\''+b._id+'\',\''+b.name.replace(/'/g,"\\'")+'\')">Delete</button>'
@@ -1125,7 +1125,7 @@ async function renderManagementDashboard(c){
       +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'
       +'<div style="width:40px;height:40px;border-radius:99px;background:var(--card2);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">'+(s.photo?'<img src="'+s.photo+'" style="width:100%;height:100%;object-fit:cover;"/>':'<span style="font-size:13px;font-weight:800;color:var(--or);">'+ini(s.name)+'</span>')+'</div>'
       +'<div style="flex:1;min-width:0;"><div style="font-weight:800;font-size:13px;">'+s.name+'</div><div style="font-size:10px;color:var(--mu);">'+(s.staffNumber||'N/A')+'</div></div>'
-      +'<span style="font-size:9px;font-weight:800;padding:2px 8px;border-radius:99px;background:'+(suspended?'rgba(244,63,94,0.15)':'rgba(34,197,94,0.15)')+';color:'+(suspended?'var(--re)':'var(--su)')+';">'+(suspended?'SUSPENDED':'ACTIVE')+'</span>'
+      +'<span style="font-size:9px;font-weight:800;padding:2px 8px;border-radius:99px;background:'+(suspended?'rgba(244,63,94,0.15)':'rgba(255,106,0,0.15)')+';color:'+(suspended?'var(--re)':'var(--su)')+';">'+(suspended?'SUSPENDED':'ACTIVE')+'</span>'
       +'</div>'
       +'<div style="font-size:11px;color:var(--or);font-weight:700;margin-bottom:10px;">'+role.label+'</div>'
       +'<div style="display:flex;gap:8px;">'
@@ -1503,7 +1503,7 @@ async function openSalaryRecords(id,name){
     return '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid var(--bdr);flex-wrap:wrap;gap:8px;">'
       +'<div><div style="font-weight:800;">'+(h.month||h.date)+'</div>'+(h.description||h.note?'<div style="font-size:12px;color:var(--mu);">'+(h.description||h.note)+'</div>':'')+'</div>'
       +'<div style="display:flex;align-items:center;gap:10px;">'
-      +'<div style="text-align:right;"><div style="font-weight:800;color:'+(h.status==='paid'?'var(--su)':'var(--or)')+';">'+fmt(h.amount)+'</div><span style="font-size:9px;font-weight:800;padding:2px 8px;border-radius:99px;background:'+(h.status==='paid'?'rgba(34,197,94,0.15)':'rgba(255,106,0,0.15)')+';color:'+(h.status==='paid'?'var(--su)':'var(--or)')+';">'+(h.status||'pending').toUpperCase()+'</span></div>'
+      +'<div style="text-align:right;"><div style="font-weight:800;color:'+(h.status==='paid'?'#fff':'var(--or)')+';">'+fmt(h.amount)+'</div><span style="font-size:9px;font-weight:800;padding:2px 8px;border-radius:99px;background:'+(h.status==='paid'?'rgba(255,255,255,0.15)':'rgba(255,106,0,0.15)')+';color:'+(h.status==='paid'?'#fff':'var(--or)')+';">'+(h.status||'pending').toUpperCase()+'</span></div>'
       +'<button class="btn" style="font-size:10px;padding:5px 10px;" onclick="editSalaryRecord(\''+id+'\',\''+h._key+'\',\''+name.replace(/'/g,"\\'")+'\')">Edit</button>'
       +'</div></div>';
   }).join(''):'<div style="color:var(--mu);font-size:12px;">No salary records yet.</div>';
@@ -2219,7 +2219,7 @@ function riderRow(r){
   const avgRating=ratings.length?(ratings.reduce(function(s,x){return s+x;},0)/ratings.length).toFixed(1):null;
   return '<div class="data-row" style="align-items:flex-start;flex-direction:column;">'
     +'<div style="display:flex;justify-content:space-between;width:100%;flex-wrap:wrap;gap:8px;">'
-    +'<div><div class="row-name">'+r.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(255,106,0,0.12);color:var(--or);">'+(r.vehicleType||'')+'</span> <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:'+(online?'rgba(34,197,94,0.15)':'rgba(153,153,153,0.15)')+';color:'+(online?'var(--su)':'var(--mu)')+';">'+(online?'● ONLINE':'○ OFFLINE')+'</span>'+(suspended?' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(244,63,94,0.12);color:var(--re);">SUSPENDED</span>':'')+(strikes>0?' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(244,63,94,0.12);color:var(--re);">⚠ '+strikes+'/3 STRIKES</span>':'')+'</div>'
+    +'<div><div class="row-name">'+r.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(255,106,0,0.12);color:var(--or);">'+(r.vehicleType||'')+'</span> <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:'+(online?'rgba(255,106,0,0.15)':'rgba(153,153,153,0.15)')+';color:'+(online?'var(--su)':'var(--mu)')+';">'+(online?'● ONLINE':'○ OFFLINE')+'</span>'+(suspended?' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(244,63,94,0.12);color:var(--re);">SUSPENDED</span>':'')+(strikes>0?' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(244,63,94,0.12);color:var(--re);">⚠ '+strikes+'/3 STRIKES</span>':'')+'</div>'
     +'<div class="row-meta">'+r.email+' &middot; '+r.phone+(r.riderNumber?' &middot; '+r.riderNumber:'')+' &middot; Pays: '+(r.payFrequency||'weekly')+'</div>'
     +'<div class="row-meta">💰 Total Paid Out: <strong style="color:var(--su);">'+fmt(r.totalPaid||0)+'</strong>'+(avgRating?' &middot; ⭐ Rating: <strong style="color:var(--or);">'+avgRating+'/5</strong> ('+ratings.length+')':'')+'</div>'
     +(r.bankAcctNo?'<div class="row-meta">🏦 '+r.bankName+', '+r.bankAcctNo+' ('+r.bankAcctName+') '+(r.bankVerified?'<strong style="color:var(--su);">✔ Verified</strong>':'<strong style="color:var(--or);">Awaiting Verification</strong>')+'</div>':'')
@@ -2365,12 +2365,12 @@ async function renderWalletIssues(c){
 function walletIssueRow(iss){
   var statusMap={
     pending:{label:'PENDING REVIEW',bg:'rgba(255,106,0,0.12)',color:'var(--or)'},
-    approved_awaiting_bank:{label:'AWAITING CUSTOMER BANK DETAILS',bg:'rgba(34,197,94,0.12)',color:'var(--su)'},
+    approved_awaiting_bank:{label:'AWAITING CUSTOMER BANK DETAILS',bg:'rgba(255,255,255,0.10)',color:'#fff'},
     processing:{label:'PROCESSING PAYOUT',bg:'rgba(91,155,245,0.12)',color:'var(--bl)'},
-    paid:{label:'PAID',bg:'rgba(34,197,94,0.12)',color:'var(--su)'},
+    paid:{label:'PAID',bg:'rgba(255,255,255,0.10)',color:'#fff'},
     declined:{label:'DECLINED',bg:'rgba(244,63,94,0.12)',color:'var(--re)'},
     declined_mismatch:{label:'NAME MISMATCH, STAYED IN WALLET',bg:'rgba(244,63,94,0.12)',color:'var(--re)'},
-    resolved:{label:'RESOLVED',bg:'rgba(34,197,94,0.12)',color:'var(--su)'}
+    resolved:{label:'RESOLVED',bg:'rgba(255,255,255,0.10)',color:'#fff'}
   };
   var st=statusMap[iss.status]||{label:iss.status,bg:'rgba(153,153,153,0.12)',color:'var(--mu)'};
   var typeLabel=iss.type==='refund'?'Refund Request':iss.type==='wrong_topup'?'Wrong Top-Up':'General Issue';
@@ -2465,7 +2465,7 @@ async function renderVendors(c){
   c.innerHTML=html;
 }
 function vendorRow(v){
-  var badgeClass=v.status==='approved'?'background:rgba(34,197,94,0.12);color:var(--su);':v.status==='suspended'?'background:rgba(244,63,94,0.12);color:var(--re);':'background:rgba(255,106,0,0.12);color:var(--or);';
+  var badgeClass=v.status==='approved'?'background:rgba(255,255,255,0.10);color:#fff;':v.status==='suspended'?'background:rgba(244,63,94,0.12);color:var(--re);':'background:rgba(255,106,0,0.12);color:var(--or);';
   var docs=v.documents||{};
   return '<div class="data-row" style="align-items:flex-start;">'
     +'<div style="width:44px;height:44px;border-radius:99px;background:var(--card2);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;">'+(v.photo?'<img src="'+v.photo+'" style="width:100%;height:100%;object-fit:cover;"/>':'<span style="font-size:14px;font-weight:800;color:var(--or);">'+(v.storeName||'?').charAt(0)+'</span>')+'</div>'
@@ -2913,7 +2913,7 @@ function renderOrders(c,filter=''){
 }
 
 // Renders the exact same colored step-tracker the customer sees on the
-// Track Order page (green = done, orange = current, gray = pending), so
+// Track Order page (white = done, orange = current, gray = pending), so
 // admin can see live delivery progress the same way the customer does.
 function renderCustomerStyleTracker(o){
   var isPOD=o.payMethod==='pod',isPickup=o.deliveryMethod==='pickup';
@@ -2936,13 +2936,13 @@ function renderCustomerStyleTracker(o){
   return STEPS.map(function(s,i){
     var event=tl.find(function(t){return t.status===s;});
     var done=i<curIdx,cur=i===curIdx;
-    var lineColor=i<curIdx?'var(--su)':'var(--bdr)';
-    var dotColor=done?'var(--su)':cur?'var(--or)':'var(--mu)';
-    var bg=done?'var(--su)':cur?'var(--or)':'var(--card2)';
+    var lineColor=i<curIdx?'#fff':'var(--bdr)';
+    var dotColor=done?'#fff':cur?'var(--or)':'var(--mu)';
+    var bg=done?'#fff':cur?'var(--or)':'var(--card2)';
     return '<div style="display:flex;gap:14px;padding-bottom:16px;position:relative;">'
       +(i<STEPS.length-1?'<div style="position:absolute;left:12px;top:26px;width:2px;height:calc(100% - 6px);background:'+lineColor+';"></div>':'')
       +'<div style="width:24px;height:24px;border-radius:99px;border:2px solid '+dotColor+';background:'+bg+';flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#000;z-index:1;">'+(done?'✓':cur?'●':'')+'</div>'
-      +'<div><div style="font-size:12px;font-weight:700;color:'+(done?'var(--su)':cur?'var(--or)':'var(--mu)')+';">'+s+(cur?', IN PROGRESS':'')+'</div>'
+      +'<div><div style="font-size:12px;font-weight:700;color:'+(done?'#fff':cur?'var(--or)':'var(--mu)')+';">'+s+(cur?', IN PROGRESS':'')+'</div>'
       +'<div style="font-size:11px;color:var(--mu);">'+(event?new Date(event.time).toLocaleDateString('en-GB')+', '+(event.note||''):'Pending')+'</div></div></div>';
   }).join('');
 }
@@ -3016,9 +3016,9 @@ async function renderAdminDeliveryMap(order){
   }
   setTimeout(function(){if(map)map.invalidateSize();},150);
   const storeIcon=L.divIcon({html:'<div style="background:#FF6A00;width:26px;height:26px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid #fff;">🏬</div>',iconSize:[26,26],className:''});
-  const homeIcon=L.divIcon({html:'<div style="background:#22c55e;width:26px;height:26px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid #fff;">📍</div>',iconSize:[26,26],className:''});
+  const homeIcon=L.divIcon({html:'<div style="background:#fff;width:26px;height:26px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid #161616;">📍</div>',iconSize:[26,26],className:''});
   const vehicleEmoji=VEHICLE_ICONS_ADMIN[(order.riderVehicleType||'motorcycle').toLowerCase()]||'🏍️';
-  const riderIcon=L.divIcon({html:'<div style="background:#161616;width:30px;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid '+(isLive?'#22c55e':'#FF6A00')+';">'+vehicleEmoji+'</div>',iconSize:[30,30],className:''});
+  const riderIcon=L.divIcon({html:'<div style="background:#161616;width:30px;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid '+(isLive?'#FF6A00':'#83838A')+';">'+vehicleEmoji+'</div>',iconSize:[30,30],className:''});
   L.marker([pickup.lat,pickup.lng],{icon:storeIcon}).addTo(map).bindPopup('RichNation Mall');
   L.marker([dest.lat,dest.lng],{icon:homeIcon}).addTo(map).bindPopup(order.customer?.name||'Delivery Address');
   L.marker([riderPos.lat,riderPos.lng],{icon:riderIcon}).addTo(map).bindPopup((order.riderName||'Rider')+(isLive?', live location':', approximate position'));
@@ -3105,7 +3105,7 @@ async function openOrder(tracking){
         <div style="margin-top:12px;">
           ${(o.timeline||[]).map((t,ti,arr)=>{
             var s=(t.status||'').toLowerCase();
-            var color=/cancel|declin|delet|refund/.test(s)?'#f43f5e':/deliver|approv|confirm|pick|ready|complet/.test(s)?'#22c55e':(ti===arr.length-1?'#FF6A00':'#22c55e');
+            var color=/cancel|declin|delet|refund/.test(s)?'#f43f5e':/deliver|approv|confirm|pick|ready|complet/.test(s)?'#83838A':(ti===arr.length-1?'#FF6A00':'#83838A');
             return '<div class="timeline-item" style="position:relative;border-bottom:none;">'
               +(ti<arr.length-1?'<div style="position:absolute;left:15px;top:22px;width:2px;height:calc(100% - 4px);background:'+color+';"></div>':'')
               +'<div class="tl-dot" style="background:'+color+';box-shadow:0 0 0 3px '+color+'22;"></div>'
@@ -3880,9 +3880,9 @@ function changePass(){
 function showPwMsg(text,type){
   const el=document.getElementById('pw-msg');if(!el)return;
   el.textContent=text;el.style.display='block';
-  el.style.background=type==='ok'?'rgba(34,197,94,0.07)':'rgba(244,63,94,0.07)';
+  el.style.background=type==='ok'?'rgba(255,106,0,0.07)':'rgba(244,63,94,0.07)';
   el.style.color=type==='ok'?'var(--su)':'var(--re)';
-  el.style.border='1px solid '+(type==='ok'?'rgba(34,197,94,0.2)':'rgba(244,63,94,0.2)');
+  el.style.border='1px solid '+(type==='ok'?'rgba(255,106,0,0.2)':'rgba(244,63,94,0.2)');
 }
 
 
@@ -3962,7 +3962,7 @@ function renderSiteCustomiser(c){
   html += '</div></div>';
   html += '<div class="fg"><label class="lbl">Quick Presets</label><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">';
   html += '<button class="preset-btn" style="background:#FF6A00;color:#fff;" onclick="setColour(\'#FF6A00\')">Orange</button>';
-  html += '<button class="preset-btn" style="background:#22c55e;color:#000;" onclick="setColour(\'#22c55e\')">Green</button>';
+  html += '<button class="preset-btn" style="background:#0B0B0C;color:#fff;" onclick="setColour(\'#0B0B0C\')">Black</button>';
   html += '<button class="preset-btn" style="background:#3b82f6;color:#fff;" onclick="setColour(\'#3b82f6\')">Blue</button>';
   html += '<button class="preset-btn" style="background:#a855f7;color:#fff;" onclick="setColour(\'#a855f7\')">Purple</button>';
   html += '<button class="preset-btn" style="background:#ef4444;color:#fff;" onclick="setColour(\'#ef4444\')">Red</button>';
@@ -5008,7 +5008,7 @@ function openProdForm(id){
     +'<div class="fg"><label class="lbl">Description</label><textarea class="ta" id="pf-desc" rows="6" placeholder="Describe the product...">'+(p.description||'')+'</textarea><div style="font-size:11px;color:var(--mu);margin-top:5px;line-height:1.6;">Leave a blank line between paragraphs to separate them. Start a line with <code>#</code> (e.g. <code># Materials</code>) to make it a bold section heading.</div></div>'
 
     +'<div class="sec-hdr">Pricing & Stock</div>'
-    +'<div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:9px;padding:12px;margin-bottom:14px;">'
+    +'<div style="background:rgba(255,106,0,0.06);border:1px solid rgba(255,106,0,0.2);border-radius:9px;padding:12px;margin-bottom:14px;">'
     +'<label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;color:var(--wh);">'
     +'<input type="checkbox" id="pf-free" '+(p.price===0?'checked':'')+' style="accent-color:var(--or);width:18px;height:18px;" onchange="toggleFreeProduct(this)"> '
     +'<span>🎁 <strong>Free Product</strong>, Sets price to ₦0, shows FREE badge & "Get Free" button</span></label>'

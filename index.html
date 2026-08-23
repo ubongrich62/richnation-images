@@ -480,6 +480,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .live-dot{width:8px;height:8px;border-radius:99px;background:var(--mu);flex-shrink:0;}
 .live-dot.on{background:var(--su);animation:liveDotPulse 1.6s ease-in-out infinite;}
 @keyframes liveDotPulse{0%,100%{box-shadow:0 0 0 0 rgba(225,94,0,.45);}50%{box-shadow:0 0 0 5px rgba(225,94,0,0);}}
+@keyframes mapPulse{0%,100%{opacity:.5;}50%{opacity:1;}}
 .leaflet-marker-icon{transition:transform 1s linear;}
 </style>
 <link rel="preconnect" href="https://richnation-portal-default-rtdb.firebaseio.com"/>
@@ -2770,7 +2771,7 @@ async function trackOrder(silentNum){
       ${order.riderPhone?`<a href="tel:${order.riderPhone}" style="text-decoration:none;"><button style="background:var(--or);border:none;color:#000;font-weight:800;font-size:11px;padding:8px 14px;border-radius:7px;cursor:pointer;">📞 Call</button></a>`:''}
     </div>
     <div class="live-map-card" style="display:${order.riderId&&order.deliveryStage!=='delivered'&&order.status!=='cancelled'&&order.status!=='deleted'?'block':'none'};">
-      <div id="delivery-map" style="width:100%;height:260px;border-radius:9px 9px 0 0;overflow:hidden;background:var(--card2);"></div>
+      <div id="delivery-map" style="width:100%;height:260px;border-radius:9px 9px 0 0;overflow:hidden;background:var(--card2);display:flex;align-items:center;justify-content:center;"><div style="display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--mu);font-size:12px;"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="var(--or)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="animation:mapPulse 1.4s ease-in-out infinite;"><path d="M9 4L3 6v14l6-2m0-14l6 2m-6-2v14m6-12l6-2v14l-6 2m0-14v14"/></svg>Loading map…</div></div>
       <div id="delivery-map-status" class="live-map-status"><span class="live-dot"></span> Loading location…</div>
     </div>`:''}
     ${order.status==='cancelled'?'<div style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--re);margin-bottom:14px;"><strong>ORDER CANCELLED</strong>, '+(order.cancelReason||order.timeline?.[order.timeline.length-1]?.note||'This order was cancelled.')+'</div>':''}

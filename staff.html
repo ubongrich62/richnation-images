@@ -14,7 +14,7 @@
 :root{
   --bg:#0A0A0B;--card:#151517;--card2:#1C1C20;--bdr:#2B2B31;
   --or:#FF6A00;--or-dk:#E15E00;--gold:#B8720A;--wh:#F5F5F6;--w2:#C7C7CD;--mu:#8F8F97;
-  --su:#22c55e;--re:#f43f5e;--bl:#5b9bf5;
+  --su:#FF6A00;--re:#f43f5e;--bl:#5b9bf5;
   --r-sm:6px;--r-md:10px;--r-lg:14px;--r-pill:999px;
   --sh-sm:0 1px 2px rgba(0,0,0,.4);
   --sh-md:0 8px 24px rgba(0,0,0,.45);
@@ -671,7 +671,7 @@ async function renderSalary(c){
   <div class="card"><div class="card-title">What You've Been Paid</div><div style="margin-top:8px;">${hist.length?hist.map(function(h){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);"><div style="display:flex;justify-content:space-between;align-items:center;"><div><span style="font-size:13px;color:var(--w2);font-weight:700;">'+(h.month||h.description||h.status)+'</span>'+(h.month&&h.description?'<div style="font-size:11px;color:var(--mu);">'+h.description+'</div>':'')+'</div><div style="text-align:right;"><span style="font-weight:800;color:'+(h.status==='paid'?'var(--su)':'var(--or)')+';">'+fmt(h.amount)+'</span><div style="font-size:9px;font-weight:800;color:'+(h.status==='paid'?'var(--su)':'var(--or)')+';">'+(h.status||'pending').toUpperCase()+'</div></div></div>'+(h.message?'<div style="font-size:11px;color:var(--mu);margin-top:3px;">'+h.message+'</div>':'')+'<div style="font-size:10px;color:var(--mu);margin-top:3px;">'+h.date+(h.expectedDate?' &middot; Expected: '+new Date(h.expectedDate).toLocaleDateString('en-GB'):'')+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No history yet.</div>'}</div></div>
   <div class="card">
     <div class="card-title">Withdrawal Requests</div>
-    <div style="margin-top:8px;">${withdrawals.length?withdrawals.map(function(w){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);"><div style="display:flex;justify-content:space-between;"><span style="font-size:13px;color:var(--w2);">'+fmt(w.amount)+'</span><span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;background:'+(w.status==='paid'?'rgba(34,197,94,0.15)':w.status==='declined'?'rgba(244,63,94,0.15)':'rgba(255,140,0,0.15)')+';color:'+(w.status==='paid'?'var(--su)':w.status==='declined'?'var(--re)':'var(--or)')+';">'+(w.status||'pending').toUpperCase()+'</span></div><div style="font-size:10px;color:var(--mu);margin-top:3px;">'+w.date+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No withdrawal requests yet.</div>'}</div>
+    <div style="margin-top:8px;">${withdrawals.length?withdrawals.map(function(w){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);"><div style="display:flex;justify-content:space-between;"><span style="font-size:13px;color:var(--w2);">'+fmt(w.amount)+'</span><span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;background:'+(w.status==='paid'?'rgba(255,106,0,0.15)':w.status==='declined'?'rgba(244,63,94,0.15)':'rgba(143,143,151,0.15)')+';color:'+(w.status==='paid'?'var(--su)':w.status==='declined'?'var(--re)':'var(--mu)')+';">'+(w.status||'pending').toUpperCase()+'</span></div><div style="font-size:10px;color:var(--mu);margin-top:3px;">'+w.date+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No withdrawal requests yet.</div>'}</div>
   </div>
   <div class="card">
     <div class="card-title">Resources</div>
@@ -864,7 +864,7 @@ async function initFleetMap(allRiders){
   withLocation.forEach(function(r){
     var isLive=r.liveTs&&(Date.now()-r.liveTs)<2*60*1000;
     var minsAgo=r.liveTs?Math.round((Date.now()-r.liveTs)/60000):null;
-    const icon=L.divIcon({html:'<div style="background:#161616;width:30px;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:15px;border:2px solid '+(isLive?'#22c55e':'#FF6A00')+';">🏍️</div>',iconSize:[30,30],className:''});
+    const icon=L.divIcon({html:'<div style="background:#161616;width:30px;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:15px;border:2px solid '+(isLive?'#FF6A00':'#6b6b72')+';">🏍️</div>',iconSize:[30,30],className:''});
     L.marker([r.liveLat,r.liveLng],{icon:icon}).addTo(map).bindPopup(r.name+(isLive?', live':', last seen '+(minsAgo!=null?minsAgo+' min ago':'a while ago')));
     bounds.push([r.liveLat,r.liveLng]);
   });
@@ -934,7 +934,7 @@ async function sendFleetMsg(riderId){
 async function renderSubmissions(c){
   c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">My Submissions</div></div><div style="color:var(--mu);">Loading...</div>';
   const mine=Object.entries(await fbG('rn_mall_staff_submissions')||{}).map(function(e){return Object.assign({_id:e[0]},e[1]);}).filter(function(s){return s.staffId===staff._id;}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
-  const statusColor={pending:'var(--or)',approved:'var(--su)',rejected:'var(--re)'};
+  const statusColor={pending:'var(--mu)',approved:'var(--su)',rejected:'var(--re)'};
   c.innerHTML=`
   <div class="page-hdr"><div class="page-hdr-title">My Submissions</div><div class="page-hdr-sub">Send your work to CEO / General Manager for review before it goes out.</div></div>
   <div class="card">
@@ -972,7 +972,7 @@ async function renderApprovals(c){
   const all=Object.entries(await fbG('rn_mall_staff_submissions')||{}).map(function(e){return Object.assign({_id:e[0]},e[1]);}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
   const pending=all.filter(function(s){return (s.status||'pending')==='pending';});
   const reviewed=all.filter(function(s){return s.status&&s.status!=='pending';});
-  const statusColor={pending:'var(--or)',approved:'var(--su)',rejected:'var(--re)'};
+  const statusColor={pending:'var(--mu)',approved:'var(--su)',rejected:'var(--re)'};
   function card(s){
     return '<div class="card" style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;"><div><div style="font-weight:800;font-size:14px;color:var(--wh);">'+s.title+'</div><div style="font-size:11px;color:var(--mu);margin-top:2px;">'+(s.staffName||'Unknown')+' &middot; '+(ROLE_LABELS[s.role]||s.role)+'</div></div><span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;text-transform:uppercase;background:'+statusColor[s.status||'pending']+'22;color:'+statusColor[s.status||'pending']+';">'+(s.status||'pending')+'</span></div>'
       +(s.description?'<div style="font-size:13px;color:var(--w2);margin-top:8px;">'+s.description+'</div>':'')

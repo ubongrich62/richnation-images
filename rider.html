@@ -14,7 +14,7 @@
 :root{
   --bg:#0a0a0a;--card:#161616;--card2:#1e1e1e;--bdr:#2c2c2c;
   --or:#FF6A00;--or-dk:#E15E00;--gold:#FFA733;--wh:#f5f5f5;--w2:#cfcfcf;--mu:#9a9a9a;
-  --su:#22c55e;--re:#f43f5e;--bl:#5b9bf5;
+  --su:#FF6A00;--re:#f43f5e;--bl:#5b9bf5;
   --r-sm:6px;--r-md:10px;--r-lg:14px;--r-pill:999px;
   --sh-sm:0 1px 2px rgba(0,0,0,.5);
   --sh-md:0 8px 24px rgba(0,0,0,.55);
@@ -41,7 +41,7 @@ button{font-family:inherit;}
 .topbar{min-height:56px;border-bottom:1px solid var(--bdr);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;position:sticky;top:0;background:var(--bg);z-index:100;}
 .tb-left{display:flex;align-items:center;gap:8px;min-width:0;flex:1;}
 .tb-logo{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:15px;color:var(--or);white-space:nowrap;}
-.tb-status{font-size:11px;color:var(--su);background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);padding:4px 11px;border-radius:var(--r-pill);font-weight:800;white-space:nowrap;}
+.tb-status{font-size:11px;color:var(--su);background:rgba(255,106,0,0.1);border:1px solid rgba(255,106,0,0.3);padding:4px 11px;border-radius:var(--r-pill);font-weight:800;white-space:nowrap;}
 #mob-btn{display:none;background:none;border:none;color:var(--or);font-size:24px;cursor:pointer;padding:8px 10px;min-width:44px;min-height:44px;align-items:center;justify-content:center;}
 .tb-btn{background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:10px 16px;font-size:12px;font-weight:600;color:var(--wh);cursor:pointer;min-height:40px;transition:background .15s,border-color .15s;}
 .tb-btn:hover{background:var(--bdr);}
@@ -263,7 +263,7 @@ function iconBadge(name,size){
 const STAGES=['assigned','picked_up','in_transit','arrived','delivered'];
 const STAGE_LABELS={assigned:'Assigned',picked_up:'Picked Up',in_transit:'In Transit',arrived:'Arrived at Destination',delivered:'Delivered'};
 const STAGE_TIMELINE_TEXT={picked_up:'Picked Up by Rider',in_transit:'In Transit',arrived:'Arrived at Destination',delivered:'Delivered by Rider'};
-const STAGE_COLORS={assigned:'var(--or)',picked_up:'var(--bl)',in_transit:'var(--bl)',arrived:'var(--su)',delivered:'var(--su)'};
+const STAGE_COLORS={assigned:'var(--mu)',picked_up:'var(--bl)',in_transit:'var(--bl)',arrived:'var(--su)',delivered:'var(--su)'};
 
 function togglePwVisibility(id,el){
   const inp=document.getElementById(id);if(!inp)return;
@@ -538,7 +538,7 @@ async function showDeliveryMapModal(tracking){
   overlay.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;width:100%;max-width:480px;padding:16px;">'
     +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div style="font-weight:800;">'+tracking+'</div><span onclick="document.getElementById(\'rider-map-overlay\').remove()" style="cursor:pointer;font-size:20px;color:var(--mu);">&times;</span></div>'
     +'<div id="rider-delivery-map" style="width:100%;height:280px;border-radius:9px;overflow:hidden;background:var(--card2);"></div>'
-    +'<div style="font-size:10px;color:var(--mu);margin-top:6px;">📍 Tip: if the green pin isn\'t in the right spot, drag it to the correct location.</div>'
+    +'<div style="font-size:10px;color:var(--mu);margin-top:6px;">📍 Tip: if the black pin isn\'t in the right spot, drag it to the correct location.</div>'
     +'<div id="rider-map-pin-hint" style="display:none;font-size:11px;color:var(--or);margin-top:6px;"></div>'
     +'</div>';
   document.body.appendChild(overlay);
@@ -574,14 +574,14 @@ async function showDeliveryMapModal(tracking){
   addRiderTileLayer();
   setTimeout(function(){if(map)map.invalidateSize();},150);
   const storeIcon=L.divIcon({html:'<div style="background:#FF6A00;width:26px;height:26px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid #fff;">🏬</div>',iconSize:[26,26],className:''});
-  const homeIcon=L.divIcon({html:'<div style="background:#22c55e;width:26px;height:26px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid #fff;">📍</div>',iconSize:[26,26],className:''});
+  const homeIcon=L.divIcon({html:'<div style="background:#15151A;width:26px;height:26px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);">📍</div>',iconSize:[26,26],className:''});
   L.marker([pickup.lat,pickup.lng],{icon:storeIcon}).addTo(map).bindPopup('RichNation Mall');
   const deliveryMarker=L.marker([dest.lat,dest.lng],{icon:homeIcon,draggable:true}).addTo(map).bindPopup(order.customer?.name||'Delivery Address');
   // Show the rider's own position too, prefer a fresh device reading, fall back to
   // their last-shared live location so they can always see themselves on the map.
   function placeSelfMarker(lat,lng){
     const vehicleEmoji=VEHICLE_ICONS_RIDER_SELF[(rider.vehicleType||'motorcycle').toLowerCase()]||'🏍️';
-    const selfIcon=L.divIcon({html:'<div style="background:#161616;width:30px;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid #22c55e;">'+vehicleEmoji+'</div>',iconSize:[30,30],className:''});
+    const selfIcon=L.divIcon({html:'<div style="background:#FF6A00;width:30px;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);">'+vehicleEmoji+'</div>',iconSize:[30,30],className:''});
     L.marker([lat,lng],{icon:selfIcon}).addTo(map).bindPopup('You');
   }
   const VEHICLE_ICONS_RIDER_SELF={motorcycle:'🏍️',bicycle:'🚲',car:'🚗','van/truck':'🚚','on foot':'🚶'};
@@ -695,7 +695,7 @@ async function renderRiderLeave(c){
   const leaves=Object.values(await fbG('rn_mall_rider_leave/'+rider._id)||{}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
   c.innerHTML='<div class="page-hdr-title">Leave Requests</div><div class="page-hdr-sub" style="margin-bottom:16px;">Request time off</div>'
     +'<div class="card"><div class="g2"><div class="fg"><label class="lbl">From</label><input class="fi" type="date" id="rl-from"/></div><div class="fg"><label class="lbl">To</label><input class="fi" type="date" id="rl-to"/></div></div><div class="fg"><label class="lbl">Reason</label><textarea class="fi" id="rl-reason" rows="3"></textarea></div><button class="btn btn-or" onclick="submitRiderLeave()">Submit Request</button></div>'
-    +'<div class="card"><div class="card-title">My Requests</div><div style="margin-top:8px;">'+(leaves.length?leaves.map(function(l){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);"><div style="font-size:13px;color:var(--w2);">'+l.from+' → '+l.to+'</div><div style="font-size:11px;color:var(--mu);">'+l.reason+'</div><div style="font-size:10px;color:'+(l.status==='approved'?'var(--su)':l.status==='declined'?'var(--re)':'var(--or)')+';margin-top:3px;">Status: '+(l.status||'pending')+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No leave requests yet.</div>')+'</div></div>';
+    +'<div class="card"><div class="card-title">My Requests</div><div style="margin-top:8px;">'+(leaves.length?leaves.map(function(l){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);"><div style="font-size:13px;color:var(--w2);">'+l.from+' → '+l.to+'</div><div style="font-size:11px;color:var(--mu);">'+l.reason+'</div><div style="font-size:10px;color:'+(l.status==='approved'?'var(--su)':l.status==='declined'?'var(--re)':'var(--mu)')+';margin-top:3px;">Status: '+(l.status||'pending')+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No leave requests yet.</div>')+'</div></div>';
 }
 async function submitRiderLeave(){
   const from=document.getElementById('rl-from').value;

@@ -21,7 +21,7 @@
   /* text, legacy names kept (--wh/--w2/--mu) so existing inline JS styles re-theme for free */
   --wh:#15151A;--w2:#48484E;--mu:#6B6B71;
   /* status */
-  --su:#15803D;--re:#DC2626;--bl:#2054C7;
+  --su:#FF6A00;--re:#DC2626;--bl:#2054C7;
   /* system */
   --r-sm:6px;--r-md:10px;--r-lg:14px;--r-pill:999px;
   --sh-sm:0 1px 2px rgba(15,15,20,.06);
@@ -100,8 +100,8 @@ button{font-family:inherit;}
 .row-name{font-size:13px;font-weight:700;color:var(--wh);}
 .row-meta{font-size:11px;color:var(--mu);margin-top:2px;}
 .badge{font-size:10px;font-weight:800;padding:3px 10px;border-radius:var(--r-pill);text-transform:uppercase;letter-spacing:.3px;}
-.badge-pending{background:rgba(255,106,0,0.12);color:var(--or-dk);}
-.badge-approved{background:rgba(21,128,61,0.12);color:var(--su);}
+.badge-pending{background:rgba(72,72,78,0.12);color:var(--w2);}
+.badge-approved{background:rgba(225,94,0,0.12);color:var(--su);}
 .badge-suspended{background:rgba(220,38,38,0.12);color:var(--re);}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);border:1px solid #000;border-radius:var(--r-sm);padding:11px 18px;font-size:12px;font-weight:600;color:#fff;box-shadow:var(--sh-lg);z-index:9999;display:none;white-space:nowrap;}
 @media(max-width:768px){
@@ -632,7 +632,7 @@ async function renderVPayouts(c){
   </div>
   <div class="card">
     <div class="card-title">🏦 Bank Account Details</div>
-    <div style="font-size:11px;color:var(--mu);margin:8px 0 12px;">Where your payouts are sent.${vendor.bankVerified?' <strong style="color:var(--su);">✔ Verified by admin</strong>':vendor.bankAcctNo?' <strong style="color:var(--or);">Awaiting admin verification</strong>':''}</div>
+    <div style="font-size:11px;color:var(--mu);margin:8px 0 12px;">Where your payouts are sent.${vendor.bankVerified?' <strong style="color:var(--su);">✔ Verified by admin</strong>':vendor.bankAcctNo?' <strong style="color:var(--w2);">Awaiting admin verification</strong>':''}</div>
     <div class="fg"><label class="lbl">Bank Name</label><input class="fi" id="vp-bank" value="${vendor.bankName||''}" placeholder="e.g. GTBank"/></div>
     <div class="fg"><label class="lbl">Account Number</label><input class="fi" id="vp-acctno" value="${vendor.bankAcctNo||''}" placeholder="0123456789"/></div>
     <div class="fg"><label class="lbl">Account Name</label><input class="fi" id="vp-acctname" value="${vendor.bankAcctName||''}" placeholder="Must match your store owner name"/></div>
@@ -776,7 +776,7 @@ async function renderVPerformance(c){
   const goodStanding=cancellationRate<=5&&defectRate<=5;
   c.innerHTML=`
   <div class="page-hdr"><div class="page-hdr-title">Performance</div><div class="page-hdr-sub">How your store is doing, this affects your visibility and standing on RichNation Mall.</div></div>
-  <div class="card" style="text-align:center;background:${goodStanding?'rgba(21,128,61,0.08)':'rgba(220,38,38,0.08)'};border-color:${goodStanding?'rgba(21,128,61,0.3)':'rgba(220,38,38,0.3)'};">
+  <div class="card" style="text-align:center;background:${goodStanding?'rgba(225,94,0,0.08)':'rgba(220,38,38,0.08)'};border-color:${goodStanding?'rgba(225,94,0,0.3)':'rgba(220,38,38,0.3)'};">
     <div style="font-size:28px;">${goodStanding?'✅':'⚠️'}</div>
     <div style="font-weight:800;font-size:16px;color:${goodStanding?'var(--su)':'var(--re)'};margin-top:6px;">${goodStanding?'Good Standing':'Needs Attention'}</div>
     <div style="font-size:12px;color:var(--w2);margin-top:6px;">${goodStanding?'Your store is performing well. Keep it up!':'Your cancellation or refund rate is above 5%, this can affect how often your products are shown to customers.'}</div>
@@ -851,7 +851,7 @@ async function renderVProducts(c){
       var id=entry[0],p=entry[1];
       return '<div class="data-row">'
         +'<div class="row-thumb">'+(p.images&&p.images[0]?'<img loading="lazy" decoding="async" src="'+p.images[0]+'" style="width:100%;height:100%;object-fit:cover;"/>':'')+'</div>'
-        +'<div style="flex:1;min-width:150px;"><div class="row-name">'+p.name+'</div><div class="row-meta">'+fmt(p.price)+' &middot; Stock: '+(p.stock!=null?p.stock:'∞')+' &middot; '+(p.approvalStatus==='approved'?'<span style="color:var(--su);">Approved</span>':p.approvalStatus==='rejected'?'<span style="color:var(--re);">Rejected</span>':'<span style="color:var(--or);">Pending Approval</span>')+'</div></div>'
+        +'<div style="flex:1;min-width:150px;"><div class="row-name">'+p.name+'</div><div class="row-meta">'+fmt(p.price)+' &middot; Stock: '+(p.stock!=null?p.stock:'∞')+' &middot; '+(p.approvalStatus==='approved'?'<span style="color:var(--su);">Approved</span>':p.approvalStatus==='rejected'?'<span style="color:var(--re);">Rejected</span>':'<span style="color:var(--w2);">Pending Approval</span>')+'</div></div>'
         +'<button class="btn" onclick="openVProdForm(\''+id+'\')">Edit</button>'
         +'<button class="btn btn-re" onclick="delVProd(\''+id+'\',\''+p.name.replace(/'/g,"\\'")+'\')">Delete</button>'
         +'</div>';
@@ -884,7 +884,7 @@ function openVProdForm(id){
         <button class="btn" onclick="document.getElementById('vp-img-upload').click()">📁 Choose Images</button>
       </div>
       <div style="background:var(--card2);border-radius:9px;padding:12px;margin-bottom:16px;font-size:12px;">
-        ${p.approvalStatus==='approved'?'<span style="color:var(--su);font-weight:700;">Approved, live on RichNation Mall</span>':p.approvalStatus==='rejected'?'<span style="color:var(--re);font-weight:700;">Rejected</span>'+(p.rejectionReason?'<div style="color:var(--w2);margin-top:4px;">Reason: '+p.rejectionReason+'</div>':''):'<span style="color:var(--or);font-weight:700;">Pending admin approval</span>'}
+        ${p.approvalStatus==='approved'?'<span style="color:var(--su);font-weight:700;">Approved, live on RichNation Mall</span>':p.approvalStatus==='rejected'?'<span style="color:var(--re);font-weight:700;">Rejected</span>'+(p.rejectionReason?'<div style="color:var(--w2);margin-top:4px;">Reason: '+p.rejectionReason+'</div>':''):'<span style="color:var(--w2);font-weight:700;">Pending admin approval</span>'}
         <div style="color:var(--mu);margin-top:4px;">Every new listing and edit is reviewed by admin before it shows to customers.</div>
       </div>
       <div style="display:flex;gap:10px;">

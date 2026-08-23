@@ -16,7 +16,7 @@
 :root{
   --ink:#0B0B0C;--bg:#FFFFFF;--card:#FFFFFF;--card2:#F4F4F3;--bdr:#E4E4E1;
   --or:#FF6A00;--or-dk:#E15E00;--gold:#B8720A;--wh:#15151A;--w2:#48484E;--mu:#6B6B71;
-  --su:#15803D;--re:#DC2626;--bl:#2054C7;
+  --su:#FF6A00;--re:#DC2626;--bl:#2054C7;
   --r-sm:6px;--r-md:10px;--r-lg:14px;--r-pill:999px;
   --sh-sm:0 1px 2px rgba(15,15,20,.06);
   --sh-md:0 8px 24px rgba(15,15,20,.10);
@@ -638,7 +638,7 @@ async function renderInvestorWallet(c){
   </div>
   <div class="card">
     <div class="card-title">Withdrawal Requests</div>
-    <div style="margin-top:8px;">${withdrawals.length?withdrawals.map(function(w){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);"><div style="display:flex;justify-content:space-between;"><span style="font-size:13px;color:var(--w2);">'+fmt(w.amount)+'</span><span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;background:'+(w.status==='paid'?'rgba(34,197,94,0.15)':w.status==='declined'?'rgba(244,63,94,0.15)':'rgba(255,140,0,0.15)')+';color:'+(w.status==='paid'?'var(--su)':w.status==='declined'?'var(--re)':'var(--or)')+';">'+(w.status||'pending').toUpperCase()+'</span></div><div style="font-size:10px;color:var(--mu);margin-top:3px;">'+w.date+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No withdrawal requests yet.</div>'}</div>
+    <div style="margin-top:8px;">${withdrawals.length?withdrawals.map(function(w){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);"><div style="display:flex;justify-content:space-between;"><span style="font-size:13px;color:var(--w2);">'+fmt(w.amount)+'</span><span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;background:'+(w.status==='paid'?'rgba(255,106,0,0.15)':w.status==='declined'?'rgba(244,63,94,0.15)':'rgba(255,140,0,0.15)')+';color:'+(w.status==='paid'?'var(--su)':w.status==='declined'?'var(--re)':'var(--or)')+';">'+(w.status||'pending').toUpperCase()+'</span></div><div style="font-size:10px;color:var(--mu);margin-top:3px;">'+w.date+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No withdrawal requests yet.</div>'}</div>
   </div>
   <div class="card">
     <div class="card-title">Wallet History</div>
