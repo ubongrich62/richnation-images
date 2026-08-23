@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>RichNation Mall — Investor Portal</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+@keyframes iconColorCycle{0%{stroke:#FF6A00;}50%{stroke:#ffffff;}100%{stroke:#FF6A00;}}
+.icon-color-cycle{animation:none;}
+:root{
+  --ink:#0B0B0C;--bg:#FFFFFF;--card:#FFFFFF;--card2:#F4F4F3;--bdr:#E4E4E1;
+  --or:#FF6A00;--or-dk:#E15E00;--gold:#B8720A;--wh:#15151A;--w2:#48484E;--mu:#7B7B81;
+  --su:#15803D;--re:#DC2626;--bl:#2054C7;
+  --r-sm:6px;--r-md:10px;--r-lg:14px;--r-pill:999px;
+  --sh-sm:0 1px 2px rgba(15,15,20,.06);
+  --sh-md:0 8px 24px rgba(15,15,20,.10);
+  --sh-lg:0 24px 64px rgba(15,15,20,.16);
+}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:var(--wh);overflow-x:hidden;width:100%;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:4px;}
+button{font-family:inherit;}
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg);}
+.lcard{width:100%;max-width:480px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-lg);padding:36px 30px;box-shadow:var(--sh-lg);overflow:hidden;}
+.llogo{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;letter-spacing:.3px;color:#fff;background:var(--ink);margin:-36px -30px 24px;padding:20px 30px 16px;}
+.ltitle{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;margin-bottom:6px;color:var(--wh);}
+.lsub{text-align:center;font-size:11px;color:var(--mu);margin-bottom:20px;line-height:1.6;}
+.fi{width:100%;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:12px 14px;color:var(--wh);font-size:13px;outline:none;margin-bottom:10px;transition:border-color .15s,box-shadow .15s;}
+.fi:focus{border-color:var(--or);box-shadow:0 0 0 3px rgba(255,106,0,.15);}
+.lbtn{width:100%;background:var(--or);color:#fff;border:none;padding:13px;border-radius:var(--r-md);font-weight:800;font-size:13px;cursor:pointer;margin-top:4px;transition:background .15s;}
+.lbtn:hover{background:var(--or-dk);}
+.lerr{font-size:12px;color:var(--re);margin-top:10px;display:none;background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.25);border-radius:7px;padding:10px 12px;}
+.lbl{font-size:11px;font-weight:700;color:var(--mu);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;}
+#app{display:none;min-height:100vh;}
+.topbar{min-height:56px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;position:sticky;top:0;background:var(--ink);z-index:100;box-shadow:var(--sh-sm);}
+.tb-left{display:flex;align-items:center;gap:8px;min-width:0;flex:1;}
+.tb-logo{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;color:#fff;white-space:nowrap;}
+.tb-tier{font-size:11px;color:var(--or);background:rgba(255,106,0,0.12);border:1px solid rgba(255,106,0,0.35);padding:3px 10px;border-radius:var(--r-pill);font-weight:800;max-width:38vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#mob-btn{display:none;background:none;border:none;color:#fff;font-size:24px;cursor:pointer;padding:2px 8px;}
+.tb-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:var(--r-sm);padding:8px 14px;font-size:12px;color:#fff;cursor:pointer;transition:background .15s;}
+.tb-btn:hover{background:rgba(255,255,255,.16);}
+.wrap{display:flex;min-height:calc(100vh - 56px);}
+.sb{width:210px;min-width:210px;background:var(--card);border-right:1px solid var(--bdr);padding:16px 0;display:flex;flex-direction:column;gap:1px;}
+.sb-item{display:flex;align-items:center;gap:9px;padding:10px 16px;font-size:13px;color:var(--w2);cursor:pointer;border-left:3px solid transparent;transition:background .15s,color .15s;}
+.sb-item:hover{background:var(--card2);}
+.sb-item.active{background:rgba(255,106,0,0.08);border-left-color:var(--or);color:var(--or);font-weight:700;}
+.content{flex:1;padding:24px;overflow-x:hidden;}
+.page-hdr-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:22px;color:var(--wh);}
+.page-hdr-sub{font-size:12px;color:var(--mu);margin-top:2px;}
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px;}
+.stat-card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);padding:18px;box-shadow:var(--sh-sm);}
+.stat-num{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:26px;color:var(--wh);}
+.stat-lbl{font-size:11px;font-weight:600;color:var(--mu);margin-top:4px;text-transform:uppercase;letter-spacing:.4px;}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);padding:18px;margin-bottom:14px;box-shadow:var(--sh-sm);}
+.card-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14px;color:var(--wh);}
+.fg{margin-bottom:12px;}
+.btn{background:#fff;border:1.5px solid var(--bdr);border-radius:var(--r-md);padding:9px 16px;font-size:12px;font-weight:700;color:var(--wh);cursor:pointer;transition:border-color .15s,background .15s;}
+.btn:hover{background:var(--card2);}
+.btn-or{background:var(--or);border:none;color:#fff;font-weight:800;transition:background .15s;}
+.btn-or:hover{background:var(--or-dk);}
+.btn-lg{padding:11px 18px;font-size:13px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.chat-msg{display:flex;gap:8px;margin-bottom:10px;}
+.chat-bubble{background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-md);padding:9px 12px;font-size:12px;max-width:75%;white-space:pre-wrap;color:var(--wh);}
+.chat-msg.own{flex-direction:row-reverse;}
+.chat-msg.own .chat-bubble{background:rgba(255,106,0,0.10);border-color:rgba(255,106,0,0.3);}
+.chat-av{width:26px;height:26px;border-radius:var(--r-pill);background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--or);flex-shrink:0;}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);border:1px solid var(--ink);border-radius:var(--r-md);padding:11px 18px;font-size:12px;font-weight:600;color:#fff;box-shadow:var(--sh-lg);z-index:9999;display:none;white-space:nowrap;}
+@media(max-width:768px){
+  .sb{position:fixed;left:-240px;top:56px;bottom:0;z-index:300;width:220px;transition:left .2s;box-shadow:var(--sh-lg);}
+  .sb.open{left:0;display:flex;}
+  #mob-btn{display:flex!important;}
+  .stats-grid{grid-template-columns:1fr;}
+  .g2{grid-template-columns:1fr;}
+  .content{padding:14px;}
+}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="lcard">
+    <div class="llogo">🛒 RichNation Mall</div>
+    <div class="ltitle" id="l-title">Investor Sign In</div>
+    <div class="lsub" id="l-sub">Full transparency into your investment — live stats, revenue charts, updates, and direct access to the founder.</div>
+
+    <div id="login-form">
+      <input class="fi" id="in-email" type="email" placeholder="Email"/>
+      <div style="position:relative;"><input class="fi" id="in-pass" type="password" placeholder="Password" style="padding-right:56px;"/><span onclick="togglePwVisibility('in-pass',this)" style="position:absolute;right:12px;top:12px;font-size:11px;color:var(--or);cursor:pointer;font-weight:700;">Show</span></div>
+      <button class="lbtn" onclick="doInvestorLogin()">Sign In</button>
+      <div class="lerr" id="login-err"></div>
+    </div>
+
+    <div id="apply-form" style="display:none;">
+      <div class="g2">
+        <input class="fi" id="ap-fname" placeholder="Full Name"/>
+        <div><div style="font-size:11px;color:var(--mu);margin-bottom:6px;">Date of Birth</div><input class="fi" id="ap-dob" type="date"/></div>
+      </div>
+      <div class="g2">
+        <select class="fi" id="ap-gender"><option value="">Gender</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select>
+        <input class="fi" id="ap-phone" placeholder="Phone Number"/>
+      </div>
+      <input class="fi" id="ap-email" type="email" placeholder="Email Address"/>
+      <input class="fi" id="ap-address" placeholder="House Address"/>
+      <div class="g2">
+        <input class="fi" id="ap-country" placeholder="Country" value="Nigeria"/>
+        <input class="fi" id="ap-lga" placeholder="Local Government Area"/>
+      </div>
+      <div class="g2">
+        <input class="fi" id="ap-amount" type="number" min="200000" placeholder="Investment Amount (₦) — min 200,000" oninput="updatePackagePreview()"/>
+        <select class="fi" id="ap-option">
+          <option value="">Investment Option</option>
+          <option value="profit_share">Monthly Profit Share</option>
+          <option value="equity">Equity Ownership</option>
+          <option value="fixed_return">Fixed Return</option>
+        </select>
+      </div>
+      <div id="package-preview" style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;margin-bottom:12px;font-size:12px;color:var(--w2);display:none;"></div>
+      <div style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;margin-bottom:12px;max-height:180px;overflow-y:auto;">
+        <div style="font-weight:800;font-size:12px;margin-bottom:8px;color:var(--wh);">RichNation Mall Investor Agreement</div>
+        <div style="font-size:11px;color:var(--mu);line-height:1.7;">
+          By checking "I Agree" below, you enter into this agreement electronically — no physical signature required.<br><br>
+          <strong>1. Nature of Investment.</strong> This is a business investment in RichNation Mall, not a loan or bank product. Returns depend on your selected package and structure.<br><br>
+          <strong>2. Risk Disclosure.</strong> All business investment carries risk. Past performance is not a guarantee of future results.<br><br>
+          <strong>3. Transparency Commitment.</strong> RichNation Mall shows real revenue and order data — not just percentages — in your Live Mall Stats dashboard at all times.<br><br>
+          <strong>4. Payment of Returns.</strong> Returns are paid directly to your RichNation Investor Wallet on the schedule for your package. From there, you may request a withdrawal to your bank account at any time.<br><br>
+          <strong>5. Bank Details.</strong> You are solely responsible for entering accurate bank details for withdrawals. RichNation Mall is not liable for funds lost due to incorrect information you provided.<br><br>
+          <strong>6. Confidentiality.</strong> Financial figures and business information shared with you may not be disclosed to third parties without written consent.<br><br>
+          <strong>7. Principal Withdrawal.</strong> Your invested principal is committed for the term of your package. Early exit is not guaranteed and is handled case-by-case through Chat with Founder — separate from your Wallet balance, which is yours to withdraw freely.<br><br>
+          <strong>8. Communication.</strong> Official updates come only through this portal.<br><br>
+          <strong>9. Management Authority.</strong> RichNation Global Ltd may update platform policies with notice. Your individually agreed package terms are never changed without your consent.
+        </div>
+      </div>
+      <label style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--w2);cursor:pointer;margin-bottom:12px;"><input type="checkbox" id="ap-agree" style="width:16px;height:16px;accent-color:var(--or);margin-top:2px;flex-shrink:0;"/> I have read and agree to the RichNation Mall Investor Agreement above.</label>
+      <textarea class="fi" id="ap-note" rows="3" placeholder="Anything else you'd like us to know (optional)" style="resize:vertical;"></textarea>
+      <button class="lbtn" onclick="submitInvestorApplication()">Submit Application</button>
+      <div class="lerr" id="apply-err"></div>
+    </div>
+
+    <div style="text-align:center;font-size:11px;color:var(--mu);margin-top:16px;" id="toggle-note">New partner? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Apply to invest</span></div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="tb-left">
+      <button id="mob-btn" onclick="toggleSidebar()">&#9776;</button>
+      <div class="tb-logo">🛒 RichNation Mall</div>
+      <div class="tb-tier" id="tb-tier-badge"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;position:relative;">
+      <button class="tb-btn" style="position:relative;" onclick="toggleInvestorNotifPanel()">🔔<span id="inv-notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--re);color:#fff;font-size:9px;font-weight:800;min-width:15px;height:15px;border-radius:99px;align-items:center;justify-content:center;padding:0 3px;">0</span></button>
+      <div id="inv-notif-panel" style="display:none;position:absolute;top:44px;right:0;width:300px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--bdr);border-radius:10px;box-shadow:var(--sh-lg);z-index:500;padding:8px;"></div>
+      <button class="tb-btn" onclick="investorLogout()">Sign Out</button>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="sb" id="sidebar"></div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const FB='https://richnation-portal-default-rtdb.firebaseio.com';
+const FIREBASE_CONFIG={apiKey:"AIzaSyDLGnyGB8ZnEc2u6TbVzjIAQi1pgSaZVyQ",authDomain:"richnation-portal.firebaseapp.com",databaseURL:"https://richnation-portal-default-rtdb.firebaseio.com",projectId:"richnation-portal",storageBucket:"richnation-portal.firebasestorage.app",messagingSenderId:"175550692963",appId:"1:175550692963:web:1e3c995b3ed0baaadac256"};
+const RECAPTCHA_SITE_KEY='6Ld2O5EtAAAAAN6fXMnn7kn5a6SWvDpJs97kckGC';
+let appCheckToken=null;
+// App Check isn't enforced yet, so it adds nothing functional right now — loaded only
+// after the page is fully done loading, so it costs the page nothing while unused.
+function loadAppCheckWhenIdle(){
+  function loadScript(src){
+    return new Promise(function(resolve){
+      const s=document.createElement('script');
+      s.src=src;s.onload=resolve;s.onerror=resolve;
+      document.head.appendChild(s);
+    });
+  }
+  loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js')
+    .then(function(){return loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js');})
+    .then(function(){
+      try{
+        firebase.initializeApp(FIREBASE_CONFIG);
+        const appCheckInstance=firebase.appCheck();
+        appCheckInstance.activate(new firebase.appCheck.ReCaptchaV3Provider(RECAPTCHA_SITE_KEY),true);
+        appCheckInstance.getToken().then(function(r){appCheckToken=r.token;}).catch(function(e){console.warn('App Check token fetch failed:',e.message);});
+        appCheckInstance.onTokenChanged(function(r){appCheckToken=r.token;});
+      }catch(e){
+        console.warn('App Check init failed — requests will proceed without a token:',e.message);
+      }
+    });
+}
+if(document.readyState==='complete'){setTimeout(loadAppCheckWhenIdle,2000);}
+else window.addEventListener('load',function(){setTimeout(loadAppCheckWhenIdle,2000);});
+let investor=null;
+let curNav='dashboard';
+
+async function fbFetchTimeout(url,opts,ms){
+  ms=ms||8000;const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),ms);
+  opts=opts||{};
+  if(typeof appCheckToken!=='undefined'&&appCheckToken)opts=Object.assign({},opts,{headers:Object.assign({},opts.headers,{'X-Firebase-AppCheck':appCheckToken})});
+  try{const r=await fetch(url,Object.assign({},opts,{signal:ctrl.signal}));clearTimeout(t);return r;}
+  catch(e){clearTimeout(t);throw e;}
+}
+function downloadDataDoc(uri,filename){
+  if(!uri)return;
+  try{
+    const commaIdx=uri.indexOf(',');
+    const meta=uri.slice(0,commaIdx);
+    const isBase64=meta.indexOf('base64')!==-1;
+    const mimeMatch=meta.match(/data:([^;]+)/);
+    const mime=mimeMatch?mimeMatch[1]:'application/octet-stream';
+    const raw=isBase64?atob(uri.slice(commaIdx+1)):decodeURIComponent(uri.slice(commaIdx+1));
+    const bytes=new Uint8Array(raw.length);
+    for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+    const blob=new Blob([bytes],{type:mime});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=filename||'document';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+  }catch(e){toast('Could not download this document','err');}
+}
+async function fbG(p){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{});return await r.json();}catch(e){try{await new Promise(res=>setTimeout(res,400));const r2=await fbFetchTimeout(FB+'/'+p+'.json',{});return await r2.json();}catch(e2){return null;}}}
+async function fbS(p,d){try{await fbFetchTimeout(FB+'/'+p+'.json',{method:'PUT',body:JSON.stringify(d)});}catch(e){}}
+async function fbU(p,d){try{await fbFetchTimeout(FB+'/'+p+'.json',{method:'PATCH',body:JSON.stringify(d)});}catch(e){}}
+async function fbP(p,d){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'POST',body:JSON.stringify(d)});return r.json();}catch(e){return null;}}
+
+function toast(msg,type){
+  const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';
+  t.style.borderColor=type==='err'?'var(--re)':'var(--bdr)';
+  clearTimeout(window._toastT);window._toastT=setTimeout(()=>{t.style.display='none';},3000);
+}
+function ds(){return new Date().toLocaleDateString('en-GB');}
+function fmt(n){return '₦'+parseInt(n||0).toLocaleString();}
+function svgIconPaths(name){
+  var icons={
+    home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
+    chart:'<path d="M4 20V10M12 20V4M20 20v-7"/>',
+    note:'<path d="M4 3h16v18l-4-3H4z"/><path d="M8 8h8M8 12h5"/>',
+    file:'<path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/>',
+    money:'<path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>',
+    chat:'<path d="M21 12a8 8 0 11-3.5-6.6L21 4l-1 4.5A7.9 7.9 0 0121 12z"/>',
+    user:'<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>',
+    star:'<path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1z"/>',
+    mail:'<path d="M3 5h18v14H3z"/><path d="M3 6l9 7 9-7"/>',
+    phone:'<path d="M4 3h4l2 6-3 2a12 12 0 006 6l2-3 6 2v4a2 2 0 01-2 2C10 22 2 14 2 5a2 2 0 012-2z"/>',
+    cake:'<path d="M4 21h16v-8H4z"/><path d="M4 13a3 3 0 013-3h10a3 3 0 013 3"/><path d="M9 10V6M12 10V4M15 10V6"/>',
+    briefcase:'<path d="M3 7h18v13H3z"/><path d="M8 7V4h8v3"/>'
+  };
+  return icons[name]||icons.star;
+}
+function iconBadge(name,size){
+  size=size||18;
+  return '<span style="display:inline-block;position:relative;width:'+size+'px;height:'+size+'px;vertical-align:middle;">'
+    +'<svg class="icon-color-cycle" viewBox="0 0 24 24" width="'+size+'" height="'+size+'" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;">'+svgIconPaths(name)+'</svg>'
+    +'</span>';
+}
+function tierFor(amount){
+  if(amount>=2000000)return 'Platinum Partner';
+  if(amount>=1000000)return 'Gold Partner';
+  if(amount>=500000)return 'Silver Partner';
+  return 'Bronze Partner';
+}
+const DEFAULT_PACKAGES={bronze:{label:'Bronze',min:200000,rate:12},silver:{label:'Silver',min:500000,rate:15},gold:{label:'Gold',min:1000000,rate:18},platinum:{label:'Platinum',min:2000000,rate:22}};
+function getPackages(){return (window._settings&&window._settings.investorPackages)||DEFAULT_PACKAGES;}
+function packageForAmount(amount){
+  const pkgs=getPackages();
+  if(amount>=pkgs.platinum.min)return Object.assign({id:'platinum'},pkgs.platinum);
+  if(amount>=pkgs.gold.min)return Object.assign({id:'gold'},pkgs.gold);
+  if(amount>=pkgs.silver.min)return Object.assign({id:'silver'},pkgs.silver);
+  if(amount>=pkgs.bronze.min)return Object.assign({id:'bronze'},pkgs.bronze);
+  return null;
+}
+function updatePackagePreview(){
+  const amount=parseFloat(document.getElementById('ap-amount').value)||0;
+  const box=document.getElementById('package-preview');
+  if(!box)return;
+  if(amount<200000){box.style.display='none';return;}
+  const pkg=packageForAmount(amount);
+  if(!pkg){box.style.display='none';return;}
+  const annual=Math.round(amount*(pkg.rate/100));
+  const monthly=Math.round(annual/12);
+  box.style.display='block';
+  box.innerHTML='<strong style="color:var(--or);">'+pkg.label+' Package</strong> — '+pkg.rate+'% annual return<br>Estimated: <strong style="color:var(--su);">₦'+monthly.toLocaleString()+'/month</strong> (₦'+annual.toLocaleString()+'/year) with Monthly Profit Share or Fixed Return. Equity Ownership works differently — see the agreement above.';
+}
+const OPTION_LABELS={profit_share:'Monthly Profit Share',equity:'Equity Ownership',fixed_return:'Fixed Return'};
+
+function togglePwVisibility(id,el){
+  const inp=document.getElementById(id);if(!inp)return;
+  if(inp.type==='password'){inp.type='text';el.textContent='Hide';}
+  else{inp.type='password';el.textContent='Show';}
+}
+function toggleApplyMode(){
+  const isLogin=document.getElementById('login-form').style.display!=='none';
+  document.getElementById('login-form').style.display=isLogin?'none':'block';
+  document.getElementById('apply-form').style.display=isLogin?'block':'none';
+  document.getElementById('l-title').textContent=isLogin?'Apply to Invest':'Investor Sign In';
+  document.getElementById('l-sub').textContent=isLogin?'Minimum investment ₦200,000. Fill in your details below and our team will follow up with a formal partnership agreement.':'Full transparency into your investment — live stats, revenue charts, updates, and direct access to the founder.';
+  document.getElementById('toggle-note').innerHTML=isLogin?'Already a partner? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Sign in</span>':'New partner? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Apply to invest</span>';
+}
+async function submitInvestorApplication(){
+  const fname=document.getElementById('ap-fname').value.trim();
+  const dob=document.getElementById('ap-dob').value;
+  const gender=document.getElementById('ap-gender').value;
+  const phone=document.getElementById('ap-phone').value.trim();
+  const email=document.getElementById('ap-email').value.trim().toLowerCase();
+  const address=document.getElementById('ap-address').value.trim();
+  const country=document.getElementById('ap-country').value.trim();
+  const lga=document.getElementById('ap-lga').value.trim();
+  const amount=parseFloat(document.getElementById('ap-amount').value)||0;
+  const option=document.getElementById('ap-option').value;
+  const note=document.getElementById('ap-note').value.trim();
+  const err=document.getElementById('apply-err');err.style.display='none';
+  if(!fname||!phone||!email||!address||!option){err.textContent='Please fill in your name, phone, email, address, and chosen option.';err.style.display='block';return;}
+  if(amount<200000){err.textContent='Minimum investment is ₦200,000.';err.style.display='block';return;}
+  if(!document.getElementById('ap-agree').checked){err.textContent='Please read and agree to the Investor Agreement to continue.';err.style.display='block';return;}
+  const all=await fbG('rn_mall_investors')||{};
+  if(Object.values(all).find(function(s){return s.email===email;})){err.textContent='An application or account with this email already exists.';err.style.display='block';return;}
+  const id='inv_'+Date.now();
+  const pkg=packageForAmount(amount);
+  await fbS('rn_mall_investors/'+id,{
+    id,name:fname,dob,gender,phone,email,address,country,lga,
+    investmentAmount:amount,investmentOption:option,note,
+    package:pkg?pkg.id:null,packageRate:pkg?pkg.rate:null,
+    agreementAccepted:true,agreementAcceptedAt:Date.now(),
+    walletBalance:0,
+    password:'',status:'pending_review',joinDate:ds(),ts:Date.now()
+  });
+  await fbP('rn_mall_notifications',{type:'new_investor_application',name:fname,amount,option,email,date:ds(),read:false,ts:Date.now()});
+  err.style.display='none';
+  document.getElementById('apply-form').innerHTML='<div style="text-align:center;padding:10px 0;"><div style="font-size:32px;margin-bottom:10px;">✅</div><div style="font-weight:800;margin-bottom:8px;">Application Submitted!</div><div style="font-size:12px;color:var(--mu);line-height:1.7;">Thank you, '+fname+'! Our team will review your application and follow up with a formal partnership agreement. Once signed and confirmed, your investor portal will be activated.</div></div>';
+}
+async function doInvestorLogin(){
+  const email=document.getElementById('in-email').value.trim().toLowerCase();
+  const pass=document.getElementById('in-pass').value.trim();
+  const err=document.getElementById('login-err');err.style.display='none';
+  if(!email||!pass){err.textContent='Enter your email and password.';err.style.display='block';return;}
+  const all=await fbG('rn_mall_investors')||{};
+  const byEmail=Object.entries(all).find(function(e){return e[1].email===email;});
+  if(!byEmail){err.textContent='Incorrect email or password.';err.style.display='block';return;}
+  const found=Object.assign({_id:byEmail[0]},byEmail[1]);
+  if(found.status==='pending_review'){err.textContent='Your application is still under review. You\'ll be notified once your agreement is confirmed.';err.style.display='block';return;}
+  if(found.status==='suspended'){err.textContent='Your access has been suspended. Please contact us.';err.style.display='block';return;}
+  if(found.password!==pass){err.textContent='Incorrect email or password.';err.style.display='block';return;}
+  investor=found;
+  sessionStorage.setItem('rnm_investor_session',JSON.stringify(investor));
+  startApp();
+}
+function investorLogout(){sessionStorage.removeItem('rnm_investor_session');investor=null;document.getElementById('app').style.display='none';document.getElementById('login').style.display='flex';}
+function checkInvestorSession(){const s=sessionStorage.getItem('rnm_investor_session');if(s){try{investor=JSON.parse(s);startApp();}catch(e){}}}
+function buildInvestorSidebar(){
+  var items=[['dashboard','home','Dashboard'],['wallet','money','Wallet'],['switch','star','Switch Plan'],['stats','chart','Live Mall Stats'],['updates','note','Updates'],['documents','file','My Documents'],['chat','chat','Chat with Founder'],['profile','user','My Profile']];
+  var html='';
+  items.forEach(function(item,i){html+='<div class="sb-item'+(i===0?' active':'')+'" id="nav-'+item[0]+'" onclick="inav(\''+item[0]+'\')">'+iconBadge(item[1],16)+'&nbsp;'+item[2]+'</div>';});
+  document.getElementById('sidebar').innerHTML=html;
+}
+function startApp(){
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('tb-tier-badge').textContent=investor.tier||tierFor(investor.investmentAmount);
+  buildInvestorSidebar();
+  inav('dashboard');
+  loadInvestorNotifs();
+}
+function toggleSidebar(){document.querySelector('.sb').classList.toggle('open');}
+
+async function manualRefreshInvestorDash(btn){
+  const orig=btn.innerHTML;btn.innerHTML='⏳...';btn.disabled=true;
+  await inav('dashboard');
+  toast('Updated!');
+  btn.innerHTML=orig;btn.disabled=false;
+}
+async function inav(page){
+  curNav=page;
+  document.querySelectorAll('.sb-item').forEach(el=>el.classList.toggle('active',el.id==='nav-'+page));
+  document.querySelector('.sb').classList.remove('open');
+  const c=document.getElementById('content');
+  const routes={dashboard:renderDashboard,wallet:renderInvestorWallet,switch:renderSwitchPlan,stats:renderStats,updates:renderUpdates,documents:renderDocuments,chat:renderChat,profile:renderProfile};
+  (routes[page]||renderDashboard)(c);
+  const fresh=await fbG('rn_mall_investors/'+investor._id);
+  if(fresh&&curNav===page){
+    const changed=JSON.stringify(fresh)!==JSON.stringify(Object.assign({},investor,{_id:undefined}));
+    investor=Object.assign({_id:investor._id},fresh);
+    sessionStorage.setItem('rnm_investor_session',JSON.stringify(investor));
+    document.getElementById('tb-tier-badge').textContent=investor.tier||tierFor(investor.investmentAmount);
+    if(changed)(routes[page]||renderDashboard)(c);
+  }
+}
+// dashboard live-refresh interval removed — was causing a disruptive flash every 15s
+
+async function renderDashboard(c){
+  c.innerHTML='<div class="page-hdr-title">Welcome, '+investor.name+'</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
+  const tier=investor.tier||tierFor(investor.investmentAmount);
+  const [settings,payoutsData]=await Promise.all([fbG('rn_mall_settings'),fbG('rn_mall_investor_payouts/'+investor._id)]);
+  const totalTarget=(settings||{}).investorCapitalTarget||3000000;
+  const equityPct=investor.investmentOption==='equity'?((investor.investmentAmount/totalTarget)*100).toFixed(2):null;
+  const payouts=Object.values(payoutsData||{}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  const latestPayout=payouts[0];
+  const now=new Date();
+  const thisMonthPaid=payouts.filter(function(p){var d=new Date(p.ts||0);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}).reduce(function(s,p){return s+(p.amount||0);},0);
+  c.innerHTML=`
+  <div class="card" style="display:flex;align-items:center;gap:16px;justify-content:space-between;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:16px;">
+    <div onclick="document.getElementById('dash-photo-upload').click()" style="width:64px;height:64px;border-radius:99px;background:var(--card2);border:2px solid var(--bdr);cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      ${investor.photo?'<img src="'+investor.photo+'" style="width:100%;height:100%;object-fit:cover;"/>':'<span style="font-size:22px;color:var(--mu);">'+investor.name.slice(0,2).toUpperCase()+'</span>'}
+    </div>
+    <input type="file" id="dash-photo-upload" accept="image/*" style="display:none;" onchange="uploadMyPhoto('dash-photo-upload')">
+    <div>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:18px;">${investor.name}</div>
+      <div style="font-size:12px;color:var(--mu);margin-top:2px;">${tier} &middot; Partner since ${investor.joinDate||'—'}</div>
+      <div onclick="document.getElementById('dash-photo-upload').click()" style="font-size:11px;color:var(--or);cursor:pointer;margin-top:4px;">Change Photo</div>
+    </div>
+    </div>
+    <button onclick="manualRefreshInvestorDash(this)" class="btn" style="font-size:11px;">🔄 Refresh</button>
+  </div>
+  ${latestPayout&&latestPayout.expectedDate&&new Date(latestPayout.expectedDate)>=now?`<div class="card">
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:var(--or);">💰 A payment is on its way!</div>
+    <div style="font-size:12px;color:var(--mu);margin-top:4px;">Expect ${fmt(latestPayout.amount)} around ${new Date(latestPayout.expectedDate).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}</div>
+    ${latestPayout.message?`<div style="font-size:12px;color:var(--w2);margin-top:6px;">${latestPayout.message}</div>`:''}
+  </div>`:''}
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num" style="color:var(--su);">${fmt(investor.investmentAmount)}</div><div class="stat-lbl">Your Investment</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--gold);">${fmt(investor.totalPaid||0)}</div><div class="stat-lbl">Total Profit Paid</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--su);">${fmt(investor.walletBalance||0)}</div><div class="stat-lbl">Wallet Balance</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--su);">${fmt(thisMonthPaid)}</div><div class="stat-lbl">This Month's Earnings</div></div>
+    <div class="stat-card"><div class="stat-num">${OPTION_LABELS[investor.investmentOption]||investor.investmentOption}</div><div class="stat-lbl">Your Option</div></div>
+    ${equityPct?`<div class="stat-card"><div class="stat-num" style="color:var(--or);">${equityPct}%</div><div class="stat-lbl">Your Equity Stake</div></div>`:''}
+    <div class="stat-card"><div class="stat-num" style="color:${investor.status==='active'?'var(--su)':'var(--or)'};">${investor.status==='active'?'Active':investor.status}</div><div class="stat-lbl">Status</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📋 Your Partnership Terms</div>
+    <div style="font-size:12px;color:var(--w2);line-height:1.9;margin-top:8px;">
+      ${investor.investmentOption==='profit_share'?'You receive a share of net profits monthly, starting 6 months after the mall reaches full-capacity launch. Your return grows as the business grows — no cap on upside.':
+        investor.investmentOption==='equity'?'You hold a permanent ownership stake in RichNation Mall, proportional to your investment vs. the total capital raised. Your stake includes a share of profits and a voice in major decisions.':
+        investor.investmentOption==='fixed_return'?'You will receive your capital back plus your agreed fixed return at the end of your term, as specified in your signed partnership agreement.':'See your signed partnership agreement for full terms.'}
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">📊 Earnings Analytics</div>
+    <div style="font-size:11px;color:var(--mu);margin:6px 0 14px;">Last 6 months, and how often you've been paid.</div>
+    <div id="earnings-chart" style="display:flex;align-items:flex-end;gap:8px;height:100px;margin-bottom:10px;"></div>
+    <div id="earnings-freq" style="font-size:12px;color:var(--w2);"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">💰 What You've Been Paid</div>
+    <div style="margin-top:8px;">${payouts.length?payouts.map(function(p){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);"><div style="display:flex;justify-content:space-between;"><span style="font-size:13px;color:var(--w2);">'+(p.description||'Payment')+'</span><span style="font-weight:800;color:var(--su);">'+fmt(p.amount)+'</span></div>'+(p.message?'<div style="font-size:11px;color:var(--mu);margin-top:3px;">'+p.message+'</div>':'')+'<div style="font-size:10px;color:var(--mu);margin-top:3px;">'+p.date+(p.expectedDate?' &middot; Expected: '+new Date(p.expectedDate).toLocaleDateString('en-GB'):'')+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No payments recorded yet.</div>'}</div>
+  </div>`;
+  renderEarningsChart(payouts);
+}
+function renderEarningsChart(payouts){
+  const chartEl=document.getElementById('earnings-chart');
+  const freqEl=document.getElementById('earnings-freq');
+  if(!chartEl)return;
+  const now=new Date();
+  const months=[];
+  for(let i=5;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    months.push({label:d.toLocaleDateString('en-GB',{month:'short'}),year:d.getFullYear(),month:d.getMonth()});
+  }
+  const totals=months.map(function(m){
+    return payouts.filter(function(p){var d=new Date(p.ts||0);return d.getMonth()===m.month&&d.getFullYear()===m.year;}).reduce(function(s,p){return s+(p.amount||0);},0);
+  });
+  const maxVal=Math.max.apply(null,totals.concat([1]));
+  chartEl.innerHTML=months.map(function(m,i){
+    const h=Math.max(4,Math.round((totals[i]/maxVal)*90));
+    return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:100%;height:'+h+'px;background:'+(totals[i]>0?'var(--or)':'var(--card2)')+';border-radius:4px 4px 0 0;"></div><div style="font-size:9px;color:var(--mu);">'+m.label+'</div></div>';
+  }).join('');
+  const paidMonths=totals.filter(function(t){return t>0;}).length;
+  if(freqEl){
+    freqEl.innerHTML=paidMonths>0
+      ?'Paid in <strong style="color:var(--su);">'+paidMonths+' of the last 6 months</strong>. Average when paid: <strong style="color:var(--or);">'+fmt(totals.filter(function(t){return t>0;}).reduce(function(s,t){return s+t;},0)/paidMonths)+'</strong>.'
+      :'No payments in the last 6 months yet.';
+  }
+}
+
+async function renderStats(c){
+  c.innerHTML='<div class="page-hdr-title">Live Mall Stats</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
+  const orders=Object.values(await fbG('rn_mall_orders')||{}).filter(function(o){return o.status!=='cancelled'&&o.status!=='deleted';});
+  const totalRev=orders.reduce(function(s,o){return s+(o.total||0);},0);
+  const custs=await fbG('rn_mall_customers')||{};
+  const prods=await fbG('rn_mall_products')||{};
+  const now=new Date();
+  const months=[];
+  for(let i=5;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const label=d.toLocaleDateString('en-GB',{month:'short',year:'2-digit'});
+    const start=new Date(d.getFullYear(),d.getMonth(),1),end=new Date(d.getFullYear(),d.getMonth()+1,0,23,59,59);
+    const rev=orders.filter(function(o){
+      const parts=(o.date||'').split('/');if(parts.length!==3)return false;
+      const od=new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));
+      return od>=start&&od<=end;
+    }).reduce(function(s,o){return s+(o.total||0);},0);
+    months.push({label,rev});
+  }
+  const maxRev=Math.max.apply(null,months.map(function(m){return m.rev;}).concat([1]));
+  c.innerHTML=`
+  <div class="page-hdr-title">Live Mall Stats</div>
+  <div class="page-hdr-sub" style="margin-bottom:20px;">Real, unfiltered numbers — updated live.</div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num" style="color:var(--su);">${fmt(totalRev)}</div><div class="stat-lbl">Total Revenue</div></div>
+    <div class="stat-card"><div class="stat-num">${orders.length}</div><div class="stat-lbl">Total Orders</div></div>
+    <div class="stat-card"><div class="stat-num">${Object.keys(custs).length}</div><div class="stat-lbl">Total Customers</div></div>
+    <div class="stat-card"><div class="stat-num">${Object.keys(prods).length}</div><div class="stat-lbl">Live Products</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Monthly Revenue (Last 6 Months)</div>
+    <div style="display:flex;align-items:flex-end;gap:12px;height:160px;margin-top:16px;">
+      ${months.map(function(m){const h=Math.max(4,Math.round((m.rev/maxRev)*120));return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="font-size:9px;color:var(--mu);">'+(m.rev>0?fmt(m.rev):'')+'</div><div style="width:100%;background:var(--or);border-radius:4px 4px 0 0;height:'+h+'px;"></div><div style="font-size:10px;color:var(--mu);">'+m.label+'</div></div>';}).join('')}
+    </div>
+  </div>`;
+}
+
+async function renderUpdates(c){
+  c.innerHTML='<div class="page-hdr-title">Updates from Ubong Rich</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
+  const updates=Object.values(await fbG('rn_mall_investor_updates')||{}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  c.innerHTML='<div class="page-hdr-title">Updates from Ubong Rich</div><div class="page-hdr-sub" style="margin-bottom:20px;">Announcements, milestones, and monthly reports.</div>'
+    +(updates.length?updates.map(function(u){return '<div class="card"><div style="font-size:13px;color:var(--w2);line-height:1.7;">'+u.message+'</div><div style="font-size:10px;color:var(--mu);margin-top:8px;">'+u.date+'</div></div>';}).join(''):'<div class="card" style="text-align:center;padding:40px;color:var(--mu);">No updates yet — check back soon.</div>');
+}
+
+async function renderSwitchPlan(c){
+  c.innerHTML='<div class="page-hdr-title">Switch Plan</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
+  const planStart=new Date(investor.planStartDate||investor.joinDate||Date.now());
+  const monthsHeld=(Date.now()-planStart.getTime())/(1000*60*60*24*30);
+  const canSwitch=monthsHeld>=3;
+  const nextEligible=new Date(planStart.getTime()+90*24*60*60*1000);
+  const pendingReq=investor.pendingSwitchRequest;
+  c.innerHTML=`
+  <div class="page-hdr-title">Switch Plan</div>
+  <div class="page-hdr-sub" style="margin-bottom:16px;">Request a change to your investment structure — admin reviews and approves every switch.</div>
+  <div class="card">
+    <div class="card-title">Your Current Plan</div>
+    <div style="font-size:13px;color:var(--w2);margin-top:8px;">${investor.tier||tierFor(investor.investmentAmount)} &middot; ${OPTION_LABELS[investor.investmentOption]||investor.investmentOption} &middot; ${fmt(investor.investmentAmount)}</div>
+    <div style="font-size:11px;color:var(--mu);margin-top:4px;">Active since ${planStart.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})} (${Math.floor(monthsHeld)} month${Math.floor(monthsHeld)===1?'':'s'} ago)</div>
+  </div>
+  ${pendingReq?`<div class="card" style="border-color:rgba(255,140,0,0.4);background:rgba(255,140,0,0.06);">
+    <div style="font-weight:800;color:var(--or);">⏳ Switch request pending admin approval</div>
+    <div style="font-size:12px;color:var(--w2);margin-top:6px;">Requested: ${OPTION_LABELS[pendingReq.option]}${pendingReq.newAmount&&pendingReq.newAmount>investor.investmentAmount?' &middot; Top-up to '+fmt(pendingReq.newAmount):''}</div>
+    <div style="font-size:11px;color:var(--mu);margin-top:6px;">${pendingReq.newAmount&&pendingReq.newAmount>investor.investmentAmount?'Admin will confirm your top-up payment before approving.':'We\'ll notify you once admin reviews this.'}</div>
+  </div>`:!canSwitch?`<div class="card" style="border-color:rgba(244,63,94,0.4);background:rgba(244,63,94,0.06);">
+    <div style="font-weight:800;color:var(--re);">🔒 Not eligible to switch yet</div>
+    <div style="font-size:12px;color:var(--w2);margin-top:6px;">You can request a switch starting <strong>${nextEligible.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}</strong> — plans must be held at least 3 months before switching.</div>
+  </div>`:`
+  <div class="card">
+    <div class="card-title">Request a New Structure</div>
+    <div class="fg"><label class="lbl">New Option</label><select class="fi" id="sw-option">
+      <option value="profit_share" ${investor.investmentOption==='profit_share'?'disabled':''}>Monthly Profit Share</option>
+      <option value="equity" ${investor.investmentOption==='equity'?'disabled':''}>Equity Ownership</option>
+      <option value="fixed_return" ${investor.investmentOption==='fixed_return'?'disabled':''}>Fixed Return</option>
+    </select></div>
+    <div class="fg"><label class="lbl">New Investment Amount (optional — leave blank to keep ${fmt(investor.investmentAmount)})</label><input class="fi" type="number" id="sw-amount" placeholder="${investor.investmentAmount}"/></div>
+    <div style="font-size:11px;color:var(--mu);margin-bottom:10px;">If your new amount is higher than your current investment, you'll need to make a top-up payment — admin confirms this before your switch is approved.</div>
+    <button class="btn btn-or" onclick="previewPlanSwitch()">Preview Request</button>
+    <div id="switch-preview" style="margin-top:14px;"></div>
+  </div>`}
+  <div class="card">
+    <div class="card-title">📜 What Switching Means</div>
+    <div style="font-size:12px;color:var(--w2);line-height:1.9;margin-top:8px;">
+      • Every switch request requires admin approval — nothing changes until approved.<br>
+      • If you're increasing your investment amount, admin confirms your top-up payment first — no payment confirmed means the request is denied.<br>
+      • Your current plan stays active until admin approves the switch.<br>
+      • Once approved, your payout timeline resets from that date.<br>
+      • Your Wallet balance (${fmt(investor.walletBalance||0)}) is never affected — it's always yours.<br>
+      • Requests can be made once every 3 months.<br>
+      • Approved switches cannot be undone.
+    </div>
+  </div>`;
+}
+function previewPlanSwitch(){
+  const newOption=document.getElementById('sw-option').value;
+  const newAmountRaw=document.getElementById('sw-amount').value;
+  const newAmount=newAmountRaw?parseFloat(newAmountRaw):investor.investmentAmount;
+  const box=document.getElementById('switch-preview');
+  const isTopUp=newAmount>investor.investmentAmount;
+  box.innerHTML='<div style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;font-size:12px;color:var(--w2);">'
+    +'Requesting <strong style="color:var(--or);">'+OPTION_LABELS[newOption]+'</strong>'+(newAmount!==investor.investmentAmount?' at '+fmt(newAmount):'')+'.<br><br>'
+    +(isTopUp?'⚠ This requires a top-up of <strong style="color:var(--or);">'+fmt(newAmount-investor.investmentAmount)+'</strong> — admin will confirm this payment before approving.<br>':'✔ No additional payment needed for this switch.<br>')
+    +'✔ Your Wallet balance of '+fmt(investor.walletBalance||0)+' is unaffected either way<br>'
+    +'⚠ Nothing changes until admin approves<br><br>'
+    +'<button class="btn btn-or" onclick="submitSwitchRequest(\''+newOption+'\','+newAmount+')">Submit Request</button></div>';
+}
+async function submitSwitchRequest(newOption,newAmount){
+  const req={option:newOption,newAmount:newAmount,currentOption:investor.investmentOption,currentAmount:investor.investmentAmount,requestedAt:Date.now(),paymentConfirmed:newAmount<=investor.investmentAmount};
+  await fbU('rn_mall_investors/'+investor._id,{pendingSwitchRequest:req});
+  await fbP('rn_mall_notifications',{type:'investor_switch_request',investorName:investor.name,from:investor.investmentOption,to:newOption,topUp:newAmount>investor.investmentAmount?newAmount-investor.investmentAmount:0,date:ds(),read:false,ts:Date.now()});
+  investor.pendingSwitchRequest=req;
+  sessionStorage.setItem('rnm_investor_session',JSON.stringify(investor));
+  toast('Switch request sent to admin for approval.');
+  inav('switch');
+}
+async function renderInvestorWallet(c){
+  c.innerHTML='<div class="page-hdr-title">Wallet</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
+  const txns=Object.values(await fbG('rn_mall_wallet_transactions_investor/'+investor._id)||{}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  const withdrawals=Object.values(await fbG('rn_mall_investor_withdrawals/'+investor._id)||{}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  c.innerHTML=`
+  <div class="page-hdr-title">Wallet</div>
+  <div class="page-hdr-sub" style="margin-bottom:16px;">Your investment returns are credited here. Withdraw to your bank anytime.</div>
+  <div class="card" style="text-align:center;">
+    <div style="font-size:11px;color:var(--mu);text-transform:uppercase;">Wallet Balance</div>
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:32px;color:var(--su);margin-top:6px;">${fmt(investor.walletBalance||0)}</div>
+    <button class="btn btn-or" style="margin-top:12px;" onclick="requestInvestorWithdrawal()">💸 Request Withdrawal</button>
+  </div>
+  <div class="card">
+    <div class="card-title">🏦 Bank Account Details</div>
+    <div style="font-size:11px;color:var(--mu);margin:8px 0 12px;">Where withdrawals will be sent.${investor.bankVerified?' <strong style="color:var(--su);">✔ Verified by admin</strong>':investor.bankAcctNo?' <strong style="color:var(--or);">Awaiting admin verification</strong>':''}</div>
+    <div class="fg"><label class="lbl">Bank Name</label><input class="fi" id="iw-bank" value="${investor.bankName||''}" placeholder="e.g. GTBank"/></div>
+    <div class="fg"><label class="lbl">Account Number</label><input class="fi" id="iw-acctno" value="${investor.bankAcctNo||''}" placeholder="0123456789"/></div>
+    <div class="fg"><label class="lbl">Account Name</label><input class="fi" id="iw-acctname" value="${investor.bankAcctName||''}" placeholder="Must match your name on file"/></div>
+    <button class="btn btn-or" onclick="saveInvestorBankDetails()">Save Bank Details</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Withdrawal Requests</div>
+    <div style="margin-top:8px;">${withdrawals.length?withdrawals.map(function(w){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);"><div style="display:flex;justify-content:space-between;"><span style="font-size:13px;color:var(--w2);">'+fmt(w.amount)+'</span><span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;background:'+(w.status==='paid'?'rgba(34,197,94,0.15)':w.status==='declined'?'rgba(244,63,94,0.15)':'rgba(255,140,0,0.15)')+';color:'+(w.status==='paid'?'var(--su)':w.status==='declined'?'var(--re)':'var(--or)')+';">'+(w.status||'pending').toUpperCase()+'</span></div><div style="font-size:10px;color:var(--mu);margin-top:3px;">'+w.date+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No withdrawal requests yet.</div>'}</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Wallet History</div>
+    <div style="margin-top:8px;">${txns.length?txns.map(function(t){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);"><div style="display:flex;justify-content:space-between;"><span style="font-size:13px;color:var(--w2);">'+(t.description||t.type)+'</span><span style="font-weight:800;color:'+(t.type==='withdrawal'?'var(--re)':'var(--su)')+';">'+(t.type==='withdrawal'?'-':'+')+fmt(t.amount)+'</span></div><div style="font-size:10px;color:var(--mu);margin-top:3px;">'+t.date+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No wallet activity yet.</div>'}</div>
+  </div>`;
+}
+async function saveInvestorBankDetails(){
+  const bankName=(document.getElementById('iw-bank').value||'').trim();
+  const acctNo=(document.getElementById('iw-acctno').value||'').trim();
+  const acctName=(document.getElementById('iw-acctname').value||'').trim();
+  if(!bankName||!acctNo||!acctName){toast('Fill in all bank details','err');return;}
+  await fbU('rn_mall_investors/'+investor._id,{bankName:bankName,bankAcctNo:acctNo,bankAcctName:acctName,bankVerified:false});
+  investor.bankName=bankName;investor.bankAcctNo=acctNo;investor.bankAcctName=acctName;investor.bankVerified=false;
+  sessionStorage.setItem('rnm_investor_session',JSON.stringify(investor));
+  toast('Bank details saved — awaiting admin verification.');
+  inav('wallet');
+}
+async function requestInvestorWithdrawal(){
+  if(!investor.bankAcctNo){toast('Add your bank details first','err');return;}
+  const amount=parseFloat(prompt('How much would you like to withdraw? (Available: '+fmt(investor.walletBalance||0)+')',''));
+  if(isNaN(amount)||amount<=0){toast('Enter a valid amount','err');return;}
+  if(amount>(investor.walletBalance||0)){toast('That\'s more than your available balance','err');return;}
+  await fbP('rn_mall_investor_withdrawals/'+investor._id,{amount:amount,status:'pending',date:ds(),ts:Date.now()});
+  await fbP('rn_mall_notifications',{type:'investor_withdrawal_request',investorName:investor.name,amount:amount,date:ds(),read:false,ts:Date.now()});
+  toast('Withdrawal request submitted!');
+  inav('wallet');
+}
+async function renderDocuments(c){
+  c.innerHTML='<div class="page-hdr-title">My Documents</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
+  const doc=investor.agreementDoc;
+  c.innerHTML='<div class="page-hdr-title">My Documents</div><div class="page-hdr-sub" style="margin-bottom:20px;">Your signed partnership agreement.</div>'
+    +(doc?'<div class="card"><div class="card-title">📄 Partnership Agreement</div><div style="font-size:12px;color:var(--mu);margin:8px 0 12px;">Uploaded by RichNation Mall.</div><button class="btn btn-or" onclick="downloadDataDoc(investor.agreementDoc,\'RichNation_Mall_Agreement.pdf\')">Download Agreement</button></div>'
+    :'<div class="card" style="text-align:center;padding:40px;color:var(--mu);">Your signed agreement hasn\'t been uploaded yet — it will appear here once ready.</div>');
+}
+
+async function renderChat(c){
+  c.innerHTML='<div class="card"><div class="card-title">💬 Chat with Ubong Rich</div><div id="ch-msgs" style="margin:12px 0;max-height:400px;overflow-y:auto;"></div><div style="display:flex;gap:8px;"><input class="fi" id="ch-input" placeholder="Type a message..." style="flex:1;margin-bottom:0;" onkeydown="if(event.key===\'Enter\')sendInvestorMsg()"/><button class="btn btn-or" onclick="sendInvestorMsg()">Send</button></div></div>';
+  await loadInvestorChat();
+}
+async function loadInvestorChat(){
+  const msgs=Object.values(await fbG('rn_mall_investor_chat_'+investor._id)||{}).sort(function(a,b){return (a.ts||0)-(b.ts||0);});
+  const el=document.getElementById('ch-msgs');if(!el)return;
+  el.innerHTML=msgs.length?msgs.map(function(m){
+    const mine=!m.isAdmin;
+    return '<div class="chat-msg'+(mine?' own':'')+'"><div class="chat-av">'+(mine?investor.name[0]:'RN')+'</div><div><div class="chat-bubble">'+m.text+'</div></div></div>';
+  }).join(''):'<div style="color:var(--mu);font-size:12px;text-align:center;padding:20px;">Say hello to Ubong Rich!</div>';
+  el.scrollTop=el.scrollHeight;
+}
+async function sendInvestorMsg(){
+  const inp=document.getElementById('ch-input');const text=(inp.value||'').trim();if(!text)return;
+  await fbP('rn_mall_investor_chat_'+investor._id,{text,isAdmin:false,ts:Date.now(),date:ds()});
+  await fbP('rn_mall_notifications',{type:'investor_chat',name:investor.name,preview:text.slice(0,80),date:ds(),read:false,ts:Date.now()});
+  inp.value='';await loadInvestorChat();
+}
+
+function renderProfile(c){
+  c.innerHTML=`
+  <div class="page-hdr-title">My Profile</div>
+  <div class="card" style="max-width:460px;margin-top:16px;text-align:center;">
+    <div onclick="document.getElementById('pf-photo-upload').click()" style="width:80px;height:80px;border-radius:99px;background:var(--card2);border:2px solid var(--bdr);margin:0 auto;cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+      ${investor.photo?'<img src="'+investor.photo+'" style="width:100%;height:100%;object-fit:cover;"/>':'<span style="font-size:11px;color:var(--mu);">Upload Photo</span>'}
+    </div>
+    <input type="file" id="pf-photo-upload" accept="image/*" style="display:none;" onchange="uploadMyPhoto()">
+    <div style="font-size:11px;color:var(--or);cursor:pointer;margin-top:6px;" onclick="document.getElementById('pf-photo-upload').click()">Change Photo</div>
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:16px;margin-top:10px;">${investor.name}</div>
+    <div style="font-size:11px;color:var(--or);font-weight:700;margin-top:2px;">${investor.investorNumber||'—'}</div>
+  </div>
+  <div class="card" style="max-width:460px;text-align:left;">
+    <div class="card-title">📋 My Bio</div>
+    <div style="font-size:12px;color:var(--w2);line-height:1.8;margin-top:8px;">${investor.bio||'No bio set yet.'}</div>
+  </div>
+  <div class="card" style="max-width:460px;text-align:left;">
+    <div class="card-title">Personal Details</div>
+    <div style="font-size:11px;color:var(--mu);margin:6px 0 12px;">Managed by admin — to request a change, use Chat with Founder.</div>
+    <div class="lbl">Full Name</div><div class="fi" style="color:var(--mu);">${investor.name||'—'}</div>
+    <div class="lbl">Email</div><div class="fi" style="color:var(--mu);">${investor.email||'—'}</div>
+    <div class="lbl">Phone</div><div class="fi" style="color:var(--mu);">${investor.phone||'—'}</div>
+    <div class="lbl">Date of Birth</div><div class="fi" style="color:var(--mu);">${investor.dob?new Date(investor.dob).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}):'Not provided'}</div>
+    <div class="lbl">Address</div><div class="fi" style="color:var(--mu);">${investor.address||'—'}</div>
+    <div class="lbl">Local Government Area</div><div class="fi" style="color:var(--mu);">${investor.lga||'—'}</div>
+    <div class="lbl">Country</div><div class="fi" style="color:var(--mu);">${investor.country||'—'}</div>
+    <div class="lbl">New Password (leave blank to keep current)</div><div style="position:relative;"><input class="fi" id="pf-pass" type="password" placeholder="New password" style="padding-right:56px;"/><span onclick="togglePwVisibility('pf-pass',this)" style="position:absolute;right:12px;top:12px;font-size:11px;color:var(--or);cursor:pointer;font-weight:700;">Show</span></div>
+    <button class="btn btn-or btn-lg" onclick="saveInvestorProfile()">Save Password</button>
+  </div>
+  <div class="card" style="max-width:460px;text-align:left;">
+    <div class="card-title">🏦 Bank Account Details</div>
+    <div style="font-size:11px;color:var(--mu);margin:6px 0 12px;">Manage your bank details and withdrawals from the <span onclick="inav('wallet')" style="color:var(--or);cursor:pointer;font-weight:700;">Wallet</span> tab.</div>
+  </div>`;
+}
+function compressPhotoFile(file,maxDim,quality){
+  maxDim=maxDim||110;quality=quality||0.55;
+  return new Promise(function(resolve){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var img=new Image();
+      img.onload=function(){
+        try{
+          var w=img.width,h=img.height;
+          if(w>maxDim||h>maxDim){if(w>=h){h=Math.round(h*(maxDim/w));w=maxDim;}else{w=Math.round(w*(maxDim/h));h=maxDim;}}
+          var canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+          canvas.getContext('2d').drawImage(img,0,0,w,h);
+          resolve(canvas.toDataURL('image/jpeg',quality));
+        }catch(err){resolve(e.target.result);}
+      };
+      img.onerror=function(){resolve(e.target.result);};
+      img.src=e.target.result;
+    };
+    reader.onerror=function(){resolve(null);};
+    reader.readAsDataURL(file);
+  });
+}
+async function fbUVerified(p,d,ms){
+  try{
+    const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'PATCH',body:JSON.stringify(d)},ms||10000);
+    return !!(r&&r.ok);
+  }catch(e){return false;}
+}
+const GITHUB_CONFIG={owner:'ubongrich62',repo:'richnation-images',branch:'main',token:'YOUR_FINE_GRAINED_TOKEN'};
+function isGithubConfigured(){return GITHUB_CONFIG.owner!=='YOUR_GITHUB_USERNAME'&&GITHUB_CONFIG.token!=='YOUR_FINE_GRAINED_TOKEN';}
+async function uploadDataUrlToGithub(dataUrl,folder){
+  if(!isGithubConfigured())return null;
+  try{
+    const commaIdx=dataUrl.indexOf(',');
+    const base64Content=dataUrl.slice(commaIdx+1);
+    const mimeMatch=dataUrl.slice(0,commaIdx).match(/data:[^/]+\/([^;]+)/);
+    const ext=(mimeMatch?mimeMatch[1]:'jpg').split('+')[0];
+    const path='images/'+folder+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
+    const apiUrl='https://api.github.com/repos/'+GITHUB_CONFIG.owner+'/'+GITHUB_CONFIG.repo+'/contents/'+path;
+    const res=await fetch(apiUrl,{method:'PUT',headers:{'Authorization':'token '+GITHUB_CONFIG.token,'Content-Type':'application/json','Accept':'application/vnd.github+json'},body:JSON.stringify({message:'Upload '+path,content:base64Content,branch:GITHUB_CONFIG.branch})});
+    if(!res.ok)throw new Error('GitHub upload failed: '+res.status);
+    return 'https://raw.githubusercontent.com/'+GITHUB_CONFIG.owner+'/'+GITHUB_CONFIG.repo+'/'+GITHUB_CONFIG.branch+'/'+path;
+  }catch(e){console.warn('GitHub image upload failed:',e);return null;}
+}
+async function uploadMyPhoto(inputId){
+  const inp=document.getElementById(inputId||'pf-photo-upload');
+  if(!inp.files||!inp.files[0])return;
+  toast('Uploading photo…');
+  let b64=await compressPhotoFile(inp.files[0]);
+  if(!b64){toast('Could not read that image — try another one','err');return;}
+  const url=isGithubConfigured()?await uploadDataUrlToGithub(b64,'investor-photos'):null;
+  if(url)b64=url;
+  const ok=await fbUVerified('rn_mall_investors/'+investor._id,{photo:b64});
+  if(!ok){toast('Photo upload failed — check your connection and try again','err');return;}
+  investor.photo=b64;
+  sessionStorage.setItem('rnm_investor_session',JSON.stringify(investor));
+  toast('Photo updated!');
+  inav(curNav);
+}
+async function saveInvestorProfile(){
+  const pw=document.getElementById('pf-pass').value.trim();
+  if(!pw){toast('Enter a new password to change it','err');return;}
+  if(pw.length<6){toast('Password must be at least 6 characters','err');return;}
+  await fbU('rn_mall_investors/'+investor._id,{password:pw});
+  investor.password=pw;
+  sessionStorage.setItem('rnm_investor_session',JSON.stringify(investor));
+  toast('Password updated!');
+}
+
+// ── NOTIFICATIONS ──
+function invNotifMsg(n){
+  if(n.type==='investor_chat_reply')return 'Ubong Rich replied: "'+n.preview+'"';
+  if(n.type==='payout')return '💰 A payment of '+fmt(n.amount)+' was recorded for you — '+(n.description||'');
+  if(n.type==='update')return '📢 New update posted: "'+n.preview+'"';
+  if(n.type==='switch_approved')return '✔ Your switch to '+(OPTION_LABELS[n.option]||n.option)+' was approved and is now active.';
+  if(n.type==='switch_denied')return '⚠ Your plan switch request was denied. Contact Chat with Founder for details.';
+  if(n.type==='withdrawal_paid')return '💸 Your withdrawal of '+fmt(n.amount)+' has been paid.';
+  if(n.type==='withdrawal_declined')return '⚠ Your withdrawal request for '+fmt(n.amount)+' was declined.';
+  if(n.type==='bank_verified')return '✔ Your bank account details have been verified by admin.';
+  return n.message||'New notification';
+}
+async function loadInvestorNotifs(){
+  if(!investor)return;
+  const data=await fbG('rn_mall_investor_notifications/'+investor._id)||{};
+  const list=Object.entries(data).map(function(e){return Object.assign({_key:e[0]},e[1]);}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  const unread=list.filter(function(n){return !n.read;}).length;
+  const badge=document.getElementById('inv-notif-badge');
+  if(badge){badge.textContent=unread;badge.style.display=unread>0?'flex':'none';}
+  const panel=document.getElementById('inv-notif-panel');
+  if(panel){
+    panel.innerHTML=list.length?list.slice(0,25).map(function(n){
+      return '<div style="padding:8px;border-radius:8px;background:'+(n.read?'transparent':'rgba(255,106,0,0.06)')+';margin-bottom:2px;"><div style="font-size:11px;color:var(--wh);line-height:1.4;">'+invNotifMsg(n)+'</div><div style="font-size:9px;color:var(--mu);margin-top:2px;">'+n.date+'</div></div>';
+    }).join(''):'<div style="padding:16px;text-align:center;color:var(--mu);font-size:12px;">No notifications yet.</div>';
+  }
+}
+async function toggleInvestorNotifPanel(){
+  const panel=document.getElementById('inv-notif-panel');
+  const open=panel.style.display==='block';
+  panel.style.display=open?'none':'block';
+  if(!open){
+    await loadInvestorNotifs();
+    const data=await fbG('rn_mall_investor_notifications/'+investor._id)||{};
+    for(const k of Object.keys(data)){if(!data[k].read)fbU('rn_mall_investor_notifications/'+investor._id+'/'+k,{read:true});}
+    setTimeout(loadInvestorNotifs,600);
+  }
+}
+setInterval(function(){if(investor)loadInvestorNotifs();},10000);
+
+checkInvestorSession();
+fbG('rn_mall_settings').then(function(s){window._settings=s||{};});
+</script>
+</body>
+</html>

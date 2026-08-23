@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>RichNation Mall — Vendor Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+@keyframes iconColorCycle{0%{stroke:#FF6A00;}50%{stroke:#ffffff;}100%{stroke:#FF6A00;}}
+.icon-color-cycle{animation:none;}
+:root{
+  /* structural */
+  --ink:#0B0B0C;--bg:#FFFFFF;--card:#FFFFFF;--card2:#F4F4F3;--bdr:#E4E4E1;
+  /* brand accent */
+  --or:#FF6A00;--or-dk:#E15E00;--gold:#B8720A;
+  /* text — legacy names kept (--wh/--w2/--mu) so existing inline JS styles re-theme for free */
+  --wh:#15151A;--w2:#48484E;--mu:#7B7B81;
+  /* status */
+  --su:#15803D;--re:#DC2626;--bl:#2054C7;
+  /* system */
+  --r-sm:6px;--r-md:10px;--r-lg:14px;--r-pill:999px;
+  --sh-sm:0 1px 2px rgba(15,15,20,.06);
+  --sh-md:0 8px 24px rgba(15,15,20,.10);
+  --sh-lg:0 24px 64px rgba(15,15,20,.16);
+}
+html,body{height:100%;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--wh);}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(11,11,12,.18);border-radius:4px;}
+button{font-family:inherit;}
+
+/* ── LOGIN / REGISTER ── */
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+  background:var(--ink);}
+.lcard{width:100%;max-width:420px;background:#fff;border:1px solid var(--bdr);border-radius:var(--r-lg);padding:36px 30px;box-shadow:var(--sh-lg);}
+.llogo{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:20px;color:var(--or);margin-bottom:4px;}
+.ltitle{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:var(--wh);margin-bottom:4px;}
+.lsub{text-align:center;font-size:11px;color:var(--mu);margin-bottom:22px;line-height:1.6;}
+.fi,.inp{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:12px 14px;color:var(--wh);font-size:13px;outline:none;margin-bottom:10px;color-scheme:light;transition:border-color .15s,box-shadow .15s;}
+.fi:focus{border-color:var(--or);box-shadow:0 0 0 3px rgba(255,106,0,.15);}
+.lbtn{width:100%;background:var(--or);color:#fff;border:none;padding:13px;border-radius:var(--r-sm);font-weight:800;font-size:13px;cursor:pointer;margin-top:4px;transition:background .15s;}
+.lbtn:hover{background:var(--or-dk);}
+.lerr{font-size:12px;color:var(--re);margin-top:10px;display:none;background:rgba(220,38,38,0.07);border:1px solid rgba(220,38,38,0.22);border-radius:var(--r-sm);padding:10px 12px;}
+.lnote{font-size:12px;color:var(--or-dk);margin-top:10px;display:none;background:rgba(255,106,0,0.07);border:1px solid rgba(255,106,0,0.2);border-radius:var(--r-sm);padding:10px 12px;line-height:1.6;}
+.ltoggle{text-align:center;font-size:12px;color:var(--mu);margin-top:16px;}
+.ltoggle span{color:var(--or);font-weight:700;cursor:pointer;}
+.lbl{font-size:11px;font-weight:700;color:var(--mu);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;}
+
+/* ── APP SHELL ── */
+#app{display:none;min-height:100vh;}
+.topbar{height:56px;background:var(--ink);border-bottom:1px solid #000;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;box-shadow:var(--sh-sm);}
+.tb-left{display:flex;align-items:center;gap:10px;}
+.tb-logo{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:15px;color:var(--or);}
+.tb-store{font-size:11px;color:rgba(255,255,255,.55);}
+#mob-btn{display:none;background:none;border:none;color:#fff;font-size:24px;cursor:pointer;padding:2px 8px;}
+.tb-btn{background:none;border:1.5px solid rgba(255,255,255,.35);border-radius:var(--r-sm);padding:8px 14px;font-size:12px;font-weight:600;color:#fff;cursor:pointer;transition:border-color .15s,background .15s;}
+.tb-btn:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.55);}
+.wrap{display:flex;min-height:calc(100vh - 56px);}
+.sb{width:210px;min-width:210px;background:var(--ink);border-right:1px solid #000;padding:16px 0;display:flex;flex-direction:column;gap:1px;}
+.sb-item{display:flex;align-items:center;gap:9px;padding:10px 16px;font-size:13px;color:rgba(255,255,255,.62);cursor:pointer;border-left:3px solid transparent;transition:background .15s,color .15s;}
+.sb-item:hover{background:rgba(255,255,255,.06);color:#fff;}
+.sb-item.active{background:rgba(255,106,0,0.14);border-left-color:var(--or);color:var(--or);font-weight:700;}
+.sb-ico{width:18px;text-align:center;}
+.content{flex:1;padding:24px;overflow-x:hidden;background:var(--bg);}
+.page-hdr{margin-bottom:20px;}
+.page-hdr-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:22px;color:var(--wh);}
+.page-hdr-sub{font-size:12px;color:var(--mu);margin-top:2px;}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.stat-card{position:relative;overflow:hidden;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);padding:18px;box-shadow:var(--sh-sm);}
+.stat-icon{position:absolute;top:14px;right:14px;font-size:18px;opacity:.32;}
+.stat-num{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:25px;color:var(--wh);}
+.stat-lbl{font-size:12px;color:var(--w2);margin-top:3px;font-weight:600;}
+.stat-sub{font-size:11px;color:var(--mu);margin-top:5px;}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);padding:18px;box-shadow:var(--sh-sm);margin-bottom:14px;}
+.card-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14px;color:var(--wh);}
+.btn{background:#fff;border:1.5px solid var(--ink);border-radius:var(--r-sm);padding:9px 16px;font-size:12px;font-weight:700;color:var(--wh);cursor:pointer;transition:background .15s;}
+.btn:hover{background:var(--card2);}
+.btn-or{background:var(--or);border:1.5px solid var(--or);color:#fff;font-weight:800;}
+.btn-or:hover{background:var(--or-dk);border-color:var(--or-dk);}
+.btn-re{background:rgba(220,38,38,0.08);border:1.5px solid rgba(220,38,38,0.35);color:var(--re);}
+.btn-re:hover{background:rgba(220,38,38,0.14);}
+.btn-lg{padding:11px 18px;font-size:13px;}
+.fg{margin-bottom:14px;}
+.inp,.ta{width:100%;background:#fff;border:1px solid var(--bdr);border-radius:var(--r-sm);padding:11px 13px;color:var(--wh);font-size:13px;font-family:inherit;transition:border-color .15s,box-shadow .15s;}
+.inp:focus,.ta:focus{outline:none;border-color:var(--or);box-shadow:0 0 0 3px rgba(255,106,0,.15);}
+.ta{resize:vertical;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.data-row{display:flex;align-items:center;gap:12px;padding:12px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);margin-bottom:8px;flex-wrap:wrap;transition:box-shadow .15s,border-color .15s;}
+.data-row:hover{box-shadow:var(--sh-sm);border-color:rgba(21,21,26,.18);}
+.row-thumb{width:48px;height:48px;border-radius:var(--r-sm);overflow:hidden;background:var(--card2);flex-shrink:0;}
+.row-name{font-size:13px;font-weight:700;color:var(--wh);}
+.row-meta{font-size:11px;color:var(--mu);margin-top:2px;}
+.badge{font-size:10px;font-weight:800;padding:3px 10px;border-radius:var(--r-pill);text-transform:uppercase;letter-spacing:.3px;}
+.badge-pending{background:rgba(255,106,0,0.12);color:var(--or-dk);}
+.badge-approved{background:rgba(21,128,61,0.12);color:var(--su);}
+.badge-suspended{background:rgba(220,38,38,0.12);color:var(--re);}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);border:1px solid #000;border-radius:var(--r-sm);padding:11px 18px;font-size:12px;font-weight:600;color:#fff;box-shadow:var(--sh-lg);z-index:9999;display:none;white-space:nowrap;}
+@media(max-width:768px){
+  .sb{position:fixed;left:-240px;top:56px;bottom:0;z-index:300;width:220px;transition:left .2s;box-shadow:4px 0 24px rgba(0,0,0,.5);}
+  .sb.open{left:0;display:flex;}
+  #mob-btn{display:flex!important;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .g2{grid-template-columns:1fr;}
+  .content{padding:14px;}
+}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="lcard">
+    <div class="llogo">🛒 RichNation Mall</div>
+    <div class="ltitle" id="l-title">Vendor Sign In</div>
+    <div class="lsub" id="l-sub">Manage your listings, orders, and sales — all in one place.</div>
+
+    <div id="login-form">
+      <input class="fi" id="v-email" type="email" placeholder="Email address"/>
+      <div style="position:relative;"><input class="fi" id="v-pass" type="password" placeholder="Password" style="padding-right:56px;"/><span onclick="togglePwVisibility('v-pass',this)" style="position:absolute;right:12px;top:12px;font-size:11px;color:var(--or);cursor:pointer;font-weight:700;">Show</span></div>
+      <div style="text-align:right;margin-bottom:10px;"><span onclick="showVendorForgotPassword()" style="font-size:11px;color:var(--or);cursor:pointer;">Forgot password?</span></div>
+      <button class="lbtn" onclick="doVendorLogin()">Sign In</button>
+      <div class="lerr" id="login-err"></div>
+    </div>
+
+    <div id="register-form" style="display:none;">
+      <input class="fi" id="r-store" placeholder="Store / Business Name"/>
+      <input class="fi" id="r-owner" placeholder="Owner Full Name"/>
+      <input class="fi" id="r-email" type="email" placeholder="Email address"/>
+      <input class="fi" id="r-phone" placeholder="Phone number"/>
+      <div style="position:relative;"><input class="fi" id="r-pass" type="password" placeholder="Password (min 6 characters)" style="padding-right:56px;"/><span onclick="togglePwVisibility('r-pass',this)" style="position:absolute;right:12px;top:12px;font-size:11px;color:var(--or);cursor:pointer;font-weight:700;">Show</span></div>
+      <div style="font-size:11px;color:var(--mu);margin:10px 0 6px;">Your Profile Picture (required)</div>
+      <input class="fi" id="r-doc-photo" type="file" accept="image/*"/>
+      <div style="font-size:11px;color:var(--mu);margin:10px 0 6px;">Means of Identification (required)</div>
+      <input class="fi" id="r-doc-id" type="file" accept="image/*,application/pdf"/>
+      <div style="font-size:11px;color:var(--mu);margin:10px 0 6px;">Business Registration / CAC Certificate (if you have one)</div>
+      <input class="fi" id="r-doc-biz" type="file" accept="image/*,application/pdf"/>
+      <div style="font-size:11px;color:var(--mu);margin:10px 0 6px;">License / Permit (only if your product category requires one)</div>
+      <input class="fi" id="r-doc-license" type="file" accept="image/*,application/pdf"/>
+      <div style="font-size:11px;color:var(--mu);margin:10px 0 6px;">Any other business documents (optional — additional certificates, proof of address, etc.)</div>
+      <input class="fi" id="r-doc-other" type="file" accept="image/*,application/pdf" multiple/>
+      <div style="font-size:11px;color:var(--mu);margin:14px 0 6px;">How will your orders be delivered?</div>
+      <select class="fi" id="r-logistics-option" onchange="updateLogisticsPreview()">
+        <option value="self">I will handle my own delivery to customers</option>
+        <option value="richnation">RichNation Mall handles delivery for me</option>
+      </select>
+      <div id="logistics-preview" style="font-size:11px;color:var(--mu);margin-bottom:14px;"></div>
+      <div style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;margin:14px 0;max-height:220px;overflow-y:auto;">
+        <div style="font-weight:800;font-size:13px;margin-bottom:4px;color:var(--wh);">RichNation Mall — Vendor Terms &amp; Conditions</div>
+        <div style="font-size:10px;color:var(--mu);font-style:italic;margin-bottom:10px;">This agreement governs your participation as a vendor on RichNation Mall, a division of RichNation Global Ltd. By applying to sell on RichNation Mall, you agree to be bound by these terms.</div>
+        <div style="font-size:10.5px;color:var(--mu);line-height:1.7;">
+          <strong style="color:var(--w2);">1. Eligibility &amp; Application</strong><br>
+          1.1 You must provide accurate, truthful information in your vendor application — store name, owner name, contact details, and any documentation requested. False information is grounds for immediate rejection or removal.<br>
+          1.2 Approval is at RichNation Mall's sole discretion. Approval is not guaranteed, and admin may decline an application without providing a reason.<br>
+          1.3 You must be legally able to sell the products you list — this includes any required licenses, permits, or age restrictions for regulated goods.<br><br>
+          <strong style="color:var(--w2);">2. Product Listings</strong><br>
+          2.1 <strong>Accuracy.</strong> Every listing must accurately describe the product — condition, specifications, materials, and true photos of the actual item (not stock photos misrepresenting what a customer will receive).<br>
+          2.2 <strong>Pricing.</strong> You set your own prices, but pricing must be honest — no artificially inflating a price to then show a fake "discount."<br>
+          2.3 <strong>Prohibited Items.</strong> You may not list: counterfeit or replica goods, stolen goods, weapons or ammunition, illegal drugs or drug paraphernalia, items that infringe another party's intellectual property, adult content, or any item prohibited under Nigerian law.<br>
+          2.4 <strong>Stock Accuracy.</strong> Keep your stock levels updated. Repeatedly selling items you don't actually have in stock is a violation of this agreement.<br><br>
+          2.5 <strong>Business Documentation.</strong> Before your store goes live, you must upload the following:<br>
+          2.5.1 A valid means of identification belonging to the store owner (National ID, Driver's License, International Passport, or Voter's Card).<br>
+          2.5.2 A recent passport photograph of the store owner.<br>
+          2.5.3 Proof of address (a recent utility bill or bank statement in the owner's name).<br>
+          2.5.4 Business Registration — your CAC (Corporate Affairs Commission) Certificate, or Business Name Registration if registered as a sole proprietorship.<br>
+          2.5.5 Certificate of Incorporation and Memorandum &amp; Articles of Association, if you are a registered limited company.<br>
+          2.5.6 Your Tax Identification Number (TIN).<br>
+          2.5.7 Your Bank Verification Number (BVN) or a recent bank statement matching the account you'll receive payouts to.<br>
+          2.5.8 Any category-specific license or permit required for what you sell — for example, NAFDAC registration for food, drinks, cosmetics, or health products; SON certification for electronics and regulated equipment; or any other regulatory approval your product category requires under Nigerian law.<br>
+          2.5.9 A company profile or letterhead, where applicable.<br>
+          2.5.10 Any additional documentation admin may reasonably request to verify your business.<br>
+          RichNation Mall reviews every document as part of your application before approval — take your time to gather these properly rather than rush the process. Submitting false, forged, or expired documents is grounds for immediate and permanent removal, and admin reserves the right to request updated documents at any time during your time as a vendor.<br><br>
+          <strong style="color:var(--w2);">3. Orders &amp; Fulfillment</strong><br>
+          3.1 You must process and prepare orders for dispatch within the timeframe shown in your dashboard for each order.<br>
+          3.2 Once an order is marked ready, RichNation Mall's dispatch/rider system (or your own agreed fulfillment method) takes over delivery.<br>
+          3.3 Repeated failure to fulfill orders on time affects your Fulfillment Rate and overall standing (see Section 7).<br><br>
+          <strong style="color:var(--w2);">4. Commission &amp; Payments</strong><br>
+          4.1 RichNation Mall charges a commission on every sale, shown in your Payouts dashboard. This rate may be adjusted by admin with notice; your existing listings are not retroactively affected for completed sales.<br>
+          4.2 Your net earnings (sale price minus commission) accumulate in your available balance, viewable anytime in your Payouts page.<br>
+          4.3 Payouts are processed by admin to the bank details you provide. You are solely responsible for the accuracy of your bank details — RichNation Mall is not liable for funds sent to an incorrect account you provided.<br>
+          4.4 RichNation Mall does not guarantee a fixed payout schedule beyond what is communicated to you directly; payouts are recorded and visible in your dashboard as they are made.<br><br>
+          <strong style="color:var(--w2);">5. Returns, Refunds &amp; Disputes</strong><br>
+          5.1 If a customer returns an item due to your error (wrong item, damaged on arrival, not as described), the cost of that return is your responsibility, and the sale amount may be reversed from your earnings.<br>
+          5.2 If a customer returns an item for a reason unrelated to your listing (changed their mind, where our return policy allows it), standard marketplace return terms apply.<br>
+          5.3 Disputes between you and a customer should first be handled directly through your Messages tab. Unresolved disputes may be escalated to RichNation Mall admin for a final decision.<br><br>
+          <strong style="color:var(--w2);">6. Customer Communication</strong><br>
+          6.1 You must respond to customer questions and complaints professionally and in a reasonable timeframe.<br>
+          6.2 You may not use customer contact information obtained through RichNation Mall for purposes outside of fulfilling their order (no unsolicited marketing, no directing them to buy from you outside the platform).<br><br>
+          <strong style="color:var(--w2);">7. Performance Standards</strong><br>
+          7.1 Your Cancellation Rate and Order Defect Rate are tracked and shown on your Performance page. Staying at or below 5% on both keeps you in Good Standing.<br>
+          7.2 Consistently exceeding these thresholds may result in: reduced visibility of your products, a formal warning from admin, temporary suspension, or in serious/repeated cases, removal from the platform.<br>
+          7.3 RichNation Mall reviews performance holistically — a single unusual event will not automatically penalize you, but a sustained pattern will.<br><br>
+          <strong style="color:var(--w2);">8. Suspension &amp; Termination</strong><br>
+          8.1 RichNation Mall may suspend or terminate your vendor account for: violation of these terms, sustained poor performance, fraudulent activity, or conduct that harms customers or RichNation Mall's reputation.<br>
+          8.2 You may close your store voluntarily at any time by contacting admin. Outstanding earnings owed to you will still be paid out according to Section 4.<br>
+          8.3 Upon termination, your product listings are removed from the storefront. Historical order records are retained for legal and accounting purposes.<br><br>
+          <strong style="color:var(--w2);">9. Intellectual Property</strong><br>
+          9.1 You retain ownership of your product photos, descriptions, and store branding, but grant RichNation Mall the right to display them on the platform for the purpose of selling your products.<br>
+          9.2 You must not upload content you don't have the rights to use.<br><br>
+          <strong style="color:var(--w2);">10. Limitation of Liability</strong><br>
+          10.1 RichNation Mall provides the marketplace platform but is not the manufacturer or owner of your products. Product quality, safety, and accuracy of description are your responsibility.<br>
+          10.2 RichNation Mall's liability to you is limited to unpaid earnings genuinely owed under this agreement.<br><br>
+          <strong style="color:var(--w2);">11. Changes to This Agreement</strong><br>
+          11.1 RichNation Mall may update these terms with notice through the Vendor Portal. Continued selling after an update constitutes acceptance of the revised terms.
+        </div>
+      </div>
+      <label style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--w2);cursor:pointer;margin:14px 0;"><input type="checkbox" id="r-agree" style="width:16px;height:16px;accent-color:var(--or);margin-top:2px;flex-shrink:0;"/> I have read and agree to the RichNation Mall Vendor Terms &amp; Conditions above, including the requirement to provide accurate documentation.</label>
+      <button class="lbtn" onclick="doVendorRegister()">Apply to Become a Vendor</button>
+      <div class="lerr" id="register-err"></div>
+    </div>
+
+    <div class="ltoggle" id="toggle-note">New vendor? <span onclick="toggleAuthMode()">Apply here</span></div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="tb-left">
+      <button id="mob-btn" onclick="toggleSidebar()">&#9776;</button>
+      <div class="tb-logo">🛒 RichNation Mall</div>
+      <div class="tb-store" id="tb-store-name"></div>
+    </div>
+    <button class="tb-btn" onclick="vendorLogout()">Sign Out</button>
+  </div>
+  <div class="wrap">
+    <div class="sb">
+      <div class="sb-item active" id="nav-dashboard" onclick="vnav('dashboard')"><span class="sb-ico" id="ico-dashboard"></span>Dashboard</div>
+      <div class="sb-item" id="nav-products" onclick="vnav('products')"><span class="sb-ico" id="ico-products"></span>My Products</div>
+      <div class="sb-item" id="nav-orders" onclick="vnav('orders')"><span class="sb-ico" id="ico-orders"></span>My Orders</div>
+      <div class="sb-item" id="nav-payouts" onclick="vnav('payouts')"><span class="sb-ico" id="ico-payouts"></span>Payouts</div>
+      <div class="sb-item" id="nav-performance" onclick="vnav('performance')"><span class="sb-ico" id="ico-performance"></span>Performance</div>
+      <div class="sb-item" id="nav-reviews" onclick="vnav('reviews')"><span class="sb-ico" id="ico-reviews"></span>Reviews</div>
+      <div class="sb-item" id="nav-promotions" onclick="vnav('promotions')"><span class="sb-ico" id="ico-promotions"></span>Promotions</div>
+      <div class="sb-item" id="nav-messages" onclick="vnav('messages')"><span class="sb-ico" id="ico-messages"></span>Messages</div>
+      <div class="sb-item" id="nav-notifications" onclick="vnav('notifications')"><span class="sb-ico" id="ico-notifications"></span>Notifications <span id="vendor-notif-badge" style="display:none;background:var(--or);color:#000;font-size:9px;font-weight:800;padding:1px 6px;border-radius:99px;margin-left:4px;"></span></div>
+      <div class="sb-item" id="nav-profile" onclick="vnav('profile')"><span class="sb-ico" id="ico-profile"></span>Store Profile</div>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const FB='https://richnation-portal-default-rtdb.firebaseio.com';
+const FIREBASE_CONFIG={apiKey:"AIzaSyDLGnyGB8ZnEc2u6TbVzjIAQi1pgSaZVyQ",authDomain:"richnation-portal.firebaseapp.com",databaseURL:"https://richnation-portal-default-rtdb.firebaseio.com",projectId:"richnation-portal",storageBucket:"richnation-portal.firebasestorage.app",messagingSenderId:"175550692963",appId:"1:175550692963:web:1e3c995b3ed0baaadac256"};
+const RECAPTCHA_SITE_KEY='6Ld2O5EtAAAAAN6fXMnn7kn5a6SWvDpJs97kckGC';
+let appCheckToken=null;
+// App Check isn't enforced yet, so it adds nothing functional right now — loaded only
+// after the page is fully done loading, so it costs the page nothing while unused.
+function loadAppCheckWhenIdle(){
+  function loadScript(src){
+    return new Promise(function(resolve){
+      const s=document.createElement('script');
+      s.src=src;s.onload=resolve;s.onerror=resolve;
+      document.head.appendChild(s);
+    });
+  }
+  loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js')
+    .then(function(){return loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js');})
+    .then(function(){
+      try{
+        firebase.initializeApp(FIREBASE_CONFIG);
+        const appCheckInstance=firebase.appCheck();
+        appCheckInstance.activate(new firebase.appCheck.ReCaptchaV3Provider(RECAPTCHA_SITE_KEY),true);
+        appCheckInstance.getToken().then(function(r){appCheckToken=r.token;}).catch(function(e){console.warn('App Check token fetch failed:',e.message);});
+        appCheckInstance.onTokenChanged(function(r){appCheckToken=r.token;});
+      }catch(e){
+        console.warn('App Check init failed — requests will proceed without a token:',e.message);
+      }
+    });
+}
+if(document.readyState==='complete'){setTimeout(loadAppCheckWhenIdle,2000);}
+else window.addEventListener('load',function(){setTimeout(loadAppCheckWhenIdle,2000);});
+let vendor=null;
+let curNav='dashboard';
+let allCategories=[];
+
+async function fbFetchTimeout(url,opts,ms){
+  ms=ms||8000;
+  const ctrl=new AbortController();
+  const t=setTimeout(()=>ctrl.abort(),ms);
+  opts=opts||{};
+  if(typeof appCheckToken!=='undefined'&&appCheckToken)opts=Object.assign({},opts,{headers:Object.assign({},opts.headers,{'X-Firebase-AppCheck':appCheckToken})});
+  try{const r=await fetch(url,Object.assign({},opts,{signal:ctrl.signal}));clearTimeout(t);return r;}
+  catch(e){clearTimeout(t);throw e;}
+}
+async function fbG(p){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{});return await r.json();}catch(e){try{await new Promise(res=>setTimeout(res,400));const r2=await fbFetchTimeout(FB+'/'+p+'.json',{});return await r2.json();}catch(e2){console.warn('fbG failed:',e2.message);return null;}}}
+async function fbS(p,d){try{await fbFetchTimeout(FB+'/'+p+'.json',{method:'PUT',body:JSON.stringify(d)});}catch(e){console.warn('fbS failed:',e.message);}}
+async function fbU(p,d){try{await fbFetchTimeout(FB+'/'+p+'.json',{method:'PATCH',body:JSON.stringify(d)});}catch(e){console.warn('fbU failed:',e.message);}}
+async function fbP(p,d){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'POST',body:JSON.stringify(d)});return r.json();}catch(e){console.warn('fbP failed:',e.message);return null;}}
+async function fbD(p){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'DELETE'},4000);return !!(r&&r.ok);}catch{return false;}}
+
+function toast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.style.display='block';
+  t.style.borderColor=type==='err'?'var(--re)':type==='warn'?'var(--or)':'var(--bdr)';
+  clearTimeout(window._toastT);
+  window._toastT=setTimeout(()=>{t.style.display='none';},3000);
+}
+function ds(){return new Date().toLocaleDateString('en-GB');}
+function ini(name){return (name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
+function fmt(n){return '₦'+parseInt(n||0).toLocaleString();}
+function svgIconPaths(name){
+  var icons={
+    home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
+    box:'<path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/>',
+    clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>',
+    money:'<path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>',
+    chart:'<path d="M4 20V10M12 20V4M20 20v-7"/>',
+    star:'<path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1z"/>',
+    fire:'<path d="M12 2c2 3-2 5-2 8a4 4 0 108 0c0-1-.5-2-1-3 1 4-1 6-3 6s-4-2-4-5c0-3 2-4 2-6z"/>',
+    chat:'<path d="M21 12a8 8 0 11-3.5-6.6L21 4l-1 4.5A7.9 7.9 0 0121 12z"/>',
+    bell:'<path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/>',
+    user:'<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>',
+    file:'<path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/>'
+  };
+  return icons[name]||icons.star;
+}
+function iconBadge(name,size){
+  size=size||16;
+  return '<span style="display:inline-block;position:relative;width:'+size+'px;height:'+size+'px;vertical-align:middle;">'
+    +'<svg class="icon-color-cycle" viewBox="0 0 24 24" width="'+size+'" height="'+size+'" fill="none" stroke="#FF6A00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+svgIconPaths(name)+'</svg>'
+    +'</span>';
+}
+function genProdCode(){return 'RNM-'+Math.random().toString(36).slice(2,7).toUpperCase();}
+
+function compressImage(file,maxDim,quality){
+  maxDim=maxDim||1280;quality=quality||0.75;
+  return new Promise(function(resolve){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var img=new Image();
+      img.onload=function(){
+        try{
+          var w=img.width,h=img.height;
+          if(w>maxDim||h>maxDim){if(w>=h){h=Math.round(h*(maxDim/w));w=maxDim;}else{w=Math.round(w*(maxDim/h));h=maxDim;}}
+          var canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+          canvas.getContext('2d').drawImage(img,0,0,w,h);
+          resolve(canvas.toDataURL('image/jpeg',quality));
+        }catch(err){resolve(e.target.result);}
+      };
+      img.onerror=function(){resolve(e.target.result);};
+      img.src=e.target.result;
+    };
+    reader.onerror=function(){resolve(null);};
+    reader.readAsDataURL(file);
+  });
+}
+
+// ── AUTH ──
+function togglePwVisibility(id,el){
+  const inp=document.getElementById(id);
+  if(!inp)return;
+  inp.type=inp.type==='password'?'text':'password';
+  el.textContent=inp.type==='password'?'Show':'Hide';
+}
+async function showVendorForgotPassword(){
+  const settingsData=await fbG('rn_mall_settings')||{};
+  const waNumber=settingsData.waNumber||'2349164678560';
+  const overlay=document.createElement('div');
+  overlay.id='vendor-forgot-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:900;display:flex;align-items:center;justify-content:center;padding:16px;';
+  overlay.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;width:100%;max-width:380px;padding:20px;text-align:center;">'
+    +'<div style="font-size:28px;">🔑</div>'
+    +'<div style="font-weight:800;font-size:15px;margin-top:10px;">Forgot Your Password?</div>'
+    +'<div style="font-size:12px;color:var(--w2);line-height:1.7;margin-top:10px;">We don\'t have automatic email reset yet — but RichNation Mall admin can reset it for you directly. Reach out with your store name and registered email.</div>'
+    +'<a href="https://wa.me/'+waNumber+'?text='+encodeURIComponent('Hi, I forgot my vendor password on RichNation Mall. My store name is: ')+'" target="_blank" style="text-decoration:none;"><button class="lbtn" style="margin-top:16px;">💬 Message Admin on WhatsApp</button></a>'
+    +'<div style="font-size:11px;color:var(--mu);margin-top:12px;cursor:pointer;" onclick="document.getElementById(\'vendor-forgot-overlay\').remove()">Close</div>'
+    +'</div>';
+  document.body.appendChild(overlay);
+}
+function toggleAuthMode(){
+  const isLogin=document.getElementById('login-form').style.display!=='none';
+  document.getElementById('login-form').style.display=isLogin?'none':'block';
+  document.getElementById('register-form').style.display=isLogin?'block':'none';
+  document.getElementById('l-title').textContent=isLogin?'Become a RichNation Mall Vendor':'Vendor Sign In';
+  document.getElementById('l-sub').textContent=isLogin?'Apply below — our team reviews every application before you go live.':'Manage your listings, orders, and sales — all in one place.';
+  document.getElementById('toggle-note').innerHTML=isLogin?'Already a vendor? <span onclick="toggleAuthMode()">Sign in</span>':'New vendor? <span onclick="toggleAuthMode()">Apply here</span>';
+  if(isLogin)updateLogisticsPreview();
+}
+const GITHUB_CONFIG={owner:'ubongrich62',repo:'richnation-images',branch:'main',token:'YOUR_FINE_GRAINED_TOKEN'};
+const GITHUB_DOCS_CONFIG={owner:'ubongrich62',repo:'richnation-documents',branch:'main',token:GITHUB_CONFIG.token};
+function isGithubConfigured(){return GITHUB_CONFIG.owner!=='YOUR_GITHUB_USERNAME'&&GITHUB_CONFIG.token!=='YOUR_FINE_GRAINED_TOKEN';}
+// Sensitive documents (IDs, business registration, licenses) go to a PRIVATE repo instead
+// of the public images one. Since private content can't be reached via a plain public
+// link, this stores a "github-private:<path>" reference — the admin panel knows to fetch
+// that with authentication rather than opening it directly, so these documents are never
+// publicly reachable the way product photos are.
+async function uploadDataUrlToGithubPrivate(dataUrl,folder){
+  if(!isGithubConfigured())return null;
+  try{
+    const commaIdx=dataUrl.indexOf(',');
+    const base64Content=dataUrl.slice(commaIdx+1);
+    const mimeMatch=dataUrl.slice(0,commaIdx).match(/data:[^/]+\/([^;]+)/);
+    const ext=(mimeMatch?mimeMatch[1]:'jpg').split('+')[0];
+    const path='documents/'+folder+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
+    const apiUrl='https://api.github.com/repos/'+GITHUB_DOCS_CONFIG.owner+'/'+GITHUB_DOCS_CONFIG.repo+'/contents/'+path;
+    const res=await fetch(apiUrl,{method:'PUT',headers:{'Authorization':'token '+GITHUB_DOCS_CONFIG.token,'Content-Type':'application/json','Accept':'application/vnd.github+json'},body:JSON.stringify({message:'Upload '+path,content:base64Content,branch:GITHUB_DOCS_CONFIG.branch})});
+    if(!res.ok)throw new Error('GitHub private upload failed: '+res.status);
+    return 'github-private:'+path;
+  }catch(e){console.warn('GitHub private document upload failed:',e);return null;}
+}
+async function uploadDataUrlToGithub(dataUrl,folder){
+  if(!isGithubConfigured())return null;
+  try{
+    const commaIdx=dataUrl.indexOf(',');
+    const base64Content=dataUrl.slice(commaIdx+1);
+    const mimeMatch=dataUrl.slice(0,commaIdx).match(/data:[^/]+\/([^;]+)/);
+    const ext=(mimeMatch?mimeMatch[1]:'jpg').split('+')[0];
+    const path='images/'+folder+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
+    const apiUrl='https://api.github.com/repos/'+GITHUB_CONFIG.owner+'/'+GITHUB_CONFIG.repo+'/contents/'+path;
+    const res=await fetch(apiUrl,{method:'PUT',headers:{'Authorization':'token '+GITHUB_CONFIG.token,'Content-Type':'application/json','Accept':'application/vnd.github+json'},body:JSON.stringify({message:'Upload '+path,content:base64Content,branch:GITHUB_CONFIG.branch})});
+    if(!res.ok)throw new Error('GitHub upload failed: '+res.status);
+    return 'https://raw.githubusercontent.com/'+GITHUB_CONFIG.owner+'/'+GITHUB_CONFIG.repo+'/'+GITHUB_CONFIG.branch+'/'+path;
+  }catch(e){console.warn('GitHub image upload failed:',e);return null;}
+}
+function fileToBase64(file){
+  return new Promise(function(resolve){
+    var reader=new FileReader();
+    reader.onload=function(e){resolve(e.target.result);};
+    reader.onerror=function(){resolve(null);};
+    reader.readAsDataURL(file);
+  });
+}
+async function updateLogisticsPreview(){
+  const el=document.getElementById('logistics-preview');
+  const choice=document.getElementById('r-logistics-option').value;
+  if(!el)return;
+  const settingsData=await fbG('rn_mall_settings')||{};
+  const selfRate=settingsData.vendorCommissionRate!=null?settingsData.vendorCommissionRate:10;
+  const logisticsRate=settingsData.vendorLogisticsCommissionRate!=null?settingsData.vendorLogisticsCommissionRate:15;
+  if(choice==='richnation'){
+    el.innerHTML='RichNation Mall commission for this option: <strong style="color:var(--or);">'+logisticsRate+'%</strong> — our riders handle pickup and delivery for you.';
+  }else{
+    el.innerHTML='RichNation Mall commission for this option: <strong style="color:var(--or);">'+selfRate+'%</strong> — you pack and deliver orders yourself.';
+  }
+}
+async function doVendorRegister(){
+  const store=document.getElementById('r-store').value.trim();
+  const owner=document.getElementById('r-owner').value.trim();
+  const email=document.getElementById('r-email').value.trim().toLowerCase();
+  const phone=document.getElementById('r-phone').value.trim();
+  const pass=document.getElementById('r-pass').value.trim();
+  const err=document.getElementById('register-err');
+  err.style.display='none';
+  if(!store||!owner||!email||!pass){err.textContent='Please fill all fields.';err.style.display='block';return;}
+  if(pass.length<6){err.textContent='Password must be at least 6 characters.';err.style.display='block';return;}
+  const photoFile=document.getElementById('r-doc-photo').files[0];
+  const idFile=document.getElementById('r-doc-id').files[0];
+  if(!photoFile){err.textContent='Please upload your profile picture.';err.style.display='block';return;}
+  if(!idFile){err.textContent='Please upload a means of identification.';err.style.display='block';return;}
+  if(!document.getElementById('r-agree').checked){err.textContent='Please read and agree to the Vendor Terms & Conditions to continue.';err.style.display='block';return;}
+  const all=await fbG('rn_mall_vendors')||{};
+  if(Object.values(all).find(v=>v.email===email)){err.textContent='A vendor account with this email already exists.';err.style.display='block';return;}
+  err.style.display='none';
+  toast('Uploading your documents — this may take a moment…');
+  const id='vend_'+Date.now();
+  let photo=await compressImage(photoFile,600,0.8);
+  const photoUrl=isGithubConfigured()?await uploadDataUrlToGithub(photo,'vendor-photos'):null;
+  if(photoUrl)photo=photoUrl;
+  let idDoc=await fileToBase64(idFile);
+  const idDocUrl=idDoc&&isGithubConfigured()?await uploadDataUrlToGithubPrivate(idDoc,'vendor-documents'):null;
+  if(idDocUrl)idDoc=idDocUrl;
+  const bizFile=document.getElementById('r-doc-biz').files[0];
+  let bizDoc=bizFile?await fileToBase64(bizFile):null;
+  if(bizDoc){const u=isGithubConfigured()?await uploadDataUrlToGithubPrivate(bizDoc,'vendor-documents'):null;if(u)bizDoc=u;}
+  const licenseFile=document.getElementById('r-doc-license').files[0];
+  let licenseDoc=licenseFile?await fileToBase64(licenseFile):null;
+  if(licenseDoc){const u=isGithubConfigured()?await uploadDataUrlToGithubPrivate(licenseDoc,'vendor-documents'):null;if(u)licenseDoc=u;}
+  const otherFiles=Array.from(document.getElementById('r-doc-other').files||[]);
+  const otherDocs=[];
+  for(const f of otherFiles){
+    let b64=await fileToBase64(f);
+    if(!b64)continue;
+    const u=isGithubConfigured()?await uploadDataUrlToGithubPrivate(b64,'vendor-documents'):null;
+    otherDocs.push({name:f.name,data:u||b64});
+  }
+  const v={
+    id,storeName:store,ownerName:owner,email,phone,password:pass,status:'pending',joinDate:ds(),ts:Date.now(),
+    photo:photo,
+    documents:{idDocument:idDoc,businessRegDocument:bizDoc,licenseDocument:licenseDoc,otherDocuments:otherDocs},
+    logisticsOption:document.getElementById('r-logistics-option').value,
+    agreementAccepted:true,agreementAcceptedAt:Date.now()
+  };
+  await fbS('rn_mall_vendors/'+id,v);
+  await fbP('rn_mall_notifications',{type:'new_vendor_signup',name:store,owner:owner,email,date:ds(),read:false,ts:Date.now()});
+  toast('Application submitted! We\'ll review it and email you once approved.');
+  document.getElementById('register-form').innerHTML='<div style="text-align:center;padding:20px 0;"><div style="font-weight:800;margin-bottom:8px;">Application Submitted</div><div style="font-size:12px;color:var(--mu);line-height:1.7;">Thanks, '+owner+'! Our team will review your application and documents for <strong style="color:var(--wh);">'+store+'</strong> and let you know once you\'re approved to start selling.</div></div>';
+}
+async function doVendorLogin(){
+  const email=document.getElementById('v-email').value.trim().toLowerCase();
+  const pass=document.getElementById('v-pass').value.trim();
+  const err=document.getElementById('login-err');
+  err.style.display='none';
+  if(!email||!pass){err.textContent='Enter email and password.';err.style.display='block';return;}
+  const all=await fbG('rn_mall_vendors')||{};
+  const found=Object.values(all).find(v=>v.email===email&&v.password===pass);
+  if(!found){err.textContent='Incorrect email or password.';err.style.display='block';return;}
+  if(found.status==='pending'){err.innerHTML='Your vendor application is still under review. We\'ll notify you once approved.';err.style.display='block';return;}
+  if(found.status==='suspended'){err.textContent='Your vendor account has been suspended. Please contact RichNation Mall support.';err.style.display='block';return;}
+  vendor=found;
+  sessionStorage.setItem('rnm_vendor_session',JSON.stringify(vendor));
+  startApp();
+}
+function vendorLogout(){
+  sessionStorage.removeItem('rnm_vendor_session');
+  vendor=null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('login').style.display='flex';
+}
+function checkVendorSession(){
+  const s=sessionStorage.getItem('rnm_vendor_session');
+  if(s){try{vendor=JSON.parse(s);startApp();}catch(e){}}
+}
+async function startApp(){
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('tb-store-name').textContent=vendor.storeName;
+  const cats=await fbG('rn_mall_categories')||{};
+  allCategories=Object.values(cats);
+  populateSidebarIcons();
+  vnav('dashboard');
+  refreshVendorNotifBadge();
+  setInterval(refreshVendorNotifBadge,20000);
+}
+function populateSidebarIcons(){
+  var map={dashboard:'home',products:'box',orders:'clock',payouts:'money',performance:'chart',reviews:'star',promotions:'fire',messages:'chat',notifications:'bell',profile:'user'};
+  Object.keys(map).forEach(function(k){
+    var el=document.getElementById('ico-'+k);
+    if(el)el.innerHTML=iconBadge(map[k],16);
+  });
+}
+async function refreshVendorNotifBadge(){
+  const count=await unreadVendorNotifCount();
+  const badge=document.getElementById('vendor-notif-badge');
+  if(!badge)return;
+  if(count>0){badge.textContent=count;badge.style.display='inline-block';}
+  else badge.style.display='none';
+}
+function toggleSidebar(){document.querySelector('.sb').classList.toggle('open');}
+
+// ── NAVIGATION ──
+function vnav(page){
+  curNav=page;
+  document.querySelectorAll('.sb-item').forEach(el=>el.classList.toggle('active',el.id==='nav-'+page));
+  document.querySelector('.sb').classList.remove('open');
+  const c=document.getElementById('content');
+  if(page==='dashboard')renderVDash(c);
+  else if(page==='products')renderVProducts(c);
+  else if(page==='orders')renderVOrders(c);
+  else if(page==='payouts')renderVPayouts(c);
+  else if(page==='performance')renderVPerformance(c);
+  else if(page==='reviews')renderVReviews(c);
+  else if(page==='promotions')renderVPromotions(c);
+  else if(page==='messages')renderVMessages(c);
+  else if(page==='notifications')renderVNotifications(c);
+  else if(page==='profile')renderVProfile(c);
+}
+
+// ── PAYOUTS ──
+function describePayoutSchedule(schedule){
+  if(schedule.type==='weekly')return 'Every '+['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][schedule.day];
+  return 'The '+schedule.day+(schedule.day===1?'st':schedule.day===2?'nd':schedule.day===3?'rd':'th')+' of every month';
+}
+function nextPayoutDate(schedule){
+  const now=new Date();
+  if(schedule.type==='weekly'){
+    const d=new Date(now);
+    const diff=(schedule.day-now.getDay()+7)%7;
+    d.setDate(now.getDate()+(diff===0?0:diff));
+    return d;
+  }
+  let d=new Date(now.getFullYear(),now.getMonth(),schedule.day);
+  if(d<now||now.getDate()>schedule.day)d=new Date(now.getFullYear(),now.getMonth()+1,schedule.day);
+  return d;
+}
+async function renderVPayouts(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Payouts</div></div><div style="color:var(--mu);">Loading...</div>';
+  const settings=await fbG('rn_mall_settings')||{};
+  const selfRate=settings.vendorCommissionRate!=null?settings.vendorCommissionRate:10;
+  const logisticsRate=settings.vendorLogisticsCommissionRate!=null?settings.vendorLogisticsCommissionRate:15;
+  const commissionRate=vendor.logisticsOption==='richnation'?logisticsRate:selfRate;
+  const schedule=settings.vendorPayoutSchedule||{type:'monthly',day:1};
+  const allOrders=await fbG('rn_mall_orders')||{};
+  const orders=Object.values(allOrders);
+  let grossRevenue=0;
+  orders.forEach(function(o){
+    if(o.status==='cancelled'||o.status==='deleted'||o.status==='pod_declined')return;
+    (o.items||[]).forEach(function(it){if(it.vendorId===vendor.id)grossRevenue+=(it.price||0)*(it.qty||1);});
+  });
+  const commissionDeducted=Math.round(grossRevenue*(commissionRate/100));
+  const netEarned=grossRevenue-commissionDeducted;
+  const payouts=Object.values(await fbG('rn_mall_vendor_payouts/'+vendor.id)||{}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  const totalPaidOut=payouts.reduce(function(s,p){return s+(p.amount||0);},0);
+  const walletBalance=Math.max(0,netEarned-totalPaidOut);
+  c.innerHTML=`
+  <div class="page-hdr"><div class="page-hdr-title">Payouts</div><div class="page-hdr-sub">RichNation Mall takes ${commissionRate}% commission per sale — this is what you actually earn.</div></div>
+  <div class="card" style="background:rgba(255,106,0,0.06);border-color:rgba(255,106,0,0.3);">
+    <div class="card-title">Payout Schedule</div>
+    <div style="font-size:13px;color:var(--w2);margin-top:6px;">${describePayoutSchedule(schedule)}</div>
+    <div style="font-size:12px;color:var(--mu);margin-top:4px;">Next payout: <strong style="color:var(--or);">${nextPayoutDate(schedule).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}</strong></div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-icon">🧾</div><div class="stat-num">${fmt(grossRevenue)}</div><div class="stat-lbl">Gross Sales</div></div>
+    <div class="stat-card"><div class="stat-icon">➖</div><div class="stat-num" style="color:var(--re);">${fmt(commissionDeducted)}</div><div class="stat-lbl">Commission (${commissionRate}%)</div></div>
+    <div class="stat-card"><div class="stat-icon">💵</div><div class="stat-num" style="color:var(--su);">${fmt(netEarned)}</div><div class="stat-lbl">Net Earned (all-time)</div></div>
+    <div class="stat-card"><div class="stat-icon">👛</div><div class="stat-num" style="color:var(--gold);">${fmt(walletBalance)}</div><div class="stat-lbl">Available Balance</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">🏦 Bank Account Details</div>
+    <div style="font-size:11px;color:var(--mu);margin:8px 0 12px;">Where your payouts are sent.${vendor.bankVerified?' <strong style="color:var(--su);">✔ Verified by admin</strong>':vendor.bankAcctNo?' <strong style="color:var(--or);">Awaiting admin verification</strong>':''}</div>
+    <div class="fg"><label class="lbl">Bank Name</label><input class="fi" id="vp-bank" value="${vendor.bankName||''}" placeholder="e.g. GTBank"/></div>
+    <div class="fg"><label class="lbl">Account Number</label><input class="fi" id="vp-acctno" value="${vendor.bankAcctNo||''}" placeholder="0123456789"/></div>
+    <div class="fg"><label class="lbl">Account Name</label><input class="fi" id="vp-acctname" value="${vendor.bankAcctName||''}" placeholder="Must match your store owner name"/></div>
+    <button class="btn btn-or" onclick="saveVendorBankDetails()">Save Bank Details</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Payout History</div>
+    <div style="margin-top:8px;">${payouts.length?payouts.map(function(p){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);"><div style="display:flex;justify-content:space-between;"><span style="font-size:13px;color:var(--w2);">'+(p.description||'Payout')+'</span><span style="font-weight:800;color:var(--su);">'+fmt(p.amount)+'</span></div><div style="font-size:10px;color:var(--mu);margin-top:3px;">'+p.date+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No payouts recorded yet.</div>'}</div>
+  </div>`;
+}
+async function saveVendorBankDetails(){
+  const bankName=(document.getElementById('vp-bank').value||'').trim();
+  const acctNo=(document.getElementById('vp-acctno').value||'').trim();
+  const acctName=(document.getElementById('vp-acctname').value||'').trim();
+  if(!bankName||!acctNo||!acctName){toast('Fill in all bank details','err');return;}
+  await fbU('rn_mall_vendors/'+vendor.id,{bankName:bankName,bankAcctNo:acctNo,bankAcctName:acctName,bankVerified:false});
+  vendor.bankName=bankName;vendor.bankAcctNo=acctNo;vendor.bankAcctName=acctName;vendor.bankVerified=false;
+  sessionStorage.setItem('rnm_vendor_session',JSON.stringify(vendor));
+  toast('Bank details saved — awaiting admin verification.');
+  vnav('payouts');
+}
+
+// ── REVIEWS ──
+async function renderVReviews(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Reviews</div></div><div style="color:var(--mu);">Loading...</div>';
+  const allProds=await fbG('rn_mall_products')||{};
+  const myProds=Object.entries(allProds).filter(function(e){return e[1].vendorId===vendor.id;});
+  let allReviews=[];
+  for(const [pid,p] of myProds){
+    const revs=await fbG('rn_mall_reviews/'+pid)||{};
+    Object.entries(revs).forEach(function(e){allReviews.push(Object.assign({_key:e[0],productId:pid,productName:p.name},e[1]));});
+  }
+  allReviews.sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  const avgRating=allReviews.length?(allReviews.reduce(function(s,r){return s+(r.rating||0);},0)/allReviews.length).toFixed(1):'—';
+  c.innerHTML=`
+  <div class="page-hdr"><div class="page-hdr-title">Reviews</div><div class="page-hdr-sub">${allReviews.length} review(s) across your products &middot; ${avgRating} average rating</div></div>
+  ${allReviews.length?allReviews.map(function(r){
+    const stars='★'.repeat(r.rating||0)+'☆'.repeat(5-(r.rating||0));
+    return '<div class="card"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;"><div><div style="font-weight:800;font-size:13px;">'+r.name+'</div><div style="font-size:11px;color:var(--gold);">'+stars+'</div></div><div style="font-size:10px;color:var(--mu);">'+r.date+'</div></div>'
+      +'<div style="font-size:11px;color:var(--or);margin-top:6px;">on '+r.productName+'</div>'
+      +'<div style="font-size:13px;color:var(--w2);margin-top:6px;">'+r.review+'</div>'
+      +(r.vendorReply?'<div style="background:var(--card2);border-radius:8px;padding:10px;margin-top:10px;"><div style="font-size:10px;color:var(--or);font-weight:700;margin-bottom:4px;">Your reply:</div><div style="font-size:12px;color:var(--w2);">'+r.vendorReply+'</div></div>'
+        :'<div style="margin-top:10px;"><textarea class="fi" id="reply-'+r._key+'" rows="2" placeholder="Reply to this review..."></textarea><button class="btn btn-or" style="font-size:11px;padding:6px 12px;" onclick="replyToReview(\''+r.productId+'\',\''+r._key+'\')">Post Reply</button></div>')
+      +'</div>';
+  }).join(''):'<div class="card" style="text-align:center;padding:40px;color:var(--mu);">No reviews on your products yet.</div>'}`;
+}
+async function replyToReview(productId,reviewKey){
+  const text=(document.getElementById('reply-'+reviewKey).value||'').trim();
+  if(!text){toast('Write a reply first','err');return;}
+  await fbU('rn_mall_reviews/'+productId+'/'+reviewKey,{vendorReply:text,vendorReplyDate:ds()});
+  toast('Reply posted!');
+  vnav('reviews');
+}
+
+// ── PROMOTIONS ──
+async function renderVPromotions(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Promotions</div></div><div style="color:var(--mu);">Loading...</div>';
+  const allProds=await fbG('rn_mall_products')||{};
+  const myProds=Object.entries(allProds).filter(function(e){return e[1].vendorId===vendor.id;});
+  c.innerHTML=`
+  <div class="page-hdr"><div class="page-hdr-title">Promotions</div><div class="page-hdr-sub">Put any of your products on sale — they'll show in RichNation Mall's Flash Sale section automatically.</div></div>
+  ${myProds.length?myProds.map(function(entry){
+    const id=entry[0],p=entry[1];
+    return '<div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;"><div><div style="font-weight:800;font-size:13px;">'+p.name+'</div><div style="font-size:11px;color:var(--mu);">'+fmt(p.price)+(p.flashSale?' — currently on sale':'')+'</div></div>'
+      +(p.flashSale?'<button class="btn btn-re" style="font-size:11px;padding:6px 14px;" onclick="togglePromo(\''+id+'\',false)">Remove from Sale</button>'
+        :'<button class="btn btn-or" style="font-size:11px;padding:6px 14px;" onclick="togglePromo(\''+id+'\',true)">🔥 Put on Sale</button>')
+      +'</div>';
+  }).join(''):'<div class="card" style="text-align:center;padding:40px;color:var(--mu);">Add products first to run promotions.</div>'}`;
+}
+async function togglePromo(productId,onSale){
+  await fbU('rn_mall_products/'+productId,{flashSale:onSale});
+  toast(onSale?'Product added to Flash Sale!':'Removed from Flash Sale.');
+  vnav('promotions');
+}
+
+// ── MESSAGES ──
+async function renderVMessages(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Messages</div></div><div style="color:var(--mu);">Loading...</div>';
+  const threads=await fbG('rn_mall_vendor_chat_'+vendor.id)||{};
+  const threadIds=Object.keys(threads);
+  let html='<div class="page-hdr"><div class="page-hdr-title">Messages</div><div class="page-hdr-sub">Customer questions about your products.</div></div>';
+  if(!threadIds.length){
+    html+='<div class="card" style="text-align:center;padding:40px;color:var(--mu);">No messages yet.</div>';
+  }else{
+    const sorted=threadIds.map(function(k){const msgs=Object.values(threads[k]);const last=msgs.sort(function(a,b){return (b.ts||0)-(a.ts||0);})[0];return {key:k,last:last,count:msgs.length};}).sort(function(a,b){return (b.last.ts||0)-(a.last.ts||0);});
+    html+=sorted.map(function(t){return '<div class="card" style="cursor:pointer;" onclick="openVendorMsgThread(\''+t.key+'\')"><div style="font-weight:800;font-size:13px;">'+(t.last.customerName||'Customer')+'</div><div style="font-size:12px;color:var(--w2);margin-top:4px;">'+t.last.text.slice(0,60)+'</div><div style="font-size:10px;color:var(--mu);margin-top:4px;">'+t.count+' message(s)</div></div>';}).join('');
+  }
+  c.innerHTML=html;
+}
+async function openVendorMsgThread(custId){
+  const c=document.getElementById('content');
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Conversation</div></div><div class="card"><div id="vm-msgs" style="margin-bottom:12px;max-height:360px;overflow-y:auto;"></div><div style="display:flex;gap:8px;"><input class="fi" id="vm-input" placeholder="Type a reply..." style="flex:1;margin-bottom:0;" onkeydown="if(event.key===\'Enter\')sendVendorMsgReply(\''+custId+'\')"/><button class="btn btn-or" onclick="sendVendorMsgReply(\''+custId+'\')">Send</button></div></div><button class="btn" style="margin-top:10px;" onclick="vnav(\'messages\')">← Back</button>';
+  await loadVendorMsgThread(custId);
+}
+async function loadVendorMsgThread(custId){
+  const msgs=Object.values(await fbG('rn_mall_vendor_chat_'+vendor.id+'/'+custId)||{}).sort(function(a,b){return (a.ts||0)-(b.ts||0);});
+  const el=document.getElementById('vm-msgs');if(!el)return;
+  el.innerHTML=msgs.length?msgs.map(function(m){return '<div style="display:flex;'+(m.fromVendor?'flex-direction:row-reverse;':'')+'gap:10px;margin-bottom:10px;"><div style="width:28px;height:28px;border-radius:99px;background:'+(m.fromVendor?'var(--or)':'var(--card2)')+';color:'+(m.fromVendor?'#fff':'var(--w2)')+';font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+(m.fromVendor?'You':(m.customerName||'C').charAt(0))+'</div><div style="background:'+(m.fromVendor?'rgba(255,106,0,0.1)':'var(--card2)')+';padding:8px 12px;border-radius:9px;font-size:13px;max-width:70%;">'+m.text+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:13px;">No messages yet.</div>';
+  el.scrollTop=el.scrollHeight;
+}
+async function sendVendorMsgReply(custId){
+  const inp=document.getElementById('vm-input');const text=(inp.value||'').trim();if(!text)return;
+  await fbP('rn_mall_vendor_chat_'+vendor.id+'/'+custId,{text:text,fromVendor:true,ts:Date.now()});
+  await fbP('rn_mall_customer_notifications/'+custId,{type:'vendor_reply',message:'💬 '+vendor.storeName+' replied: "'+text.slice(0,60)+'"',vendorName:vendor.storeName,preview:text.slice(0,60),date:ds(),read:false,ts:Date.now()});
+  inp.value='';await loadVendorMsgThread(custId);
+}
+
+// ── NOTIFICATIONS ──
+async function renderVNotifications(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Notifications</div></div><div style="color:var(--mu);">Loading...</div>';
+  const data=await fbG('rn_mall_vendor_notifications/'+vendor.id)||{};
+  const list=Object.values(data).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Notifications</div></div>'
+    +(list.length?list.map(function(n){return '<div class="card" style="padding:12px 16px;"><div style="font-size:13px;color:var(--w2);">'+vendorNotifMsg(n)+'</div><div style="font-size:10px;color:var(--mu);margin-top:4px;">'+n.date+'</div></div>';}).join(''):'<div class="card" style="text-align:center;padding:40px;color:var(--mu);">No notifications yet.</div>');
+  Object.keys(data).forEach(function(k){if(!data[k].read)fbU('rn_mall_vendor_notifications/'+vendor.id+'/'+k,{read:true});});
+}
+function vendorNotifMsg(n){
+  if(n.type==='payout')return 'A payout of '+fmt(n.amount)+' was recorded — '+(n.description||'');
+  if(n.type==='bank_verified')return 'Your bank account details have been verified by admin.';
+  if(n.type==='product_approved')return '"'+n.productName+'" was approved and is now live on RichNation Mall.';
+  if(n.type==='product_rejected')return '"'+n.productName+'" was not approved. Reason: '+(n.reason||'—');
+  return n.message||'New notification';
+}
+async function unreadVendorNotifCount(){
+  const data=await fbG('rn_mall_vendor_notifications/'+vendor.id)||{};
+  return Object.values(data).filter(function(n){return !n.read;}).length;
+}
+
+// ── PERFORMANCE ──
+async function renderVPerformance(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Performance</div></div><div style="color:var(--mu);">Loading...</div>';
+  const allOrders=await fbG('rn_mall_orders')||{};
+  const orders=Object.values(allOrders).filter(function(o){return (o.items||[]).some(function(it){return it.vendorId===vendor.id;});});
+  const total=orders.length||1;
+  const cancelled=orders.filter(function(o){return o.status==='cancelled';}).length;
+  const delivered=orders.filter(function(o){return o.status==='delivered'||o.status==='delivered confirmed';}).length;
+  const refundRequested=orders.filter(function(o){return o.status==='refund_requested'||o.refundRequested;}).length;
+  const cancellationRate=((cancelled/total)*100).toFixed(1);
+  const defectRate=((refundRequested/total)*100).toFixed(1);
+  const fulfillmentRate=((delivered/total)*100).toFixed(1);
+  const goodStanding=cancellationRate<=5&&defectRate<=5;
+  c.innerHTML=`
+  <div class="page-hdr"><div class="page-hdr-title">Performance</div><div class="page-hdr-sub">How your store is doing — this affects your visibility and standing on RichNation Mall.</div></div>
+  <div class="card" style="text-align:center;background:${goodStanding?'rgba(21,128,61,0.08)':'rgba(220,38,38,0.08)'};border-color:${goodStanding?'rgba(21,128,61,0.3)':'rgba(220,38,38,0.3)'};">
+    <div style="font-size:28px;">${goodStanding?'✅':'⚠️'}</div>
+    <div style="font-weight:800;font-size:16px;color:${goodStanding?'var(--su)':'var(--re)'};margin-top:6px;">${goodStanding?'Good Standing':'Needs Attention'}</div>
+    <div style="font-size:12px;color:var(--w2);margin-top:6px;">${goodStanding?'Your store is performing well. Keep it up!':'Your cancellation or refund rate is above 5% — this can affect how often your products are shown to customers.'}</div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-num">${total===1&&!orders.length?0:orders.length}</div><div class="stat-lbl">Total Orders</div></div>
+    <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-num" style="color:var(--su);">${fulfillmentRate}%</div><div class="stat-lbl">Fulfillment Rate</div></div>
+    <div class="stat-card"><div class="stat-icon">❌</div><div class="stat-num" style="color:${cancellationRate>5?'var(--re)':'var(--wh)'};">${cancellationRate}%</div><div class="stat-lbl">Cancellation Rate</div></div>
+    <div class="stat-card"><div class="stat-icon">⚠️</div><div class="stat-num" style="color:${defectRate>5?'var(--re)':'var(--wh)'};">${defectRate}%</div><div class="stat-lbl">Order Defect Rate</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">What These Mean</div>
+    <div style="font-size:12px;color:var(--w2);line-height:1.9;margin-top:8px;">
+      <strong>Fulfillment Rate</strong> — % of your orders successfully delivered.<br>
+      <strong>Cancellation Rate</strong> — % of your orders that got cancelled. Keep this under 5%.<br>
+      <strong>Order Defect Rate</strong> — % of orders that led to a refund request. Keep this under 5% too.<br><br>
+      Staying in Good Standing keeps your products showing normally to customers. Consistently high rates may lead to admin review.
+    </div>
+  </div>`;
+}
+
+// ── DASHBOARD ──
+async function renderVDash(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Dashboard</div></div><div style="color:var(--mu);">Loading...</div>';
+  const allProds=await fbG('rn_mall_products')||{};
+  const myProds=Object.values(allProds).filter(p=>p.vendorId===vendor.id);
+  const allOrders=await fbG('rn_mall_orders')||{};
+  const orders=Object.values(allOrders);
+  let revenue=0,itemsSold=0,orderCount=0;
+  const today=ds();let revToday=0;
+  orders.forEach(function(o){
+    if(o.status==='cancelled'||o.status==='deleted'||o.status==='pod_declined')return;
+    let hasMine=false;
+    (o.items||[]).forEach(function(it){
+      if(it.vendorId===vendor.id){
+        hasMine=true;
+        revenue+=(it.price||0)*(it.qty||1);
+        itemsSold+=(it.qty||1);
+        if(o.date===today)revToday+=(it.price||0)*(it.qty||1);
+      }
+    });
+    if(hasMine)orderCount++;
+  });
+  c.innerHTML=`
+  <div class="page-hdr"><div class="page-hdr-title">Welcome, ${vendor.storeName}</div><div class="page-hdr-sub">Here's how your store is doing.</div></div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-num">${fmt(revenue)}</div><div class="stat-lbl">Total Revenue</div><div class="stat-sub">${fmt(revToday)} today</div></div>
+    <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-num">${orderCount}</div><div class="stat-lbl">Orders</div><div class="stat-sub">${itemsSold} items sold</div></div>
+    <div class="stat-card"><div class="stat-icon">🛍️</div><div class="stat-num">${myProds.length}</div><div class="stat-lbl">Live Products</div><div class="stat-sub">${myProds.filter(p=>p.stock!=null&&p.stock<=5).length} low stock</div></div>
+    <div class="stat-card"><div class="stat-icon">⭐</div><div class="stat-num">${(myProds.reduce((s,p)=>s+(p.rating||0),0)/(myProds.length||1)).toFixed(1)}</div><div class="stat-lbl">Avg. Rating</div><div class="stat-sub">${myProds.reduce((s,p)=>s+(p.reviews||0),0)} reviews</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Getting Started</div>
+    <div style="font-size:13px;color:var(--w2);line-height:2;margin-top:8px;">
+      • Add your products under <strong>My Products</strong> — they'll appear on RichNation Mall labeled "Sold by ${vendor.storeName}"<br>
+      • Track orders containing your items under <strong>My Orders</strong><br>
+      • Update your store details anytime under <strong>Store Profile</strong>
+    </div>
+  </div>`;
+}
+
+// ── PRODUCTS ──
+async function renderVProducts(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">My Products</div></div><div style="color:var(--mu);">Loading...</div>';
+  const allProds=await fbG('rn_mall_products')||{};
+  const myProds=Object.entries(allProds).filter(([id,p])=>p.vendorId===vendor.id);
+  let html='<div class="page-hdr" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;"><div><div class="page-hdr-title">My Products</div><div class="page-hdr-sub">'+myProds.length+' product(s)</div></div><button class="btn btn-or btn-lg" onclick="openVProdForm(null)">+ Add Product</button></div>';
+  if(!myProds.length){
+    html+='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:36px;">📦</div><div class="card-title" style="margin-top:12px;">No products yet</div><div style="font-size:12px;color:var(--mu);margin-top:6px;">Add your first product to start selling on RichNation Mall.</div></div>';
+  }else{
+    html+=myProds.map(function(entry){
+      var id=entry[0],p=entry[1];
+      return '<div class="data-row">'
+        +'<div class="row-thumb">'+(p.images&&p.images[0]?'<img loading="lazy" decoding="async" src="'+p.images[0]+'" style="width:100%;height:100%;object-fit:cover;"/>':'')+'</div>'
+        +'<div style="flex:1;min-width:150px;"><div class="row-name">'+p.name+'</div><div class="row-meta">'+fmt(p.price)+' &middot; Stock: '+(p.stock!=null?p.stock:'∞')+' &middot; '+(p.approvalStatus==='approved'?'<span style="color:var(--su);">Approved</span>':p.approvalStatus==='rejected'?'<span style="color:var(--re);">Rejected</span>':'<span style="color:var(--or);">Pending Approval</span>')+'</div></div>'
+        +'<button class="btn" onclick="openVProdForm(\''+id+'\')">Edit</button>'
+        +'<button class="btn btn-re" onclick="delVProd(\''+id+'\',\''+p.name.replace(/'/g,"\\'")+'\')">Delete</button>'
+        +'</div>';
+    }).join('');
+  }
+  c.innerHTML=html;
+}
+function openVProdForm(id){
+  (async function(){
+    const p=id?(await fbG('rn_mall_products/'+id))||{}:{};
+    window._vImages=(p.images||[]).slice();
+    const catOpts=allCategories.map(function(cat){return '<option value="'+cat.id+'" '+(p.category===cat.id?'selected':'')+'>'+cat.name+'</option>';}).join('');
+    const c=document.getElementById('content');
+    c.innerHTML=`
+    <div class="page-hdr"><div class="page-hdr-title">${id?'Edit Product':'Add Product'}</div></div>
+    <div class="card">
+      <div class="g2">
+        <div class="fg"><label class="lbl">Product Name</label><input class="inp" id="vp-name" value="${p.name||''}" placeholder="e.g. Ankara Print Dress"/></div>
+        <div class="fg"><label class="lbl">Category</label><select class="inp" id="vp-cat"><option value="">Select category</option>${catOpts}</select></div>
+      </div>
+      <div class="fg"><label class="lbl">Description</label><textarea class="ta" id="vp-desc" rows="4" placeholder="Describe your product...">${p.description||''}</textarea></div>
+      <div class="g2">
+        <div class="fg"><label class="lbl">Price (₦)</label><input class="inp" type="number" id="vp-price" value="${p.price||''}" placeholder="15000"/></div>
+        <div class="fg"><label class="lbl">Sale Price (optional)</label><input class="inp" type="number" id="vp-sale" value="${p.salePrice||''}" placeholder="12000"/></div>
+      </div>
+      <div class="fg"><label class="lbl">Stock Quantity</label><input class="inp" type="number" id="vp-stock" value="${p.stock!=null?p.stock:''}" placeholder="Leave blank for unlimited"/></div>
+      <div class="fg"><label class="lbl">Product Images</label>
+        <div id="vp-img-preview" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">${(window._vImages||[]).map(function(img,i){return '<div style="position:relative;width:60px;height:60px;"><img src="'+img+'" style="width:100%;height:100%;object-fit:cover;border-radius:6px;"/><span onclick="removeVImg('+i+')" style="position:absolute;top:-6px;right:-6px;background:var(--re);color:#fff;border-radius:99px;width:18px;height:18px;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;">×</span></div>';}).join('')}</div>
+        <input type="file" id="vp-img-upload" accept="image/*" multiple style="display:none;" onchange="previewVImages()">
+        <button class="btn" onclick="document.getElementById('vp-img-upload').click()">📁 Choose Images</button>
+      </div>
+      <div style="background:var(--card2);border-radius:9px;padding:12px;margin-bottom:16px;font-size:12px;">
+        ${p.approvalStatus==='approved'?'<span style="color:var(--su);font-weight:700;">Approved — live on RichNation Mall</span>':p.approvalStatus==='rejected'?'<span style="color:var(--re);font-weight:700;">Rejected</span>'+(p.rejectionReason?'<div style="color:var(--w2);margin-top:4px;">Reason: '+p.rejectionReason+'</div>':''):'<span style="color:var(--or);font-weight:700;">Pending admin approval</span>'}
+        <div style="color:var(--mu);margin-top:4px;">Every new listing and edit is reviewed by admin before it shows to customers.</div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-or btn-lg" onclick="saveVProd('${id||''}')">💾 ${id?'Update':'Save'} Product</button>
+        <button class="btn btn-lg" onclick="vnav('products')">Cancel</button>
+      </div>
+    </div>`;
+  })();
+}
+function removeVImg(i){window._vImages.splice(i,1);
+  const prev=document.getElementById('vp-img-preview');
+  if(prev)prev.innerHTML=(window._vImages||[]).map(function(img,idx){return '<div style="position:relative;width:60px;height:60px;"><img src="'+img+'" style="width:100%;height:100%;object-fit:cover;border-radius:6px;"/><span onclick="removeVImg('+idx+')" style="position:absolute;top:-6px;right:-6px;background:var(--re);color:#fff;border-radius:99px;width:18px;height:18px;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;">×</span></div>';}).join('');
+}
+async function previewVImages(){
+  const inp=document.getElementById('vp-img-upload');
+  if(!inp.files||!inp.files.length)return;
+  toast('Uploading images…');
+  for(let i=0;i<Math.min(inp.files.length,10);i++){
+    let b64=await compressImage(inp.files[i]);
+    if(!b64)continue;
+    const url=isGithubConfigured()?await uploadDataUrlToGithub(b64,'vendor-products'):null;
+    window._vImages=window._vImages||[];window._vImages.push(url||b64);
+  }
+  const prev=document.getElementById('vp-img-preview');
+  if(prev)prev.innerHTML=(window._vImages||[]).map(function(img,idx){return '<div style="position:relative;width:60px;height:60px;"><img src="'+img+'" style="width:100%;height:100%;object-fit:cover;border-radius:6px;"/><span onclick="removeVImg('+idx+')" style="position:absolute;top:-6px;right:-6px;background:var(--re);color:#fff;border-radius:99px;width:18px;height:18px;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;">×</span></div>';}).join('');
+  toast('Images ready — click Save to confirm');
+}
+async function saveVProd(id){
+  const name=(document.getElementById('vp-name').value||'').trim();
+  if(!name){toast('Enter a product name','err');return;}
+  const cat=document.getElementById('vp-cat').value;
+  if(!cat){toast('Select a category','err');return;}
+  const price=parseFloat(document.getElementById('vp-price').value)||0;
+  if(price<=0){toast('Enter a valid price','err');return;}
+  const pid=id||'prod_'+Date.now()+'_'+Math.random().toString(36).slice(2,5);
+  const existing=id?(await fbG('rn_mall_products/'+id))||{}:{};
+  const prod={
+    id:pid,name:name,code:existing.code||genProdCode(),
+    category:cat,
+    description:(document.getElementById('vp-desc').value||'').trim(),
+    price:price,
+    salePrice:parseFloat(document.getElementById('vp-sale').value)||null,
+    stock:document.getElementById('vp-stock').value!==''?parseInt(document.getElementById('vp-stock').value):null,
+    images:window._vImages||[],
+    videos:existing.videos||[],
+    visible:false,approvalStatus:'pending',rejectionReason:null,
+    vendorId:vendor.id,vendorName:vendor.storeName,
+    rating:existing.rating||4,reviews:existing.reviews||0,
+    featured:false,isNew:!id,flashSale:false,preOrder:false,
+    createdAt:existing.createdAt||new Date().toISOString(),
+    updatedAt:new Date().toISOString()
+  };
+  await fbS('rn_mall_products/'+pid,prod);
+  await fbP('rn_mall_notifications',{type:'vendor_product_pending',vendorName:vendor.storeName,productName:name,date:ds(),read:false,ts:Date.now()});
+  toast(id?'Changes submitted — pending admin approval before they go live.':'Product submitted — pending admin approval before it goes live.');
+  vnav('products');
+}
+async function delVProd(id,name){
+  if(!confirm('Delete "'+name+'"? This cannot be undone.'))return;
+  const ok=await fbD('rn_mall_products/'+id);
+  if(!ok){toast('Delete failed — try again','err');return;}
+  toast(name+' deleted');
+  vnav('products');
+}
+
+// ── ORDERS ──
+async function renderVOrders(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">My Orders</div></div><div style="color:var(--mu);">Loading...</div>';
+  const allOrders=await fbG('rn_mall_orders')||{};
+  const myOrders=Object.values(allOrders).filter(function(o){return (o.items||[]).some(function(it){return it.vendorId===vendor.id;});}).sort(function(a,b){return new Date(b.createdAt||0)-new Date(a.createdAt||0);});
+  let html='<div class="page-hdr"><div class="page-hdr-title">My Orders</div><div class="page-hdr-sub">'+myOrders.length+' order(s) containing your products</div></div>';
+  if(!myOrders.length){
+    html+='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:36px;">📦</div><div class="card-title" style="margin-top:12px;">No orders yet</div></div>';
+  }else{
+    html+=myOrders.map(function(o){
+      const myItems=(o.items||[]).filter(function(it){return it.vendorId===vendor.id;});
+      const myTotal=myItems.reduce(function(s,it){return s+(it.price||0)*(it.qty||1);},0);
+      return '<div class="card" style="margin-bottom:10px;">'
+        +'<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">'
+        +'<div><div style="font-weight:800;color:var(--or);">'+o.tracking+'</div><div class="row-meta">'+(o.customer?o.customer.name:'')+' &middot; '+o.date+'</div></div>'
+        +'<div style="text-align:right;"><div style="font-weight:800;">'+fmt(myTotal)+'</div><div class="row-meta">Order status: '+(o.status||'pending')+'</div></div>'
+        +'</div>'
+        +myItems.map(function(it){return '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--w2);padding:4px 0;border-top:1px solid var(--bdr);"><span>'+it.name+(it.variant?' ('+it.variant+')':'')+' x'+it.qty+'</span><span>'+fmt(it.price*it.qty)+'</span></div>';}).join('')
+        +'<div style="font-size:11px;color:var(--mu);margin-top:8px;">Deliver to: '+(o.customer?o.customer.address+', '+o.customer.city:'—')+' &middot; '+(o.customer?o.customer.phone:'')+'</div>'
+        +'</div>';
+    }).join('');
+  }
+  c.innerHTML=html;
+}
+
+// ── PROFILE ──
+async function renderVProfile(c){
+  const settingsData=await fbG('rn_mall_settings')||{};
+  const selfRate=settingsData.vendorCommissionRate!=null?settingsData.vendorCommissionRate:10;
+  const logisticsRate=settingsData.vendorLogisticsCommissionRate!=null?settingsData.vendorLogisticsCommissionRate:15;
+  const currentOption=vendor.logisticsOption||'self';
+  c.innerHTML=`
+  <div class="page-hdr"><div class="page-hdr-title">Store Profile</div></div>
+  <div class="card" style="max-width:500px;">
+    <div style="margin-bottom:14px;"><span class="badge badge-${vendor.status}">${vendor.status}</span></div>
+    <div class="fg"><label class="lbl">Store Name</label><input class="inp" id="vprof-store" value="${vendor.storeName||''}"/></div>
+    <div class="fg"><label class="lbl">Owner Name</label><input class="inp" id="vprof-owner" value="${vendor.ownerName||''}"/></div>
+    <div class="fg"><label class="lbl">Email</label><input class="inp" id="vprof-email" value="${vendor.email||''}" type="email"/></div>
+    <div class="fg"><label class="lbl">Phone</label><input class="inp" id="vprof-phone" value="${vendor.phone||''}"/></div>
+    <div class="fg"><label class="lbl">New Password (leave blank to keep current)</label><input class="inp" id="vprof-pass" type="password" placeholder="New password"/></div>
+    <button class="btn btn-or btn-lg" onclick="saveVProfile()">Save Changes</button>
+  </div>
+  <div class="card" style="max-width:500px;">
+    <div class="card-title">Delivery Method</div>
+    <div style="font-size:11px;color:var(--mu);margin:6px 0 12px;">Currently: <strong style="color:var(--or);">${currentOption==='richnation'?'RichNation Mall delivers for you ('+logisticsRate+'% commission)':'You deliver to customers yourself ('+selfRate+'% commission)'}</strong></div>
+    <select class="inp" id="vprof-logistics">
+      <option value="self" ${currentOption==='self'?'selected':''}>I deliver to customers myself — ${selfRate}% commission</option>
+      <option value="richnation" ${currentOption==='richnation'?'selected':''}>RichNation Mall delivers for me — ${logisticsRate}% commission</option>
+    </select>
+    <div style="font-size:11px;color:var(--mu);margin-bottom:12px;">This applies to orders placed after you save — it does not change commission already charged on past sales.</div>
+    <button class="btn btn-or btn-lg" onclick="saveVendorLogisticsOption()">Save Delivery Method</button>
+  </div>
+  <div class="card" style="max-width:500px;">
+    <div class="card-title">🎨 Store Branding</div>
+    <div style="font-size:11px;color:var(--mu);margin:6px 0 12px;">Shown next to your products on RichNation Mall.</div>
+    <div style="text-align:center;margin-bottom:14px;">
+      <div onclick="document.getElementById('vprof-logo-upload').click()" style="width:70px;height:70px;border-radius:99px;background:var(--card2);border:2px solid var(--bdr);margin:0 auto;cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+        ${vendor.logo?'<img src="'+vendor.logo+'" style="width:100%;height:100%;object-fit:cover;"/>':'<span style="font-size:10px;color:var(--mu);">Logo</span>'}
+      </div>
+      <input type="file" id="vprof-logo-upload" accept="image/*" style="display:none;" onchange="uploadVendorImage(this,'logo')">
+      <div style="font-size:11px;color:var(--or);cursor:pointer;margin-top:6px;" onclick="document.getElementById('vprof-logo-upload').click()">Change Logo</div>
+    </div>
+    <div class="fg"><label class="lbl">About Your Store</label><textarea class="inp" id="vprof-about" rows="4" placeholder="Tell customers what your store is about...">${vendor.about||''}</textarea></div>
+    <button class="btn btn-or btn-lg" onclick="saveVendorBranding()">Save Branding</button>
+  </div>`;
+}
+async function saveVendorLogisticsOption(){
+  const choice=document.getElementById('vprof-logistics').value;
+  await fbU('rn_mall_vendors/'+vendor.id,{logisticsOption:choice});
+  vendor.logisticsOption=choice;
+  sessionStorage.setItem('rnm_vendor_session',JSON.stringify(vendor));
+  toast('Delivery method updated!');
+  vnav('profile');
+}
+async function uploadVendorImage(input,field){
+  const file=input.files[0];if(!file)return;
+  toast('Uploading photo…');
+  let b64=await compressImage(file,600,0.85);
+  if(!b64){toast('Could not read that image — try another one','err');return;}
+  const url=isGithubConfigured()?await uploadDataUrlToGithub(b64,'vendor-photos'):null;
+  if(url)b64=url;
+  await fbU('rn_mall_vendors/'+vendor.id,{[field]:b64});
+  vendor[field]=b64;
+  sessionStorage.setItem('rnm_vendor_session',JSON.stringify(vendor));
+  toast('Photo updated!');
+  vnav('profile');
+}
+async function saveVendorBranding(){
+  const about=(document.getElementById('vprof-about').value||'').trim();
+  await fbU('rn_mall_vendors/'+vendor.id,{about:about});
+  vendor.about=about;
+  sessionStorage.setItem('rnm_vendor_session',JSON.stringify(vendor));
+  toast('Store branding saved!');
+}
+async function saveVProfile(){
+  const u={
+    storeName:document.getElementById('vprof-store').value.trim(),
+    ownerName:document.getElementById('vprof-owner').value.trim(),
+    email:document.getElementById('vprof-email').value.trim().toLowerCase(),
+    phone:document.getElementById('vprof-phone').value.trim()
+  };
+  const pw=document.getElementById('vprof-pass').value.trim();
+  if(pw&&pw.length>=6)u.password=pw;
+  await fbU('rn_mall_vendors/'+vendor.id,u);
+  vendor=Object.assign({},vendor,u);
+  sessionStorage.setItem('rnm_vendor_session',JSON.stringify(vendor));
+  document.getElementById('tb-store-name').textContent=vendor.storeName;
+  toast('Profile updated!');
+}
+
+checkVendorSession();
+</script>
+</body>
+</html>

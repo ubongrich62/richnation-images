@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>RichNation Mall — Dispatch Rider Portal</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0a0a0a;--card:#161616;--card2:#1e1e1e;--bdr:#2c2c2c;
+  --or:#FF6A00;--or-dk:#E15E00;--gold:#FFA733;--wh:#f5f5f5;--w2:#cfcfcf;--mu:#9a9a9a;
+  --su:#22c55e;--re:#f43f5e;--bl:#5b9bf5;
+  --r-sm:6px;--r-md:10px;--r-lg:14px;--r-pill:999px;
+  --sh-sm:0 1px 2px rgba(0,0,0,.5);
+  --sh-md:0 8px 24px rgba(0,0,0,.55);
+  --sh-lg:0 28px 64px rgba(0,0,0,.65);
+}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:var(--wh);overflow-x:hidden;width:100%;}
+.leaflet-control-attribution{font-size:8px!important;background:rgba(0,0,0,0.5)!important;color:#999!important;padding:1px 4px!important;}
+.leaflet-control-attribution a{color:#bbb!important;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:#000;}::-webkit-scrollbar-thumb{background:#222;border-radius:4px;}
+button{font-family:inherit;}
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 25% 40%,rgba(255,106,0,0.07),transparent 50%),radial-gradient(circle at 75% 60%,rgba(255,167,51,0.04),transparent 50%);}
+.lcard{width:100%;max-width:460px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-lg);padding:36px 30px;box-shadow:var(--sh-lg);}
+.llogo{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:20px;color:var(--or);margin-bottom:4px;}
+.ltitle{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;margin-bottom:6px;}
+.lsub{text-align:center;font-size:11px;color:var(--mu);margin-bottom:20px;line-height:1.6;}
+.fi{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:13px 14px;color:var(--wh);font-size:13px;outline:none;margin-bottom:10px;color-scheme:dark;transition:border-color .15s,box-shadow .15s;}
+.fi:focus{border-color:var(--or);box-shadow:0 0 0 3px rgba(255,106,0,.18);}
+.lbtn{width:100%;background:var(--or);color:#fff;border:none;padding:15px;border-radius:var(--r-md);font-weight:800;font-size:14px;cursor:pointer;margin-top:4px;transition:background .15s;}
+.lbtn:hover{background:var(--or-dk);}
+.lbtn:active{transform:translateY(1px);}
+.lerr{font-size:12px;color:var(--re);margin-top:10px;display:none;background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.25);border-radius:var(--r-sm);padding:10px 12px;}
+#app{display:none;min-height:100vh;}
+.topbar{min-height:56px;border-bottom:1px solid var(--bdr);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;position:sticky;top:0;background:var(--bg);z-index:100;}
+.tb-left{display:flex;align-items:center;gap:8px;min-width:0;flex:1;}
+.tb-logo{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:15px;color:var(--or);white-space:nowrap;}
+.tb-status{font-size:11px;color:var(--su);background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);padding:4px 11px;border-radius:var(--r-pill);font-weight:800;white-space:nowrap;}
+#mob-btn{display:none;background:none;border:none;color:var(--or);font-size:24px;cursor:pointer;padding:8px 10px;min-width:44px;min-height:44px;align-items:center;justify-content:center;}
+.tb-btn{background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:10px 16px;font-size:12px;font-weight:600;color:var(--wh);cursor:pointer;min-height:40px;transition:background .15s,border-color .15s;}
+.tb-btn:hover{background:var(--bdr);}
+.wrap{display:flex;min-height:calc(100vh - 56px);}
+.sb{width:200px;min-width:200px;background:var(--card);border-right:1px solid var(--bdr);padding:16px 0;display:flex;flex-direction:column;gap:1px;}
+.sb-sec{font-size:10px;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;padding:16px 16px 6px;}
+.sb-sec:first-child{padding-top:4px;}
+.sb-item{display:flex;align-items:center;gap:9px;padding:12px 16px;font-size:13px;color:var(--w2);cursor:pointer;border-left:3px solid transparent;transition:background .15s,color .15s;}
+.sb-item:hover{background:var(--card2);}
+.sb-item.active{background:rgba(255,106,0,0.1);border-left-color:var(--or);color:var(--or);font-weight:700;}
+.content{flex:1;padding:24px;overflow-x:hidden;}
+.page-hdr-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:22px;}
+.page-hdr-sub{font-size:12px;color:var(--mu);margin-top:2px;}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
+.stat-card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);padding:18px;}
+.stat-num{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:24px;}
+.stat-lbl{font-size:12px;color:var(--w2);margin-top:2px;}
+.stat-sub{font-size:10px;color:var(--mu);margin-top:3px;}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);padding:18px;margin-bottom:14px;}
+.card-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14px;}
+.btn{background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:12px 18px;font-size:12.5px;font-weight:600;color:var(--wh);cursor:pointer;min-height:44px;transition:background .15s,border-color .15s;}
+.btn:hover{background:var(--bdr);}
+.btn:active{transform:translateY(1px);}
+.btn-or{background:var(--or);border:none;color:#fff;font-weight:800;}
+.btn-or:hover{background:var(--or-dk);}
+.btn-lg{padding:15px 22px;font-size:14px;min-height:50px;border-radius:var(--r-md);}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fg{margin-bottom:14px;}
+.lbl{font-size:11px;font-weight:700;color:var(--mu);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;}
+.stage-badge{font-size:10px;font-weight:800;padding:4px 10px;border-radius:var(--r-pill);text-transform:uppercase;letter-spacing:0.3px;}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:11px 18px;font-size:12px;font-weight:600;color:var(--wh);box-shadow:var(--sh-lg);z-index:9999;display:none;white-space:nowrap;}
+.chat-msg{display:flex;align-items:flex-end;gap:8px;margin-bottom:12px;}
+.chat-msg.own{flex-direction:row-reverse;}
+.chat-msg.own>div{text-align:right;}
+.chat-av{width:26px;height:26px;min-width:26px;border-radius:var(--r-pill);background:var(--card2);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--w2);}
+.chat-msg.own .chat-av{background:var(--or);border-color:var(--or);color:#fff;}
+.chat-bubble{display:inline-block;background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-md);padding:9px 13px;font-size:12.5px;color:var(--w2);line-height:1.5;max-width:230px;text-align:left;}
+.chat-msg.own .chat-bubble{background:var(--or);border-color:var(--or);color:#fff;}
+@media(max-width:768px){
+  .sb{position:fixed;left:-220px;top:56px;bottom:0;z-index:300;width:200px;transition:left .2s;box-shadow:var(--sh-lg);}
+  .sb.open{left:0;display:flex;}
+  #mob-btn{display:flex!important;}
+  .stats-grid{grid-template-columns:1fr;}
+  .g2{grid-template-columns:1fr;}
+  .content{padding:14px;}
+}
+</style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+
+<div id="login">
+  <div class="lcard">
+    <div class="llogo">🛒 RichNation Mall</div>
+    <div class="ltitle" id="l-title">Dispatch Rider Sign In</div>
+    <div class="lsub" id="l-sub">Manage your deliveries and update your status in real time.</div>
+
+    <div id="login-form">
+      <input class="fi" id="r-email" type="email" placeholder="Email"/>
+      <div style="position:relative;"><input class="fi" id="r-pass" type="password" placeholder="Password" style="padding-right:56px;"/><span onclick="togglePwVisibility('r-pass',this)" style="position:absolute;right:12px;top:12px;font-size:11px;color:var(--or);cursor:pointer;font-weight:700;">Show</span></div>
+      <button class="lbtn" onclick="doRiderLogin()">Sign In</button>
+      <div class="lerr" id="login-err"></div>
+    </div>
+
+    <div id="apply-form" style="display:none;">
+      <div class="g2">
+        <input class="fi" id="ap-fname" placeholder="Full Name"/>
+        <div><div style="font-size:11px;color:var(--mu);margin-bottom:6px;">Date of Birth</div><input class="fi" id="ap-dob" type="date"/></div>
+      </div>
+      <div class="g2">
+        <select class="fi" id="ap-gender"><option value="">Gender</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select>
+        <input class="fi" id="ap-phone" placeholder="Phone Number"/>
+      </div>
+      <input class="fi" id="ap-email" type="email" placeholder="Email Address"/>
+      <input class="fi" id="ap-address" placeholder="House Address"/>
+      <div class="g2">
+        <input class="fi" id="ap-country" placeholder="Country" value="Nigeria"/>
+        <input class="fi" id="ap-lga" placeholder="Local Government Area"/>
+      </div>
+      <div class="g2">
+        <select class="fi" id="ap-vehicle"><option value="">Vehicle Type</option><option value="Motorcycle">Motorcycle</option><option value="Bicycle">Bicycle</option><option value="Car">Car</option><option value="Van/Truck">Van/Truck</option><option value="On Foot">On Foot</option></select>
+        <input class="fi" id="ap-idnum" placeholder="ID Number (NIN/Driver's License)"/>
+      </div>
+      <textarea class="fi" id="ap-note" rows="2" placeholder="Anything else you'd like us to know (optional)" style="resize:vertical;"></textarea>
+      <div style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;margin:14px 0;max-height:220px;overflow-y:auto;">
+        <div style="font-weight:800;font-size:13px;margin-bottom:8px;color:var(--wh);">A Direct Word From the Founder — Please Read</div>
+        <div style="font-size:10.5px;color:var(--mu);line-height:1.7;">
+          You are the last person our customer sees before they hold what they paid for. To them, you are RichNation. Customers have complained before about riders being rude, impatient, or rough with packages. This will not be taken lightly.<br><br>
+          <strong>What I expect:</strong> wait patiently if a customer needs a moment. Answer questions calmly and politely, even the same one for the hundredth time. Carry every package the way you would carry something you paid for yourself.<br><br>
+          <strong>If a customer treats you badly:</strong> do not argue back and do not respond anyhow. Stay professional, finish the delivery, and report it to your logistics manager or to management directly. We will handle it from there, and if you handled it the right way, we stand behind you.<br><br>
+          <strong>Consequences that are not negotiable:</strong> confirmed rudeness, impatience, or careless handling follows our strike system — a formal strike on the first confirmed report, another on the second, and automatic suspension on the third. Running away with a customer's product, or anything close to theft, is not a strike matter. It is immediate termination, treated as theft.<br><br>
+          This is written because I respect you enough to tell you exactly what is expected, before you sign, not after a mistake.
+        </div>
+      </div>
+      <label style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--w2);cursor:pointer;margin:14px 0;"><input type="checkbox" id="ap-conduct-agree" style="width:16px;height:16px;accent-color:var(--or);margin-top:2px;flex-shrink:0;"/> I have read this and I understand what is expected of me.</label>
+      <button class="lbtn" onclick="submitRiderApplication()">Submit Application</button>
+      <div class="lerr" id="apply-err"></div>
+    </div>
+
+    <div style="text-align:center;font-size:11px;color:var(--mu);margin-top:16px;" id="toggle-note">New rider? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Apply here</span></div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="tb-left">
+      <button id="mob-btn" onclick="toggleSidebar()">&#9776;</button>
+      <div class="tb-logo">🛒 RichNation Mall</div>
+      <div class="tb-status">🏍️ Rider</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;position:relative;">
+      <button class="tb-btn" style="position:relative;" onclick="toggleRiderNotifPanel()">🔔<span id="rider-notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--re);color:#fff;font-size:9px;font-weight:800;min-width:15px;height:15px;border-radius:99px;align-items:center;justify-content:center;padding:0 3px;">0</span></button>
+      <div id="rider-notif-panel" style="display:none;position:absolute;top:44px;right:0;width:280px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--bdr);border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,0.6);z-index:500;padding:8px;"></div>
+      <button class="tb-btn" onclick="riderLogout()">Sign Out</button>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="sb" id="sidebar"></div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const FB='https://richnation-portal-default-rtdb.firebaseio.com';
+const FIREBASE_CONFIG={apiKey:"AIzaSyDLGnyGB8ZnEc2u6TbVzjIAQi1pgSaZVyQ",authDomain:"richnation-portal.firebaseapp.com",databaseURL:"https://richnation-portal-default-rtdb.firebaseio.com",projectId:"richnation-portal",storageBucket:"richnation-portal.firebasestorage.app",messagingSenderId:"175550692963",appId:"1:175550692963:web:1e3c995b3ed0baaadac256"};
+const RECAPTCHA_SITE_KEY='6Ld2O5EtAAAAAN6fXMnn7kn5a6SWvDpJs97kckGC';
+let appCheckToken=null;
+// App Check isn't enforced yet, so it adds nothing functional right now — loaded only
+// after the page is fully done loading, so it costs the page nothing while unused.
+function loadAppCheckWhenIdle(){
+  function loadScript(src){
+    return new Promise(function(resolve){
+      const s=document.createElement('script');
+      s.src=src;s.onload=resolve;s.onerror=resolve;
+      document.head.appendChild(s);
+    });
+  }
+  loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js')
+    .then(function(){return loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js');})
+    .then(function(){
+      try{
+        firebase.initializeApp(FIREBASE_CONFIG);
+        const appCheckInstance=firebase.appCheck();
+        appCheckInstance.activate(new firebase.appCheck.ReCaptchaV3Provider(RECAPTCHA_SITE_KEY),true);
+        appCheckInstance.getToken().then(function(r){appCheckToken=r.token;}).catch(function(e){console.warn('App Check token fetch failed:',e.message);});
+        appCheckInstance.onTokenChanged(function(r){appCheckToken=r.token;});
+      }catch(e){
+        console.warn('App Check init failed — requests will proceed without a token:',e.message);
+      }
+    });
+}
+if(document.readyState==='complete'){setTimeout(loadAppCheckWhenIdle,2000);}
+else window.addEventListener('load',function(){setTimeout(loadAppCheckWhenIdle,2000);});
+let rider=null;
+
+async function fbFetchTimeout(url,opts,ms){
+  ms=ms||8000;const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),ms);
+  opts=opts||{};
+  if(typeof appCheckToken!=='undefined'&&appCheckToken)opts=Object.assign({},opts,{headers:Object.assign({},opts.headers,{'X-Firebase-AppCheck':appCheckToken})});
+  try{const r=await fetch(url,Object.assign({},opts,{signal:ctrl.signal}));clearTimeout(t);return r;}
+  catch(e){clearTimeout(t);throw e;}
+}
+async function fbG(p){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{});return await r.json();}catch(e){try{await new Promise(res=>setTimeout(res,400));const r2=await fbFetchTimeout(FB+'/'+p+'.json',{});return await r2.json();}catch(e2){return null;}}}
+async function fbS(p,d){try{await fbFetchTimeout(FB+'/'+p+'.json',{method:'PUT',body:JSON.stringify(d)});}catch(e){}}
+async function fbU(p,d){try{await fbFetchTimeout(FB+'/'+p+'.json',{method:'PATCH',body:JSON.stringify(d)});}catch(e){}}
+async function fbP(p,d){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'POST',body:JSON.stringify(d)});return r.json();}catch(e){return null;}}
+
+function toast(msg,type){
+  const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';
+  t.style.borderColor=type==='err'?'var(--re)':'var(--bdr)';
+  clearTimeout(window._toastT);window._toastT=setTimeout(()=>{t.style.display='none';},3000);
+}
+function ds(){return new Date().toLocaleDateString('en-GB');}
+function fmt(n){return '₦'+parseInt(n||0).toLocaleString();}
+function ini(name){return (name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
+function svgIconPaths(name){
+  var icons={
+    home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
+    box:'<path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/>',
+    clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>',
+    user:'<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>',
+    star:'<path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1z"/>',
+    file:'<path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/>',
+    money:'<path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>',
+    note:'<path d="M4 3h16v18l-4-3H4z"/><path d="M8 8h8M8 12h5"/>',
+    alert:'<path d="M12 2L2 20h20L12 2z"/><path d="M12 9v5M12 17h.01"/>',
+    palm:'<path d="M12 22V12M12 12C7 12 4 8 4 4c4 0 8 3 8 8zM12 12c5 0 8-4 8-8-4 0-8 3-8 8z"/>',
+    chat:'<path d="M21 12a8 8 0 11-3.5-6.6L21 4l-1 4.5A7.9 7.9 0 0121 12z"/>'
+  };
+  return icons[name]||icons.star;
+}
+function iconBadge(name,size){
+  size=size||18;
+  return '<span style="display:inline-block;position:relative;width:'+size+'px;height:'+size+'px;vertical-align:middle;">'
+    +'<span style="position:absolute;inset:-4px;background:radial-gradient(circle,rgba(255,140,0,0.35),transparent 70%);border-radius:50%;"></span>'
+    +'<svg viewBox="0 0 24 24" width="'+size+'" height="'+size+'" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;">'+svgIconPaths(name)+'</svg>'
+    +'</span>';
+}
+
+const STAGES=['assigned','picked_up','in_transit','arrived','delivered'];
+const STAGE_LABELS={assigned:'Assigned',picked_up:'Picked Up',in_transit:'In Transit',arrived:'Arrived at Destination',delivered:'Delivered'};
+const STAGE_TIMELINE_TEXT={picked_up:'Picked Up by Rider',in_transit:'In Transit',arrived:'Arrived at Destination',delivered:'Delivered by Rider'};
+const STAGE_COLORS={assigned:'var(--or)',picked_up:'var(--bl)',in_transit:'var(--bl)',arrived:'var(--su)',delivered:'var(--su)'};
+
+function togglePwVisibility(id,el){
+  const inp=document.getElementById(id);if(!inp)return;
+  if(inp.type==='password'){inp.type='text';el.textContent='Hide';}
+  else{inp.type='password';el.textContent='Show';}
+}
+function toggleApplyMode(){
+  const isLogin=document.getElementById('login-form').style.display!=='none';
+  document.getElementById('login-form').style.display=isLogin?'none':'block';
+  document.getElementById('apply-form').style.display=isLogin?'block':'none';
+  document.getElementById('l-title').textContent=isLogin?'Apply to Become a Rider':'Dispatch Rider Sign In';
+  document.getElementById('l-sub').textContent=isLogin?'Fill in your details — our team reviews every application before you start receiving deliveries.':'Manage your deliveries and update your status in real time.';
+  document.getElementById('toggle-note').innerHTML=isLogin?'Already a rider? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Sign in</span>':'New rider? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Apply here</span>';
+}
+async function submitRiderApplication(){
+  const fname=document.getElementById('ap-fname').value.trim();
+  const dob=document.getElementById('ap-dob').value;
+  const gender=document.getElementById('ap-gender').value;
+  const phone=document.getElementById('ap-phone').value.trim();
+  const email=document.getElementById('ap-email').value.trim().toLowerCase();
+  const address=document.getElementById('ap-address').value.trim();
+  const country=document.getElementById('ap-country').value.trim();
+  const lga=document.getElementById('ap-lga').value.trim();
+  const vehicleType=document.getElementById('ap-vehicle').value;
+  const idNumber=document.getElementById('ap-idnum').value.trim();
+  const note=document.getElementById('ap-note').value.trim();
+  const err=document.getElementById('apply-err');err.style.display='none';
+  if(!fname||!phone||!email||!address||!vehicleType||!idNumber){err.textContent='Please fill in your name, phone, email, address, vehicle type, and ID number.';err.style.display='block';return;}
+  if(!document.getElementById('ap-conduct-agree').checked){err.textContent='Please confirm you have read and understood the founder\'s message before submitting.';err.style.display='block';return;}
+  const all=await fbG('rn_mall_riders')||{};
+  if(Object.values(all).find(function(s){return s.email===email;})){err.textContent='An application or account with this email already exists.';err.style.display='block';return;}
+  const id='rider_'+Date.now();
+  await fbS('rn_mall_riders/'+id,{
+    id,name:fname,dob,gender,phone,email,address,country,lga,vehicleType,idNumber,note,
+    password:'',status:'pending_review',joinDate:ds(),ts:Date.now(),
+    conductMemoAcknowledged:true,conductMemoAcknowledgedAt:Date.now()
+  });
+  await fbP('rn_mall_notifications',{type:'new_rider_application',name:fname,vehicleType,email,date:ds(),read:false,ts:Date.now()});
+  err.style.display='none';
+  document.getElementById('apply-form').innerHTML='<div style="text-align:center;padding:10px 0;"><div style="font-size:32px;margin-bottom:10px;">✅</div><div style="font-weight:800;margin-bottom:8px;">Application Submitted!</div><div style="font-size:12px;color:var(--mu);line-height:1.7;">Thanks, '+fname+'! Our admin will review your application. Once approved, you\'ll receive your login email and password separately.</div></div>';
+}
+async function doRiderLogin(){
+  const email=document.getElementById('r-email').value.trim().toLowerCase();
+  const pass=document.getElementById('r-pass').value.trim();
+  const err=document.getElementById('login-err');err.style.display='none';
+  if(!email||!pass){err.textContent='Enter your email and password.';err.style.display='block';return;}
+  const all=await fbG('rn_mall_riders')||{};
+  const byEmail=Object.entries(all).find(function(e){return e[1].email===email;});
+  if(!byEmail){err.textContent='Incorrect email or password.';err.style.display='block';return;}
+  const found=Object.assign({_id:byEmail[0]},byEmail[1]);
+  if(found.status==='pending_review'){err.textContent='Your application is still under review.';err.style.display='block';return;}
+  if(found.status==='suspended'){err.textContent='Your account has been suspended. Contact your admin.';err.style.display='block';return;}
+  if(found.password!==pass){err.textContent='Incorrect email or password.';err.style.display='block';return;}
+  rider=found;
+  sessionStorage.setItem('rnm_rider_session',JSON.stringify(rider));
+  startApp();
+}
+function riderLogout(){sessionStorage.removeItem('rnm_rider_session');rider=null;document.getElementById('app').style.display='none';document.getElementById('login').style.display='flex';}
+function checkRiderSession(){const s=sessionStorage.getItem('rnm_rider_session');if(s){try{rider=JSON.parse(s);startApp();}catch(e){}}}
+function buildRiderSidebar(){
+  var work=[['dashboard','home','Dashboard'],['deliveries','box','My Deliveries'],['history','clock','History']];
+  var me=[['salary','money','My Salary'],['points','star','My StaffPoints'],['reports','note','Reports'],['complaints','alert','Complaints'],['leave','palm','Leave Requests'],['messages','chat','Messages'],['activity','clock','My Activity'],['policy','file','Rider Policy'],['profile','user','My Profile']];
+  var html='<div class="sb-sec">My Work</div>';
+  work.forEach(function(item,i){html+='<div class="sb-item'+(i===0?' active':'')+'" id="nav-'+item[0]+'" onclick="rnav(\''+item[0]+'\')">'+iconBadge(item[1],16)+'&nbsp;'+item[2]+'</div>';});
+  html+='<div class="sb-sec">Me</div>';
+  me.forEach(function(item){html+='<div class="sb-item" id="nav-'+item[0]+'" onclick="rnav(\''+item[0]+'\')">'+iconBadge(item[1],16)+'&nbsp;'+item[2]+'</div>';});
+  document.getElementById('sidebar').innerHTML=html;
+}
+function showInfoModal(title,bodyHtml){
+  const existing=document.getElementById('info-modal-overlay');if(existing)existing.remove();
+  const overlay=document.createElement('div');
+  overlay.id='info-modal-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto;';
+  overlay.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:24px;max-width:480px;width:100%;max-height:85vh;overflow-y:auto;">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;"><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:900;font-size:16px;">'+title+'</div><span onclick="closeInfoModal()" style="cursor:pointer;font-size:22px;color:var(--mu);line-height:1;">&times;</span></div>'
+    +bodyHtml
+    +'</div>';
+  document.body.appendChild(overlay);
+}
+function closeInfoModal(){const el=document.getElementById('info-modal-overlay');if(el)el.remove();}
+function startApp(){
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').style.display='block';
+  buildRiderSidebar();
+  rnav('dashboard');
+  loadRiderNotifs();
+  maybeShowRiderWelcomeSetup();
+}
+function maybeShowRiderWelcomeSetup(){
+  const missing=[];
+  if(!rider.photo)missing.push('Add a profile picture');
+  if(!rider.bankAcctNo)missing.push('Add your bank account details');
+  if(!rider.policyRead)missing.push('Read and confirm the Rider Policy');
+  if(!missing.length)return;
+  showInfoModal('👋 Welcome, '+rider.name.split(' ')[0]+'!',`
+    <div style="font-size:13px;color:var(--w2);line-height:1.7;margin-bottom:14px;">Let's finish setting up your dashboard — a few things left:</div>
+    <div style="margin-bottom:16px;">${missing.map(function(m){return '<div style="padding:8px 0;border-top:1px solid var(--bdr);font-size:13px;color:var(--w2);">☐ '+m+'</div>';}).join('')}</div>
+    <button class="btn btn-or btn-lg" onclick="closeInfoModal();rnav('profile');" style="width:100%;">Complete My Setup</button>
+  `);
+}
+function toggleSidebar(){document.querySelector('.sb').classList.toggle('open');}
+let curRNav='dashboard';
+async function manualRefreshRiderDash(btn){
+  const orig=btn.innerHTML;btn.innerHTML='⏳...';btn.disabled=true;
+  await rnav('dashboard');
+  toast('Updated!');
+  btn.innerHTML=orig;btn.disabled=false;
+}
+async function rnav(page){
+  curRNav=page;
+  document.querySelectorAll('.sb-item').forEach(el=>el.classList.toggle('active',el.id==='nav-'+page));
+  document.querySelector('.sb').classList.remove('open');
+  const c=document.getElementById('content');
+  const routes={dashboard:renderDashboard,deliveries:renderDeliveries,history:renderHistory,salary:renderRiderSalary,points:renderRiderPoints,reports:renderRiderReports,complaints:renderRiderComplaints,leave:renderRiderLeave,messages:renderRiderMessages,activity:renderRiderActivity,policy:renderRiderPolicy,profile:renderProfile};
+  (routes[page]||renderDashboard)(c);
+  const fresh=await fbG('rn_mall_riders/'+rider._id);
+  if(fresh&&curRNav===page){
+    const changed=JSON.stringify(fresh)!==JSON.stringify(Object.assign({},rider,{_id:undefined}));
+    rider=Object.assign({_id:rider._id},fresh);
+    sessionStorage.setItem('rnm_rider_session',JSON.stringify(rider));
+    if(changed)(routes[page]||renderDashboard)(c);
+  }
+}
+// dashboard live-refresh interval removed — was causing a disruptive flash every 15s
+
+let _locationWatchId=null;
+let _lastLocationWriteTs=0;
+function startLiveLocationSharing(){
+  if(_locationWatchId!==null)return; // already watching
+  if(!navigator.geolocation){return;}
+  const badge=document.getElementById('live-loc-badge');if(badge)badge.style.display='flex';
+  _locationWatchId=navigator.geolocation.watchPosition(
+    function(pos){
+      // Throttle actual writes — the device can report position changes far more
+      // often than we need; updating every ~15s is plenty for a delivery map.
+      if(Date.now()-_lastLocationWriteTs<15000)return;
+      _lastLocationWriteTs=Date.now();
+      fbU('rn_mall_riders/'+rider._id,{liveLat:pos.coords.latitude,liveLng:pos.coords.longitude,liveTs:Date.now()});
+      const b=document.getElementById('live-loc-badge');if(b)b.style.display='flex';
+    },
+    function(err){
+      const b=document.getElementById('live-loc-badge');if(b){b.style.display='flex';b.style.color='var(--re)';b.textContent='⚠ Location access needed for live tracking';}
+    },
+    {enableHighAccuracy:true,maximumAge:15000,timeout:20000}
+  );
+}
+function stopLiveLocationSharing(){
+  if(_locationWatchId!==null){navigator.geolocation.clearWatch(_locationWatchId);_locationWatchId=null;}
+  const badge=document.getElementById('live-loc-badge');if(badge)badge.style.display='none';
+}
+async function getMyOrders(){
+  const all=await fbG('rn_mall_orders')||{};
+  return Object.values(all).filter(function(o){return o.riderId===rider._id;});
+}
+async function renderDashboard(c){
+  c.innerHTML='<div class="page-hdr-title">Welcome, '+rider.name+'</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
+  const [orders,payoutsData]=await Promise.all([getMyOrders(),fbG('rn_mall_rider_payouts/'+rider._id)]);
+  const active=orders.filter(function(o){return o.deliveryStage&&o.deliveryStage!=='delivered';});
+  const completed=orders.filter(function(o){return o.deliveryStage==='delivered';});
+  if(active.length)startLiveLocationSharing();else stopLiveLocationSharing();
+  const payouts=Object.values(payoutsData||{}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  const latestPayout=payouts[0];
+  const now=new Date();
+  const thisMonthPaid=payouts.filter(function(p){var d=new Date(p.ts||0);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}).reduce(function(s,p){return s+(p.amount||0);},0);
+  const ratingsArr=rider.ratings||[];
+  const ratingText=ratingsArr.length?(ratingsArr.reduce(function(s,x){return s+x;},0)/ratingsArr.length).toFixed(1)+'/5':'No ratings yet';
+  c.innerHTML=`
+  <div class="card" style="display:flex;align-items:center;gap:16px;justify-content:space-between;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:16px;">
+    <div onclick="document.getElementById('dash-photo-upload').click()" style="width:64px;height:64px;border-radius:99px;background:var(--card2);border:2px solid var(--bdr);cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      ${rider.photo?'<img src="'+rider.photo+'" style="width:100%;height:100%;object-fit:cover;"/>':'<span style="font-size:22px;color:var(--mu);">'+ini(rider.name)+'</span>'}
+    </div>
+    <input type="file" id="dash-photo-upload" accept="image/*" style="display:none;" onchange="uploadMyPhoto('dash-photo-upload')">
+    <div>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:18px;">${rider.name}</div>
+      <div style="font-size:12px;color:var(--mu);margin-top:2px;">${rider.vehicleType||''}${rider.riderNumber?' &middot; '+rider.riderNumber:''} &middot; Paid ${rider.payFrequency||'weekly'}${(rider.strikes||0)>0?' &middot; <span style="color:var(--re);">⚠ '+rider.strikes+'/3 strikes</span>':''}</div>
+      <div onclick="document.getElementById('dash-photo-upload').click()" style="font-size:11px;color:var(--or);cursor:pointer;margin-top:4px;">Change Photo</div>
+    </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+      <div onclick="toggleMyAvailability()" style="cursor:pointer;display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--bdr);border-radius:99px;padding:6px 12px;">
+        <span style="width:8px;height:8px;border-radius:99px;background:${rider.online?'var(--su)':'var(--mu)'};"></span>
+        <span style="font-size:11px;font-weight:700;color:${rider.online?'var(--su)':'var(--mu)'};">${rider.online?'ONLINE':'OFFLINE'}</span>
+      </div>
+      <div id="live-loc-badge" style="display:none;align-items:center;gap:6px;font-size:10px;font-weight:700;color:var(--or);"><span style="width:6px;height:6px;border-radius:99px;background:var(--or);animation:pulse 1.5s infinite;"></span>📍 Sharing live location</div>
+      <button onclick="manualRefreshRiderDash(this)" class="btn" style="font-size:11px;">🔄 Refresh</button>
+    </div>
+  </div>
+  ${latestPayout&&latestPayout.expectedDate&&new Date(latestPayout.expectedDate)>=now?`<div class="card">
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:var(--or);">💰 A payment is on its way!</div>
+    <div style="font-size:12px;color:var(--mu);margin-top:4px;">Expect ${fmt(latestPayout.amount)} around ${new Date(latestPayout.expectedDate).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}</div>
+    ${latestPayout.message?`<div style="font-size:12px;color:var(--w2);margin-top:6px;">${latestPayout.message}</div>`:''}
+  </div>`:''}
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num" style="color:var(--or);">${active.length}</div><div class="stat-lbl">Active Deliveries</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--su);">${completed.length}</div><div class="stat-lbl">Completed</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--gold);">${fmt(rider.totalPaid||0)}</div><div class="stat-lbl">Total Earned</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--or);">${rider.points||0} pts</div><div class="stat-lbl">StaffPoints</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--su);">${fmt(thisMonthPaid)}</div><div class="stat-lbl">This Month</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--or);">${ratingText}</div><div class="stat-lbl">Customer Rating</div><div class="stat-sub">${(rider.ratings||[]).length} rating(s)</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📋 My Bio</div>
+    <div style="font-size:12px;color:var(--w2);line-height:1.8;margin-top:8px;">${rider.bio||'No bio set yet.'}</div>
+  </div>
+  <div class="card">
+    <div class="card-title">🎯 My Job Description</div>
+    <div style="font-size:12px;color:var(--w2);line-height:1.8;margin-top:8px;">Picks up and delivers assigned orders, updates delivery status live so customers can track progress, and collects proof of delivery. Only accesses the delivery address and phone number for orders they're assigned.</div>
+  </div>
+  <div class="card">
+    <div class="card-title">📦 Active Deliveries</div>
+    <div style="margin-top:10px;">${active.length?active.map(deliveryCard).join(''):'<div style="color:var(--mu);font-size:12px;">No active deliveries right now.</div>'}</div>
+  </div>
+  <div class="card">
+    <div class="card-title">💰 Payment History</div>
+    <div style="margin-top:8px;">${payouts.length?payouts.map(function(p){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);"><div style="display:flex;justify-content:space-between;"><span style="font-size:13px;color:var(--w2);">'+(p.description||'Payment')+'</span><span style="font-weight:800;color:var(--su);">'+fmt(p.amount)+'</span></div>'+(p.message?'<div style="font-size:11px;color:var(--mu);margin-top:3px;">'+p.message+'</div>':'')+'<div style="font-size:10px;color:var(--mu);margin-top:3px;">'+p.date+(p.expectedDate?' &middot; Expected: '+new Date(p.expectedDate).toLocaleDateString('en-GB'):'')+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No payments recorded yet.</div>'}</div>
+  </div>`;
+}
+async function toggleMyAvailability(){
+  const newState=!rider.online;
+  await fbU('rn_mall_riders/'+rider._id,{online:newState});
+  rider.online=newState;
+  sessionStorage.setItem('rnm_rider_session',JSON.stringify(rider));
+  toast(newState?'You\'re online — ready for deliveries!':'You\'re offline now.');
+  rnav('dashboard');
+}
+async function renderDeliveries(c){
+  c.innerHTML='<div class="page-hdr-title">My Deliveries</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
+  const orders=await getMyOrders();
+  const active=orders.filter(function(o){return o.deliveryStage&&o.deliveryStage!=='delivered';});
+  c.innerHTML='<div class="page-hdr-title">My Deliveries</div><div class="page-hdr-sub" style="margin-bottom:20px;">Tap through each stage as it happens — customers see this live on their tracking page.</div>'
+    +(active.length?active.map(deliveryCard).join(''):'<div class="card" style="text-align:center;padding:40px;color:var(--mu);">No active deliveries right now.</div>');
+}
+function deliveryCard(o){
+  const stage=o.deliveryStage||'assigned';
+  const nextStage=STAGES[STAGES.indexOf(stage)+1];
+  return '<div class="card" style="margin-bottom:10px;">'
+    +'<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;">'
+    +'<div><div style="font-weight:800;color:var(--or);">'+o.tracking+'</div><div style="font-size:12px;color:var(--w2);margin-top:2px;">'+(o.customer?o.customer.name:'')+' &middot; '+(o.customer?o.customer.phone:'')+'</div></div>'
+    +'<span class="stage-badge" style="background:rgba(255,255,255,0.06);color:'+STAGE_COLORS[stage]+';">'+STAGE_LABELS[stage]+'</span>'
+    +'</div>'
+    +'<div style="font-size:12px;color:var(--mu);margin-bottom:10px;">📍 '+(o.customer?o.customer.address+', '+o.customer.city:'')+'</div>'
+    +'<button class="btn" style="margin-bottom:8px;" onclick="showDeliveryMapModal(\''+o.tracking+'\')">🗺️ View Map</button>'
+    +(nextStage?'<button class="btn btn-or" onclick="advanceStage(\''+o.tracking+'\',\''+nextStage+'\')">Mark as '+STAGE_LABELS[nextStage]+'</button>':'<div style="color:var(--su);font-size:12px;font-weight:700;">✅ Delivered</div>')
+    +'</div>';
+}
+let _riderMapInstance=null;
+async function geocodeAddress(address){
+  try{
+    const res=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(address));
+    const data=await res.json();
+    if(data&&data[0])return {lat:parseFloat(data[0].lat),lng:parseFloat(data[0].lon)};
+  }catch(e){}
+  return null;
+}
+async function saveDeliveryPinPosition(tracking,lat,lng){
+  await fbU('rn_mall_orders/'+tracking,{deliveryLat:lat,deliveryLng:lng,deliveryPinCorrectedBy:'rider'});
+  const hint=document.getElementById('rider-map-pin-hint');
+  if(hint){hint.innerHTML='✔ Saved! The delivery location has been updated.';hint.style.color='var(--su)';}
+  toast('Delivery location corrected!');
+}
+async function showDeliveryMapModal(tracking){
+  const order=await fbG('rn_mall_orders/'+tracking);if(!order)return;
+  const overlay=document.createElement('div');
+  overlay.id='rider-map-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:900;display:flex;align-items:center;justify-content:center;padding:16px;';
+  overlay.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;width:100%;max-width:480px;padding:16px;">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div style="font-weight:800;">'+tracking+'</div><span onclick="document.getElementById(\'rider-map-overlay\').remove()" style="cursor:pointer;font-size:20px;color:var(--mu);">&times;</span></div>'
+    +'<div id="rider-delivery-map" style="width:100%;height:280px;border-radius:9px;overflow:hidden;background:var(--card2);"></div>'
+    +'<div style="font-size:10px;color:var(--mu);margin-top:6px;">📍 Tip: if the green pin isn\'t in the right spot, drag it to the correct location.</div>'
+    +'<div id="rider-map-pin-hint" style="display:none;font-size:11px;color:var(--or);margin-top:6px;"></div>'
+    +'</div>';
+  document.body.appendChild(overlay);
+  const settings=await fbG('rn_mall_settings')||{};
+  const pickup=settings.pickupLocation||{lat:6.5244,lng:3.3792};
+  let dest=order.deliveryLat!=null?{lat:order.deliveryLat,lng:order.deliveryLng}:null;
+  if(!dest&&order.customer?.address){
+    dest=await geocodeAddress(order.customer.address+', '+(order.customer.city||'')+', Nigeria');
+    if(dest)fbU('rn_mall_orders/'+tracking,{deliveryLat:dest.lat,deliveryLng:dest.lng});
+  }
+  if(!dest||typeof L==='undefined')return;
+  if(_riderMapInstance){_riderMapInstance.remove();_riderMapInstance=null;}
+  const map=L.map('rider-delivery-map',{zoomControl:false,attributionControl:true}).setView([pickup.lat,pickup.lng],12);
+  _riderMapInstance=map;
+  let riderMapViewMode=localStorage.getItem('rnm_map_view')||'street';
+  function addRiderTileLayer(){
+    if(riderMapViewMode==='satellite'){
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18}).addTo(map);
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:18}).addTo(map);
+    }else{
+      var riderPrimaryTiles=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',{maxZoom:20,maxNativeZoom:20,subdomains:'abcd',attribution:'© OpenStreetMap © CARTO'}).addTo(map);
+      var riderTileErrors=0,riderFellBack=false;
+      riderPrimaryTiles.on('tileerror',function(){
+        riderTileErrors++;
+        if(riderTileErrors>3&&!riderFellBack){
+          riderFellBack=true;
+          map.removeLayer(riderPrimaryTiles);
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,subdomains:'abc',attribution:'© OpenStreetMap contributors'}).addTo(map);
+        }
+      });
+    }
+  }
+  addRiderTileLayer();
+  setTimeout(function(){if(map)map.invalidateSize();},150);
+  const storeIcon=L.divIcon({html:'<div style="background:#FF6A00;width:26px;height:26px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid #fff;">🏬</div>',iconSize:[26,26],className:''});
+  const homeIcon=L.divIcon({html:'<div style="background:#22c55e;width:26px;height:26px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid #fff;">📍</div>',iconSize:[26,26],className:''});
+  L.marker([pickup.lat,pickup.lng],{icon:storeIcon}).addTo(map).bindPopup('RichNation Mall');
+  const deliveryMarker=L.marker([dest.lat,dest.lng],{icon:homeIcon,draggable:true}).addTo(map).bindPopup(order.customer?.name||'Delivery Address');
+  // Show the rider's own position too — prefer a fresh device reading, fall back to
+  // their last-shared live location so they can always see themselves on the map.
+  function placeSelfMarker(lat,lng){
+    const vehicleEmoji=VEHICLE_ICONS_RIDER_SELF[(rider.vehicleType||'motorcycle').toLowerCase()]||'🏍️';
+    const selfIcon=L.divIcon({html:'<div style="background:#161616;width:30px;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid #22c55e;">'+vehicleEmoji+'</div>',iconSize:[30,30],className:''});
+    L.marker([lat,lng],{icon:selfIcon}).addTo(map).bindPopup('You');
+  }
+  const VEHICLE_ICONS_RIDER_SELF={motorcycle:'🏍️',bicycle:'🚲',car:'🚗','van/truck':'🚚','on foot':'🚶'};
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(
+      function(pos){placeSelfMarker(pos.coords.latitude,pos.coords.longitude);},
+      function(){if(rider.liveLat!=null)placeSelfMarker(rider.liveLat,rider.liveLng);},
+      {enableHighAccuracy:true,timeout:8000}
+    );
+  }else if(rider.liveLat!=null){
+    placeSelfMarker(rider.liveLat,rider.liveLng);
+  }
+  const pinHint=document.getElementById('rider-map-pin-hint');
+  deliveryMarker.on('dragstart',function(){if(pinHint)pinHint.style.display='block';});
+  deliveryMarker.on('dragend',function(e){
+    const pos=e.target.getLatLng();
+    if(pinHint)pinHint.innerHTML='📍 Pin moved — <button onclick="saveDeliveryPinPosition(\''+tracking+'\','+pos.lat+','+pos.lng+')" style="background:var(--or);border:none;color:#000;font-weight:800;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;">Save New Location</button>';
+  });
+  L.polyline([[pickup.lat,pickup.lng],[dest.lat,dest.lng]],{color:'#FF6A00',weight:3,dashArray:'6,6'}).addTo(map);
+  const toggleBtn=L.control({position:'topright'});
+  toggleBtn.onAdd=function(){
+    const div=L.DomUtil.create('div');
+    div.innerHTML='<button style="background:#161616;color:#fff;border:1px solid #FF6A00;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">'+(riderMapViewMode==='satellite'?'🗺️ Street':'🛰️ Satellite')+'</button>';
+    div.onclick=function(e){e.stopPropagation();document.getElementById('rider-map-overlay').remove();riderMapViewMode=riderMapViewMode==='street'?'satellite':'street';localStorage.setItem('rnm_map_view',riderMapViewMode);showDeliveryMapModal(tracking);};
+    L.DomEvent.disableClickPropagation(div);
+    return div;
+  };
+  toggleBtn.addTo(map);
+  map.fitBounds(L.latLngBounds([[pickup.lat,pickup.lng],[dest.lat,dest.lng]]),{padding:[30,30]});
+  setTimeout(function(){if(map){map.invalidateSize();}},350);
+}
+async function advanceStage(tracking,newStage){
+  if(!confirm('Mark this delivery as "'+STAGE_LABELS[newStage]+'"?'))return;
+  const order=await fbG('rn_mall_orders/'+tracking);if(!order)return;
+  const tl=(order.timeline||[]).concat([{status:STAGE_TIMELINE_TEXT[newStage]||STAGE_LABELS[newStage],time:new Date().toISOString(),note:'Updated by dispatch rider '+rider.name}]);
+  await fbU('rn_mall_orders/'+tracking,{deliveryStage:newStage,timeline:tl});
+  await fbP('rn_mall_rider_activity_log/'+rider._id,{action:'Updated delivery status',detail:tracking+' → '+STAGE_LABELS[newStage],date:ds(),ts:Date.now()});
+  if(order.customer&&order.customer.id){
+    await fbP('rn_mall_customer_notifications/'+order.customer.id,{type:'status_update',orderId:tracking,message:'Your order '+tracking+' is now: '+STAGE_LABELS[newStage],date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
+  }
+  toast('Updated to '+STAGE_LABELS[newStage]+'!');
+  rnav('deliveries');
+}
+async function renderHistory(c){
+  c.innerHTML='<div class="page-hdr-title">Delivery History</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
+  const orders=await getMyOrders();
+  const completed=orders.filter(function(o){return o.deliveryStage==='delivered';}).sort(function(a,b){return new Date(b.createdAt||0)-new Date(a.createdAt||0);});
+  c.innerHTML='<div class="page-hdr-title">Delivery History</div><div class="page-hdr-sub" style="margin-bottom:20px;">'+completed.length+' completed delivery(ies)</div>'
+    +(completed.length?completed.map(function(o){return '<div class="card"><div style="font-weight:800;color:var(--or);">'+o.tracking+'</div><div style="font-size:12px;color:var(--w2);margin-top:4px;">'+(o.customer?o.customer.name:'')+' &middot; '+o.date+'</div></div>';}).join(''):'<div class="card" style="text-align:center;padding:40px;color:var(--mu);">No completed deliveries yet.</div>');
+}
+async function renderRiderSalary(c){
+  c.innerHTML='<div class="page-hdr-title">My Salary</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
+  const payouts=Object.values(await fbG('rn_mall_rider_payouts/'+rider._id)||{}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  const now=new Date();
+  const thisMonthPaid=payouts.filter(function(p){var d=new Date(p.ts||0);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}).reduce(function(s,p){return s+(p.amount||0);},0);
+  c.innerHTML='<div class="page-hdr-title">My Salary</div><div class="page-hdr-sub" style="margin-bottom:16px;">Paid '+(rider.payFrequency||'weekly')+'</div>'
+    +'<div class="card"><div class="card-title">Total Earned</div><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:900;font-size:28px;color:var(--gold);margin-top:6px;">'+fmt(rider.totalPaid||0)+'</div><div style="font-size:11px;color:var(--mu);margin-top:2px;">This month: '+fmt(thisMonthPaid)+'</div></div>'
+    +'<div class="card"><div class="card-title">Payment History</div><div style="margin-top:8px;">'+(payouts.length?payouts.map(function(p){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);"><div style="display:flex;justify-content:space-between;"><span style="font-size:13px;color:var(--w2);">'+(p.description||'Payment')+'</span><span style="font-weight:800;color:var(--su);">'+fmt(p.amount)+'</span></div>'+(p.message?'<div style="font-size:11px;color:var(--mu);margin-top:3px;">'+p.message+'</div>':'')+'<div style="font-size:10px;color:var(--mu);margin-top:3px;">'+p.date+(p.expectedDate?' &middot; Expected: '+new Date(p.expectedDate).toLocaleDateString('en-GB'):'')+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No payments recorded yet.</div>')+'</div></div>';
+}
+async function renderRiderPoints(c){
+  c.innerHTML='<div class="page-hdr-title">My StaffPoints</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
+  const log=Object.values(await fbG('rn_mall_rider_points_log/'+rider._id)||{}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  c.innerHTML='<div class="page-hdr-title">My StaffPoints</div><div class="page-hdr-sub" style="margin-bottom:16px;">Bonus points awarded by admin</div>'
+    +'<div class="card" style="text-align:center;"><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:900;font-size:32px;color:var(--or);">'+(rider.points||0)+' pts</div></div>'
+    +'<div class="card"><div class="card-title">History</div><div style="margin-top:8px;">'+(log.length?log.map(function(l){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);"><div style="display:flex;justify-content:space-between;"><span style="font-size:13px;color:var(--w2);">'+(l.reason||'Bonus')+'</span><span style="font-weight:800;color:var(--or);">+'+l.amount+'</span></div><div style="font-size:10px;color:var(--mu);margin-top:3px;">'+l.date+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No points yet.</div>')+'</div></div>';
+}
+async function renderRiderReports(c){
+  c.innerHTML='<div class="page-hdr-title">Reports</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
+  const reports=Object.values(await fbG('rn_mall_rider_reports/'+rider._id)||{}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  c.innerHTML='<div class="page-hdr-title">Reports</div><div class="page-hdr-sub" style="margin-bottom:16px;">Submit a work report — daily, weekly, or whenever needed</div>'
+    +'<div class="card"><textarea class="fi" id="rr-text" rows="4" placeholder="What happened today? Deliveries, issues, anything admin should know..."></textarea><button class="btn btn-or" style="margin-top:10px;" onclick="submitRiderReport()">Submit Report</button></div>'
+    +'<div class="card"><div class="card-title">My Past Reports</div><div style="margin-top:8px;">'+(reports.length?reports.map(function(r){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);font-size:13px;color:var(--w2);">'+r.message+'<div style="font-size:10px;color:var(--mu);margin-top:3px;">'+r.date+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No reports submitted yet.</div>')+'</div></div>';
+}
+async function submitRiderReport(){
+  const text=(document.getElementById('rr-text').value||'').trim();
+  if(!text){toast('Write your report first','err');return;}
+  await fbP('rn_mall_rider_reports/'+rider._id,{riderId:rider._id,riderName:rider.name,message:text,date:ds(),ts:Date.now()});
+  toast('Report submitted!');
+  rnav('reports');
+}
+async function renderRiderComplaints(c){
+  c.innerHTML='<div class="page-hdr-title">Complaints</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
+  const complaints=Object.values(await fbG('rn_mall_rider_complaints/'+rider._id)||{}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  c.innerHTML='<div class="page-hdr-title">Complaints</div><div class="page-hdr-sub" style="margin-bottom:16px;">Had a problem on the road, with a customer, or anything else? Let admin know here.</div>'
+    +'<div class="card">'
+    +'<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--re);cursor:pointer;margin-bottom:10px;"><input type="checkbox" id="rc-urgent" style="width:16px;height:16px;accent-color:var(--re);"/> ⚠ This is urgent (accident, safety issue, emergency)</label>'
+    +'<textarea class="fi" id="rc-text" rows="4" placeholder="Describe what happened..."></textarea>'
+    +'<button class="btn btn-or" style="margin-top:10px;" onclick="submitRiderComplaint()">Submit Complaint</button>'
+    +'</div>'
+    +'<div class="card"><div class="card-title">My Past Complaints</div><div style="margin-top:8px;">'+(complaints.length?complaints.map(function(cm){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);">'+(cm.urgent?'<span style="font-size:9px;font-weight:800;color:var(--re);background:rgba(244,63,94,0.15);padding:2px 8px;border-radius:99px;">⚠ URGENT</span> ':'')+'<div style="font-size:13px;color:var(--w2);margin-top:4px;">'+cm.message+'</div>'+(cm.adminReply?'<div style="font-size:12px;color:var(--su);margin-top:4px;">↳ Admin: '+cm.adminReply+'</div>':'<div style="font-size:10px;color:var(--mu);margin-top:4px;">Status: '+(cm.status||'pending')+'</div>')+'<div style="font-size:10px;color:var(--mu);margin-top:3px;">'+cm.date+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No complaints submitted yet.</div>')+'</div></div>';
+}
+async function submitRiderComplaint(){
+  const text=(document.getElementById('rc-text').value||'').trim();
+  const urgent=document.getElementById('rc-urgent').checked;
+  if(!text){toast('Describe what happened first','err');return;}
+  await fbP('rn_mall_rider_complaints/'+rider._id,{riderId:rider._id,riderName:rider.name,message:text,urgent:urgent,status:'pending',date:ds(),ts:Date.now()});
+  await fbP('rn_mall_notifications',{type:urgent?'urgent_rider_complaint':'rider_complaint',riderName:rider.name,preview:text.slice(0,60),date:ds(),read:false,ts:Date.now()});
+  toast(urgent?'Urgent complaint sent — admin has been alerted!':'Complaint submitted!');
+  rnav('complaints');
+}
+async function renderRiderLeave(c){
+  c.innerHTML='<div class="page-hdr-title">Leave Requests</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
+  const leaves=Object.values(await fbG('rn_mall_rider_leave/'+rider._id)||{}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  c.innerHTML='<div class="page-hdr-title">Leave Requests</div><div class="page-hdr-sub" style="margin-bottom:16px;">Request time off</div>'
+    +'<div class="card"><div class="g2"><div class="fg"><label class="lbl">From</label><input class="fi" type="date" id="rl-from"/></div><div class="fg"><label class="lbl">To</label><input class="fi" type="date" id="rl-to"/></div></div><div class="fg"><label class="lbl">Reason</label><textarea class="fi" id="rl-reason" rows="3"></textarea></div><button class="btn btn-or" onclick="submitRiderLeave()">Submit Request</button></div>'
+    +'<div class="card"><div class="card-title">My Requests</div><div style="margin-top:8px;">'+(leaves.length?leaves.map(function(l){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);"><div style="font-size:13px;color:var(--w2);">'+l.from+' → '+l.to+'</div><div style="font-size:11px;color:var(--mu);">'+l.reason+'</div><div style="font-size:10px;color:'+(l.status==='approved'?'var(--su)':l.status==='declined'?'var(--re)':'var(--or)')+';margin-top:3px;">Status: '+(l.status||'pending')+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No leave requests yet.</div>')+'</div></div>';
+}
+async function submitRiderLeave(){
+  const from=document.getElementById('rl-from').value;
+  const to=document.getElementById('rl-to').value;
+  const reason=(document.getElementById('rl-reason').value||'').trim();
+  if(!from||!to||!reason){toast('Fill in all fields','err');return;}
+  await fbP('rn_mall_rider_leave/'+rider._id,{riderId:rider._id,riderName:rider.name,from:from,to:to,reason:reason,status:'pending',date:ds(),ts:Date.now()});
+  toast('Leave request submitted!');
+  rnav('leave');
+}
+async function renderRiderMessages(c){
+  c.innerHTML='<div class="page-hdr-title">Messages</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
+  c.innerHTML='<div class="page-hdr-title">Messages</div><div class="page-hdr-sub" style="margin-bottom:16px;">Direct line to admin — for anything, anytime</div>'
+    +'<div class="card"><div id="rm-msgs" style="margin-bottom:12px;max-height:360px;overflow-y:auto;"></div><div style="display:flex;gap:8px;"><input class="fi" id="rm-input" placeholder="Type a message..." style="flex:1;" onkeydown="if(event.key===\'Enter\')sendRiderMessage()"/><button class="btn btn-or" onclick="sendRiderMessage()">Send</button></div></div>';
+  await loadRiderMessages();
+}
+async function loadRiderMessages(){
+  const key='rn_mall_rider_admin_chat_'+rider._id;
+  const msgs=Object.values(await fbG(key)||{}).sort(function(a,b){return (a.ts||0)-(b.ts||0);});
+  const el=document.getElementById('rm-msgs');if(!el)return;
+  const roleLabels={ceo:'CEO',general_manager:'General Manager',logistics_manager:'Logistics Manager',customer_service:'Customer Service',hr_manager:'HR Manager'};
+  el.innerHTML=msgs.length?msgs.map(function(m){
+    const label=m.isAdmin?(m.senderName?m.senderName+(m.senderRole?' — '+(roleLabels[m.senderRole]||m.senderRole):' — Admin'):'Admin'):'You';
+    return '<div class="chat-msg'+(m.isAdmin?'':' own')+'"><div class="chat-av">'+(m.isAdmin?(m.senderName?m.senderName.charAt(0):'A'):ini(rider.name))+'</div><div><div class="chat-bubble">'+m.text+'</div><div style="font-size:9px;color:var(--mu);margin-top:2px;">'+label+'</div></div></div>';
+  }).join(''):'<div style="color:var(--mu);font-size:12px;text-align:center;padding:20px;">No messages yet — say hello!</div>';
+  el.scrollTop=el.scrollHeight;
+}
+async function sendRiderMessage(){
+  const inp=document.getElementById('rm-input');const text=(inp.value||'').trim();if(!text)return;
+  const key='rn_mall_rider_admin_chat_'+rider._id;
+  await fbP(key,{senderId:rider._id,senderName:rider.name,text:text,isAdmin:false,ts:Date.now(),date:ds()});
+  await fbP('rn_mall_notifications',{type:'rider_message',riderName:rider.name,preview:text.slice(0,60),date:ds(),read:false,ts:Date.now()});
+  inp.value='';await loadRiderMessages();
+}
+async function renderRiderActivity(c){
+  c.innerHTML='<div class="page-hdr-title">My Activity</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
+  const log=Object.values(await fbG('rn_mall_rider_activity_log/'+rider._id)||{}).sort(function(a,b){return (b.ts||0)-(a.ts||0);}).slice(0,50);
+  c.innerHTML='<div class="page-hdr-title">My Activity</div><div class="page-hdr-sub" style="margin-bottom:16px;">Your recent actions</div>'
+    +'<div class="card">'+(log.length?log.map(function(l){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);font-size:13px;color:var(--w2);">'+l.action+(l.detail?' — '+l.detail:'')+'<div style="font-size:10px;color:var(--mu);margin-top:3px;">'+l.date+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No activity logged yet.</div>')+'</div>';
+}
+async function renderRiderPolicy(c){
+  c.innerHTML=`
+  <div class="page-hdr-title">Rider Policy</div>
+  <div class="page-hdr-sub" style="margin-bottom:16px;">RichNation Global Ltd — Dispatch Rider Terms — Effective 2026</div>
+  ${!rider.policyRead?`<div class="card" style="border-color:rgba(255,140,0,0.4);background:rgba(255,140,0,0.06);"><div style="font-size:13px;color:var(--or);font-weight:700;">Please read this in full, then confirm below.</div></div>`:''}
+  <div class="card"><div class="card-title">Who We Are</div><div style="font-size:12px;color:var(--w2);line-height:1.8;margin-top:8px;">RichNation Global Ltd (RC 8998019) operates RichNation Mall — Nigeria's digital shopping destination. Our mission: <strong style="color:var(--wh);">Build People. Build Platforms. Create Millionaires.</strong> As a rider, you're the last and most visible step of that promise to every customer.</div></div>
+  ${[
+    ['1. Pickup Confirmation','Riders must confirm pickup before marking any order "In Transit". Do not advance a stage you haven\'t actually completed.'],
+    ['2. Accurate Status Updates','Delivery status must be updated at each real stage as it happens — no skipping straight to "Delivered". False status updates are a strike-eligible offence.'],
+    ['3. Proof of Delivery','A customer signature or confirmation is required to close out every order. Deliveries without proof may be disputed and reversed.'],
+    ['4. Data Privacy','You may only view the address and phone number for orders assigned to you — nothing else. Sharing a customer\'s delivery details with anyone outside RichNation is grounds for immediate suspension.'],
+    ['5. Professional Conduct','You represent RichNation at the customer\'s door. Be respectful, presentable, and on time. Harassment or dishonesty toward a customer is a strike-eligible offence and may be immediate termination.'],
+    ['6. Availability','Go Online when you\'re available for deliveries and Offline when you\'re not, from your Dashboard. Repeated unavailability after accepting assignments is strike-eligible.'],
+    ['7. Vehicle &amp; Documentation','You must maintain a valid means of identification and keep your vehicle details up to date in your Profile at all times.'],
+    ['8. Earnings','You choose your payout frequency (daily/weekly/monthly) from your Profile. Payments go to your verified bank account only — unverified accounts do not get paid.'],
+    ['9. Strikes, Suspension &amp; Termination','3 confirmed strikes = automatic suspension pending review. Suspended riders are not paid and cannot receive new deliveries until reinstated. Violations after reinstatement result in permanent termination.'],
+    ['10. Management Authority','Management retains full authority to review, edit, or override any rider record or delivery assignment at any time.']
+  ].map(function(item){return '<div class="card"><div class="card-title">'+item[0]+'</div><div style="font-size:12px;color:var(--w2);line-height:1.8;margin-top:8px;">'+item[1]+'</div></div>';}).join('')}
+  <div class="card" style="text-align:center;">
+    ${rider.policyRead?`<div style="color:var(--su);font-weight:700;font-size:13px;">✔ You confirmed reading this on ${rider.policyReadDate||''}</div>`:`<button class="btn btn-or btn-lg" onclick="confirmRiderPolicyRead()">I've Read and Understood This Policy</button>`}
+  </div>`;
+}
+async function confirmRiderPolicyRead(){
+  const dateStr=ds();
+  await fbU('rn_mall_riders/'+rider._id,{policyRead:true,policyReadDate:dateStr});
+  rider.policyRead=true;rider.policyReadDate=dateStr;
+  sessionStorage.setItem('rnm_rider_session',JSON.stringify(rider));
+  toast('Thanks for confirming!');
+  rnav('policy');
+}
+function renderProfile(c){
+  c.innerHTML=`
+  <div class="page-hdr-title">My Profile</div>
+  <div class="card" style="max-width:460px;margin-top:16px;text-align:center;">
+    <div onclick="document.getElementById('pf-photo-upload').click()" style="width:80px;height:80px;border-radius:99px;background:var(--card2);border:2px solid var(--bdr);margin:0 auto;cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+      ${rider.photo?'<img src="'+rider.photo+'" style="width:100%;height:100%;object-fit:cover;"/>':'<span style="font-size:11px;color:var(--mu);">Upload Photo</span>'}
+    </div>
+    <input type="file" id="pf-photo-upload" accept="image/*" style="display:none;" onchange="uploadMyPhoto()">
+    <div style="font-size:11px;color:var(--or);cursor:pointer;margin-top:6px;" onclick="document.getElementById('pf-photo-upload').click()">Change Photo</div>
+  </div>
+  <div class="card" style="max-width:460px;text-align:left;">
+    <div class="fi" style="background:transparent;border:none;padding:0;margin-bottom:14px;"><div style="font-size:11px;color:var(--mu);text-transform:uppercase;margin-bottom:6px;">Full Name</div><input class="fi" id="pf-name" value="${rider.name||''}"/></div>
+    <div style="font-size:11px;color:var(--mu);text-transform:uppercase;margin-bottom:6px;">Email</div><input class="fi" id="pf-email" value="${rider.email||''}" type="email"/>
+    <div style="font-size:11px;color:var(--mu);text-transform:uppercase;margin-bottom:6px;">Phone</div><input class="fi" id="pf-phone" value="${rider.phone||''}"/>
+    <div style="font-size:11px;color:var(--mu);text-transform:uppercase;margin-bottom:6px;">Vehicle Type</div>
+    <select class="fi" id="pf-vehicle"><option value="Motorcycle" ${rider.vehicleType==='Motorcycle'?'selected':''}>Motorcycle</option><option value="Bicycle" ${rider.vehicleType==='Bicycle'?'selected':''}>Bicycle</option><option value="Car" ${rider.vehicleType==='Car'?'selected':''}>Car</option><option value="Van/Truck" ${rider.vehicleType==='Van/Truck'?'selected':''}>Van/Truck</option><option value="On Foot" ${rider.vehicleType==='On Foot'?'selected':''}>On Foot</option></select>
+    <div style="font-size:11px;color:var(--mu);text-transform:uppercase;margin-bottom:6px;">New Password (leave blank to keep current)</div><div style="position:relative;"><input class="fi" id="pf-pass" type="password" placeholder="New password" style="padding-right:56px;"/><span onclick="togglePwVisibility('pf-pass',this)" style="position:absolute;right:12px;top:12px;font-size:11px;color:var(--or);cursor:pointer;font-weight:700;">Show</span></div>
+    <button class="btn btn-or btn-lg" onclick="saveRiderProfile()">Save Changes</button>
+  </div>
+  <div class="card" style="max-width:460px;text-align:left;">
+    <div class="card-title">💵 Payment Preference</div>
+    <div style="font-size:11px;color:var(--mu);margin:8px 0 12px;">How often would you like to be paid?</div>
+    <select class="fi" id="pf-payfreq"><option value="daily" ${rider.payFrequency==='daily'?'selected':''}>Daily</option><option value="weekly" ${rider.payFrequency==='weekly'||!rider.payFrequency?'selected':''}>Weekly</option><option value="monthly" ${rider.payFrequency==='monthly'?'selected':''}>Monthly</option></select>
+    <button class="btn btn-or" onclick="saveRiderPayFreq()">Save Preference</button>
+  </div>
+  <div class="card" style="max-width:460px;text-align:left;">
+    <div class="card-title">🏦 Bank Account Details</div>
+    <div style="font-size:11px;color:var(--mu);margin:8px 0 12px;">Where you'd like to receive your delivery earnings.</div>
+    <div class="lbl">Bank Name</div><input class="fi" id="pf-bank" value="${rider.bankName||''}" placeholder="e.g. GTBank"/>
+    <div class="lbl">Account Number</div><input class="fi" id="pf-acctno" value="${rider.bankAcctNo||''}" placeholder="0123456789"/>
+    <div class="lbl">Account Name</div><input class="fi" id="pf-acctname" value="${rider.bankAcctName||''}" placeholder="Must match your name on file"/>
+    <button class="btn btn-or btn-lg" onclick="saveRiderBankDetails()">Save Bank Details</button>
+  </div>`;
+}
+function compressPhotoFile(file,maxDim,quality){
+  maxDim=maxDim||110;quality=quality||0.55;
+  return new Promise(function(resolve){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var img=new Image();
+      img.onload=function(){
+        try{
+          var w=img.width,h=img.height;
+          if(w>maxDim||h>maxDim){if(w>=h){h=Math.round(h*(maxDim/w));w=maxDim;}else{w=Math.round(w*(maxDim/h));h=maxDim;}}
+          var canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+          canvas.getContext('2d').drawImage(img,0,0,w,h);
+          resolve(canvas.toDataURL('image/jpeg',quality));
+        }catch(err){resolve(e.target.result);}
+      };
+      img.onerror=function(){resolve(e.target.result);};
+      img.src=e.target.result;
+    };
+    reader.onerror=function(){resolve(null);};
+    reader.readAsDataURL(file);
+  });
+}
+async function fbUVerified(p,d,ms){
+  try{
+    const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'PATCH',body:JSON.stringify(d)},ms||10000);
+    return !!(r&&r.ok);
+  }catch(e){return false;}
+}
+const GITHUB_CONFIG={owner:'ubongrich62',repo:'richnation-images',branch:'main',token:'YOUR_FINE_GRAINED_TOKEN'};
+function isGithubConfigured(){return GITHUB_CONFIG.owner!=='YOUR_GITHUB_USERNAME'&&GITHUB_CONFIG.token!=='YOUR_FINE_GRAINED_TOKEN';}
+async function uploadDataUrlToGithub(dataUrl,folder){
+  if(!isGithubConfigured())return null;
+  try{
+    const commaIdx=dataUrl.indexOf(',');
+    const base64Content=dataUrl.slice(commaIdx+1);
+    const mimeMatch=dataUrl.slice(0,commaIdx).match(/data:[^/]+\/([^;]+)/);
+    const ext=(mimeMatch?mimeMatch[1]:'jpg').split('+')[0];
+    const path='images/'+folder+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
+    const apiUrl='https://api.github.com/repos/'+GITHUB_CONFIG.owner+'/'+GITHUB_CONFIG.repo+'/contents/'+path;
+    const res=await fetch(apiUrl,{method:'PUT',headers:{'Authorization':'token '+GITHUB_CONFIG.token,'Content-Type':'application/json','Accept':'application/vnd.github+json'},body:JSON.stringify({message:'Upload '+path,content:base64Content,branch:GITHUB_CONFIG.branch})});
+    if(!res.ok)throw new Error('GitHub upload failed: '+res.status);
+    return 'https://raw.githubusercontent.com/'+GITHUB_CONFIG.owner+'/'+GITHUB_CONFIG.repo+'/'+GITHUB_CONFIG.branch+'/'+path;
+  }catch(e){console.warn('GitHub image upload failed:',e);return null;}
+}
+async function uploadMyPhoto(inputId){
+  const inp=document.getElementById(inputId||'pf-photo-upload');
+  if(!inp.files||!inp.files[0])return;
+  toast('Uploading photo…');
+  let b64=await compressPhotoFile(inp.files[0]);
+  if(!b64){toast('Could not read that image — try another one','err');return;}
+  const url=isGithubConfigured()?await uploadDataUrlToGithub(b64,'rider-photos'):null;
+  if(url)b64=url;
+  const ok=await fbUVerified('rn_mall_riders/'+rider._id,{photo:b64});
+  if(!ok){toast('Photo upload failed — check your connection and try again','err');return;}
+  rider.photo=b64;
+  sessionStorage.setItem('rnm_rider_session',JSON.stringify(rider));
+  toast('Photo updated!');
+  rnav(curRNav);
+}
+async function saveRiderPayFreq(){
+  const freq=document.getElementById('pf-payfreq').value;
+  await fbU('rn_mall_riders/'+rider._id,{payFrequency:freq});
+  rider.payFrequency=freq;
+  sessionStorage.setItem('rnm_rider_session',JSON.stringify(rider));
+  toast('Payment preference saved!');
+}
+async function saveRiderBankDetails(){
+  const u={bankName:document.getElementById('pf-bank').value.trim(),bankAcctNo:document.getElementById('pf-acctno').value.trim(),bankAcctName:document.getElementById('pf-acctname').value.trim()};
+  await fbU('rn_mall_riders/'+rider._id,u);
+  rider=Object.assign({},rider,u);
+  sessionStorage.setItem('rnm_rider_session',JSON.stringify(rider));
+  toast('Bank details saved!');
+}
+async function saveRiderProfile(){
+  const u={name:document.getElementById('pf-name').value.trim(),email:document.getElementById('pf-email').value.trim().toLowerCase(),phone:document.getElementById('pf-phone').value.trim(),vehicleType:document.getElementById('pf-vehicle').value};
+  const pw=document.getElementById('pf-pass').value.trim();
+  if(pw&&pw.length>=6)u.password=pw;
+  await fbU('rn_mall_riders/'+rider._id,u);
+  rider=Object.assign({},rider,u);
+  sessionStorage.setItem('rnm_rider_session',JSON.stringify(rider));
+  toast('Profile updated!');
+}
+
+// ── NOTIFICATIONS ──
+function riderNotifMsg(n){
+  if(n.type==='payout')return '💰 A payment of '+fmt(n.amount)+' was recorded for you — '+(n.description||'')+'. '+(n.message||'');
+  if(n.type==='strike')return n.strikes>=3?'🚫 You have been automatically suspended after 3 strikes, pending review. Last strike: '+n.reason:'⚠ You received a strike ('+n.strikes+'/3): '+n.reason;
+  if(n.type==='bank_verified')return '✔ Your bank account details have been verified by admin.';
+  if(n.type==='points_awarded')return '⭐ You earned '+n.amount+' StaffPoints — '+(n.reason||'');
+  if(n.type==='admin_reply')return '💬 Admin replied: '+(n.preview||'');
+  return n.message||'New notification';
+}
+async function loadRiderNotifs(){
+  if(!rider)return;
+  const data=await fbG('rn_mall_rider_notifications/'+rider._id)||{};
+  const list=Object.entries(data).map(function(e){return Object.assign({_key:e[0]},e[1]);}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  const unread=list.filter(function(n){return !n.read;}).length;
+  const badge=document.getElementById('rider-notif-badge');
+  if(badge){badge.textContent=unread;badge.style.display=unread>0?'flex':'none';}
+  const panel=document.getElementById('rider-notif-panel');
+  if(panel){
+    panel.innerHTML=list.length?list.slice(0,25).map(function(n){
+      return '<div style="padding:8px;border-radius:8px;background:'+(n.read?'transparent':'rgba(255,106,0,0.06)')+';margin-bottom:2px;"><div style="font-size:11px;color:var(--wh);line-height:1.4;">'+riderNotifMsg(n)+'</div><div style="font-size:9px;color:var(--mu);margin-top:2px;">'+n.date+'</div></div>';
+    }).join(''):'<div style="padding:16px;text-align:center;color:var(--mu);font-size:12px;">No notifications yet.</div>';
+  }
+}
+async function toggleRiderNotifPanel(){
+  const panel=document.getElementById('rider-notif-panel');
+  const open=panel.style.display==='block';
+  panel.style.display=open?'none':'block';
+  if(!open){
+    await loadRiderNotifs();
+    const data=await fbG('rn_mall_rider_notifications/'+rider._id)||{};
+    for(const k of Object.keys(data)){if(!data[k].read)fbU('rn_mall_rider_notifications/'+rider._id+'/'+k,{read:true});}
+    setTimeout(loadRiderNotifs,600);
+  }
+}
+setInterval(function(){if(rider)loadRiderNotifs();},10000);
+
+checkRiderSession();
+</script>
+</body>
+</html>

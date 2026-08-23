@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>RichNation Mall — Staff Portal</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0A0A0B;--card:#151517;--card2:#1C1C20;--bdr:#2B2B31;
+  --or:#FF6A00;--or-dk:#E15E00;--gold:#B8720A;--wh:#F5F5F6;--w2:#C7C7CD;--mu:#8F8F97;
+  --su:#22c55e;--re:#f43f5e;--bl:#5b9bf5;
+  --r-sm:6px;--r-md:10px;--r-lg:14px;--r-pill:999px;
+  --sh-sm:0 1px 2px rgba(0,0,0,.4);
+  --sh-md:0 8px 24px rgba(0,0,0,.45);
+  --sh-lg:0 24px 64px rgba(0,0,0,.55);
+}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:var(--wh);overflow-x:hidden;width:100%;}
+@keyframes iconColorCycle{0%{stroke:#FF6A00;}50%{stroke:#ffffff;}100%{stroke:#FF6A00;}}
+.icon-color-cycle{animation:none;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:#000;}::-webkit-scrollbar-thumb{background:#222;border-radius:4px;}
+button{font-family:inherit;}
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 30% 20%,rgba(255,106,0,0.07),transparent 55%),var(--bg);}
+.lcard{width:100%;max-width:400px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-lg);padding:36px 30px;box-shadow:var(--sh-lg);}
+.llogo{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:20px;color:var(--or);margin-bottom:4px;}
+.ltitle{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;margin-bottom:22px;color:var(--wh);}
+.fi{width:100%;background:var(--bg);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:12px 14px;color:var(--wh);font-size:13px;outline:none;margin-bottom:10px;transition:border-color .15s,box-shadow .15s;}
+.fi:focus{border-color:var(--or);box-shadow:0 0 0 3px rgba(255,106,0,.15);}
+.lbtn{width:100%;background:var(--or);color:#fff;border:none;padding:13px;border-radius:var(--r-md);font-weight:800;font-size:13px;cursor:pointer;margin-top:4px;transition:background .15s;}
+.lbtn:hover{background:var(--or-dk);}
+.lerr{font-size:12px;color:var(--re);margin-top:10px;display:none;background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.25);border-radius:var(--r-sm);padding:10px 12px;}
+.lbl{font-size:11px;font-weight:700;color:var(--mu);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;}
+#app{display:none;min-height:100vh;}
+.topbar{min-height:56px;border-bottom:1px solid var(--bdr);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;position:sticky;top:0;background:var(--bg);z-index:100;}
+.tb-left{display:flex;align-items:center;gap:8px;min-width:0;flex:1;}
+.tb-logo{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:15px;color:var(--or);white-space:nowrap;}
+.tb-role{font-size:11px;color:var(--mu);background:var(--card2);padding:3px 9px;border-radius:var(--r-pill);max-width:38vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#mob-btn{display:none;background:none;border:none;color:var(--or);font-size:24px;cursor:pointer;padding:2px 8px;}
+.tb-btn{background:transparent;border:1.5px solid var(--bdr);border-radius:var(--r-md);padding:8px 14px;font-size:12px;font-weight:600;color:var(--w2);cursor:pointer;transition:border-color .15s,color .15s;}
+.tb-btn:hover{border-color:var(--wh);color:var(--wh);}
+.wrap{display:flex;min-height:calc(100vh - 56px);}
+.sb{width:210px;min-width:210px;background:var(--card);border-right:1px solid var(--bdr);padding:16px 0;display:flex;flex-direction:column;gap:1px;overflow-y:auto;}
+.sb-item{display:flex;align-items:center;gap:9px;padding:10px 16px;font-size:13px;color:var(--w2);cursor:pointer;border-left:3px solid transparent;transition:background .15s,color .15s;}
+.sb-item:hover{background:var(--card2);color:var(--wh);}
+.sb-item.active{background:rgba(255,106,0,0.08);border-left-color:var(--or);color:var(--or);font-weight:700;}
+.sb-sec{font-size:9px;font-weight:700;color:#46464c;text-transform:uppercase;letter-spacing:1.5px;padding:14px 16px 4px;}
+.content{flex:1;padding:24px;overflow-x:hidden;}
+.page-hdr{margin-bottom:20px;}
+.page-hdr-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:22px;}
+.page-hdr-sub{font-size:12px;color:var(--mu);margin-top:2px;}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
+.stat-card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);padding:18px;transition:border-color .15s;}
+.stat-icon{margin-bottom:6px;}
+.stat-num{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:24px;}
+.stat-lbl{font-size:12px;color:var(--w2);margin-top:2px;}
+.stat-sub{font-size:11px;color:var(--mu);margin-top:4px;}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);padding:18px;margin-bottom:14px;}
+.card-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14px;}
+.btn{background:transparent;border:1.5px solid var(--bdr);border-radius:var(--r-md);padding:9px 16px;font-size:12px;font-weight:600;color:var(--w2);cursor:pointer;transition:border-color .15s,color .15s,background .15s;}
+.btn:hover{border-color:var(--wh);color:var(--wh);}
+.btn-or{background:var(--or);border:1.5px solid var(--or);color:#fff;font-weight:800;}
+.btn-or:hover{background:var(--or-dk);border-color:var(--or-dk);color:#fff;}
+.btn-dk{background:transparent;border:1.5px solid var(--bdr);color:var(--w2);}
+.btn-dk:hover{border-color:var(--wh);color:var(--wh);}
+.btn-re{background:rgba(244,63,94,0.1);border:1.5px solid rgba(244,63,94,0.3);color:var(--re);font-weight:700;}
+.btn-re:hover{background:rgba(244,63,94,0.16);}
+.btn-lg{padding:11px 18px;font-size:13px;}
+.fg{margin-bottom:14px;}
+.inp,.ta{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:11px 13px;color:var(--wh);font-size:13px;font-family:inherit;transition:border-color .15s,box-shadow .15s;}
+.inp:focus,.ta:focus{border-color:var(--or);box-shadow:0 0 0 3px rgba(255,106,0,.15);outline:none;}
+.ta{resize:vertical;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.data-row{display:flex;align-items:center;gap:12px;padding:12px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);margin-bottom:8px;flex-wrap:wrap;transition:border-color .15s;}
+.data-row:hover{border-color:#3a3a41;}
+.row-name{font-size:13px;font-weight:700;}
+.row-meta{font-size:11px;color:var(--mu);margin-top:2px;}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);padding:11px 18px;font-size:12px;font-weight:600;color:var(--wh);box-shadow:var(--sh-lg);z-index:9999;display:none;white-space:nowrap;}
+.chat-msg{display:flex;gap:8px;margin-bottom:10px;}
+.chat-bubble{background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-md);padding:9px 12px;font-size:12px;max-width:75%;white-space:pre-wrap;}
+.chat-msg.own{flex-direction:row-reverse;}
+.chat-msg.own .chat-bubble{background:rgba(255,106,0,0.12);border-color:rgba(255,106,0,0.3);}
+.chat-av{width:26px;height:26px;border-radius:var(--r-pill);background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--or);flex-shrink:0;}
+@media(max-width:768px){
+  .sb{position:fixed;left:-240px;top:56px;bottom:0;z-index:300;width:220px;transition:left .2s;box-shadow:4px 0 24px rgba(0,0,0,.9);}
+  .sb.open{left:0;display:flex;}
+  #mob-btn{display:flex!important;}
+  .stats-grid{grid-template-columns:1fr;}
+  .g2{grid-template-columns:1fr;}
+  .content{padding:14px;}
+}
+</style>
+<link rel="preconnect" href="https://richnation-portal-default-rtdb.firebaseio.com"/>
+<link rel="preconnect" href="https://basemaps.cartocdn.com"/>
+<link rel="dns-prefetch" href="https://unpkg.com"/>
+</head>
+<body>
+
+<div id="login">
+  <div class="lcard" style="max-width:460px;">
+    <div class="llogo">🛒 RichNation Mall</div>
+    <div class="ltitle" id="l-title">Staff Sign In</div>
+
+    <div id="login-form">
+      <input class="fi" id="s-email" type="email" placeholder="Work email"/>
+      <div style="position:relative;">
+        <input class="fi" id="s-pass" type="password" placeholder="Password" style="padding-right:56px;"/>
+        <span onclick="togglePwVisibility('s-pass',this)" style="position:absolute;right:12px;top:12px;font-size:11px;color:var(--or);cursor:pointer;font-weight:700;">Show</span>
+      </div>
+      <button class="lbtn" onclick="doStaffLogin()">Sign In</button>
+      <div class="lerr" id="login-err"></div>
+    </div>
+
+    <div id="apply-form" style="display:none;">
+      <div class="g2">
+        <input class="fi" id="ap-fname" placeholder="Full Name"/>
+        <div><div style="font-size:11px;color:var(--mu);margin-bottom:6px;">Date of Birth</div><input class="fi" id="ap-dob" type="date"/></div>
+      </div>
+      <div class="g2">
+        <select class="fi" id="ap-gender"><option value="">Gender</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select>
+        <input class="fi" id="ap-phone" placeholder="Phone Number"/>
+      </div>
+      <input class="fi" id="ap-email" type="email" placeholder="Email Address"/>
+      <input class="fi" id="ap-address" placeholder="House Address"/>
+      <div class="g2">
+        <input class="fi" id="ap-country" placeholder="Country" value="Nigeria"/>
+        <input class="fi" id="ap-lga" placeholder="Local Government Area"/>
+      </div>
+      <select class="fi" id="ap-role"><option value="">Role you're applying for</option></select>
+      <textarea class="fi" id="ap-note" rows="3" placeholder="Anything else you'd like us to know (optional)" style="resize:vertical;"></textarea>
+      <button class="lbtn" onclick="submitStaffApplication()">Submit Application</button>
+      <div class="lerr" id="apply-err"></div>
+    </div>
+
+    <div style="text-align:center;font-size:11px;color:var(--mu);margin-top:16px;" id="toggle-note">Don't have an account? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Apply here</span></div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="tb-left">
+      <button id="mob-btn" onclick="toggleSidebar()">&#9776;</button>
+      <div class="tb-logo">🛒 RichNation Mall</div>
+      <div class="tb-role" id="tb-role-badge"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;position:relative;">
+      <button class="tb-btn" style="position:relative;" onclick="toggleStaffNotifPanel()">🔔<span id="staff-notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--re);color:#fff;font-size:9px;font-weight:800;min-width:15px;height:15px;border-radius:99px;align-items:center;justify-content:center;padding:0 3px;">0</span></button>
+      <div id="staff-notif-panel" style="display:none;position:absolute;top:44px;right:0;width:300px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--bdr);border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,0.6);z-index:500;padding:8px;"></div>
+      <button class="tb-btn" onclick="staffLogout()">Sign Out</button>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="sb" id="sidebar"></div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const FB='https://richnation-portal-default-rtdb.firebaseio.com';
+const FIREBASE_CONFIG={apiKey:"AIzaSyDLGnyGB8ZnEc2u6TbVzjIAQi1pgSaZVyQ",authDomain:"richnation-portal.firebaseapp.com",databaseURL:"https://richnation-portal-default-rtdb.firebaseio.com",projectId:"richnation-portal",storageBucket:"richnation-portal.firebasestorage.app",messagingSenderId:"175550692963",appId:"1:175550692963:web:1e3c995b3ed0baaadac256"};
+const RECAPTCHA_SITE_KEY='6Ld2O5EtAAAAAN6fXMnn7kn5a6SWvDpJs97kckGC';
+let appCheckToken=null;
+// App Check isn't enforced yet, so it adds nothing functional right now — loaded only
+// after the page is fully done loading, so it costs the page nothing while unused.
+function loadAppCheckWhenIdle(){
+  function loadScript(src){
+    return new Promise(function(resolve){
+      const s=document.createElement('script');
+      s.src=src;s.onload=resolve;s.onerror=resolve;
+      document.head.appendChild(s);
+    });
+  }
+  loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js')
+    .then(function(){return loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js');})
+    .then(function(){
+      try{
+        firebase.initializeApp(FIREBASE_CONFIG);
+        const appCheckInstance=firebase.appCheck();
+        appCheckInstance.activate(new firebase.appCheck.ReCaptchaV3Provider(RECAPTCHA_SITE_KEY),true);
+        appCheckInstance.getToken().then(function(r){appCheckToken=r.token;}).catch(function(e){console.warn('App Check token fetch failed:',e.message);});
+        appCheckInstance.onTokenChanged(function(r){appCheckToken=r.token;});
+      }catch(e){
+        console.warn('App Check init failed — requests will proceed without a token:',e.message);
+      }
+    });
+}
+if(document.readyState==='complete'){setTimeout(loadAppCheckWhenIdle,2000);}
+else window.addEventListener('load',function(){setTimeout(loadAppCheckWhenIdle,2000);});
+let staff=null;
+let curNav='dashboard';
+
+async function fbFetchTimeout(url,opts,ms){
+  ms=ms||8000;const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),ms);
+  opts=opts||{};
+  if(typeof appCheckToken!=='undefined'&&appCheckToken)opts=Object.assign({},opts,{headers:Object.assign({},opts.headers,{'X-Firebase-AppCheck':appCheckToken})});
+  try{const r=await fetch(url,Object.assign({},opts,{signal:ctrl.signal}));clearTimeout(t);return r;}
+  catch(e){clearTimeout(t);throw e;}
+}
+function openDataDoc(uri){
+  if(!uri)return;
+  if(uri.indexOf('data:')!==0){window.open(uri,'_blank');return;}
+  try{
+    const commaIdx=uri.indexOf(',');
+    const meta=uri.slice(0,commaIdx);
+    const isBase64=meta.indexOf('base64')!==-1;
+    const mimeMatch=meta.match(/data:([^;]+)/);
+    const mime=mimeMatch?mimeMatch[1]:'application/octet-stream';
+    const raw=isBase64?atob(uri.slice(commaIdx+1)):decodeURIComponent(uri.slice(commaIdx+1));
+    const bytes=new Uint8Array(raw.length);
+    for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+    const blob=new Blob([bytes],{type:mime});
+    window.open(URL.createObjectURL(blob),'_blank');
+  }catch(e){toast('Could not open this document','err');}
+}
+async function fbG(p){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{});return await r.json();}catch(e){try{await new Promise(res=>setTimeout(res,400));const r2=await fbFetchTimeout(FB+'/'+p+'.json',{});return await r2.json();}catch(e2){return null;}}}
+async function fbS(p,d){try{await fbFetchTimeout(FB+'/'+p+'.json',{method:'PUT',body:JSON.stringify(d)});}catch(e){}}
+async function fbU(p,d){try{await fbFetchTimeout(FB+'/'+p+'.json',{method:'PATCH',body:JSON.stringify(d)});}catch(e){}}
+async function fbP(p,d){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'POST',body:JSON.stringify(d)});return r.json();}catch(e){return null;}}
+async function fbD(p){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'DELETE'},4000);return !!(r&&r.ok);}catch{return false;}}
+
+function toast(msg,type){
+  const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';
+  t.style.borderColor=type==='err'?'var(--re)':'var(--bdr)';
+  clearTimeout(window._toastT);window._toastT=setTimeout(()=>{t.style.display='none';},3000);
+}
+function ds(){return new Date().toLocaleDateString('en-GB');}
+function ini(name){return (name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
+function svgIconPaths(name){
+  var icons={
+    home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
+    box:'<path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/>',
+    cart:'<circle cx="9" cy="20" r="1.3"/><circle cx="18" cy="20" r="1.3"/><path d="M2 3h3l2.4 12.2a2 2 0 002 1.8h8.6a2 2 0 002-1.7L22 8H6"/>',
+    building:'<path d="M4 21V6l8-4 8 4v15"/><path d="M9 21v-6h6v6M9 10h.01M9 14h.01M15 10h.01M15 14h.01"/>',
+    chart:'<path d="M4 20V10M12 20V4M20 20v-7"/>',
+    user:'<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>',
+    ticket:'<path d="M3 8a2 2 0 000 4v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 000-4V6a2 2 0 00-2-2H5a2 2 0 00-2 2z"/>',
+    money:'<path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>',
+    star:'<path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1z"/>',
+    note:'<path d="M4 3h16v18l-4-3H4z"/><path d="M8 8h8M8 12h5"/>',
+    alert:'<path d="M12 2L2 20h20L12 2z"/><path d="M12 9v5M12 17h.01"/>',
+    palm:'<path d="M12 22V12M12 12C7 12 4 8 4 4c4 0 8 3 8 8zM12 12c5 0 8-4 8-8-4 0-8 3-8 8z"/>',
+    chat:'<path d="M21 12a8 8 0 11-3.5-6.6L21 4l-1 4.5A7.9 7.9 0 0121 12z"/>',
+    clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>',
+    file:'<path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/>'
+  };
+  return icons[name]||icons.star;
+}
+function iconBadge(name,size){
+  size=size||18;
+  return '<span style="display:inline-block;position:relative;width:'+size+'px;height:'+size+'px;vertical-align:middle;">'
+    +'<svg class="icon-color-cycle" viewBox="0 0 24 24" width="'+size+'" height="'+size+'" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;">'+svgIconPaths(name)+'</svg>'
+    +'</span>';
+}
+function fmt(n){return '₦'+parseInt(n||0).toLocaleString();}
+
+const STAFF_ROLES=[
+  {id:'ceo',label:'CEO',access:'exec',dept:'Executive Management'},
+  {id:'general_manager',label:'General Manager',access:'exec',dept:'Executive Management'},
+  {id:'warehouse_manager',label:'Warehouse Manager',access:'product_manager',dept:'Operations'},
+  {id:'accountant',label:'Accountant',access:'accountant',dept:'Finance'},
+  {id:'hr_manager',label:'HR Manager',access:'hr',dept:'Human Resources'},
+  {id:'logistics_manager',label:'Logistics Manager',access:'logistics',dept:'Logistics'},
+  {id:'dispatch_rider',label:'Dispatch Rider',access:'logistics',dept:'Logistics'},
+  {id:'customer_service',label:'Customer Service',access:'support',dept:'Customer Experience'},
+  {id:'marketer',label:'Marketer',access:'marketing',dept:'Marketing'},
+  {id:'social_media_manager',label:'Social Media Manager',access:'marketing',dept:'Marketing'},
+  {id:'content_creator',label:'Content Creator',access:'marketing',dept:'Marketing'},
+  {id:'graphic_designer',label:'Graphic Designer',access:'marketing',dept:'Marketing'},
+  {id:'product_manager',label:'Product Manager',access:'product_manager',dept:'Operations'}
+];
+const ROLE_LABELS={};STAFF_ROLES.forEach(function(r){ROLE_LABELS[r.id]=r.label;});
+const ROLE_JOB_DESCRIPTIONS={
+  ceo:'Full oversight of RichNation Mall — strategy, final approval on major decisions, sees everything every other role sees.',
+  general_manager:'Full day-to-day operational oversight through the Staff Portal — Orders, Products, Vendors, Analytics, Customers, Wallet Issues, Customer Chat. Reviews staff strikes and conduct, and pending-suspension cases as outlined in the Company Policy.',
+  warehouse_manager:'Manages stock levels, receives new inventory, keeps product quantities accurate, flags low-stock items.',
+  accountant:'Tracks revenue and analytics, reviews and approves wallet refund requests, handles financial reporting.',
+  hr_manager:'Manages staff records, reviews reports/complaints/leave requests from the team, oversees onboarding of new staff.',
+  logistics_manager:'Oversees the delivery operation — assigns riders to orders, monitors active deliveries, resolves delivery issues.',
+  dispatch_rider:'Picks up and delivers assigned orders, updates delivery status live so customers can track progress, collects proof of delivery.',
+  customer_service:'Responds to customer chat messages, resolves wallet/refund complaints, handles general customer questions.',
+  marketer:'Plans and runs promotional campaigns, coordinates with Social Media/Content/Graphics roles, tracks campaign performance.',
+  social_media_manager:'Manages RichNation\'s social media presence, schedules posts, engages with followers.',
+  content_creator:'Writes product descriptions, blog content, and promotional copy.',
+  graphic_designer:'Creates visuals for products, banners, and social media.',
+  product_manager:'Adds and maintains full product listings — pricing, stock, images, descriptions, categories.'
+};
+function accessFor(roleId){const r=STAFF_ROLES.find(function(x){return x.id===roleId;});return r?r.access:'viewer';}
+const ACCESS_NAV={
+  exec:[['dashboard','home','Dashboard'],['orders','box','Orders'],['products','box','Products'],['vendors','building','Vendors'],['analytics','chart','Analytics'],['customers','user','Customers'],['wallet-issues','ticket','Wallet Issues'],['customer-chat','chat','Customer Chat'],['approvals','star','Approvals']],
+  manager:[['dashboard','home','Dashboard'],['orders','box','Orders'],['products','box','Products'],['vendors','building','Vendors'],['analytics','chart','Analytics'],['customers','user','Customers']],
+  product_manager:[['dashboard','home','Dashboard'],['products','box','Products']],
+  marketing:[['dashboard','home','Dashboard'],['analytics','chart','Analytics'],['products','box','Products'],['submissions','file','My Submissions']],
+  support:[['dashboard','home','Dashboard'],['orders','box','Orders'],['wallet-issues','ticket','Wallet Issues']],
+  vendor_relations:[['dashboard','home','Dashboard'],['vendors','building','Vendors'],['analytics','chart','Analytics']],
+  logistics:[['dashboard','home','Dashboard'],['orders','box','Orders'],['fleet','building','Fleet']],
+  accountant:[['dashboard','home','Dashboard'],['analytics','chart','Analytics'],['wallet-issues','ticket','Wallet Issues']],
+  hr:[['dashboard','home','Dashboard']],
+  viewer:[['dashboard','home','Dashboard'],['analytics','chart','Analytics']]
+};
+const PERSONAL_NAV=[['salary','money','My Wallet'],['points','star','My StaffPoints'],['reports','note','Reports'],['complaints','alert','Complaints'],['leave','palm','Leave Requests'],['messages','chat','Messages'],['activity','clock','My Activity'],['policy','file','Company Policy'],['profile','user','My Profile']];
+
+(function populateApplyRoleDropdown(){
+  const sel=document.getElementById('ap-role');if(!sel)return;
+  const depts={};
+  STAFF_ROLES.forEach(function(r){(depts[r.dept]=depts[r.dept]||[]).push(r);});
+  let html='<option value="">Role you\'re applying for</option>';
+  Object.keys(depts).forEach(function(dept){
+    html+='<optgroup label="'+dept+'">';
+    depts[dept].forEach(function(r){html+='<option value="'+r.id+'">'+r.label+'</option>';});
+    html+='</optgroup>';
+  });
+  sel.innerHTML=html;
+})();
+
+function showInfoModal(title,bodyHtml){
+  const existing=document.getElementById('info-modal-overlay');if(existing)existing.remove();
+  const overlay=document.createElement('div');
+  overlay.id='info-modal-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto;';
+  overlay.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:24px;max-width:480px;width:100%;max-height:85vh;overflow-y:auto;">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;"><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:900;font-size:16px;">'+title+'</div><span onclick="closeInfoModal()" style="cursor:pointer;font-size:22px;color:var(--mu);line-height:1;">&times;</span></div>'
+    +bodyHtml
+    +'</div>';
+  document.body.appendChild(overlay);
+}
+function closeInfoModal(){const el=document.getElementById('info-modal-overlay');if(el)el.remove();}
+async function logStaffActivity(action,detail){
+  const entry={by:staff.email,action:action,detail:detail||'',date:ds(),ts:Date.now()};
+  if(staff.role==='ceo')entry.needsReview=true; // CEO actions go live immediately but are flagged for Admin to review after
+  await fbP('rn_mall_activity_log',entry);
+}
+function togglePwVisibility(id,el){
+  const inp=document.getElementById(id);if(!inp)return;
+  if(inp.type==='password'){inp.type='text';el.textContent='Hide';}
+  else{inp.type='password';el.textContent='Show';}
+}
+function toggleApplyMode(){
+  const isLogin=document.getElementById('login-form').style.display!=='none';
+  document.getElementById('login-form').style.display=isLogin?'none':'block';
+  document.getElementById('apply-form').style.display=isLogin?'block':'none';
+  document.getElementById('l-title').textContent=isLogin?'Apply to Join the Team':'Staff Sign In';
+  document.getElementById('toggle-note').innerHTML=isLogin?'Already have login details? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Sign in</span>':'Don\'t have an account? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Apply here</span>';
+}
+async function submitStaffApplication(){
+  const fname=document.getElementById('ap-fname').value.trim();
+  const dob=document.getElementById('ap-dob').value;
+  const gender=document.getElementById('ap-gender').value;
+  const phone=document.getElementById('ap-phone').value.trim();
+  const email=document.getElementById('ap-email').value.trim().toLowerCase();
+  const address=document.getElementById('ap-address').value.trim();
+  const country=document.getElementById('ap-country').value.trim();
+  const lga=document.getElementById('ap-lga').value.trim();
+  const requestedRole=document.getElementById('ap-role').value;
+  const note=document.getElementById('ap-note').value.trim();
+  const err=document.getElementById('apply-err');err.style.display='none';
+  if(!fname||!phone||!email||!address||!requestedRole){err.textContent='Please fill in your name, phone, email, address, and the role you\'re applying for.';err.style.display='block';return;}
+  const all=await fbG('rn_mall_staff')||{};
+  if(Object.values(all).find(function(s){return s.email===email;})){err.textContent='An application or account with this email already exists.';err.style.display='block';return;}
+  const id='staff_'+Date.now();
+  await fbS('rn_mall_staff/'+id,{
+    id,name:fname,dob,gender,phone,email,address,country,lga,requestedRole,note,
+    password:'',role:requestedRole,salary:0,salaryStatus:'pending',points:0,
+    status:'pending_review',joinDate:ds(),ts:Date.now()
+  });
+  err.style.display='none';
+  document.getElementById('apply-form').innerHTML='<div style="text-align:center;padding:10px 0;"><div style="font-size:32px;margin-bottom:10px;">✅</div><div style="font-weight:800;margin-bottom:8px;">Application Submitted!</div><div style="font-size:12px;color:var(--mu);line-height:1.7;">Thanks, '+fname+'! Our admin will review your application. Once approved, you\'ll receive your login email and password separately — check with us if you don\'t hear back soon.</div></div>';
+}
+async function doStaffLogin(){
+  const email=document.getElementById('s-email').value.trim().toLowerCase();
+  const pass=document.getElementById('s-pass').value.trim();
+  const err=document.getElementById('login-err');err.style.display='none';
+  if(!email||!pass){err.textContent='Enter your email and password.';err.style.display='block';return;}
+  const all=await fbG('rn_mall_staff')||{};
+  const byEmail=Object.entries(all).find(function(e){return e[1].email===email;});
+  if(!byEmail){err.textContent='Incorrect email or password.';err.style.display='block';return;}
+  const found=Object.assign({_id:byEmail[0]},byEmail[1]);
+  if(found.status==='pending_review'){err.textContent='Your application is still under review. You\'ll be able to sign in once approved.';err.style.display='block';return;}
+  if(found.status==='suspended'){err.textContent='Your account has been suspended. Contact your admin.';err.style.display='block';return;}
+  if(found.password!==pass){err.textContent='Incorrect email or password.';err.style.display='block';return;}
+  staff=found;
+  sessionStorage.setItem('rnm_staff_session',JSON.stringify(staff));
+  sessionStorage.setItem('rnm_staff_email',staff.email);
+  startApp();
+}
+function staffLogout(){sessionStorage.removeItem('rnm_staff_session');staff=null;document.getElementById('app').style.display='none';document.getElementById('login').style.display='flex';}
+function checkStaffSession(){const s=sessionStorage.getItem('rnm_staff_session');if(s){try{staff=JSON.parse(s);startApp();}catch(e){}}}
+function startApp(){
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('tb-role-badge').textContent=staff.name+' — '+(ROLE_LABELS[staff.role]||staff.role);
+  buildSidebar();
+  snav('dashboard');
+  loadStaffNotifs();
+  if(staff.role==='logistics_manager'&&!staff.conductMemoAcknowledged){
+    showLogisticsConductMemo();
+  }else{
+    maybeShowWelcomeSetup();
+  }
+}
+function showLogisticsConductMemo(){
+  const overlay=document.createElement('div');
+  overlay.id='conduct-memo-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto;';
+  overlay.innerHTML='<div style="background:var(--card);border:1px solid var(--or);border-radius:14px;padding:24px;max-width:500px;width:100%;max-height:88vh;overflow-y:auto;">'
+    +'<div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:900;font-size:17px;margin-bottom:4px;">A Direct Word From the Founder</div>'
+    +'<div style="font-size:11px;color:var(--or);font-weight:700;margin-bottom:14px;">Please read before you continue</div>'
+    +'<div style="font-size:12.5px;color:var(--w2);line-height:1.8;margin-bottom:16px;">'
+    +'You lead the team our customers meet last, the riders who put their order in their hands. How your team treats customers and handles their packages reflects on you and on RichNation directly. Customers have complained before about rudeness, impatience, and rough handling. This will not be taken lightly.<br><br>'
+    +'<strong>What I expect from you:</strong> hold your riders to the standard of patience, politeness, and careful handling, every time. If a customer complains, your team reports it to you or to management, they do not argue with the customer.<br><br>'
+    +'<strong>Consequences that are not negotiable:</strong> confirmed rudeness, impatience, or careless handling follows our strike system through to suspension. Running away with a customer\'s product is not a strike matter, it is immediate termination, treated as theft.<br><br>'
+    +'This applies to you leading your team the same way it applies to every rider. I am telling you this directly because I respect you enough to be clear, not because I expect the worst from you.'
+    +'</div>'
+    +'<label style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--w2);cursor:pointer;margin-bottom:16px;"><input type="checkbox" id="conduct-memo-agree" style="width:16px;height:16px;accent-color:var(--or);margin-top:2px;flex-shrink:0;"/> I have read this and I understand what is expected of me and my team.</label>'
+    +'<button class="btn btn-or btn-lg" style="width:100%;" onclick="acknowledgeConductMemo()">Continue</button>'
+    +'</div>';
+  document.body.appendChild(overlay);
+}
+async function acknowledgeConductMemo(){
+  if(!document.getElementById('conduct-memo-agree').checked){toast('Please confirm you have read and understood this before continuing','err');return;}
+  await fbU('rn_mall_staff/'+staff._id,{conductMemoAcknowledged:true,conductMemoAcknowledgedAt:Date.now()});
+  staff.conductMemoAcknowledged=true;
+  sessionStorage.setItem('rnm_staff_session',JSON.stringify(staff));
+  document.getElementById('conduct-memo-overlay').remove();
+  maybeShowWelcomeSetup();
+}
+function maybeShowWelcomeSetup(){
+  const missing=[];
+  if(!staff.photo)missing.push('Add a profile picture');
+  if(!staff.bankAcctNo)missing.push('Add your bank account details');
+  if(!staff.policyRead)missing.push('Read and confirm the Company Policy');
+  if(!missing.length)return;
+  showInfoModal('👋 Welcome, '+staff.name.split(' ')[0]+'!',`
+    <div style="font-size:13px;color:var(--w2);line-height:1.7;margin-bottom:14px;">Let's finish setting up your dashboard — a few things left:</div>
+    <div style="margin-bottom:16px;">${missing.map(function(m){return '<div style="padding:8px 0;border-top:1px solid var(--bdr);font-size:13px;color:var(--w2);">☐ '+m+'</div>';}).join('')}</div>
+    <button class="btn btn-or btn-lg" onclick="closeInfoModal();snav('profile');" style="width:100%;">Complete My Setup</button>
+  `);
+}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');}
+const EXTRA_PERM_NAV={
+  products:['products','box','Products'],orders:['orders','box','Orders'],
+  customerService:['customer-chat','chat','Customer Chat'],vendors:['vendors','building','Vendors'],
+  analytics:['analytics','chart','Analytics'],walletIssues:['wallet-issues','ticket','Wallet Issues'],
+  customers:['customers','user','Customers']
+};
+function buildSidebar(){
+  const roleItems=(ACCESS_NAV[accessFor(staff.role)]||ACCESS_NAV.viewer).slice();
+  const havePages=roleItems.map(function(i){return i[0];});
+  const perms=staff.permissions||{};
+  Object.keys(perms).forEach(function(pid){
+    if(perms[pid]&&EXTRA_PERM_NAV[pid]&&havePages.indexOf(EXTRA_PERM_NAV[pid][0])===-1){
+      roleItems.push(EXTRA_PERM_NAV[pid]);havePages.push(EXTRA_PERM_NAV[pid][0]);
+    }
+  });
+  let html='<div class="sb-sec">My Work</div>';
+  roleItems.forEach(function(item){html+='<div class="sb-item" id="nav-'+item[0]+'" onclick="snav(\''+item[0]+'\')">'+iconBadge(item[1],16)+'&nbsp;'+item[2]+'</div>';});
+  html+='<div class="sb-sec">Me</div>';
+  PERSONAL_NAV.forEach(function(item){html+='<div class="sb-item" id="nav-'+item[0]+'" onclick="snav(\''+item[0]+'\')">'+iconBadge(item[1],16)+'&nbsp;'+item[2]+'</div>';});
+  document.getElementById('sidebar').innerHTML=html;
+}
+
+// ── NAVIGATION ──
+async function manualRefreshStaffDash(btn){
+  const orig=btn.innerHTML;btn.innerHTML='⏳...';btn.disabled=true;
+  await snav('dashboard');
+  toast('Updated!');
+  btn.innerHTML=orig;btn.disabled=false;
+}
+async function snav(page){
+  curNav=page;
+  document.querySelectorAll('.sb-item').forEach(el=>el.classList.toggle('active',el.id==='nav-'+page));
+  document.getElementById('sidebar').classList.remove('open');
+  const c=document.getElementById('content');
+  const routes={
+    dashboard:renderDashboard,orders:renderOrders,products:renderProducts,vendors:renderVendorsView,
+    analytics:renderAnalyticsView,customers:renderCustomersView,'wallet-issues':renderWalletIssuesView,
+    'customer-chat':renderCustomerChatList,
+    salary:renderSalary,points:renderPoints,reports:renderReports,complaints:renderComplaints,
+    leave:renderLeave,messages:renderMessages,activity:renderMyActivity,policy:renderCompanyPolicy,profile:renderProfile,
+    submissions:renderSubmissions,approvals:renderApprovals,fleet:renderFleet
+  };
+  // Render right away with whatever staff data is already cached — never make the
+  // person wait on a network round-trip just to see the page they clicked into.
+  (routes[page]||renderDashboard)(c);
+  // Then quietly check for anything admin changed, and only re-render if this is
+  // still the active page and something actually differs.
+  const fresh=await fbG('rn_mall_staff/'+staff._id);
+  if(fresh&&curNav===page){
+    const changed=JSON.stringify(fresh)!==JSON.stringify(Object.assign({},staff,{_id:undefined}));
+    staff=Object.assign({_id:staff._id},fresh);
+    sessionStorage.setItem('rnm_staff_session',JSON.stringify(staff));
+    document.getElementById('tb-role-badge').textContent=staff.name+' — '+(ROLE_LABELS[staff.role]||staff.role);
+    if(changed)(routes[page]||renderDashboard)(c);
+  }
+}
+
+// ── DASHBOARD ──
+async function loadMyTasks(){
+  const data=await fbG('rn_mall_staff_tasks/'+staff._id)||{};
+  const el=document.getElementById('my-tasks-list');if(!el)return;
+  const entries=Object.entries(data).sort(function(a,b){return (b[1].ts||0)-(a[1].ts||0);});
+  const pending=entries.filter(function(e){return !e[1].status||e[1].status==='pending';});
+  const submitted=entries.filter(function(e){return e[1].status==='submitted';});
+  const approved=entries.filter(function(e){return e[1].status==='approved';});
+  const statCard=document.getElementById('tasks-stat-card');
+  if(statCard)statCard.innerHTML='<div class="stat-num" style="color:var(--su);">'+approved.length+'</div><div class="stat-lbl">Tasks Done</div><div class="stat-sub">'+(pending.length+submitted.length)+' pending</div>';
+  if(!entries.length){el.innerHTML='<div style="color:var(--mu);font-size:12px;">No tasks assigned yet.</div>';return;}
+  function taskCard(e,mode){
+    var t=e[1];
+    var completionBlock='';
+    if(mode==='pending'){
+      completionBlock='<div style="margin-top:8px;"><textarea class="fi" id="tc-note-'+e[0]+'" rows="2" placeholder="What did you do? (required)" style="margin-bottom:6px;"></textarea>'
+        +'<input class="fi" id="tc-link-'+e[0]+'" placeholder="Google link (optional)" style="margin-bottom:6px;"/>'
+        +'<input class="fi" id="tc-file-'+e[0]+'" type="file" style="margin-bottom:6px;"/>'
+        +'<button class="btn btn-or" style="font-size:11px;padding:6px 14px;" onclick="submitTaskCompletion(\''+e[0]+'\')">Submit for Approval</button></div>';
+    }else if(mode==='submitted'){
+      completionBlock='<div style="font-size:11px;color:var(--or);margin-top:6px;">⏳ Sent to admin — awaiting approval</div>'
+        +(t.completionNote?'<div style="font-size:12px;color:var(--w2);margin-top:4px;">'+t.completionNote+'</div>':'')
+        +(t.completionLink?'<div style="margin-top:6px;"><a href="javascript:void(0)" data-uri="'+t.completionLink+'" onclick="openDataDoc(this.dataset.uri)" style="color:var(--or);font-size:11px;">View Link</a></div>':'')
+        +(t.completionFile?'<div style="margin-top:6px;"><a href="javascript:void(0)" data-uri="'+t.completionFile+'" onclick="openDataDoc(this.dataset.uri)" style="color:var(--or);font-size:11px;">View File</a></div>':'');
+    }else{
+      completionBlock='<div style="font-size:11px;color:var(--su);margin-top:6px;">✔ Approved by '+(t.approvedBy||'Admin')+'</div>'+(t.completionNote?'<div style="font-size:12px;color:var(--w2);margin-top:4px;">'+t.completionNote+'</div>':'');
+    }
+    return '<div style="padding:10px 0;border-top:1px solid var(--bdr);"><div style="font-size:13px;color:var(--w2);font-weight:700;">'+t.description+'</div><div style="font-size:10px;color:var(--mu);margin-top:3px;">Assigned by '+(t.assignedBy||'Admin')+(t.dueDate?' &middot; Due '+t.dueDate:'')+'</div>'+completionBlock+'</div>';
+  }
+  el.innerHTML=pending.map(function(e){return taskCard(e,'pending');}).join('')
+    +submitted.map(function(e){return taskCard(e,'submitted');}).join('')
+    +(approved.length?'<div style="font-size:10px;color:var(--mu);text-transform:uppercase;margin-top:10px;padding-top:10px;border-top:1px solid var(--bdr);">Approved</div>'+approved.map(function(e){return taskCard(e,'approved');}).join(''):'');
+}
+async function submitTaskCompletion(taskKey){
+  const note=(document.getElementById('tc-note-'+taskKey).value||'').trim();
+  const link=(document.getElementById('tc-link-'+taskKey).value||'').trim();
+  const file=document.getElementById('tc-file-'+taskKey).files[0];
+  if(!note){toast('Describe what you did before submitting','err');return;}
+  let fileData=null;
+  if(file){toast('Uploading…');fileData=await fileToBase64(file);if(fileData){const url=isGithubConfigured()?await uploadDataUrlToGithub(fileData,'task-files'):null;if(url)fileData=url;}}
+  await fbU('rn_mall_staff_tasks/'+staff._id+'/'+taskKey,{status:'submitted',completionNote:note,completionLink:link||null,completionFile:fileData,submittedAt:Date.now()});
+  await fbP('rn_mall_notifications',{type:'staff_task_submitted',staffName:staff.name,description:(await fbG('rn_mall_staff_tasks/'+staff._id+'/'+taskKey)).description,date:ds(),read:false,ts:Date.now()});
+  toast('Sent to admin for approval!');
+  snav('dashboard');
+}
+async function renderDashboard(c){
+  const roleObj=STAFF_ROLES.find(function(r){return r.id===staff.role;});
+  c.innerHTML=`
+  <div class="card" style="display:flex;align-items:center;gap:16px;justify-content:space-between;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:16px;">
+    <div onclick="document.getElementById('dash-photo-upload').click()" style="width:64px;height:64px;border-radius:99px;background:var(--card2);border:2px solid var(--bdr);cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      ${staff.photo?'<img src="'+staff.photo+'" style="width:100%;height:100%;object-fit:cover;"/>':'<span style="font-size:22px;color:var(--mu);">'+ini(staff.name)+'</span>'}
+    </div>
+    <input type="file" id="dash-photo-upload" accept="image/*" style="display:none;" onchange="uploadMyPhoto('dash-photo-upload')">
+    <div>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:18px;">${staff.name}</div>
+      <div style="font-size:12px;color:var(--mu);margin-top:2px;">${roleObj?roleObj.label:staff.role}${staff.staffNumber?' &middot; '+staff.staffNumber:''} &middot; here's what's happening.</div>
+      <div onclick="document.getElementById('dash-photo-upload').click()" style="font-size:11px;color:var(--or);cursor:pointer;margin-top:4px;">Change Photo</div>
+    </div>
+    </div>
+    <button onclick="manualRefreshStaffDash(this)" class="btn" style="font-size:11px;">🔄 Refresh</button>
+  </div>
+  ${staff.role==='ceo'?(staff.adminPanelAccess?`<div class="card" style="border-color:rgba(255,140,0,0.4);background:rgba(255,140,0,0.06);">
+    <div style="font-weight:800;color:var(--or);font-size:14px;">🖥️ You have full Admin Panel access</div>
+    <div style="font-size:12px;color:var(--w2);margin-top:6px;line-height:1.7;">This Staff Portal is for your day-to-day tasks — salary, points, messages, your own reports. For company-wide access (all products, orders, vendors, investors, riders, promotions, settings — everything Admin sees), log into the <strong>Admin Panel</strong> with these same email and password. Every action you take there is visible to Admin for review.</div>
+  </div>`:`<div class="card" style="border-color:rgba(255,140,0,0.4);background:rgba(255,140,0,0.06);">
+    <div style="font-weight:800;color:var(--or);font-size:14px;">🖥️ Full Admin Panel access not yet granted</div>
+    <div style="font-size:12px;color:var(--w2);margin-top:6px;line-height:1.7;">This Staff Portal only shows a limited view. For the full company-wide experience — same as Admin sees — ask Admin to grant you Admin Panel Access from Staff & Roles.</div>
+  </div>`):''}
+  ${accessFor(staff.role)==='exec'?`<div class="card-title" style="margin:16px 0 10px;">🏢 Company Overview</div><div class="stats-grid" id="ceo-overview-grid"><div style="color:var(--mu);font-size:12px;">Loading...</div></div>`:''}
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num" style="color:var(--su);">${fmt(staff.salary||0)}</div><div class="stat-lbl">Monthly Salary</div><div class="stat-sub">Status: ${staff.salaryStatus||'pending'}</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--or);">${staff.points||0} pts</div><div class="stat-lbl">StaffPoints</div><div class="stat-sub">Bonus points from admin</div></div>
+    <div class="stat-card"><div class="stat-num">${roleObj?roleObj.label:staff.role}</div><div class="stat-lbl">Your Role</div><div class="stat-sub">Since ${staff.joinDate||'—'}</div></div>
+    <div class="stat-card"><div class="stat-num" style="font-size:15px;">${staff.workingHours||'Not set'}</div><div class="stat-lbl">Working Hours</div><div class="stat-sub">Set by admin</div></div>
+    <div class="stat-card" id="tasks-stat-card"><div class="stat-num" style="color:var(--su);">${staff.tasksDone||0}</div><div class="stat-lbl">Tasks Done</div><div class="stat-sub">${staff.tasksPending||0} pending</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:${(staff.strikes||0)>0?'var(--re)':'var(--su)'};">${staff.strikes||0}/3</div><div class="stat-lbl">Strikes</div><div class="stat-sub">${(staff.strikes||0)>=3?'Suspended pending review':'Stay clean of these'}</div></div>
+  </div>
+  <div class="card" id="my-tasks-card">
+    <div class="card-title">${iconBadge('note',16)} My Tasks</div>
+    <div id="my-tasks-list" style="margin-top:8px;color:var(--mu);font-size:12px;">Loading...</div>
+  </div>
+  <div class="card">
+    <div class="card-title">📋 My Bio</div>
+    <div style="font-size:12px;color:var(--w2);line-height:1.8;margin-top:8px;">${staff.bio||'No bio set yet.'}</div>
+  </div>
+  <div class="card">
+    <div class="card-title">🎯 My Job Description</div>
+    <div style="font-size:12px;color:var(--w2);line-height:1.8;margin-top:8px;">${ROLE_JOB_DESCRIPTIONS[staff.role]||'Contact HR for your job description.'}</div>
+  </div>
+  <div class="card">
+    <div class="card-title">📢 Announcements</div>
+    <div id="dash-anns" style="margin-top:8px;color:var(--mu);font-size:12px;">Loading...</div>
+  </div>`;
+  if(accessFor(staff.role)==='exec'){
+    Promise.all([fbG('rn_mall_orders'),fbG('rn_mall_products'),fbG('rn_mall_customers')]).then(function(res){
+      if(curNav!=='dashboard')return;
+      const grid=document.getElementById('ceo-overview-grid');if(!grid)return;
+      const orders=Object.values(res[0]||{});
+      const revenue=orders.reduce(function(s,o){return s+(o.total||0);},0);
+      const today=ds();
+      const ordersToday=orders.filter(function(o){return o.date===today;}).length;
+      grid.innerHTML='<div class="stat-card"><div class="stat-num" style="color:var(--su);">'+fmt(revenue)+'</div><div class="stat-lbl">Total Revenue</div><div class="stat-sub">'+orders.length+' orders</div></div>'
+        +'<div class="stat-card"><div class="stat-num" style="color:var(--or);">'+ordersToday+'</div><div class="stat-lbl">Orders Today</div></div>'
+        +'<div class="stat-card"><div class="stat-num">'+Object.keys(res[1]||{}).length+'</div><div class="stat-lbl">Products</div><div class="stat-sub">'+Object.keys(res[2]||{}).length+' customers</div></div>';
+    });
+  }
+  loadMyTasks();
+  fbG('rn_mall_announcements').then(function(data){
+    if(curNav!=='dashboard')return; // they've already navigated away — don't overwrite whatever's there now
+    const entries=Object.entries(data||{}).sort(function(a,b){return (b[1].ts||0)-(a[1].ts||0);}).slice(0,5);
+    const el=document.getElementById('dash-anns');
+    if(!el)return;
+    el.innerHTML=entries.length?entries.map(function(e){return '<div style="padding:8px 0;border-top:1px solid var(--bdr);font-size:13px;color:var(--w2);">'+e[1].message+'<div style="font-size:10px;color:var(--mu);margin-top:2px;">'+e[1].date+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No announcements yet.</div>';
+    // Read receipt — record that this staff member has now seen each of these.
+    entries.forEach(function(e){fbU('rn_mall_announcement_reads/'+e[0],{[staff._id]:{name:staff.name,ts:Date.now()}});});
+  });
+}
+
+// ── SALARY ──
+async function renderSalary(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">My Wallet</div></div><div style="color:var(--mu);">Loading...</div>';
+  const hist=Object.values(await fbG('rn_mall_staff_salary_history/'+staff._id)||{}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  const paidEntries=hist.filter(function(h){return h.status==='paid';});
+  const isPending=staff.salaryStatus!=='paid';
+  const latestExpected=hist.find(function(h){return h.expectedDate;});
+  const now=new Date();
+  const thisMonthPaid=paidEntries.filter(function(h){
+    var d=new Date(h.ts||0);
+    return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
+  }).reduce(function(s,h){return s+(h.amount||0);},0);
+  const withdrawals=Object.values(await fbG('rn_mall_staff_withdrawals/'+staff._id)||{}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  const totalWithdrawn=withdrawals.filter(function(w){return w.status==='paid';}).reduce(function(s,w){return s+(w.amount||0);},0);
+  const walletBalance=Math.max(0,(staff.walletBalance!=null?staff.walletBalance:paidEntries.reduce(function(s,h){return s+(h.amount||0);},0))-totalWithdrawn);
+  c.innerHTML=`
+  <div class="page-hdr"><div class="page-hdr-title">My Wallet</div><div class="page-hdr-sub">Your salary and bonus payments, and a place to request withdrawals.</div></div>
+  <div class="card" style="text-align:center;background:rgba(255,140,0,0.06);border-color:rgba(255,140,0,0.3);">
+    <div style="font-size:11px;color:var(--mu);text-transform:uppercase;">Wallet Balance</div>
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:32px;color:var(--su);margin-top:6px;">${fmt(walletBalance)}</div>
+    <button class="btn btn-or" style="margin-top:12px;" onclick="requestStaffWithdrawal()">Request Withdrawal</button>
+  </div>
+  <div class="card">
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:${isPending?'var(--or)':'var(--su)'};">${isPending?'Your payment is pending and will be headed your way soon!':'You\'re all paid up for now!'}</div>
+    ${latestExpected&&latestExpected.expectedDate?`<div style="font-size:12px;color:var(--mu);margin-top:4px;">Expect a payment around ${new Date(latestExpected.expectedDate).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}</div>`:''}
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:36px;color:var(--wh);margin-top:14px;">${fmt(staff.salary||0)}</div>
+    <div style="font-size:11px;color:var(--mu);margin-top:2px;">Monthly salary &middot; Status: <strong style="color:${isPending?'var(--or)':'var(--su)'};">${staff.salaryStatus||'pending'}</strong></div>
+  </div>
+  <div class="card">
+    <div class="card-title">This Month's Earnings</div>
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:22px;color:var(--su);margin-top:6px;">${fmt(thisMonthPaid)}</div>
+    <div style="font-size:11px;color:var(--mu);margin-top:2px;">Total paid to you so far this calendar month</div>
+  </div>
+  <div class="card"><div class="card-title">What You've Been Paid</div><div style="margin-top:8px;">${hist.length?hist.map(function(h){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);"><div style="display:flex;justify-content:space-between;align-items:center;"><div><span style="font-size:13px;color:var(--w2);font-weight:700;">'+(h.month||h.description||h.status)+'</span>'+(h.month&&h.description?'<div style="font-size:11px;color:var(--mu);">'+h.description+'</div>':'')+'</div><div style="text-align:right;"><span style="font-weight:800;color:'+(h.status==='paid'?'var(--su)':'var(--or)')+';">'+fmt(h.amount)+'</span><div style="font-size:9px;font-weight:800;color:'+(h.status==='paid'?'var(--su)':'var(--or)')+';">'+(h.status||'pending').toUpperCase()+'</div></div></div>'+(h.message?'<div style="font-size:11px;color:var(--mu);margin-top:3px;">'+h.message+'</div>':'')+'<div style="font-size:10px;color:var(--mu);margin-top:3px;">'+h.date+(h.expectedDate?' &middot; Expected: '+new Date(h.expectedDate).toLocaleDateString('en-GB'):'')+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No history yet.</div>'}</div></div>
+  <div class="card">
+    <div class="card-title">Withdrawal Requests</div>
+    <div style="margin-top:8px;">${withdrawals.length?withdrawals.map(function(w){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);"><div style="display:flex;justify-content:space-between;"><span style="font-size:13px;color:var(--w2);">'+fmt(w.amount)+'</span><span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;background:'+(w.status==='paid'?'rgba(34,197,94,0.15)':w.status==='declined'?'rgba(244,63,94,0.15)':'rgba(255,140,0,0.15)')+';color:'+(w.status==='paid'?'var(--su)':w.status==='declined'?'var(--re)':'var(--or)')+';">'+(w.status||'pending').toUpperCase()+'</span></div><div style="font-size:10px;color:var(--mu);margin-top:3px;">'+w.date+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No withdrawal requests yet.</div>'}</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Resources</div>
+    <div style="margin-top:8px;">
+      <div onclick="showSalaryFaq('calc')" style="padding:10px 0;border-top:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;cursor:pointer;"><span style="font-size:13px;color:var(--w2);">How is my salary set?</span><span style="color:var(--mu);">›</span></div>
+      <div onclick="showSalaryFaq('when')" style="padding:10px 0;border-top:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;cursor:pointer;"><span style="font-size:13px;color:var(--w2);">When are payments made?</span><span style="color:var(--mu);">›</span></div>
+      <div onclick="showSalaryFaq('contact')" style="padding:10px 0;border-top:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;cursor:pointer;"><span style="font-size:13px;color:var(--w2);">Who do I contact with questions?</span><span style="color:var(--mu);">›</span></div>
+    </div>
+  </div>`;
+}
+async function requestStaffWithdrawal(){
+  if(!staff.bankAcctNo){toast('Add your bank details in Profile first','err');return;}
+  const amount=parseFloat(prompt('How much would you like to withdraw?',''));
+  if(isNaN(amount)||amount<=0){toast('Enter a valid amount','err');return;}
+  await fbP('rn_mall_staff_withdrawals/'+staff._id,{amount:amount,status:'pending',date:ds(),ts:Date.now()});
+  await fbP('rn_mall_notifications',{type:'staff_withdrawal_request',staffName:staff.name,amount:amount,date:ds(),read:false,ts:Date.now()});
+  toast('Withdrawal request submitted!');
+  snav('salary');
+}
+function showSalaryFaq(type){
+  const content={
+    calc:'Your monthly salary amount is set directly by admin and shown at the top of this page. If you believe there\'s an error, use Complaints to raise it.',
+    when:'Admin marks your salary as paid when it\'s sent, along with an expected arrival date — usually a few working days depending on your bank. You\'ll get a notification the moment it\'s recorded.',
+    contact:'Use the Complaints tab to reach out about any payment question, or message admin directly from Messages.'
+  };
+  showInfoModal(iconBadge('money',18)+' Payment Info',`<div style="font-size:13px;color:var(--w2);line-height:1.8;">${content[type]||''}</div>`);
+}
+
+// ── POINTS ──
+async function renderPoints(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">My StaffPoints</div></div><div style="color:var(--mu);">Loading...</div>';
+  const hist=Object.values(await fbG('rn_mall_staff_points_log/'+staff._id)||{}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  c.innerHTML=`
+  <div class="page-hdr"><div class="page-hdr-title">My StaffPoints</div></div>
+  <div class="card" style="text-align:center;">
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:32px;color:var(--or);">${staff.points||0} pts</div>
+    <div style="font-size:12px;color:var(--mu);margin-top:4px;">Awarded by admin as bonuses/recognition — can factor into future salary reviews.</div>
+  </div>
+  <div class="card"><div class="card-title">Points History</div><div style="margin-top:8px;">${hist.length?hist.map(function(h){return '<div style="padding:8px 0;border-top:1px solid var(--bdr);font-size:12px;"><div style="display:flex;justify-content:space-between;"><span style="color:var(--w2);">'+(h.reason||'Bonus')+'</span><span style="font-weight:700;color:var(--su);">+'+h.amount+'</span></div><div style="font-size:10px;color:var(--mu);">'+h.date+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No points yet.</div>'}</div></div>`;
+}
+
+// ── REPORTS ──
+async function renderReports(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Reports</div></div><div style="color:var(--mu);">Loading...</div>';
+  const mine=Object.entries(await fbG('rn_mall_staff_reports')||{}).map(function(e){return Object.assign({_id:e[0]},e[1]);}).filter(function(r){return r.staffId===staff._id;}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  const typeIcon={daily:'clock',weekly:'chart',monthly:'note'};
+  const typeLabel={daily:'Daily',weekly:'Weekly',monthly:'Monthly'};
+  c.innerHTML=`
+  <div class="page-hdr"><div class="page-hdr-title">Reports</div><div class="page-hdr-sub">Keep it short and readable — a clear headline says more than a wall of text.</div></div>
+  <div class="card">
+    <div class="fg"><label class="lbl">Report Type</label><select class="inp" id="rp-type"><option value="daily">Daily Report</option><option value="weekly">Weekly Report</option><option value="monthly">Monthly Report</option></select></div>
+    <div class="fg"><label class="lbl">Headline</label><input class="inp" id="rp-headline" placeholder="One clear line — what's this report about?" maxlength="80"/></div>
+    <div class="fg"><label class="lbl">Subtitle</label><input class="inp" id="rp-subtitle" placeholder="A short one-line summary" maxlength="120"/></div>
+    <div class="fg"><label class="lbl">Body</label><textarea class="ta" id="rp-msg" rows="5" placeholder="${staff.role==='logistics_manager'?"Deliveries completed, any delays and why, vehicle or rider issues, what's next...":"The details — what you did, any blockers, what's next..."}"></textarea></div>
+    <button class="btn btn-or" onclick="submitReport()">${iconBadge('note',14)} Submit Report</button>
+  </div>
+  <div class="card-title" style="margin:16px 0 10px;">My Past Reports</div>
+  ${mine.length?mine.map(function(r){return '<div class="card" style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;"><div style="display:flex;align-items:center;gap:8px;">'+iconBadge(typeIcon[r.type]||'note',16)+'<span style="font-size:10px;font-weight:800;color:var(--or);text-transform:uppercase;letter-spacing:0.4px;">'+(typeLabel[r.type]||r.type)+'</span></div><div style="font-size:10px;color:var(--mu);">'+r.date+'</div></div><div style="font-weight:800;font-size:14px;color:var(--wh);margin-top:8px;">'+(r.headline||'(No headline)')+'</div>'+(r.subtitle?'<div style="font-size:12px;color:var(--or);margin-top:2px;">'+r.subtitle+'</div>':'')+(r.message?'<div style="font-size:13px;color:var(--w2);line-height:1.7;margin-top:8px;">'+r.message+'</div>':'')+'</div>';}).join(''):'<div class="card" style="text-align:center;padding:30px;color:var(--mu);">No reports submitted yet.</div>'}`;
+}
+async function submitReport(){
+  const type=document.getElementById('rp-type').value;
+  const headline=(document.getElementById('rp-headline').value||'').trim();
+  const subtitle=(document.getElementById('rp-subtitle').value||'').trim();
+  const message=(document.getElementById('rp-msg').value||'').trim();
+  if(!headline){toast('Give your report a headline','err');return;}
+  if(!message){toast('Fill in the body of your report','err');return;}
+  await fbP('rn_mall_staff_reports',{staffId:staff._id,staffName:staff.name,type,headline,subtitle,message,date:ds(),ts:Date.now()});
+  toast('Report submitted!');
+  snav('reports');
+}
+
+// ── COMPLAINTS ──
+const GITHUB_CONFIG={owner:'ubongrich62',repo:'richnation-images',branch:'main',token:'YOUR_FINE_GRAINED_TOKEN'};
+function isGithubConfigured(){return GITHUB_CONFIG.owner!=='YOUR_GITHUB_USERNAME'&&GITHUB_CONFIG.token!=='YOUR_FINE_GRAINED_TOKEN';}
+async function uploadDataUrlToGithub(dataUrl,folder){
+  if(!isGithubConfigured())return null;
+  try{
+    const commaIdx=dataUrl.indexOf(',');
+    const base64Content=dataUrl.slice(commaIdx+1);
+    const mimeMatch=dataUrl.slice(0,commaIdx).match(/data:[^/]+\/([^;]+)/);
+    const ext=(mimeMatch?mimeMatch[1]:'jpg').split('+')[0];
+    const path='images/'+folder+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
+    const apiUrl='https://api.github.com/repos/'+GITHUB_CONFIG.owner+'/'+GITHUB_CONFIG.repo+'/contents/'+path;
+    const res=await fetch(apiUrl,{method:'PUT',headers:{'Authorization':'token '+GITHUB_CONFIG.token,'Content-Type':'application/json','Accept':'application/vnd.github+json'},body:JSON.stringify({message:'Upload '+path,content:base64Content,branch:GITHUB_CONFIG.branch})});
+    if(!res.ok)throw new Error('GitHub upload failed: '+res.status);
+    return 'https://raw.githubusercontent.com/'+GITHUB_CONFIG.owner+'/'+GITHUB_CONFIG.repo+'/'+GITHUB_CONFIG.branch+'/'+path;
+  }catch(e){console.warn('GitHub image upload failed:',e);return null;}
+}
+function fileToBase64(file){
+  return new Promise(function(resolve){
+    var reader=new FileReader();
+    reader.onload=function(e){resolve(e.target.result);};
+    reader.onerror=function(){resolve(null);};
+    reader.readAsDataURL(file);
+  });
+}
+// ── SUBMISSIONS (Content Creator / Graphic Designer / Marketer / Social Media Manager) ──
+// ── FLEET (Logistics Manager) ──
+let _fleetMap=null;
+async function renderFleet(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Fleet</div></div><div style="color:var(--mu);">Loading...</div>';
+  const riders=Object.entries(await fbG('rn_mall_riders')||{}).map(function(e){return Object.assign({_id:e[0]},e[1]);}).filter(function(r){return r.status!=='pending_review';});
+  const orders=Object.values(await fbG('rn_mall_orders')||{});
+  const activeDeliveries=orders.filter(function(o){return o.riderId&&o.deliveryStage&&o.deliveryStage!=='delivered'&&o.status!=='cancelled';});
+  const deliveredOrders=orders.filter(function(o){return o.deliveryStage==='delivered';});
+  const onlineRiders=riders.filter(function(r){return r.online;});
+  const liveRiders=riders.filter(function(r){return r.liveLat!=null&&r.liveTs&&(Date.now()-r.liveTs)<2*60*1000;});
+  const vehicles=Object.entries(await fbG('rn_mall_logistics_vehicles')||{}).map(function(e){return Object.assign({_id:e[0]},e[1]);});
+  c.innerHTML=`
+  <div class="page-hdr"><div class="page-hdr-title">Fleet</div><div class="page-hdr-sub">Every rider, every vehicle, one view.</div></div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-icon">${iconBadge('box',22)}</div><div class="stat-num">${riders.length}</div><div class="stat-lbl">Total Riders</div></div>
+    <div class="stat-card"><div class="stat-icon">${iconBadge('star',22)}</div><div class="stat-num" style="color:var(--su);">${onlineRiders.length}</div><div class="stat-lbl">Online Now</div></div>
+    <div class="stat-card"><div class="stat-icon">${iconBadge('clock',22)}</div><div class="stat-num" style="color:var(--or);">${activeDeliveries.length}</div><div class="stat-lbl">Active Deliveries</div></div>
+    <div class="stat-card"><div class="stat-icon">${iconBadge('chart',22)}</div><div class="stat-num">${deliveredOrders.length}</div><div class="stat-lbl">Delivered (all-time)</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Live Fleet Map</div>
+    <div style="font-size:11px;color:var(--mu);margin:6px 0 10px;">${liveRiders.length} rider${liveRiders.length!==1?'s':''} currently reporting live location.</div>
+    <div id="fleet-map" style="width:100%;height:280px;border-radius:9px;overflow:hidden;background:var(--card2);"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Add a Vehicle</div>
+    <div class="g2"><div class="fg"><label class="lbl">Vehicle Name / Plate</label><input class="inp" id="veh-name" placeholder="e.g. Bike 04 — ABC123XY"/></div><div class="fg"><label class="lbl">Type</label><select class="inp" id="veh-type"><option>Motorcycle</option><option>Bicycle</option><option>Car</option><option>Van/Truck</option></select></div></div>
+    <div class="fg"><label class="lbl">Assign to Rider (optional)</label><select class="inp" id="veh-rider"><option value="">Unassigned</option>${riders.map(function(r){return '<option value="'+r._id+'">'+r.name+'</option>';}).join('')}</select></div>
+    <button class="btn btn-or" onclick="addVehicle()">${iconBadge('box',14)} Add Vehicle</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Vehicle Registry</div>
+    <div style="margin-top:8px;">${vehicles.length?vehicles.map(function(v){
+      var statusColor=v.status==='active'?'var(--su)':v.status==='maintenance'?'var(--re)':'var(--mu)';
+      var riderName=v.riderId?(riders.find(function(r){return r._id===v.riderId;})||{}).name:null;
+      return '<div style="padding:10px 0;border-top:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><div><div style="font-weight:700;font-size:13px;color:var(--wh);">'+v.name+'</div><div style="font-size:11px;color:var(--mu);">'+v.type+(riderName?' &middot; '+riderName:' &middot; Unassigned')+'</div></div><select class="inp" style="width:auto;margin-bottom:0;" onchange="setVehicleStatus(\''+v._id+'\',this.value)"><option value="active" '+(v.status==='active'?'selected':'')+'>Active</option><option value="maintenance" '+(v.status==='maintenance'?'selected':'')+'>Maintenance</option><option value="idle" '+((!v.status||v.status==='idle')?'selected':'')+'>Idle</option></select></div>';
+    }).join(''):'<div style="color:var(--mu);font-size:12px;">No vehicles added yet.</div>'}</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Riders — Message Directly</div>
+    <div style="margin-top:8px;">${riders.length?riders.map(function(r){
+      var isLive=r.liveLat!=null&&r.liveTs&&(Date.now()-r.liveTs)<2*60*1000;
+      return '<div style="padding:10px 0;border-top:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><div><div style="font-weight:700;font-size:13px;color:var(--wh);">'+r.name+'</div><div style="font-size:11px;color:var(--mu);">'+(r.online?'<span style="color:var(--su);">● Online</span>':'<span style="color:var(--mu);">○ Offline</span>')+(isLive?' &middot; Live location active':'')+'</div></div><button class="btn btn-dk" style="font-size:11px;padding:6px 14px;" onclick="openFleetRiderChat(\''+r._id+'\',\''+r.name.replace(/'/g,"\\'")+'\')">'+iconBadge('chat',12)+' Message</button></div>';
+    }).join(''):'<div style="color:var(--mu);font-size:12px;">No riders yet.</div>'}</div>
+  </div>`;
+  initFleetMap(riders);
+}
+function loadLeafletIfNeeded(){
+  if(window._leafletLoadPromise)return window._leafletLoadPromise;
+  window._leafletLoadPromise=new Promise(function(resolve){
+    if(typeof L!=='undefined'){resolve();return;}
+    const cssLink=document.createElement('link');
+    cssLink.rel='stylesheet';cssLink.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    document.head.appendChild(cssLink);
+    const script=document.createElement('script');
+    script.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    script.onload=function(){resolve();};
+    script.onerror=function(){resolve();};
+    document.head.appendChild(script);
+  });
+  return window._leafletLoadPromise;
+}
+async function initFleetMap(allRiders){
+  await loadLeafletIfNeeded();
+  const el=document.getElementById('fleet-map');
+  if(!el||typeof L==='undefined')return;
+  if(_fleetMap){_fleetMap.remove();_fleetMap=null;}
+  const withLocation=allRiders.filter(function(r){return r.liveLat!=null;});
+  const start=withLocation.length?[withLocation[0].liveLat,withLocation[0].liveLng]:[6.5244,3.3792];
+  const map=L.map('fleet-map',{zoomControl:true,attributionControl:true}).setView(start,withLocation.length?12:6);
+  _fleetMap=map;
+  var fleetTiles=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',{maxZoom:20,maxNativeZoom:20,subdomains:'abcd',attribution:'© OpenStreetMap © CARTO'}).addTo(map);
+  var fleetTileErrors=0,fleetFellBack=false;
+  fleetTiles.on('tileerror',function(){
+    fleetTileErrors++;
+    if(fleetTileErrors>3&&!fleetFellBack){
+      fleetFellBack=true;
+      map.removeLayer(fleetTiles);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,subdomains:'abc',attribution:'© OpenStreetMap contributors'}).addTo(map);
+    }
+  });
+  setTimeout(function(){if(map)map.invalidateSize();},150);
+  const bounds=[];
+  fbG('rn_mall_settings').then(function(settingsData){
+    var pickup=(settingsData||{}).pickupLocation;
+    if(pickup&&pickup.lat!=null){
+      var storeIcon=L.divIcon({html:'<div style="background:#FF6A00;width:28px;height:28px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid #fff;">🏬</div>',iconSize:[28,28],className:''});
+      L.marker([pickup.lat,pickup.lng],{icon:storeIcon}).addTo(map).bindPopup('Pickup Point — RichNation Mall');
+      bounds.push([pickup.lat,pickup.lng]);
+      if(bounds.length>1)map.fitBounds(L.latLngBounds(bounds),{padding:[40,40]});
+    }
+  });
+  withLocation.forEach(function(r){
+    var isLive=r.liveTs&&(Date.now()-r.liveTs)<2*60*1000;
+    var minsAgo=r.liveTs?Math.round((Date.now()-r.liveTs)/60000):null;
+    const icon=L.divIcon({html:'<div style="background:#161616;width:30px;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:15px;border:2px solid '+(isLive?'#22c55e':'#FF6A00')+';">🏍️</div>',iconSize:[30,30],className:''});
+    L.marker([r.liveLat,r.liveLng],{icon:icon}).addTo(map).bindPopup(r.name+(isLive?' — live':' — last seen '+(minsAgo!=null?minsAgo+' min ago':'a while ago')));
+    bounds.push([r.liveLat,r.liveLng]);
+  });
+  if(bounds.length>1)map.fitBounds(L.latLngBounds(bounds),{padding:[40,40]});
+  const searchBox=L.control({position:'topleft'});
+  searchBox.onAdd=function(){
+    const div=L.DomUtil.create('div');
+    div.innerHTML='<input id="fleet-map-search" placeholder="Search a location..." style="width:200px;padding:7px 10px;border-radius:6px;border:1px solid #FF6A00;background:#161616;color:#fff;font-size:12px;"/>';
+    L.DomEvent.disableClickPropagation(div);
+    return div;
+  };
+  searchBox.addTo(map);
+  document.getElementById('fleet-map-search').addEventListener('keydown',function(e){
+    if(e.key==='Enter')searchFleetMapLocation(e.target.value);
+  });
+}
+async function searchFleetMapLocation(query){
+  if(!query||!_fleetMap)return;
+  try{
+    const res=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(query+', Nigeria'));
+    const data=await res.json();
+    if(data&&data[0]){
+      const lat=parseFloat(data[0].lat),lng=parseFloat(data[0].lon);
+      _fleetMap.setView([lat,lng],15);
+      L.marker([lat,lng]).addTo(_fleetMap).bindPopup(query).openPopup();
+    }else{
+      toast('Location not found','err');
+    }
+  }catch(e){toast('Search failed — check your connection','err');}
+}
+async function addVehicle(){
+  const name=(document.getElementById('veh-name').value||'').trim();
+  const type=document.getElementById('veh-type').value;
+  const riderId=document.getElementById('veh-rider').value||null;
+  if(!name){toast('Enter a vehicle name or plate number','err');return;}
+  await fbP('rn_mall_logistics_vehicles',{name:name,type:type,riderId:riderId,status:'active',addedBy:staff.name,date:ds(),ts:Date.now()});
+  toast('Vehicle added!');
+  snav('fleet');
+}
+async function setVehicleStatus(id,status){
+  await fbU('rn_mall_logistics_vehicles/'+id,{status:status});
+  toast('Vehicle status updated!');
+}
+async function openFleetRiderChat(riderId,riderName){
+  const c=document.getElementById('content');
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">'+riderName+'</div></div><div class="card"><div id="fc-msgs" style="margin-bottom:12px;max-height:360px;overflow-y:auto;"></div><div style="display:flex;gap:8px;"><input class="inp" id="fc-input" placeholder="Type a message..." style="flex:1;margin-bottom:0;" onkeydown="if(event.key===\'Enter\')sendFleetMsg(\''+riderId+'\')"/><button class="btn btn-or" onclick="sendFleetMsg(\''+riderId+'\')">Send</button></div></div><button class="btn" style="margin-top:10px;" onclick="snav(\'fleet\')">← Back to Fleet</button>';
+  await loadFleetChat(riderId);
+}
+async function loadFleetChat(riderId){
+  const key='rn_mall_rider_admin_chat_'+riderId;
+  const msgs=Object.values(await fbG(key)||{}).sort(function(a,b){return (a.ts||0)-(b.ts||0);});
+  const el=document.getElementById('fc-msgs');if(!el)return;
+  el.innerHTML=msgs.length?msgs.map(function(m){
+    const senderRole=m.senderRole?(ROLE_LABELS[m.senderRole]||m.senderRole):(m.isAdmin?'Admin':'Rider');
+    const label=m.isAdmin?(m.senderName?m.senderName+' — '+senderRole:'Admin'):(m.senderName||'Rider');
+    return '<div style="display:flex;'+(m.isAdmin?'flex-direction:row-reverse;':'')+'gap:10px;margin-bottom:10px;"><div style="width:28px;height:28px;border-radius:99px;background:'+(m.isAdmin?'var(--or)':'var(--card2)')+';color:'+(m.isAdmin?'#fff':'var(--w2)')+';font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+(m.senderName||'R').charAt(0)+'</div><div><div style="background:'+(m.isAdmin?'rgba(255,106,0,0.1)':'var(--card2)')+';padding:8px 12px;border-radius:9px;font-size:13px;max-width:100%;">'+m.text+'</div><div style="font-size:9px;color:var(--mu);margin-top:2px;'+(m.isAdmin?'text-align:right;':'')+'">'+label+'</div></div></div>';
+  }).join(''):'<div style="color:var(--mu);font-size:13px;">No messages yet.</div>';
+  el.scrollTop=el.scrollHeight;
+}
+async function sendFleetMsg(riderId){
+  const inp=document.getElementById('fc-input');const text=(inp.value||'').trim();if(!text)return;
+  const key='rn_mall_rider_admin_chat_'+riderId;
+  await fbP(key,{senderId:staff._id,senderName:staff.name,senderRole:staff.role,text:text,isAdmin:true,ts:Date.now(),date:ds()});
+  await fbP('rn_mall_rider_notifications/'+riderId,{type:'admin_reply',from:staff.name,preview:text.slice(0,60),date:ds(),read:false,ts:Date.now()});
+  inp.value='';await loadFleetChat(riderId);
+}
+async function renderSubmissions(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">My Submissions</div></div><div style="color:var(--mu);">Loading...</div>';
+  const mine=Object.entries(await fbG('rn_mall_staff_submissions')||{}).map(function(e){return Object.assign({_id:e[0]},e[1]);}).filter(function(s){return s.staffId===staff._id;}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  const statusColor={pending:'var(--or)',approved:'var(--su)',rejected:'var(--re)'};
+  c.innerHTML=`
+  <div class="page-hdr"><div class="page-hdr-title">My Submissions</div><div class="page-hdr-sub">Send your work to CEO / General Manager for review before it goes out.</div></div>
+  <div class="card">
+    <div class="fg"><label class="lbl">Title</label><input class="inp" id="sub-title" placeholder="What is this work?" maxlength="80"/></div>
+    <div class="fg"><label class="lbl">Description</label><textarea class="ta" id="sub-desc" rows="3" placeholder="A short note on what this is and where it's meant to go..."></textarea></div>
+    <div class="fg"><label class="lbl">Google Link (Drive, Docs, Sheets — optional)</label><input class="inp" id="sub-link" placeholder="https://drive.google.com/..."/></div>
+    <div class="fg"><label class="lbl">Or Upload a File (optional)</label><input class="inp" id="sub-file" type="file"/></div>
+    <button class="btn btn-or" onclick="submitWork()">${iconBadge('file',14)} Send for Approval</button>
+  </div>
+  <div class="card-title" style="margin:16px 0 10px;">My Past Submissions</div>
+  ${mine.length?mine.map(function(s){return '<div class="card" style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;"><div style="font-weight:800;font-size:14px;color:var(--wh);">'+s.title+'</div><span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;text-transform:uppercase;background:'+statusColor[s.status||'pending']+'22;color:'+statusColor[s.status||'pending']+';">'+(s.status||'pending')+'</span></div>'
+    +(s.description?'<div style="font-size:13px;color:var(--w2);margin-top:6px;">'+s.description+'</div>':'')
+    +(s.link?'<div style="margin-top:8px;"><a href="javascript:void(0)" data-uri="'+s.link+'" onclick="openDataDoc(this.dataset.uri)" style="color:var(--or);font-size:12px;">'+iconBadge('file',12)+' View Link</a></div>':'')
+    +(s.fileData?'<div style="margin-top:8px;"><a href="javascript:void(0)" data-uri="'+s.fileData+'" onclick="openDataDoc(this.dataset.uri)" style="color:var(--or);font-size:12px;">'+iconBadge('file',12)+' View File</a></div>':'')
+    +(s.reviewNote?'<div style="background:var(--card2);border-radius:8px;padding:10px;margin-top:10px;"><div style="font-size:10px;color:'+statusColor[s.status||'pending']+';font-weight:700;margin-bottom:4px;">Reviewer note:</div><div style="font-size:12px;color:var(--w2);">'+s.reviewNote+'</div></div>':'')
+    +'<div style="font-size:10px;color:var(--mu);margin-top:8px;">'+s.date+'</div></div>';}).join(''):'<div class="card" style="text-align:center;padding:30px;color:var(--mu);">No submissions yet.</div>'}`;
+}
+async function submitWork(){
+  const title=(document.getElementById('sub-title').value||'').trim();
+  const description=(document.getElementById('sub-desc').value||'').trim();
+  const link=(document.getElementById('sub-link').value||'').trim();
+  const file=document.getElementById('sub-file').files[0];
+  if(!title){toast('Give your submission a title','err');return;}
+  if(!link&&!file){toast('Add a Google link or upload a file','err');return;}
+  let fileData=null,fileName=null;
+  if(file){toast('Uploading…');fileData=await fileToBase64(file);fileName=file.name;if(fileData){const url=isGithubConfigured()?await uploadDataUrlToGithub(fileData,'submissions'):null;if(url)fileData=url;}}
+  await fbP('rn_mall_staff_submissions',{staffId:staff._id,staffName:staff.name,role:staff.role,title,description,link:link||null,fileData:fileData,fileName:fileName,status:'pending',date:ds(),ts:Date.now()});
+  await fbP('rn_mall_notifications',{type:'staff_submission',staffName:staff.name,title:title,date:ds(),read:false,ts:Date.now()});
+  toast('Sent for approval!');
+  snav('submissions');
+}
+// ── APPROVALS (CEO / General Manager) ──
+async function renderApprovals(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Approvals</div></div><div style="color:var(--mu);">Loading...</div>';
+  const all=Object.entries(await fbG('rn_mall_staff_submissions')||{}).map(function(e){return Object.assign({_id:e[0]},e[1]);}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  const pending=all.filter(function(s){return (s.status||'pending')==='pending';});
+  const reviewed=all.filter(function(s){return s.status&&s.status!=='pending';});
+  const statusColor={pending:'var(--or)',approved:'var(--su)',rejected:'var(--re)'};
+  function card(s){
+    return '<div class="card" style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;"><div><div style="font-weight:800;font-size:14px;color:var(--wh);">'+s.title+'</div><div style="font-size:11px;color:var(--mu);margin-top:2px;">'+(s.staffName||'Unknown')+' &middot; '+(ROLE_LABELS[s.role]||s.role)+'</div></div><span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;text-transform:uppercase;background:'+statusColor[s.status||'pending']+'22;color:'+statusColor[s.status||'pending']+';">'+(s.status||'pending')+'</span></div>'
+      +(s.description?'<div style="font-size:13px;color:var(--w2);margin-top:8px;">'+s.description+'</div>':'')
+      +(s.link?'<div style="margin-top:8px;"><a href="javascript:void(0)" data-uri="'+s.link+'" onclick="openDataDoc(this.dataset.uri)" style="color:var(--or);font-size:12px;">'+iconBadge('file',12)+' Open Link</a></div>':'')
+      +(s.fileData?'<div style="margin-top:8px;"><a href="javascript:void(0)" data-uri="'+s.fileData+'" onclick="openDataDoc(this.dataset.uri)" style="color:var(--or);font-size:12px;">'+iconBadge('file',12)+' Open File'+(s.fileName?' — '+s.fileName:'')+'</a></div>':'')
+      +(s.reviewNote?'<div style="background:var(--card2);border-radius:8px;padding:10px;margin-top:10px;"><div style="font-size:10px;color:'+statusColor[s.status||'pending']+';font-weight:700;margin-bottom:4px;">Your note:</div><div style="font-size:12px;color:var(--w2);">'+s.reviewNote+'</div></div>':'')
+      +'<div style="font-size:10px;color:var(--mu);margin-top:8px;">'+s.date+'</div>'
+      +((s.status||'pending')==='pending'?'<div style="display:flex;gap:8px;margin-top:12px;"><button class="btn btn-or" style="font-size:11px;padding:6px 14px;" onclick="reviewSubmission(\''+s._id+'\',\'approved\')">Approve</button><button class="btn btn-re" style="font-size:11px;padding:6px 14px;" onclick="reviewSubmission(\''+s._id+'\',\'rejected\')">Reject</button></div>':'')
+      +'</div>';
+  }
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Approvals</div><div class="page-hdr-sub">Work submitted by the content team, waiting on your review.</div></div>'
+    +(pending.length?pending.map(card).join(''):'<div class="card" style="text-align:center;padding:30px;color:var(--mu);">Nothing pending — you\'re all caught up.</div>')
+    +(reviewed.length?'<div class="card-title" style="margin:20px 0 10px;">Reviewed</div>'+reviewed.map(card).join(''):'');
+}
+async function reviewSubmission(id,decision){
+  const note=prompt(decision==='approved'?'Optional note for the submitter (or leave blank):':'Feedback for the submitter (required for a rejection):');
+  if(note===null)return;
+  if(decision==='rejected'&&!note.trim()){toast('Feedback is required when rejecting','err');return;}
+  const s=await fbG('rn_mall_staff_submissions/'+id);if(!s)return;
+  await fbU('rn_mall_staff_submissions/'+id,{status:decision,reviewNote:note.trim()||null,reviewedBy:staff.name,reviewedAt:Date.now()});
+  await fbP('rn_mall_staff_notifications/'+s.staffId,{type:decision==='approved'?'submission_approved':'submission_rejected',title:s.title,note:note.trim()||null,date:ds(),read:false,ts:Date.now()});
+  toast(decision==='approved'?'Approved!':'Rejected — feedback sent');
+  snav('approvals');
+}
+async function renderComplaints(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Complaints</div></div><div style="color:var(--mu);">Loading...</div>';
+  const mine=Object.entries(await fbG('rn_mall_staff_complaints')||{}).map(function(e){return Object.assign({_id:e[0]},e[1]);}).filter(function(r){return r.staffId===staff._id;}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  c.innerHTML=`
+  <div class="page-hdr"><div class="page-hdr-title">Complaints</div><div class="page-hdr-sub">Report a workplace issue, dispute, or request directly to admin.</div></div>
+  <div class="card">
+    <div class="fg"><label class="lbl">What's the issue?</label><textarea class="ta" id="cp-msg" rows="4" placeholder="Explain your complaint..."></textarea></div>
+    <button class="btn btn-or" onclick="submitComplaint()">Submit Complaint</button>
+  </div>
+  <div class="card-title" style="margin:16px 0 10px;">My Complaints</div>
+  ${mine.length?mine.map(function(r){return '<div class="data-row"><div style="flex:1;"><div style="font-size:12px;color:var(--w2);">'+r.message+'</div><div class="row-meta">'+r.date+' &middot; '+(r.status||'pending')+'</div>'+(r.adminReply?'<div style="font-size:11px;color:var(--w2);margin-top:4px;background:var(--card2);padding:6px 8px;border-radius:6px;">Reply: '+r.adminReply+'</div>':'')+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No complaints filed yet.</div>'}`;
+}
+async function submitComplaint(){
+  const message=(document.getElementById('cp-msg').value||'').trim();
+  if(!message){toast('Please explain your complaint','err');return;}
+  await fbP('rn_mall_staff_complaints',{staffId:staff._id,staffName:staff.name,message,status:'pending',date:ds(),ts:Date.now()});
+  toast('Complaint submitted!');
+  snav('complaints');
+}
+
+// ── LEAVE ──
+async function renderLeave(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Leave Requests</div></div><div style="color:var(--mu);">Loading...</div>';
+  const mine=Object.entries(await fbG('rn_mall_staff_leave')||{}).map(function(e){return Object.assign({_id:e[0]},e[1]);}).filter(function(r){return r.staffId===staff._id;}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  c.innerHTML=`
+  <div class="page-hdr"><div class="page-hdr-title">Leave Requests</div></div>
+  <div class="card">
+    <div class="g2">
+      <div class="fg"><label class="lbl">From</label><input class="inp" type="date" id="lv-from"/></div>
+      <div class="fg"><label class="lbl">To</label><input class="inp" type="date" id="lv-to"/></div>
+    </div>
+    <div class="fg"><label class="lbl">Reason</label><textarea class="ta" id="lv-reason" rows="3" placeholder="Reason for leave..."></textarea></div>
+    <button class="btn btn-or" onclick="submitLeave()">Request Leave</button>
+  </div>
+  <div class="card-title" style="margin:16px 0 10px;">My Requests</div>
+  ${mine.length?mine.map(function(r){return '<div class="data-row"><div style="flex:1;"><div class="row-name">'+r.from+' to '+r.to+'</div><div style="font-size:12px;color:var(--w2);margin-top:4px;">'+r.reason+'</div><div class="row-meta">Status: '+(r.status||'pending')+'</div></div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No leave requests yet.</div>'}`;
+}
+async function submitLeave(){
+  const from=document.getElementById('lv-from').value,to=document.getElementById('lv-to').value;
+  const reason=(document.getElementById('lv-reason').value||'').trim();
+  if(!from||!to||!reason){toast('Fill in all fields','err');return;}
+  await fbP('rn_mall_staff_leave',{staffId:staff._id,staffName:staff.name,from,to,reason,status:'pending',date:ds(),ts:Date.now()});
+  toast('Leave request submitted!');
+  snav('leave');
+}
+
+// ── MESSAGES (DMs, General Discussion, Role Community) ──
+async function renderMessages(c){
+  c.innerHTML=`
+  <div class="page-hdr"><div class="page-hdr-title">Messages</div></div>
+  <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+    <button class="btn btn-or" onclick="msgTab('dm')" id="mtab-dm">Direct Messages</button>
+    <button class="btn btn-dk" onclick="msgTab('general')" id="mtab-general">General Discussion</button>
+    <button class="btn btn-dk" onclick="msgTab('role')" id="mtab-role">${ROLE_LABELS[staff.role]||'Team'} Community</button>
+  </div>
+  <div id="msg-body"></div>`;
+  msgTab('dm');
+}
+function msgTab(tab){
+  ['dm','general','role'].forEach(function(t){document.getElementById('mtab-'+t).className='btn '+(t===tab?'btn-or':'btn-dk');});
+  const body=document.getElementById('msg-body');
+  if(tab==='dm')renderDMList(body);
+  else if(tab==='general')renderChannelChat(body,'rn_mall_staff_general_chat','general');
+  else renderChannelChat(body,'rn_mall_staff_role_chat_'+staff.role,'role');
+}
+async function renderDMList(c){
+  c.innerHTML='<div style="color:var(--mu);">Loading...</div>';
+  const all=await fbG('rn_mall_staff')||{};
+  const others=Object.entries(all).map(function(e){return Object.assign({_id:e[0]},e[1]);}).filter(function(s){return s._id!==staff._id&&s.status!=='suspended';});
+  c.innerHTML='<div class="card"><div class="card-title">Team Members</div><div style="margin-top:8px;">'
+    +(others.length?others.map(function(o){return '<div class="data-row" onclick="openDM(\''+o._id+'\',\''+o.name.replace(/'/g,"\\'")+'\')" style="cursor:pointer;"><div class="chat-av">'+ini(o.name)+'</div><div style="flex:1;"><div class="row-name">'+o.name+'</div><div class="row-meta">'+(ROLE_LABELS[o.role]||o.role)+'</div></div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No other staff yet.</div>')
+    +'</div></div>';
+}
+function dmKey(id1,id2){return [id1,id2].sort().join('__');}
+async function openDM(otherId,otherName){
+  const body=document.getElementById('msg-body');
+  const key='rn_mall_staff_dm_'+dmKey(staff._id,otherId);
+  body.innerHTML='<div class="card"><div class="card-title">💬 '+otherName+'</div><div id="dm-msgs" style="margin:12px 0;max-height:360px;overflow-y:auto;"></div><div style="display:flex;gap:8px;"><input class="inp" id="dm-input" placeholder="Type a message..." style="flex:1;" onkeydown="if(event.key===\'Enter\')sendDM(\''+key+'\',\''+otherId+'\')"/><button class="btn btn-or" onclick="sendDM(\''+key+'\',\''+otherId+'\')">Send</button></div><button class="btn" style="margin-top:10px;" onclick="msgTab(\'dm\')">← Back to Team</button></div>';
+  await loadChannelMsgs(key,'dm-msgs',true);
+}
+async function sendDM(key,otherId){
+  const inp=document.getElementById('dm-input');const text=(inp.value||'').trim();if(!text)return;
+  await fbP(key,{senderId:staff._id,senderName:staff.name,senderRole:staff.role,text,ts:Date.now(),date:ds()});
+  await fbP('rn_mall_staff_notifications/'+otherId,{type:'dm',from:staff.name,preview:text.slice(0,80),date:ds(),read:false,ts:Date.now()});
+  inp.value='';await loadChannelMsgs(key,'dm-msgs',true);
+}
+async function renderChannelChat(c,key,mode){
+  if(mode==='general'){
+    const settings=await fbG('rn_mall_settings')||{};
+    if(settings.staffDiscussionOpen===false){
+      c.innerHTML='<div class="card" style="text-align:center;padding:30px;color:var(--mu);">🔒 General Discussion is currently closed by admin.</div>';
+      return;
+    }
+  }
+  c.innerHTML='<div class="card"><div id="ch-msgs" style="margin-bottom:12px;max-height:400px;overflow-y:auto;"></div><div style="display:flex;gap:8px;"><input class="inp" id="ch-input" placeholder="Type a message..." style="flex:1;" onkeydown="if(event.key===\'Enter\')sendChannelMsg(\''+key+'\',\''+mode+'\')"/><button class="btn btn-or" onclick="sendChannelMsg(\''+key+'\',\''+mode+'\')">Send</button></div></div>';
+  await loadChannelMsgs(key,'ch-msgs');
+}
+async function sendChannelMsg(key,mode){
+  const inp=document.getElementById('ch-input');const text=(inp.value||'').trim();if(!text)return;
+  await fbP(key,{senderId:staff._id,senderName:staff.name,senderRole:staff.role,text,ts:Date.now(),date:ds()});
+  const all=await fbG('rn_mall_staff')||{};
+  const recipients=Object.entries(all).filter(function(e){
+    if(e[0]===staff._id||e[1].status==='suspended'||e[1].status==='pending_review')return false;
+    return mode==='general'||e[1].role===staff.role;
+  });
+  const notifType=mode==='general'?'general_discussion':'role_community';
+  recipients.forEach(function(e){
+    fbP('rn_mall_staff_notifications/'+e[0],{type:notifType,from:staff.name,preview:text.slice(0,80),date:ds(),read:false,ts:Date.now()});
+  });
+  inp.value='';await loadChannelMsgs(key,'ch-msgs');
+}
+async function loadChannelMsgs(key,elId,isDM){
+  const msgsData=await fbG(key)||{};
+  const entries=Object.entries(msgsData).sort(function(a,b){return (a[1].ts||0)-(b[1].ts||0);});
+  const el=document.getElementById(elId);if(!el)return;
+  el.innerHTML=entries.length?entries.map(function(e){
+    var msgKey=e[0],m=e[1];
+    const mine=m.senderId===staff._id;
+    const senderRole=m.senderRole?(ROLE_LABELS[m.senderRole]||m.senderRole):'';
+    const tick=isDM&&mine?'<div style="font-size:9px;color:'+(m.readByRecipient?'#5b9bf5':'var(--mu)')+';margin-top:2px;">'+(m.readByRecipient?'✔✔ Read':'✔ Sent')+'</div>':'';
+    return '<div class="chat-msg'+(mine?' own':'')+'"><div class="chat-av">'+ini(m.senderName)+'</div><div><div class="chat-bubble">'+m.text+'</div><div style="font-size:9px;color:var(--mu);margin-top:2px;">'+(mine?'You':m.senderName+(senderRole?' — '+senderRole:''))+'</div>'+tick+'</div></div>';
+  }).join(''):'<div style="color:var(--mu);font-size:12px;text-align:center;padding:20px;">No messages yet — say hello!</div>';
+  el.scrollTop=el.scrollHeight;
+  if(isDM){
+    entries.forEach(function(e){if(e[1].senderId!==staff._id&&!e[1].readByRecipient)fbU(key+'/'+e[0],{readByRecipient:true});});
+  }
+}
+
+// ── MY ACTIVITY ──
+async function renderMyActivity(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">My Activity</div></div><div style="color:var(--mu);">Loading...</div>';
+  const log=Object.values(await fbG('rn_mall_activity_log')||{}).filter(function(l){return l.by===staff.email;}).sort(function(a,b){return (b.ts||0)-(a.ts||0);}).slice(0,50);
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">My Activity</div><div class="page-hdr-sub">Your own action history — full transparency.</div></div>'
+    +(log.length?log.map(function(l){return '<div class="data-row"><div style="flex:1;"><div class="row-name">'+l.action+'</div><div class="row-meta">'+(l.detail||'')+'</div></div><div class="row-meta">'+l.date+'</div></div>';}).join(''):'<div class="card" style="text-align:center;padding:40px;color:var(--mu);">No activity logged yet.</div>');
+}
+
+// ── PROFILE ──
+async function renderCompanyPolicy(c){
+  c.innerHTML=`
+  <div class="page-hdr"><div class="page-hdr-title">Company Policy</div><div class="page-hdr-sub">RichNation Global Ltd — Staff Terms &amp; Conditions — Effective 2026</div></div>
+  ${!staff.policyRead?`<div class="card" style="border-color:rgba(255,140,0,0.4);background:rgba(255,140,0,0.06);"><div style="font-size:13px;color:var(--or);font-weight:700;">Please read this in full, then confirm below.</div></div>`:''}
+  <div class="card"><div class="card-title">Who We Are</div><div style="font-size:12px;color:var(--w2);line-height:1.8;margin-top:8px;">RichNation Global Ltd (RC 8998019) is a digital media, education, and growth company founded by Ubong Rich, operating six divisions: RichNation Academy, RichNation Music, RichNation Animation, RichNation Podcast (WBPT), RichNation Stories, and RichNation Mall. Our mission: <strong style="color:var(--wh);">Build People. Build Platforms. Create Millionaires.</strong></div></div>
+  ${[
+    ['1. Core Hours','You must be reachable during your assigned working hours, set by management and shown on your dashboard. Unavailability without prior notice is a strike-eligible offence.'],
+    ['2. Weekly Reports','A work report is due every Friday by 8:00 PM. No report, no notice = strike. This is not negotiable case-by-case.'],
+    ['3. Deadlines','Deadlines are binding. Extensions require written management approval at least 48 hours in advance — not a last-minute message.'],
+    ['4. Absence','2+ consecutive working days absent without notice is strike-eligible. Medical emergencies require documentation submitted as soon as reasonably possible.'],
+    ['5. Confidentiality','Sharing company data, customer information, product/pricing details, or internal discussions outside the company — with anyone, for any reason — is grounds for immediate suspension, no strikes needed.'],
+    ['6. Customer Data Protection','You may only access customer information relevant to your role and current task. Browsing customer records out of curiosity, sharing a customer\'s order/address/payment info with anyone outside the company, or using customer data for personal reasons is treated the same as a confidentiality breach — immediate suspension.'],
+    ['7. Financial Integrity','Any manipulation of prices, discounts, refunds, wallet balances, or payouts — for yourself, a friend, or anyone — outside your authorized role is treated as fraud and results in immediate termination and may be reported to authorities.'],
+    ['8. Order & Inventory Accuracy','Product listings, stock counts, and order statuses must be accurate and truthful at all times. Deliberately falsifying any of these to hit a target or avoid a conversation with a customer is a strike-eligible offence.'],
+    ['9. Salary & Earnings','Compensation is reviewed monthly by management and is not open to individual negotiation outside that review. All payments go to registered, verified bank accounts only.'],
+    ['10. Bank Account Details','You must submit accurate bank details through your dashboard. Management is not liable for failed or misdirected transfers caused by incorrect information you supplied. Unverified accounts do not get paid.'],
+    ['11. Strikes, Suspension &amp; Termination','3 confirmed strikes = automatic suspension, pending full review by the General Manager. Suspended staff are not paid until reinstatement is confirmed. Violations after reinstatement = permanent termination. No second reinstatement.'],
+    ['12. Management Authority','Management (Admin/CEO) retains full authority to review, edit, or override any staff record, task, or entry on this platform at any time. This is absolute and not open to dispute.'],
+    ['13. Conduct','You represent RichNation in every interaction. Disrespect, harassment, or dishonesty toward a customer or teammate is strike-eligible and may be immediate termination depending on severity.'],
+    ['14. System Use','Your login is yours alone — never share it. Actions taken under your login are your responsibility, whether you performed them or not.']
+  ].map(function(item){return '<div class="card"><div class="card-title">'+item[0]+'</div><div style="font-size:12px;color:var(--w2);line-height:1.8;margin-top:8px;">'+item[1]+'</div></div>';}).join('')}
+  <div class="card" style="text-align:center;">
+    ${staff.policyRead?`<div style="color:var(--su);font-weight:700;font-size:13px;">✔ You confirmed reading this on ${staff.policyReadDate||''}</div>`:`<button class="btn btn-or btn-lg" onclick="confirmPolicyRead()">I've Read and Understood This Policy</button>`}
+  </div>`;
+}
+async function confirmPolicyRead(){
+  const dateStr=ds();
+  await fbU('rn_mall_staff/'+staff._id,{policyRead:true,policyReadDate:dateStr});
+  staff.policyRead=true;staff.policyReadDate=dateStr;
+  sessionStorage.setItem('rnm_staff_session',JSON.stringify(staff));
+  toast('Thanks for confirming!');
+  snav('policy');
+}
+function renderProfile(c){
+  const roleObj=STAFF_ROLES.find(function(r){return r.id===staff.role;});
+  c.innerHTML=`
+  <div class="page-hdr"><div class="page-hdr-title">My Profile</div></div>
+  <div class="card" style="max-width:460px;">
+    <div style="text-align:center;margin-bottom:16px;">
+      <div onclick="document.getElementById('pf-photo-upload').click()" style="width:80px;height:80px;border-radius:99px;background:var(--card2);border:2px solid var(--bdr);margin:0 auto;cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+        ${staff.photo?'<img src="'+staff.photo+'" style="width:100%;height:100%;object-fit:cover;"/>':'<span style="font-size:11px;color:var(--mu);">Upload Photo</span>'}
+      </div>
+      <input type="file" id="pf-photo-upload" accept="image/*" style="display:none;" onchange="uploadMyPhoto()">
+      <div style="font-size:11px;color:var(--or);cursor:pointer;margin-top:6px;" onclick="document.getElementById('pf-photo-upload').click()">Change Photo</div>
+    </div>
+    <div style="text-align:center;margin-bottom:16px;">
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:18px;">${staff.name}</div>
+      <div style="font-size:12px;color:var(--or);font-weight:700;margin-top:2px;">${staff.staffNumber||'—'}</div>
+      <div style="font-size:11px;color:var(--mu);margin-top:2px;">${roleObj?roleObj.label:staff.role} &middot; ${staff.department||'—'}</div>
+    </div>
+    <div class="fg"><label class="lbl">Full Name</label><div class="inp" style="color:var(--mu);">${staff.name||'—'}</div></div>
+    <div class="fg"><label class="lbl">Email</label><div class="inp" style="color:var(--mu);">${staff.email||'—'}</div></div>
+    <div class="fg"><label class="lbl">Phone</label><div class="inp" style="color:var(--mu);">${staff.phone||'—'}</div></div>
+    <div class="fg"><label class="lbl">Address</label><div class="inp" style="color:var(--mu);">${staff.address||'—'}</div></div>
+    <div class="fg"><label class="lbl">Date of Birth</label><div class="inp" style="color:var(--mu);">${staff.dob||'—'}</div></div>
+    <div style="font-size:11px;color:var(--mu);margin-bottom:14px;">These details are managed by admin. To request a change, use Complaints.</div>
+    <div class="fg"><label class="lbl">New Password (leave blank to keep current)</label><div style="position:relative;"><input class="inp" id="pf-pass" type="password" placeholder="New password" style="padding-right:56px;"/><span onclick="togglePwVisibility('pf-pass',this)" style="position:absolute;right:12px;top:12px;font-size:11px;color:var(--or);cursor:pointer;font-weight:700;">Show</span></div></div>
+    <button class="btn btn-or btn-lg" onclick="saveMyProfile()">Save Password</button>
+  </div>
+  <div class="card" style="max-width:460px;">
+    <div class="card-title">📋 My Bio</div>
+    <div style="font-size:12px;color:var(--w2);line-height:1.8;margin-top:8px;">${staff.bio||'No bio set yet.'}</div>
+    <div style="font-size:11px;color:var(--mu);margin-top:8px;">Want this changed? Reach out via Complaints.</div>
+  </div>
+  <div class="card" style="max-width:460px;">
+    <div class="card-title">🎯 My Job Description</div>
+    <div style="font-size:12px;color:var(--w2);line-height:1.8;margin-top:8px;">${ROLE_JOB_DESCRIPTIONS[staff.role]||'Contact HR for your job description.'}</div>
+  </div>
+  <div class="card" style="max-width:460px;">
+    <div class="card-title">🏦 Bank Account Details</div>
+    <div style="font-size:11px;color:var(--mu);margin:8px 0 12px;">Where you'd like to receive your salary payments.${staff.bankVerified?' <strong style="color:var(--su);">✔ Verified by admin</strong>':staff.bankAcctNo?' <strong style="color:var(--or);">Awaiting admin verification</strong>':''}</div>
+    <div class="fg"><label class="lbl">Bank Name</label><input class="inp" id="pf-bank" value="${staff.bankName||''}" placeholder="e.g. GTBank"/></div>
+    <div class="fg"><label class="lbl">Account Number</label><input class="inp" id="pf-acctno" value="${staff.bankAcctNo||''}" placeholder="0123456789"/></div>
+    <div class="fg"><label class="lbl">Account Name</label><input class="inp" id="pf-acctname" value="${staff.bankAcctName||''}" placeholder="Must match your name on file"/></div>
+    <button class="btn btn-or btn-lg" onclick="saveMyBankDetails()">Save Bank Details</button>
+  </div>`;
+}
+function compressPhotoFile(file,maxDim,quality){
+  maxDim=maxDim||110;quality=quality||0.55;
+  return new Promise(function(resolve){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var img=new Image();
+      img.onload=function(){
+        try{
+          var w=img.width,h=img.height;
+          if(w>maxDim||h>maxDim){if(w>=h){h=Math.round(h*(maxDim/w));w=maxDim;}else{w=Math.round(w*(maxDim/h));h=maxDim;}}
+          var canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+          canvas.getContext('2d').drawImage(img,0,0,w,h);
+          resolve(canvas.toDataURL('image/jpeg',quality));
+        }catch(err){resolve(e.target.result);}
+      };
+      img.onerror=function(){resolve(e.target.result);};
+      img.src=e.target.result;
+    };
+    reader.onerror=function(){resolve(null);};
+    reader.readAsDataURL(file);
+  });
+}
+async function fbUVerified(p,d,ms){
+  try{
+    const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'PATCH',body:JSON.stringify(d)},ms||10000);
+    return !!(r&&r.ok);
+  }catch(e){return false;}
+}
+async function uploadMyPhoto(inputId){
+  const inp=document.getElementById(inputId||'pf-photo-upload');
+  if(!inp.files||!inp.files[0])return;
+  toast('Uploading photo…');
+  let b64=await compressPhotoFile(inp.files[0]);
+  if(!b64){toast('Could not read that image — try another one','err');return;}
+  const url=isGithubConfigured()?await uploadDataUrlToGithub(b64,'staff-photos'):null;
+  if(url)b64=url;
+  const ok=await fbUVerified('rn_mall_staff/'+staff._id,{photo:b64});
+  if(!ok){toast('Photo upload failed — check your connection and try again','err');return;}
+  staff.photo=b64;
+  sessionStorage.setItem('rnm_staff_session',JSON.stringify(staff));
+  toast('Photo updated!');
+  snav(curNav);
+}
+async function saveMyBankDetails(){
+  const u={bankName:document.getElementById('pf-bank').value.trim(),bankAcctNo:document.getElementById('pf-acctno').value.trim(),bankAcctName:document.getElementById('pf-acctname').value.trim()};
+  await fbU('rn_mall_staff/'+staff._id,u);
+  staff=Object.assign({},staff,u);
+  sessionStorage.setItem('rnm_staff_session',JSON.stringify(staff));
+  toast('Bank details saved!');
+}
+async function saveMyProfile(){
+  const pw=document.getElementById('pf-pass').value.trim();
+  if(!pw){toast('Enter a new password to change it','err');return;}
+  if(pw.length<6){toast('Password must be at least 6 characters','err');return;}
+  await fbU('rn_mall_staff/'+staff._id,{password:pw});
+  staff.password=pw;
+  sessionStorage.setItem('rnm_staff_session',JSON.stringify(staff));
+  toast('Password updated!');
+}
+
+// ── ROLE WORK VIEWS (read/scoped access to shared store data) ──
+async function renderOrders(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Orders</div></div><div style="color:var(--mu);">Loading...</div>';
+  const orders=Object.values(await fbG('rn_mall_orders')||{}).sort(function(a,b){return new Date(b.createdAt||0)-new Date(a.createdAt||0);}).slice(0,50);
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Orders</div><div class="page-hdr-sub">Most recent 50 orders — tap one to update its status</div></div>'
+    +orders.map(function(o){return '<div class="data-row" onclick="openStaffOrder(\''+o.tracking+'\')" style="cursor:pointer;"><div style="flex:1;"><div class="row-name">'+o.tracking+'</div><div class="row-meta">'+(o.customer?o.customer.name:'')+' &middot; '+o.date+' &middot; '+fmt(o.total)+'</div></div><div class="row-meta">'+(o.status||'pending')+'</div></div>';}).join('');
+}
+const STAFF_STATUSES=['pending','confirmed','packed','shipped','out for delivery','delivered','cancelled'];
+const STAFF_STATUSES_RIDER_ASSIGNED=['pending','confirmed','packed','cancelled'];
+async function openStaffOrder(tracking){
+  const o=await fbG('rn_mall_orders/'+tracking);if(!o)return;
+  const c=document.getElementById('content');
+  const hasRider=!!(o.riderId&&o.deliveryStage!=='delivered');
+  const statusList=hasRider?STAFF_STATUSES_RIDER_ASSIGNED:STAFF_STATUSES;
+  const opts=statusList.map(function(s){return '<option value="'+s+'" '+(o.status===s?'selected':'')+'>'+s+'</option>';}).join('');
+  c.innerHTML=`
+  <div class="page-hdr"><div class="page-hdr-title">${tracking}</div><div class="page-hdr-sub">${o.customer?o.customer.name:''} &middot; ${o.date} &middot; ${fmt(o.total)}</div></div>
+  <div class="card">
+    <div class="card-title">Items</div>
+    <div style="margin-top:8px;">${(o.items||[]).map(function(i){return '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--w2);padding:4px 0;border-top:1px solid var(--bdr);"><span>'+i.name+(i.variant?' ('+i.variant+')':'')+' x'+i.qty+'</span><span>'+fmt(i.price*i.qty)+'</span></div>';}).join('')}</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Delivery Address</div>
+    <div style="font-size:12px;color:var(--w2);margin-top:8px;">${o.customer?o.customer.address+', '+o.customer.city:'—'}<br>${o.customer?o.customer.phone:''}</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Update Status</div>
+    ${hasRider?`<div style="font-size:11px;color:var(--or);margin-bottom:10px;">🏍️ ${o.riderName} is handling delivery for this order — shipping/delivery statuses are controlled by the rider's own updates to keep the timeline in order.</div>`:''}
+    <select class="inp" id="so-status" style="margin:10px 0;">${opts}</select>
+    <button class="btn btn-or btn-lg" onclick="saveStaffOrderStatus('${tracking}')">Save Status</button>
+    <button class="btn btn-lg" onclick="snav('orders')" style="margin-left:8px;">← Back</button>
+  </div>`;
+}
+async function saveStaffOrderStatus(tracking){
+  const newStatus=document.getElementById('so-status').value;
+  const o=await fbG('rn_mall_orders/'+tracking);if(!o)return;
+  const tl=(o.timeline||[]).concat([{status:newStatus.charAt(0).toUpperCase()+newStatus.slice(1),time:new Date().toISOString(),note:'Updated by '+staff.name}]);
+  await fbU('rn_mall_orders/'+tracking,{status:newStatus,timeline:tl});
+  if(o.customer&&o.customer.id){
+    await fbP('rn_mall_customer_notifications/'+o.customer.id,{type:'status_update',orderId:tracking,message:'Your order '+tracking+' is now: '+newStatus,date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
+  }
+  await logStaffActivity('Updated order status',tracking+' → '+newStatus);
+  toast('Order status updated!');
+  snav('orders');
+}
+async function renderProducts(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Products</div></div><div style="color:var(--mu);">Loading...</div>';
+  let timedOut=false;
+  const stallTimer=setTimeout(function(){
+    timedOut=true;
+    c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Products</div></div><div class="card" style="text-align:center;padding:30px;"><div style="color:var(--mu);margin-bottom:12px;">This is taking longer than expected.</div><button class="btn btn-or" onclick="snav(\'products\')">Try Again</button></div>';
+  },6000);
+  let prodsData;
+  try{prodsData=await fbG('rn_mall_products');}catch(e){prodsData=null;}
+  clearTimeout(stallTimer);
+  if(timedOut)return; // the retry UI already took over — don't overwrite it with a late response
+  const prods=Object.entries(prodsData||{});
+  var html='<div class="page-hdr" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;"><div><div class="page-hdr-title">Products</div><div class="page-hdr-sub">'+prods.length+' product(s)</div></div><button class="btn btn-or" onclick="openStaffProductForm(null)">+ Add Product</button></div>';
+  html+=prods.map(function(e){var pid=e[0],p=e[1];return '<div class="data-row" onclick="openStaffProductForm(\''+pid+'\')" style="cursor:pointer;"><div class="chat-av">'+(p.images&&p.images[0]?'<img src="'+p.images[0]+'" style="width:100%;height:100%;object-fit:cover;border-radius:99px;"/>':ini(p.name))+'</div><div style="flex:1;"><div class="row-name">'+p.name+'</div><div class="row-meta">'+fmt(p.price)+' &middot; Stock: '+(p.stock!=null?p.stock:'∞')+' &middot; '+(p.visible!==false?'Visible':'Hidden')+'</div></div></div>';}).join('');
+  c.innerHTML=html;
+}
+async function openStaffProductForm(id){
+  const p=id?(await fbG('rn_mall_products/'+id))||{}:{};
+  const cats=Object.values(await fbG('rn_mall_categories')||{});
+  window._spImages=(p.images||[]).slice();
+  const c=document.getElementById('content');
+  const catOpts=cats.map(function(cat){return '<option value="'+cat.id+'" '+(p.category===cat.id?'selected':'')+'>'+cat.name+'</option>';}).join('');
+  c.innerHTML=`
+  <div class="page-hdr"><div class="page-hdr-title">${id?'Edit Product':'Add Product'}</div></div>
+  <div class="card">
+    <div class="g2">
+      <div class="fg"><label class="lbl">Product Name</label><input class="inp" id="sp-name" value="${p.name||''}"/></div>
+      <div class="fg"><label class="lbl">Category</label><select class="inp" id="sp-cat"><option value="">Select category</option>${catOpts}</select></div>
+    </div>
+    <div class="fg"><label class="lbl">Description</label><textarea class="ta" id="sp-desc" rows="4">${p.description||''}</textarea></div>
+    <div class="g2">
+      <div class="fg"><label class="lbl">Price (₦)</label><input class="inp" type="number" id="sp-price" value="${p.price||''}"/></div>
+      <div class="fg"><label class="lbl">Sale Price (optional)</label><input class="inp" type="number" id="sp-sale" value="${p.salePrice||''}"/></div>
+    </div>
+    <div class="fg"><label class="lbl">Stock Quantity</label><input class="inp" type="number" id="sp-stock" value="${p.stock!=null?p.stock:''}" placeholder="Leave blank for unlimited"/></div>
+    <div class="fg"><label class="lbl">Product Images</label>
+      <div id="sp-img-preview" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">${(window._spImages||[]).map(function(img,i){return '<div style="position:relative;width:60px;height:60px;"><img src="'+img+'" style="width:100%;height:100%;object-fit:cover;border-radius:6px;"/><span onclick="removeStaffProdImg('+i+')" style="position:absolute;top:-6px;right:-6px;background:var(--re);color:#fff;border-radius:99px;width:18px;height:18px;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;">×</span></div>';}).join('')}</div>
+      <input type="file" id="sp-img-upload" accept="image/*" multiple style="display:none;" onchange="uploadStaffProdImages()">
+      <button class="btn" onclick="document.getElementById('sp-img-upload').click()">📁 Choose Images</button>
+    </div>
+    <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;margin-bottom:16px;"><input type="checkbox" id="sp-visible" ${p.visible!==false?'checked':''} style="accent-color:var(--or);width:16px;height:16px;"/> Visible to customers</label>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-or btn-lg" onclick="saveStaffProduct('${id||''}')">💾 ${id?'Update':'Save'} Product</button>
+      <button class="btn btn-lg" onclick="snav('products')">Cancel</button>
+      ${id?'<button class="btn btn-lg" style="color:var(--re);" onclick="deleteStaffProduct(\''+id+'\')">Delete</button>':''}
+    </div>
+  </div>`;
+}
+function removeStaffProdImg(i){
+  window._spImages.splice(i,1);
+  const prev=document.getElementById('sp-img-preview');
+  if(prev)prev.innerHTML=(window._spImages||[]).map(function(img,idx){return '<div style="position:relative;width:60px;height:60px;"><img src="'+img+'" style="width:100%;height:100%;object-fit:cover;border-radius:6px;"/><span onclick="removeStaffProdImg('+idx+')" style="position:absolute;top:-6px;right:-6px;background:var(--re);color:#fff;border-radius:99px;width:18px;height:18px;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;">×</span></div>';}).join('');
+}
+async function uploadStaffProdImages(){
+  const inp=document.getElementById('sp-img-upload');
+  if(!inp.files||!inp.files.length)return;
+  toast('Uploading images…');
+  for(let i=0;i<Math.min(inp.files.length,10);i++){
+    let b64=await compressPhotoFile(inp.files[i],1000,0.8);
+    if(!b64)continue;
+    const url=isGithubConfigured()?await uploadDataUrlToGithub(b64,'staff-products'):null;
+    window._spImages=window._spImages||[];window._spImages.push(url||b64);
+  }
+  const prev=document.getElementById('sp-img-preview');
+  if(prev)prev.innerHTML=(window._spImages||[]).map(function(img,idx){return '<div style="position:relative;width:60px;height:60px;"><img src="'+img+'" style="width:100%;height:100%;object-fit:cover;border-radius:6px;"/><span onclick="removeStaffProdImg('+idx+')" style="position:absolute;top:-6px;right:-6px;background:var(--re);color:#fff;border-radius:99px;width:18px;height:18px;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;">×</span></div>';}).join('');
+  toast('Images ready — click Save to confirm');
+}
+async function saveStaffProduct(id){
+  const name=(document.getElementById('sp-name').value||'').trim();
+  if(!name){toast('Enter a product name','err');return;}
+  const cat=document.getElementById('sp-cat').value;
+  if(!cat){toast('Select a category','err');return;}
+  const price=parseFloat(document.getElementById('sp-price').value)||0;
+  if(price<=0){toast('Enter a valid price','err');return;}
+  const pid=id||'prod_'+Date.now()+'_'+Math.random().toString(36).slice(2,5);
+  const existing=id?(await fbG('rn_mall_products/'+id))||{}:{};
+  const prod={
+    id:pid,name:name,code:existing.code||('RNM-'+Math.random().toString(36).slice(2,7).toUpperCase()),
+    category:cat,
+    description:(document.getElementById('sp-desc').value||'').trim(),
+    price:price,
+    salePrice:parseFloat(document.getElementById('sp-sale').value)||null,
+    stock:document.getElementById('sp-stock').value!==''?parseInt(document.getElementById('sp-stock').value):null,
+    images:window._spImages||[],
+    videos:existing.videos||[],
+    visible:!!document.getElementById('sp-visible').checked,
+    rating:existing.rating||4,reviews:existing.reviews||0,
+    featured:existing.featured||false,isNew:!id,flashSale:existing.flashSale||false,preOrder:existing.preOrder||false,
+    createdAt:existing.createdAt||new Date().toISOString(),
+    updatedAt:new Date().toISOString()
+  };
+  await fbS('rn_mall_products/'+pid,prod);
+  await fbU('rn_mall_settings',{lastCatalogUpdate:Date.now()});
+  await logStaffActivity(id?'Updated product':'Added product',name);
+  toast(id?'Product updated!':'Product added!');
+  snav('products');
+}
+async function deleteStaffProduct(id){
+  if(!confirm('Delete this product? This cannot be undone.'))return;
+  const p=await fbG('rn_mall_products/'+id);
+  const r=await fbFetchTimeout(FB+'/rn_mall_products/'+id+'.json',{method:'DELETE'},8000);
+  if(!r||!r.ok){toast('Delete failed — try again','err');return;}
+  await fbU('rn_mall_settings',{lastCatalogUpdate:Date.now()});
+  await logStaffActivity('Deleted product',p?p.name:id);
+  toast('Product deleted');
+  snav('products');
+}
+async function renderVendorsView(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Vendors</div></div><div style="color:var(--mu);">Loading...</div>';
+  const vendors=Object.entries(await fbG('rn_mall_vendors')||{}).map(function(e){return Object.assign({_id:e[0]},e[1]);});
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Vendors</div></div>'+vendors.map(function(v){
+    var actions='';
+    if(v.status==='pending')actions='<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="staffApproveVendor(\''+v._id+'\')">Approve</button>';
+    else if(v.status==='approved')actions='<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="staffSuspendVendor(\''+v._id+'\',false)">Suspend</button>';
+    else if(v.status==='suspended')actions='<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="staffSuspendVendor(\''+v._id+'\',true)">Reactivate</button>';
+    return '<div class="data-row"><div style="flex:1;"><div class="row-name">'+v.storeName+'</div><div class="row-meta">'+v.email+' &middot; '+v.status+'</div></div>'+actions+'</div>';
+  }).join('');
+}
+async function staffApproveVendor(id){
+  await fbU('rn_mall_vendors/'+id,{status:'approved'});
+  await logStaffActivity('Approved vendor',id);
+  toast('Vendor approved!');snav('vendors');
+}
+async function staffSuspendVendor(id,reactivate){
+  await fbU('rn_mall_vendors/'+id,{status:reactivate?'approved':'suspended'});
+  await logStaffActivity(reactivate?'Reactivated vendor':'Suspended vendor',id);
+  toast('Updated!');snav('vendors');
+}
+async function renderCustomersView(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Customers</div></div><div style="color:var(--mu);">Loading...</div>';
+  const custs=Object.entries(await fbG('rn_mall_customers')||{}).map(function(e){return Object.assign({_id:e[0]},e[1]);});
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Customers</div><div class="page-hdr-sub">'+custs.length+' customer(s)</div></div>'
+    +custs.slice(0,50).map(function(cu){return '<div class="data-row"><div style="flex:1;"><div class="row-name">'+cu.fname+' '+cu.lname+'</div><div class="row-meta">'+cu.email+'</div></div>'
+      +'<button class="btn '+(cu.accountStatus==='suspended'?'':'btn-re')+'" style="font-size:10px;padding:5px 10px;" onclick="staffToggleSuspendCustomer(\''+cu._id+'\','+(cu.accountStatus==='suspended')+')">'+(cu.accountStatus==='suspended'?'Reactivate':'Suspend')+'</button>'
+      +'</div>';}).join('');
+}
+async function staffToggleSuspendCustomer(id,wasSuspended){
+  await fbU('rn_mall_customers/'+id,{accountStatus:wasSuspended?'active':'suspended'});
+  await logStaffActivity(wasSuspended?'Reactivated customer':'Suspended customer',id);
+  toast('Done');
+  snav('customers');
+}
+async function renderAnalyticsView(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Analytics</div></div><div style="color:var(--mu);">Loading...</div>';
+  const orders=Object.values(await fbG('rn_mall_orders')||{}).filter(function(o){return o.status!=='cancelled'&&o.status!=='deleted';});
+  const today=ds();
+  const todayOrds=orders.filter(function(o){return o.date===today;});
+  const totalRev=orders.reduce(function(s,o){return s+(o.total||0);},0);
+  const custs=await fbG('rn_mall_customers')||{};
+  const prods=await fbG('rn_mall_products')||{};
+  c.innerHTML=`<div class="page-hdr"><div class="page-hdr-title">Analytics</div></div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num" style="color:var(--su);">${fmt(totalRev)}</div><div class="stat-lbl">Total Revenue</div><div class="stat-sub">${orders.length} orders</div></div>
+    <div class="stat-card"><div class="stat-num">${todayOrds.length}</div><div class="stat-lbl">Orders Today</div></div>
+    <div class="stat-card"><div class="stat-num">${Object.keys(prods).length}</div><div class="stat-lbl">Products</div><div class="stat-sub">${Object.keys(custs).length} customers</div></div>
+  </div>`;
+}
+async function renderCustomerChatList(c){
+  c.innerHTML='<div class="page-hdr-title">Customer Chat</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
+  const allChats=await fbG('rn_mall_chat')||{};
+  const allOrdersData=await fbG('rn_mall_orders')||{};
+  const allCustsData=await fbG('rn_mall_customers')||{};
+  const orderTrackingSet=new Set(Object.keys(allOrdersData));
+  const custById={};Object.values(allCustsData).forEach(function(cu){custById[cu.id]=cu;});
+  const threads=Object.keys(allChats).map(function(key){
+    const msgs=Object.values(allChats[key]||{}).sort(function(a,b){return (a.ts||0)-(b.ts||0);});
+    const lastMsg=msgs[msgs.length-1];
+    let name='Guest',meta=key;
+    if(orderTrackingSet.has(key)){var o=allOrdersData[key];name=(o.customer&&o.customer.name)||'Guest Customer';meta='Order: '+key;}
+    else if(custById[key]){name=custById[key].fname+' '+custById[key].lname;meta=custById[key].email||'General inquiry';}
+    else if(key==='general'){name='Anonymous Visitor(s)';meta='Not signed in';}
+    return {key:key,name:name,meta:meta,lastMsg:lastMsg,msgCount:msgs.length,lastTs:lastMsg?lastMsg.ts:0};
+  }).sort(function(a,b){return b.lastTs-a.lastTs;});
+  c.innerHTML='<div class="page-hdr-title">Customer Chat</div><div class="page-hdr-sub" style="margin-bottom:16px;">'+threads.length+' conversation(s)</div>'
+    +(threads.length?threads.map(function(t){return '<div class="data-row" onclick="openStaffCustomerChat(\''+t.key+'\',\''+t.name.replace(/'/g,"\\'")+'\')" style="cursor:pointer;"><div class="chat-av">'+ini(t.name)+'</div><div style="flex:1;"><div class="row-name">'+t.name+'</div><div class="row-meta">'+t.meta+' &middot; '+t.msgCount+' message(s)'+(t.lastMsg?' &middot; "'+t.lastMsg.text.slice(0,40)+'"':'')+'</div></div></div>';}).join(''):'<div class="card" style="text-align:center;padding:40px;color:var(--mu);">No messages yet.</div>');
+}
+async function openStaffCustomerChat(key,name){
+  const c=document.getElementById('content');
+  c.innerHTML='<div class="page-hdr-title">'+name+'</div><div class="card" style="margin-top:16px;"><div id="cc-msgs" style="margin-bottom:12px;max-height:400px;overflow-y:auto;"></div><div style="display:flex;gap:8px;"><input class="inp" id="cc-input" placeholder="Type your reply..." style="flex:1;" onkeydown="if(event.key===\'Enter\')sendStaffChatReply(\''+key+'\')"/><button class="btn btn-or" onclick="sendStaffChatReply(\''+key+'\')">Send</button></div><button class="btn" style="margin-top:10px;" onclick="snav(\'customer-chat\')">← Back</button></div>';
+  await loadStaffChatMsgs(key);
+}
+async function loadStaffChatMsgs(key){
+  const msgs=Object.values(await fbG('rn_mall_chat/'+key)||{}).sort(function(a,b){return (a.ts||0)-(b.ts||0);});
+  const el=document.getElementById('cc-msgs');if(!el)return;
+  el.innerHTML=msgs.length?msgs.map(function(m){
+    return '<div class="chat-msg'+(m.isAdmin?' own':'')+'"><div class="chat-av">'+(m.isAdmin?'RN':ini(m.senderName||'?'))+'</div><div><div class="chat-bubble">'+m.text+'</div></div></div>';
+  }).join(''):'<div style="color:var(--mu);font-size:12px;text-align:center;padding:20px;">No messages yet.</div>';
+  el.scrollTop=el.scrollHeight;
+}
+async function sendStaffChatReply(key){
+  const inp=document.getElementById('cc-input');const text=(inp.value||'').trim();if(!text)return;
+  await fbP('rn_mall_chat/'+key,{text:text,senderId:'staff',senderName:staff.name,isAdmin:true,ts:Date.now(),date:ds(),time:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})});
+  inp.value='';await loadStaffChatMsgs(key);
+}
+async function renderWalletIssuesView(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Wallet Issues</div></div><div style="color:var(--mu);">Loading...</div>';
+  const data=Object.entries(await fbG('rn_mall_wallet_issues')||{}).map(function(e){return Object.assign({_id:e[0]},e[1]);}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Wallet Issues</div></div>'+data.map(function(iss){
+    var actions='';
+    if(iss.status==='pending'&&(iss.type==='refund'||iss.type==='wrong_topup')){
+      actions='<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="staffApproveIssue(\''+iss._id+'\')">Approve</button>';
+    }else if(iss.status==='processing'){
+      actions='<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="staffMarkIssuePaid(\''+iss._id+'\')">Mark as Paid</button>';
+    }
+    return '<div class="data-row"><div style="flex:1;"><div class="row-name">'+iss.customerName+' — '+iss.type+(iss.amount?' — '+fmt(iss.amount):'')+'</div><div class="row-meta">'+iss.message+'</div><div class="row-meta">'+iss.status+'</div></div>'+actions+'</div>';
+  }).join('');
+}
+async function staffApproveIssue(id){
+  const iss=await fbG('rn_mall_wallet_issues/'+id);if(!iss)return;
+  await fbU('rn_mall_wallet_issues/'+id,{status:'approved_awaiting_bank'});
+  await fbP('rn_mall_customer_notifications/'+iss.customerId,{type:'points_earned',message:'Your refund request was approved! Please go to your Wallet and enter your bank details.',date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
+  toast('Approved');snav('wallet-issues');
+}
+async function staffMarkIssuePaid(id){
+  const iss=await fbG('rn_mall_wallet_issues/'+id);if(!iss)return;
+  if(!confirm('Confirm payment sent to '+iss.bankAcctName+'?'))return;
+  await fbU('rn_mall_wallet_issues/'+id,{status:'paid'});
+  await fbP('rn_mall_customer_notifications/'+iss.customerId,{type:'points_earned',message:fmt(iss.amount||0)+' has been sent to your bank account.',date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
+  toast('Marked paid');snav('wallet-issues');
+}
+
+// ── NOTIFICATIONS ──
+function notifIcon(type){
+  var map={dm:'chat',general_discussion:'note',role_community:'user',salary_paid:'money',salary_set:'money',points_awarded:'star',hours_set:'clock',strike:'alert',bank_verified:'file',withdrawal_paid:'money',withdrawal_declined:'alert',submission_approved:'star',submission_rejected:'alert',task_assigned:'note',task_approved:'star'};
+  return iconBadge(map[type]||'bell',15);
+}
+function notifMsg(n){
+  if(n.type==='dm')return n.from+' sent you a message: "'+n.preview+'"';
+  if(n.type==='general_discussion')return n.from+' posted in General Discussion: "'+n.preview+'"';
+  if(n.type==='role_community')return n.from+' posted in your team channel: "'+n.preview+'"';
+  if(n.type==='salary_paid')return fmt(n.amount)+' salary payment sent'+(n.description?' ('+n.description+')':'')+'. '+(n.message||'');
+  if(n.type==='salary_set')return 'Your monthly salary was set to '+fmt(n.amount);
+  if(n.type==='points_awarded')return 'You earned '+n.amount+' StaffPoints — '+(n.reason||'');
+  if(n.type==='hours_set')return 'Your working hours were set to: '+n.hours;
+  if(n.type==='strike')return n.strikes>=3?'You have been automatically suspended after 3 strikes, pending review. Last strike: '+n.reason:'You received a strike ('+n.strikes+'/3): '+n.reason;
+  if(n.type==='bank_verified')return 'Your bank account details have been verified by admin.';
+  if(n.type==='withdrawal_paid')return 'Your withdrawal of '+fmt(n.amount)+' has been paid.';
+  if(n.type==='withdrawal_declined')return 'Your withdrawal request for '+fmt(n.amount)+' was declined.';
+  if(n.type==='submission_approved')return '"'+n.title+'" was approved'+(n.note?' — '+n.note:'')+'.';
+  if(n.type==='submission_rejected')return '"'+n.title+'" needs changes — '+(n.note||'see feedback in My Submissions')+'.';
+  if(n.type==='task_assigned')return 'New task assigned: '+n.description+(n.dueDate?' — due '+n.dueDate:'')+'.';
+  if(n.type==='task_approved')return 'Your task completion was approved.';
+  return n.preview||'New notification';
+}
+async function loadStaffNotifs(){
+  if(!staff)return;
+  const data=await fbG('rn_mall_staff_notifications/'+staff._id)||{};
+  const list=Object.entries(data).map(function(e){return Object.assign({_key:e[0]},e[1]);}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  const unread=list.filter(function(n){return !n.read;}).length;
+  const badge=document.getElementById('staff-notif-badge');
+  if(badge){badge.textContent=unread;badge.style.display=unread>0?'flex':'none';}
+  const panel=document.getElementById('staff-notif-panel');
+  if(panel){
+    panel.innerHTML=list.length?list.slice(0,25).map(function(n){
+      return '<div style="display:flex;gap:8px;padding:8px;border-radius:8px;background:'+(n.read?'transparent':'rgba(255,106,0,0.06)')+';margin-bottom:2px;"><div style="font-size:15px;">'+notifIcon(n.type)+'</div><div style="flex:1;"><div style="font-size:11px;color:var(--wh);line-height:1.4;">'+notifMsg(n)+'</div><div style="font-size:9px;color:var(--mu);margin-top:2px;">'+n.date+'</div></div></div>';
+    }).join(''):'<div style="padding:16px;text-align:center;color:var(--mu);font-size:12px;">No notifications yet.</div>';
+  }
+}
+async function toggleStaffNotifPanel(){
+  const panel=document.getElementById('staff-notif-panel');
+  const open=panel.style.display==='block';
+  panel.style.display=open?'none':'block';
+  if(!open){
+    await loadStaffNotifs();
+    const data=await fbG('rn_mall_staff_notifications/'+staff._id)||{};
+    for(const k of Object.keys(data)){if(!data[k].read)fbU('rn_mall_staff_notifications/'+staff._id+'/'+k,{read:true});}
+    setTimeout(loadStaffNotifs,600);
+  }
+}
+setInterval(function(){if(staff)loadStaffNotifs();},10000);
+
+checkStaffSession();
+</script>
+</body>
+</html>
