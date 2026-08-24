@@ -8,8 +8,17 @@
 <meta name="color-scheme" content="dark">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>RichNation Mall, Vendor Dashboard</title>
+<!-- Loaded as a non-blocking link (instead of an @import inside the style block) because a
+     render-blocking stylesheet delays execution of every classic, non-deferred script that
+     comes after it in the document; on a slow/flaky connection to fonts.googleapis.com that
+     meant the entire app, including the login screen, stayed inert until it finished or
+     timed out. media="print" makes the browser fetch it without blocking, the onload swap
+     then applies it once it's actually ready. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap"></noscript>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
 @keyframes iconColorCycle{0%{stroke:#FF6A00;}50%{stroke:#ffffff;}100%{stroke:#FF6A00;}}
 .icon-color-cycle{animation:none;}
