@@ -250,7 +250,7 @@ let _settingsPromise=null;
 function getSettingsData(){if(!_settingsPromise)_settingsPromise=fbG('rn_mall_settings');return _settingsPromise;}
 async function fbS(p,d){try{await fbFetchTimeout(FB+'/'+p+'.json',{method:'PUT',body:JSON.stringify(d)});}catch(e){}}
 async function fbU(p,d){try{await fbFetchTimeout(FB+'/'+p+'.json',{method:'PATCH',body:JSON.stringify(d)});}catch(e){}}
-async function fbP(p,d){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'POST',body:JSON.stringify(d)});return r.json();}catch(e){return null;}}
+async function fbP(p,d){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'POST',body:JSON.stringify(d)});return await r.json();}catch(e){return null;}}
 
 function toast(msg,type){
   const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';

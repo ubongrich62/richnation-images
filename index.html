@@ -894,14 +894,19 @@ function fbFetchTimeout(url,opts,ms=8000){
   return Promise.race([fetch(url,opts),timeout]);
 }
 async function fbG(p){
+  // r.json() must be awaited HERE, inside the try, not just returned, otherwise
+  // a response that arrives but fails to parse (a truncated body from a dropped
+  // connection, a non-JSON error page) rejects outside this try/catch instead of
+  // being caught by it, so a single bad response can crash a whole Promise.all
+  // boot sequence with nothing to catch it, freezing the page mid-load forever.
   try{
     var r=await fbFetchTimeout(FB+'/'+p+'.json');
-    return r.ok?r.json():null;
+    return r.ok?await r.json():null;
   }catch(e){
     console.warn('fbG failed for',p,', retrying once:',e.message);
     try{
       var r2=await fbFetchTimeout(FB+'/'+p+'.json');
-      return r2.ok?r2.json():null;
+      return r2.ok?await r2.json():null;
     }catch(e2){
       console.warn('fbG retry also failed for',p,':',e2.message);
       return null;
@@ -910,7 +915,7 @@ async function fbG(p){
 }
 async function fbS(p,d){try{await fbFetchTimeout(FB+'/'+p+'.json',{method:'PUT',body:JSON.stringify(d)});}catch(e){console.warn('fbS failed for',p,':',e.message);}}
 async function fbU(p,d){try{await fbFetchTimeout(FB+'/'+p+'.json',{method:'PATCH',body:JSON.stringify(d)});}catch(e){console.warn('fbU failed for',p,':',e.message);}}
-async function fbP(p,d){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'POST',body:JSON.stringify(d)});return r.json();}catch(e){console.warn('fbP failed for',p,':',e.message);return null;}}
+async function fbP(p,d){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'POST',body:JSON.stringify(d)});return await r.json();}catch(e){console.warn('fbP failed for',p,':',e.message);return null;}}
 async function fbD(p){try{await fbFetchTimeout(FB+'/'+p+'.json',{method:'DELETE'});}catch(e){console.warn('fbD failed for',p,':',e.message);}}
 
 function toast(m,type='ok'){
