@@ -5,7 +5,7 @@
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
 <meta charset="UTF-8">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="dark">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
 <meta name="theme-color" content="#FF4747">
 <title>RichNation Mall, Shop Smart. Shop RichNation.</title>
@@ -16,12 +16,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  /* structural, ink2 gives dark surfaces a slight warm depth instead of flat black */
-  --ink:#0B0B0C;--ink2:#1A1410;--bg:#FFFFFF;--card:#FFFFFF;--card2:#F4F4F3;--bdr:#E4E4E1;
+  /* structural, ink2 gives dark surfaces a slight warm depth instead of flat black.
+     --ink/--ink2 stay dark (not near-white) here: unlike --wh/--w2/--mu, they are never
+     used as a text color in this file, only as background fills for already-dark chrome
+     (topbar, hero, footer, dark buttons) — repointing them to near-white would turn those
+     bars into white boxes and make their white text invisible. */
+  --ink:#0A0A0B;--ink2:#151512;--bg:#0A0A0B;--card:#111113;--card2:#17171A;--bdr:#242428;
   /* brand accent */
   --or:#FF6A00;--or-dk:#E15E00;--gold:#B8720A;--amber:#FFB05A;
   /* text, legacy names kept (--wh/--w2/--mu) so existing inline JS styles re-theme for free */
-  --wh:#15151A;--w2:#48484E;--mu:#83838A;
+  --wh:#fff;--w2:#e0e0e0;--mu:#84848d;
   /* status */
   --su:#FF6A00;--re:#DC2626;--bl:#2054C7;
   /* system */
@@ -34,15 +38,15 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
-html,body{color-scheme:light;background:var(--bg);color:var(--wh);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100%;overflow-x:hidden;}
+html,body{color-scheme:dark;background:var(--bg);color:var(--wh);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100%;overflow-x:hidden;}
 h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .container{max-width:var(--container);margin:0 auto;}
 /* TOPBAR */
 .topbar{background:linear-gradient(165deg,var(--ink),var(--ink2) 130%);border-bottom:1px solid #000;position:sticky;top:0;z-index:100;box-shadow:var(--sh-sm);}
 .tb-top{display:flex;align-items:center;height:64px;max-width:var(--container);margin:0 auto;padding:0 20px;gap:14px;}
 .tb-logo{height:38px;max-width:150px;object-fit:contain;cursor:pointer;flex-shrink:0;}
-.tb-search{flex:1;max-width:520px;display:flex;gap:0;background:#fff;border-radius:var(--r-sm);overflow:hidden;}
-.tb-search input{flex:1;background:#fff;border:none;padding:10px 14px;color:var(--wh);font-size:13px;outline:none;}
+.tb-search{flex:1;max-width:520px;display:flex;gap:0;background:var(--card2);border-radius:var(--r-sm);overflow:hidden;}
+.tb-search input{flex:1;background:var(--card2);border:none;padding:10px 14px;color:var(--wh);font-size:13px;outline:none;}
 .tb-search button{background:var(--or);color:#fff;border:none;border-radius:0;padding:10px 20px;font-weight:800;font-size:12px;cursor:pointer;transition:background .15s;}
 .tb-search button:hover{background:var(--or-dk);}
 .tb-actions{display:flex;align-items:center;gap:8px;margin-left:auto;}
@@ -54,7 +58,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .curr-btn.active{background:var(--or);color:#fff;border-color:var(--or);}
 .lang-wrap{position:relative;}
 .lang-btn{background:none;border:1px solid rgba(255,255,255,.25);border-radius:var(--r-sm);color:rgba(255,255,255,.85);font-size:11px;font-weight:700;cursor:pointer;padding:5px 9px;}
-.lang-panel{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border:1px solid var(--bdr);border-radius:var(--r-md);padding:6px;min-width:150px;z-index:200;display:none;box-shadow:var(--sh-md);}
+.lang-panel{position:absolute;top:calc(100% + 8px);right:0;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);padding:6px;min-width:150px;z-index:200;display:none;box-shadow:var(--sh-md);}
 .lang-panel.open{display:block;}
 .lang-opt{padding:8px 10px;border-radius:var(--r-sm);font-size:12px;cursor:pointer;color:var(--w2);}
 .lang-opt:hover{background:var(--card2);color:var(--wh);}
@@ -65,7 +69,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .announce-bar{background:var(--ink);color:#fff;text-align:center;padding:8px 40px;font-size:12px;font-weight:600;display:none;position:relative;border-bottom:2px solid var(--or);}
 .announce-close{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#fff;font-size:16px;font-weight:900;opacity:0.7;}
 /* CAT NAV */
-.cat-nav{display:flex;background:#fff;border-bottom:1px solid var(--bdr);padding:0 20px;max-width:var(--container);margin:0 auto;overflow-x:auto;scrollbar-width:none;}
+.cat-nav{display:flex;background:var(--card);border-bottom:1px solid var(--bdr);padding:0 20px;max-width:var(--container);margin:0 auto;overflow-x:auto;scrollbar-width:none;}
 .cat-nav::-webkit-scrollbar{display:none;}
 .cat-nav-item{padding:11px 14px;font-size:12.5px;font-weight:600;color:var(--w2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;transition:color .15s,border-color .15s;}
 .cat-nav-item:hover,.cat-nav-item.active{color:var(--or);border-bottom-color:var(--or);}
@@ -107,7 +111,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .cat-card:hover{border-color:var(--wh);box-shadow:var(--sh-sm);transform:translateY(-1px);}
 .cat-ico{font-size:22px;margin-bottom:8px;}
 .cat-name{font-size:12px;font-weight:700;color:var(--wh);}
-.cat-count{font-size:10.5px;color:var(--mu);margin-top:2px;}
+.cat-count{font-size:10.5px;color:var(--wh);font-weight:700;margin-top:2px;}
 /* PRODUCTS */
 .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;}
 .prod-card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);overflow:hidden;cursor:pointer;transition:box-shadow .15s,transform .15s,border-color .15s;animation:fadeInUp .35s var(--ease) both;}
@@ -117,25 +121,25 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .prod-card.prod-disabled{opacity:.55;cursor:default;}
 .prod-img-wrap{position:relative;aspect-ratio:1;max-height:280px;overflow:hidden;background:var(--card2);}
 .prod-img{width:100%;height:100%;object-fit:cover;display:block;}
-.prod-img-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:40px;color:var(--mu);}
+.prod-img-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:40px;color:var(--wh);font-weight:700;}
 .prod-badges{position:absolute;top:8px;left:8px;display:flex;flex-direction:column;gap:4px;}
 .prod-badge{font-size:9px;font-weight:800;padding:3px 7px;border-radius:var(--r-sm);letter-spacing:.3px;}
 .bdg-sale{background:var(--or);color:#fff;}
 .bdg-new{background:var(--ink);color:#fff;}
-.bdg-best{background:#fff;color:var(--or);border:1px solid var(--or);}
-.bdg-pre{background:#fff;color:var(--bl);border:1px solid rgba(32,84,199,.35);}
+.bdg-best{background:var(--card);color:var(--or);border:1px solid var(--or);}
+.bdg-pre{background:var(--card);color:var(--bl);border:1px solid rgba(32,84,199,.35);}
 .bdg-free{background:var(--su);color:#fff;}
 .prod-wish{position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.92);border:1px solid var(--bdr);border-radius:var(--r-pill);width:30px;height:30px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:transform .12s;}
 .prod-wish:hover{transform:scale(1.08);}
 .prod-info{padding:12px 13px 14px;}
-.prod-cat-lbl{font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px;}
+.prod-cat-lbl{font-size:10px;font-weight:700;color:var(--wh);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px;}
 .prod-name{font-size:13px;font-weight:600;margin-bottom:6px;color:var(--wh);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .prod-price-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .prod-price{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:var(--wh);}
-.prod-old{font-size:11px;color:var(--mu);text-decoration:line-through;}
+.prod-old{font-size:11px;color:var(--wh);font-weight:700;text-decoration:line-through;}
 .prod-stars{font-size:11px;color:var(--gold);margin-top:4px;}
-.prod-stars span{color:var(--mu);font-weight:600;}
-.prod-sold{font-size:10px;color:var(--mu);margin-top:3px;}
+.prod-stars span{color:var(--wh);font-weight:700;font-weight:700;}
+.prod-sold{font-size:10px;color:var(--wh);font-weight:700;margin-top:3px;}
 .prod-add-btn{width:100%;margin-top:10px;background:var(--ink);color:#fff;border:none;border-radius:var(--r-sm);padding:9px;font-weight:700;font-size:12px;cursor:pointer;transition:background .15s;}
 .prod-add-btn:hover{background:var(--or);}
 .prod-add-btn:disabled{background:var(--card2);color:var(--mu);cursor:not-allowed;}
@@ -146,7 +150,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .flash-hdr{display:flex;align-items:center;gap:12px;margin-bottom:16px;justify-content:space-between;}
 .flash-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#fff;}
 .flash-timer{background:var(--or);color:#fff;padding:4px 12px;border-radius:var(--r-sm);font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;}
-.flash-wrap .prod-card{background:#fff;}
+.flash-wrap .prod-card{background:var(--card);}
 /* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(11,11,12,0.7);z-index:500;display:none;align-items:center;justify-content:center;padding:16px;}
 .modal-overlay.open{display:flex;}
@@ -155,22 +159,22 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .modal-grid{display:grid;grid-template-columns:1fr 1fr;}
 .modal-imgs{border-radius:var(--r-lg) 0 0 var(--r-lg);overflow:hidden;background:var(--card2);padding:16px 16px 0;}
 .modal-info{padding:26px;overflow-y:auto;}
-.modal-close{position:sticky;top:12px;float:right;background:#fff;border:1px solid var(--bdr);border-radius:var(--r-pill);width:32px;height:32px;cursor:pointer;color:var(--w2);font-size:14px;display:flex;align-items:center;justify-content:center;z-index:10;margin-bottom:8px;box-shadow:var(--sh-sm);}
+.modal-close{position:sticky;top:12px;float:right;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-pill);width:32px;height:32px;cursor:pointer;color:var(--w2);font-size:14px;display:flex;align-items:center;justify-content:center;z-index:10;margin-bottom:8px;box-shadow:var(--sh-sm);}
 .modal-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px;margin-bottom:8px;clear:both;color:var(--wh);}
 .modal-price{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:28px;color:var(--wh);margin-bottom:4px;}
-.modal-old{font-size:13px;color:var(--mu);text-decoration:line-through;margin-bottom:12px;}
+.modal-old{font-size:13px;color:var(--wh);font-weight:700;text-decoration:line-through;margin-bottom:12px;}
 .modal-desc{font-size:13px;color:var(--w2);line-height:1.8;margin-bottom:16px;}
-.variant-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--mu);margin-bottom:6px;}
+.variant-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--wh);font-weight:700;margin-bottom:6px;}
 .variant-opts{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
 .variant-opt{background:var(--card2);border:1.5px solid var(--bdr);border-radius:var(--r-sm);padding:6px 13px;font-size:12px;cursor:pointer;color:var(--w2);font-weight:600;}
 .variant-opt.active{border-color:var(--or);color:var(--or);background:rgba(255,106,0,0.08);}
 .qty-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
-.qty-btn{width:38px;height:38px;border-radius:var(--r-sm);border:1.5px solid var(--bdr);background:#fff;color:var(--wh);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.qty-btn{width:38px;height:38px;border-radius:var(--r-sm);border:1.5px solid var(--bdr);background:var(--card2);color:var(--wh);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .qty-btn:hover{border-color:var(--wh);}
 .qty-val{font-weight:800;font-size:15px;min-width:24px;text-align:center;color:var(--wh);}
 .add-cart-btn{width:100%;background:var(--or);color:#fff;border:none;border-radius:var(--r-md);padding:14px;font-weight:800;font-size:14px;cursor:pointer;margin-bottom:8px;transition:background .15s;}
 .add-cart-btn:hover{background:var(--or-dk);}
-.buy-now-btn{width:100%;background:#fff;border:1.5px solid var(--ink);color:var(--ink);border-radius:var(--r-md);padding:12px;font-weight:800;font-size:14px;cursor:pointer;transition:background .15s;}
+.buy-now-btn{width:100%;background:var(--card);border:1.5px solid var(--wh);color:var(--wh);border-radius:var(--r-md);padding:12px;font-weight:800;font-size:14px;cursor:pointer;transition:background .15s;}
 .buy-now-btn:hover{background:var(--card2);}
 /* SLIDESHOW */
 .slideshow-wrap{position:relative;background:var(--card2);aspect-ratio:1;max-height:480px;overflow:hidden;display:flex;align-items:center;justify-content:center;border-radius:var(--r-md);}
@@ -187,7 +191,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .cart-drawer.open{right:0;}
 .cart-hdr{padding:18px 20px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;}
 .cart-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;color:var(--wh);}
-.cart-close{background:none;border:none;color:var(--mu);font-size:20px;cursor:pointer;}
+.cart-close{background:none;border:none;color:var(--wh);font-weight:700;font-size:20px;cursor:pointer;}
 .cart-body{flex:1;overflow-y:auto;padding:12px 18px;}
 .cart-item{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--bdr);align-items:flex-start;}
 .cart-item-img{width:66px;height:66px;border-radius:var(--r-sm);object-fit:cover;background:var(--card2);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid var(--bdr);}
@@ -195,24 +199,24 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .cart-item-info{flex:1;min-width:0;}
 .cart-item-name{font-size:12.5px;font-weight:700;margin-bottom:3px;color:var(--wh);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .cart-item-var{font-size:10.5px;color:var(--w2);background:var(--card2);display:inline-block;padding:1px 7px;border-radius:var(--r-sm);margin-bottom:4px;}
-.cart-item-meta{font-size:11px;color:var(--mu);margin-bottom:3px;}
+.cart-item-meta{font-size:11px;color:var(--wh);font-weight:700;margin-bottom:3px;}
 .cart-item-price{font-size:13px;color:var(--wh);font-weight:800;margin-bottom:6px;}
-.cart-item-rm{background:none;border:none;color:var(--mu);cursor:pointer;font-size:16px;padding:2px;}
+.cart-item-rm{background:none;border:none;color:var(--wh);font-weight:700;cursor:pointer;font-size:16px;padding:2px;}
 .cart-qty-row{display:flex;align-items:center;gap:10px;}
-.cart-qty-btn{width:30px;height:30px;border-radius:var(--r-sm);border:1.5px solid var(--bdr);background:#fff;color:var(--wh);font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0;}
+.cart-qty-btn{width:30px;height:30px;border-radius:var(--r-sm);border:1.5px solid var(--bdr);background:var(--card2);color:var(--wh);font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0;}
 .cart-qty-btn:hover{border-color:var(--wh);}
 .cart-qty-num{font-weight:700;font-size:13px;min-width:18px;text-align:center;color:var(--wh);}
-.cart-remove{font-size:11px;color:var(--mu);cursor:pointer;margin-left:auto;text-decoration:underline;}
+.cart-remove{font-size:11px;color:var(--wh);font-weight:700;cursor:pointer;margin-left:auto;text-decoration:underline;}
 .cart-remove:hover{color:var(--or);}
-.cart-empty-state{text-align:center;padding:60px 20px;color:var(--mu);}
+.cart-empty-state{text-align:center;padding:60px 20px;color:var(--wh);font-weight:700;}
 .cart-footer{padding:16px 18px;border-top:1px solid var(--bdr);}
 .coupon-row{display:flex;gap:8px;margin-bottom:14px;}
-.coupon-inp{flex:1;background:#fff;border:1px solid var(--bdr);border-radius:var(--r-sm);padding:9px 12px;color:var(--wh);font-size:12px;outline:none;}
+.coupon-inp{flex:1;background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:9px 12px;color:var(--wh);font-size:12px;outline:none;}
 .coupon-btn{background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-sm);color:var(--wh);font-size:12px;font-weight:700;cursor:pointer;padding:9px 14px;}
 .cart-total{display:flex;justify-content:space-between;font-weight:800;font-size:15px;margin-bottom:14px;color:var(--wh);}
 .cart-checkout-btn{width:100%;background:var(--or);color:#fff;border:none;border-radius:var(--r-md);padding:14px;font-weight:800;font-size:14px;cursor:pointer;transition:background .15s;}
 .cart-checkout-btn:hover{background:var(--or-dk);}
-.cart-empty{text-align:center;padding:40px 20px;color:var(--mu);}
+.cart-empty{text-align:center;padding:40px 20px;color:var(--wh);font-weight:700;}
 .cart-empty-icon{font-size:44px;margin-bottom:12px;opacity:.35;}
 /* AUTH */
 .auth-overlay{position:fixed;inset:0;background:rgba(11,11,12,0.65);z-index:600;display:none;align-items:center;justify-content:center;padding:16px;}
@@ -223,29 +227,29 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .auth-close{background:none;border:none;color:rgba(255,255,255,.7);font-size:20px;cursor:pointer;width:30px;height:30px;border-radius:var(--r-pill);display:flex;align-items:center;justify-content:center;}
 .auth-close:hover{background:rgba(255,255,255,.1);color:#fff;}
 .auth-tabs{display:flex;gap:4px;margin-bottom:0;}
-.atab{font-weight:700;font-size:13px;padding:9px 16px;border-radius:var(--r-sm);cursor:pointer;color:var(--mu);border:none;background:none;}
+.atab{font-weight:700;font-size:13px;padding:9px 16px;border-radius:var(--r-sm);cursor:pointer;color:var(--wh);font-weight:700;border:none;background:none;}
 .atab.active{color:var(--or);background:rgba(255,106,0,0.08);}
 .auth-body{padding:20px 22px 24px;}
-.auth-sub{font-size:12px;color:var(--mu);margin-bottom:14px;}
-.fi{width:100%;background:#fff;border:1px solid var(--bdr);border-radius:var(--r-sm);padding:10px 13px;color:var(--wh);font-size:13px;outline:none;margin-bottom:10px;box-sizing:border-box;}
+.auth-sub{font-size:12px;color:var(--wh);font-weight:700;margin-bottom:14px;}
+.fi{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:10px 13px;color:var(--wh);font-size:13px;outline:none;margin-bottom:10px;box-sizing:border-box;}
 .fi:focus{border-color:var(--or);box-shadow:0 0 0 3px rgba(255,106,0,.15);}
 .pw-wrap{position:relative;margin-bottom:10px;}
 .pw-wrap .fi{margin-bottom:0;padding-right:52px;}
-.pw-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--mu);font-size:10px;cursor:pointer;font-weight:700;letter-spacing:.5px;}
+.pw-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--wh);font-weight:700;font-size:10px;cursor:pointer;font-weight:700;letter-spacing:.5px;}
 .auth-err{color:var(--re);font-size:11px;margin-bottom:8px;display:none;}
 .auth-btn{width:100%;background:var(--or);color:#fff;border:none;border-radius:var(--r-md);padding:12px;font-weight:800;font-size:14px;cursor:pointer;transition:background .15s;}
 .auth-btn:hover{background:var(--or-dk);}
-.auth-forgot{text-align:center;font-size:11px;color:var(--mu);margin-top:10px;cursor:pointer;}
+.auth-forgot{text-align:center;font-size:11px;color:var(--wh);font-weight:700;margin-top:10px;cursor:pointer;}
 .auth-forgot:hover{color:var(--or);}
 /* FORMS */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
-.inp{width:100%;background:#fff;border:1px solid var(--bdr);border-radius:var(--r-sm);padding:10px 13px;color:var(--wh);font-size:13px;outline:none;box-sizing:border-box;}
+.inp{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:10px 13px;color:var(--wh);font-size:13px;outline:none;box-sizing:border-box;}
 .inp:focus,.inp-sel:focus{border-color:var(--or);box-shadow:0 0 0 3px rgba(255,106,0,.15);}
-.inp-sel{width:100%;background:#fff;border:1px solid var(--bdr);border-radius:var(--r-sm);padding:10px 13px;color:var(--wh);font-size:13px;outline:none;appearance:none;box-sizing:border-box;}
-.lbl{font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px;}
+.inp-sel{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:10px 13px;color:var(--wh);font-size:13px;outline:none;appearance:none;box-sizing:border-box;}
+.lbl{font-size:11px;font-weight:700;color:var(--wh);font-weight:700;text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px;}
 .fg{margin-bottom:12px;}
-.ta{width:100%;background:#fff;border:1px solid var(--bdr);border-radius:var(--r-sm);padding:10px 13px;color:var(--wh);font-size:13px;outline:none;box-sizing:border-box;resize:vertical;}
+.ta{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:10px 13px;color:var(--wh);font-size:13px;outline:none;box-sizing:border-box;resize:vertical;}
 /* CHECKOUT */
 .co-grid{display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start;max-width:var(--container);margin:0 auto;}
 .co-card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-lg);padding:20px;margin-bottom:16px;}
@@ -257,7 +261,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .pay-radio{width:16px;height:16px;border-radius:var(--r-pill);border:2px solid var(--bdr);flex-shrink:0;margin-top:2px;transition:all .15s;}
 .pay-opt.active .pay-radio{border-color:var(--or);background:var(--or);}
 .pay-lbl{font-size:13px;font-weight:700;margin-bottom:2px;color:var(--wh);}
-.pay-sub{font-size:11px;color:var(--mu);}
+.pay-sub{font-size:11px;color:var(--wh);font-weight:700;}
 .place-btn{width:100%;background:var(--or);color:#fff;border:none;border-radius:var(--r-md);padding:15px;font-weight:800;font-size:15px;cursor:pointer;transition:background .15s;}
 .place-btn:hover{background:var(--or-dk);}
 .os-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--bdr);align-items:center;}
@@ -270,7 +274,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .info-box{background:rgba(32,84,199,0.06);border:1px solid rgba(32,84,199,0.22);border-radius:var(--r-sm);padding:10px 14px;font-size:12px;color:var(--bl);margin-bottom:10px;}
 .tb-btn{border-radius:var(--r-sm);padding:6px 12px;font-weight:700;font-size:11px;cursor:pointer;border:none;}
 .tb-btn-or{background:var(--or);color:#fff;}
-.tb-btn-dk{background:#fff;border:1.5px solid var(--ink);color:var(--ink);}
+.tb-btn-dk{background:var(--card);border:1.5px solid var(--wh);color:var(--wh);}
 /* WHY / GUARANTEE */
 .why-grid,.guarantee-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;}
 .why-card,.guarantee-card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);padding:20px 18px;transition:box-shadow .15s,border-color .15s;}
@@ -281,25 +285,25 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 /* REVIEWS */
 .review-card{background:var(--card2);border-radius:var(--r-md);padding:16px;margin-bottom:10px;}
 .review-stars{color:var(--gold);font-size:14px;margin-bottom:4px;}
-.review-author{font-size:11px;color:var(--mu);margin-bottom:6px;}
+.review-author{font-size:11px;color:var(--wh);font-weight:700;margin-bottom:6px;}
 .review-text{font-size:12.5px;color:var(--w2);line-height:1.7;}
 .star-pick span{font-size:22px;cursor:pointer;color:var(--bdr);}
 .star-pick span.on{color:var(--gold);}
 /* ACCOUNT */
 .acc-tabs{display:flex;gap:0;border-bottom:1px solid var(--bdr);overflow-x:auto;scrollbar-width:none;margin-bottom:16px;}
 .acc-tabs::-webkit-scrollbar{display:none;}
-.acc-tab{padding:11px 14px;font-size:12.5px;font-weight:600;color:var(--mu);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;}
+.acc-tab{padding:11px 14px;font-size:12.5px;font-weight:600;color:var(--wh);font-weight:700;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;}
 .acc-tab.active{color:var(--or);border-bottom-color:var(--or);}
 .order-card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);padding:16px;margin-bottom:10px;}
 .order-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
 .order-num{font-size:12px;font-weight:700;color:var(--wh);}
-.order-date{font-size:11px;color:var(--mu);}
+.order-date{font-size:11px;color:var(--wh);font-weight:700;}
 .status-badge{font-size:10px;font-weight:800;padding:4px 9px;border-radius:var(--r-pill);}
-.status-pending{background:#F4F4F3;color:#48484E;}
-.status-confirmed{background:#FFE9D9;color:var(--su);}
-.status-shipped{background:#E9EFFC;color:var(--bl);}
-.status-delivered{background:#FFE9D9;color:var(--su);}
-.status-cancelled{background:#FCE9E9;color:var(--re);}
+.status-pending{background:rgba(255,255,255,0.10);color:var(--w2);}
+.status-confirmed{background:rgba(255,106,0,0.14);color:var(--su);}
+.status-shipped{background:rgba(32,84,199,0.16);color:var(--bl);}
+.status-delivered{background:rgba(255,106,0,0.14);color:var(--su);}
+.status-cancelled{background:rgba(220,38,38,0.16);color:var(--re);}
 /* CHAT */
 .chat-float{position:fixed;bottom:20px;right:20px;z-index:300;}
 .chat-trigger{width:52px;height:52px;border-radius:var(--r-pill);background:var(--ink);border:none;cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-md);color:#fff;}
@@ -315,7 +319,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .chat-bubble{background:var(--card2);border-radius:var(--r-md);padding:8px 11px;font-size:12px;max-width:80%;line-height:1.5;color:var(--wh);white-space:pre-wrap;}
 .chat-bubble.own-b{background:var(--ink);color:#fff;}
 .chat-inp-row{display:flex;gap:6px;padding:10px;}
-.widget-inp{flex:1;background:#fff;border:1px solid var(--bdr);border-radius:var(--r-sm);padding:8px 10px;color:var(--wh);font-size:12px;outline:none;}
+.widget-inp{flex:1;background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:8px 10px;color:var(--wh);font-size:12px;outline:none;}
 .send-btn{background:var(--or);border:none;border-radius:var(--r-sm);width:34px;cursor:pointer;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;}
 /* FOOTER */
 .footer{background:linear-gradient(175deg,var(--ink),var(--ink2) 140%);padding:48px 20px 20px;margin-top:48px;}
@@ -331,7 +335,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .newsletter-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px;color:var(--wh);margin-bottom:8px;}
 .newsletter-sub{font-size:13px;color:var(--w2);margin-bottom:20px;}
 .newsletter-form{display:flex;flex-wrap:wrap;gap:10px;max-width:520px;margin:0 auto;}
-.newsletter-form input{flex:1 1 160px;min-width:0;background:#fff;border:1.5px solid var(--bdr);border-radius:var(--r-sm);padding:12px 14px;font-size:13px;color:var(--wh);outline:none;}
+.newsletter-form input{flex:1 1 160px;min-width:0;background:var(--card2);border:1.5px solid var(--bdr);border-radius:var(--r-sm);padding:12px 14px;font-size:13px;color:var(--wh);outline:none;}
 .newsletter-form input:focus{border-color:var(--or);}
 .newsletter-form button{background:var(--ink);color:#fff;border:none;border-radius:var(--r-sm);padding:12px 22px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap;}
 .newsletter-form button:hover{background:var(--or);}
@@ -364,7 +368,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .acc-prompt-hdr{background:var(--ink);padding:20px;text-align:center;border-bottom:2px solid var(--or);}
 .acc-prompt-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#fff;}
 .acc-prompt-body{padding:20px 20px 26px;text-align:center;}
-.acc-prompt-sub{font-size:13px;color:var(--mu);margin-bottom:18px;line-height:1.7;}
+.acc-prompt-sub{font-size:13px;color:var(--wh);font-weight:700;margin-bottom:18px;line-height:1.7;}
 /* RESPONSIVE */
 @media(min-width:1025px){
   .products-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));}
@@ -414,7 +418,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .out-stock{background:rgba(220,38,38,0.10);color:var(--re);}
 .pre-order-bdg{background:rgba(32,84,199,0.10);color:var(--bl);}
 .pre-order-box{background:rgba(32,84,199,0.06);border:1px solid rgba(32,84,199,0.2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--w2);line-height:1.7;margin-bottom:14px;}
-.var-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--mu);margin-bottom:8px;margin-top:14px;}
+.var-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--wh);font-weight:700;margin-bottom:8px;margin-top:14px;}
 .var-opts{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;}
 .var-opt{background:var(--card2);border:1.5px solid var(--bdr);border-radius:7px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;color:var(--w2);transition:all .15s;}
 .var-opt:hover{border-color:var(--or);color:var(--wh);}
@@ -426,19 +430,19 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .modal-btn:hover{opacity:.9;}
 .modal-btn:disabled{opacity:.45;cursor:not-allowed;}
 .modal-btn-or{background:var(--or);color:#fff;}
-.modal-btn-dk{background:#fff;border:1.5px solid var(--ink);color:var(--ink);}
+.modal-btn-dk{background:var(--card);border:1.5px solid var(--wh);color:var(--wh);}
 .modal-btn-pre{background:var(--bl);color:#fff;}
 .modal-btn-free{background:var(--su);color:#fff;}
 .specs-table{margin-top:14px;}
 .spec-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:12px;}
-.spec-key{color:var(--mu);}
+.spec-key{color:var(--wh);font-weight:700;}
 .spec-val{color:var(--wh);font-weight:600;text-align:right;}
 .reviews-sec{padding:24px 16px 40px;max-width:900px;margin:0 auto;}
 .review-hdr{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
 .review-av{width:32px;height:32px;border-radius:99px;background:rgba(255,106,0,0.12);color:var(--or);font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .review-name{font-size:13px;font-weight:700;color:var(--wh);}
 .verified{font-size:9px;color:var(--su);background:rgba(255,106,0,0.12);padding:2px 6px;border-radius:4px;margin-left:6px;font-weight:700;}
-.review-date{font-size:10px;color:var(--mu);}
+.review-date{font-size:10px;color:var(--wh);font-weight:700;}
 .review-stars{color:var(--gold);font-size:13px;}
 .review-text{font-size:13px;color:var(--w2);line-height:1.7;margin-top:4px;}
 .review-imgs{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
@@ -544,7 +548,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 </div>
 
 <!-- BACK BUTTON -->
-<div id="global-back-btn" style="display:none;position:sticky;top:0;z-index:99;background:rgba(255,255,255,0.96);backdrop-filter:blur(8px);padding:10px 20px;border-bottom:1px solid var(--bdr);">
+<div id="global-back-btn" style="display:none;position:sticky;top:0;z-index:99;background:rgba(10,10,11,0.92);backdrop-filter:blur(8px);padding:10px 20px;border-bottom:1px solid var(--bdr);">
   <button onclick="goBack()" style="background:none;border:none;color:var(--or);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">← Back</button>
 </div>
 
@@ -589,7 +593,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 
   <div class="sec-wrap">
     <div class="sec-hdr2"><div class="sec-title">Shop by Category</div></div>
-    <div class="cats-grid" id="cats-grid"><div style="grid-column:1/-1;text-align:center;padding:30px 20px;"><div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:18px;background:linear-gradient(90deg,#FF6A00,#FFA733,#FF6A00);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmerText 1.6s linear infinite;">RichNation Mall</div><div style="font-size:11px;color:var(--mu);margin-top:6px;">Loading...</div></div></div>
+    <div class="cats-grid" id="cats-grid"><div style="grid-column:1/-1;text-align:center;padding:30px 20px;"><div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:18px;background:linear-gradient(90deg,#FF6A00,#FFA733,#FF6A00);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmerText 1.6s linear infinite;">RichNation Mall</div><div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:6px;">Loading...</div></div></div>
   </div>
 
   <div class="sec-wrap" id="featured-sec" style="display:none;">
@@ -778,8 +782,8 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
     <div class="acc-prompt-body">
       <div class="acc-prompt-sub">Sign in to add items to cart, track orders, and get exclusive deals.</div>
       <button class="auth-btn" onclick="closeAccPrompt();openAuth('register')">Create Free Account</button>
-      <div style="margin-top:10px;font-size:11px;color:#888;cursor:pointer;" onclick="closeAccPrompt();openAuth('login')">Already have an account? Sign In</div>
-      <div style="margin-top:8px;font-size:11px;color:#555;cursor:pointer;" onclick="closeAccPrompt()">Continue Browsing</div>
+      <div style="margin-top:10px;font-size:11px;color:var(--wh);font-weight:700;cursor:pointer;" onclick="closeAccPrompt();openAuth('login')">Already have an account? Sign In</div>
+      <div style="margin-top:8px;font-size:11px;color:var(--wh);font-weight:700;cursor:pointer;" onclick="closeAccPrompt()">Continue Browsing</div>
     </div>
   </div>
 </div>
@@ -1030,10 +1034,10 @@ function showRichPointsInfo(){
     <div style="font-size:13px;color:var(--w2);line-height:2.1;">
       • Discount on any future order, redeem at checkout<br>
       • Free shipping on selected orders, redeem at checkout<br>
-      • Redeem for selected free products <span style="color:var(--mu);">(coming soon)</span><br>
-      • Entry into monthly loyalty prize draws <span style="color:var(--mu);">(coming soon)</span><br>
-      • Exclusive access to member-only flash sales <span style="color:var(--mu);">(coming soon)</span><br>
-      • Gift vouchers for friends and family <span style="color:var(--mu);">(coming soon)</span>
+      • Redeem for selected free products <span style="color:var(--wh);font-weight:700;">(coming soon)</span><br>
+      • Entry into monthly loyalty prize draws <span style="color:var(--wh);font-weight:700;">(coming soon)</span><br>
+      • Exclusive access to member-only flash sales <span style="color:var(--wh);font-weight:700;">(coming soon)</span><br>
+      • Gift vouchers for friends and family <span style="color:var(--wh);font-weight:700;">(coming soon)</span>
     </div>
   `);
 }
@@ -1068,7 +1072,7 @@ function showInfoModal(title,bodyHtml){
   overlay.id='info-modal-overlay';
   overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto;';
   overlay.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:24px;max-width:480px;width:100%;max-height:85vh;overflow-y:auto;">'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;"><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:900;font-size:16px;">'+title+'</div><span onclick="closeInfoModal()" style="cursor:pointer;font-size:22px;color:var(--mu);line-height:1;">&times;</span></div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;"><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:900;font-size:16px;">'+title+'</div><span onclick="closeInfoModal()" style="cursor:pointer;font-size:22px;color:var(--wh);font-weight:700;line-height:1;">&times;</span></div>'
     +bodyHtml
     +'</div>';
   document.body.appendChild(overlay);
@@ -1207,10 +1211,10 @@ function renderWalletIssueRow(iss){
       <div style="font-size:12px;font-weight:700;color:var(--wh);">${typeLabel}${iss.amount?', '+fmt(iss.amount):''}</div>
       <div style="font-size:10px;font-weight:800;color:${st.color};">${st.label}</div>
     </div>
-    <div style="font-size:11px;color:var(--mu);margin-top:3px;">${iss.message}</div>
+    <div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:3px;">${iss.message}</div>
     ${iss.adminReply?`<div style="font-size:11px;color:var(--w2);margin-top:4px;background:var(--card2);padding:6px 8px;border-radius:6px;">Reply: ${iss.adminReply}</div>`:''}
     ${iss.status==='approved_awaiting_bank'?`<button onclick="showBankDetailsForm('${iss._id}')" style="margin-top:6px;font-size:11px;font-weight:700;padding:6px 12px;border-radius:6px;background:rgba(255,106,0,0.1);border:1px solid rgba(255,106,0,0.3);color:var(--su);cursor:pointer;">Enter Bank Details</button>`:''}
-    ${iss.status==='processing'||iss.status==='paid'?`<div style="font-size:11px;color:var(--mu);margin-top:4px;">Sending to: ${iss.bankAcctName}, ${iss.bankName} (${iss.bankAcctNo})</div>`:''}
+    ${iss.status==='processing'||iss.status==='paid'?`<div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:4px;">Sending to: ${iss.bankAcctName}, ${iss.bankName} (${iss.bankAcctNo})</div>`:''}
   </div>`;
 }
 function showWalletIssueForm(){
@@ -1241,7 +1245,7 @@ async function submitWalletIssue(){
 }
 function showBankDetailsForm(issueId){
   showInfoModal('Enter Bank Details',`
-    <div style="font-size:12px;color:var(--mu);margin-bottom:12px;">The account name must match your RichNation Mall profile name (<strong style="color:var(--wh);">${currUser.name}</strong>) or we can't process the payout.</div>
+    <div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;">The account name must match your RichNation Mall profile name (<strong style="color:var(--wh);">${currUser.name}</strong>) or we can't process the payout.</div>
     <div class="fg"><label class="lbl">Bank Name</label><input class="inp" id="rb-bank" placeholder="e.g. GTBank"/></div>
     <div class="fg"><label class="lbl">Account Number</label><input class="inp" id="rb-acctno" placeholder="0123456789"/></div>
     <div class="fg"><label class="lbl">Account Name</label><input class="inp" id="rb-acctname" placeholder="Must match: ${currUser.name}"/></div>
@@ -1290,7 +1294,7 @@ async function submitRefundBankDetails(issueId){
     window._heroCarouselTimer=setInterval(()=>{idx=(idx+1)%imgs.length;apply(idx);},4500);
   }
 }
-function fmtBoth(n){return '₦'+parseInt(n).toLocaleString()+' <span style="color:var(--mu);font-size:10px;">($'+(n/exchangeRate).toFixed(0)+')</span>';}
+function fmtBoth(n){return '₦'+parseInt(n).toLocaleString()+' <span style="color:var(--wh);font-weight:700;font-size:10px;">($'+(n/exchangeRate).toFixed(0)+')</span>';}
 function ini(n){return(n||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
 function ds(){return new Date().toLocaleDateString('en-GB');}
 function ts2(){return new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}
@@ -1409,7 +1413,7 @@ function calcDel(){
   if(country==='NG'&&stateRaw){
     const key='ng_'+state;
     deliveryFee=custom[key]||NG_FEES[stateRaw.toLowerCase()]||NG_FEES[state]||2500;
-    if(info){info.style.display='block';info.innerHTML='📍 Delivery to <strong>'+(lga?lga+', ':'')+stateRaw+'</strong>, estimated shipping fee: <strong>₦'+deliveryFee.toLocaleString()+'</strong>'+(lga?'':'<br><span style="color:var(--mu);">Tip: select your Local Government Area above for more accurate delivery estimates.</span>');}
+    if(info){info.style.display='block';info.innerHTML='📍 Delivery to <strong>'+(lga?lga+', ':'')+stateRaw+'</strong>, estimated shipping fee: <strong>₦'+deliveryFee.toLocaleString()+'</strong>'+(lga?'':'<br><span style="color:var(--wh);font-weight:700;">Tip: select your Local Government Area above for more accurate delivery estimates.</span>');}
   }else if(country&&country!=='NG'){
     deliveryFee=custom['intl_'+country]||INTL_FEES[country]||35000;
     if(info){info.style.display='block';info.innerHTML='📍 International delivery to <strong>'+(stateRaw||country)+'</strong>, estimated shipping fee: <strong>₦'+deliveryFee.toLocaleString()+'</strong>';}
@@ -1530,12 +1534,12 @@ async function openResetPasswordPrompt(custId){
   overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:900;display:flex;align-items:center;justify-content:center;padding:16px;';
   overlay.innerHTML=`<div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;width:100%;max-width:380px;padding:22px;">
     <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:16px;color:var(--wh);margin-bottom:6px;">Reset Your Password</div>
-    <div style="font-size:12px;color:var(--mu);margin-bottom:16px;">Hi ${cust.fname||''}, choose a new password for ${cust.email}.</div>
+    <div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:16px;">Hi ${cust.fname||''}, choose a new password for ${cust.email}.</div>
     <div class="pw-wrap"><input class="fi" id="reset-pw1" type="password" placeholder="New password (min 6 chars)" style="margin-bottom:0;"/></div>
     <div class="pw-wrap" style="margin-top:10px;"><input class="fi" id="reset-pw2" type="password" placeholder="Confirm new password" style="margin-bottom:0;"/></div>
     <div class="auth-err" id="reset-err" style="margin-top:8px;"></div>
     <button class="auth-btn" style="margin-top:14px;" onclick="submitPasswordReset('${custId}')">Set New Password</button>
-    <div style="text-align:center;font-size:11px;color:var(--mu);margin-top:12px;cursor:pointer;" onclick="this.closest('div[style*=fixed]').remove()">Cancel</div>
+    <div style="text-align:center;font-size:11px;color:var(--wh);font-weight:700;margin-top:12px;cursor:pointer;" onclick="this.closest('div[style*=fixed]').remove()">Cancel</div>
   </div>`;
   document.body.appendChild(overlay);
 }
@@ -1555,10 +1559,10 @@ function renderCatNav(){const nav=document.getElementById('cat-nav');if(!nav)ret
 function brandLoaderHTML(sub){
   return `<div style="grid-column:1/-1;text-align:center;padding:40px 20px;">
     <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:20px;background:linear-gradient(90deg,var(--or),var(--gold),var(--or));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmerText 1.6s linear infinite;">RichNation Mall</div>
-    <div style="font-size:12px;color:var(--mu);margin-top:6px;">${sub||'Loading...'}</div>
+    <div style="font-size:12px;color:var(--wh);font-weight:700;margin-top:6px;">${sub||'Loading...'}</div>
   </div>`;
 }
-function renderCategories(){const g=document.getElementById('cats-grid');if(!g)return;if(!allCategories.length){g.innerHTML=window._mallDataReady?'<div style="color:var(--mu);font-size:12px;grid-column:1/-1;">No categories yet.</div>':brandLoaderHTML('Fetching categories...');return;}g.innerHTML=allCategories.map(c=>{const cnt=allProducts.filter(p=>p.category===c.id).length;return `<div class="cat-card" onclick="filterCat('${c.id}')"><div class="cat-ico" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:16px;color:var(--or);">${c.icon||c.name.slice(0,2).toUpperCase()}</div><div class="cat-name">${c.name}</div><div class="cat-count">${cnt} item${cnt!==1?'s':''}</div></div>`;}).join('');}
+function renderCategories(){const g=document.getElementById('cats-grid');if(!g)return;if(!allCategories.length){g.innerHTML=window._mallDataReady?'<div style="color:var(--wh);font-weight:700;font-size:12px;grid-column:1/-1;">No categories yet.</div>':brandLoaderHTML('Fetching categories...');return;}g.innerHTML=allCategories.map(c=>{const cnt=allProducts.filter(p=>p.category===c.id).length;return `<div class="cat-card" onclick="filterCat('${c.id}')"><div class="cat-ico" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:16px;color:var(--or);">${c.icon||c.name.slice(0,2).toUpperCase()}</div><div class="cat-name">${c.name}</div><div class="cat-count">${cnt} item${cnt!==1?'s':''}</div></div>`;}).join('');}
 function catName(id){return allCategories.find(c=>c.id===id)?.name||id||'';}
 function catIcon(id){return allCategories.find(c=>c.id===id)?.icon||id?.slice(0,2).toUpperCase()||'P';}
 
@@ -1584,13 +1588,13 @@ function productCard(p){
     <div class="prod-info">
       <div class="prod-cat-lbl">${catName(p.category)}</div>
       <div class="prod-name">${p.name}</div>
-      ${p.vendorId&&p.vendorName?`<div style="font-size:9px;color:var(--mu);margin-bottom:3px;">Sold by ${p.vendorName}</div>`:''}
+      ${p.vendorId&&p.vendorName?`<div style="font-size:9px;color:var(--wh);font-weight:700;margin-bottom:3px;">Sold by ${p.vendorName}</div>`:''}
       <div class="prod-price-row">
-        <div class="prod-price">${disabled?'<span style="color:var(--mu);">Unavailable</span>':isFree?'<span style="color:var(--su);font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:900;">FREE</span>':fmt(price)}</div>
+        <div class="prod-price">${disabled?'<span style="color:var(--wh);font-weight:700;">Unavailable</span>':isFree?'<span style="color:var(--su);font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:900;">FREE</span>':fmt(price)}</div>
         ${p.salePrice&&p.salePrice<p.price&&!disabled?`<div class="prod-old">${fmt(p.price)}</div>`:''}
       </div>
       <div class="prod-stars">${stars} <span>(${p.reviews||0})</span></div>
-      ${sold>0?`<div style="font-size:9px;color:var(--mu);margin-bottom:4px;font-weight:600;">${sold} sold${p.stock!==null&&p.stock!==undefined?' · '+p.stock+' left':''}</div>`:''}
+      ${sold>0?`<div style="font-size:9px;color:var(--wh);font-weight:700;margin-bottom:4px;font-weight:700;">${sold} sold${p.stock!==null&&p.stock!==undefined?' · '+p.stock+' left':''}</div>`:''}
       <button class="prod-add-btn${preorder&&!disabled?' preorder':''}"
         ${(oos&&!preorder)||disabled?'disabled':''}
         onclick="event.stopPropagation();${disabled||oos&&!preorder?'':preorder?`openProduct('${p.id}')`:isFree?`addFreeProduct('${p.id}')`:(`quickAdd('${p.id}')`)}">
@@ -1614,7 +1618,7 @@ function renderAllProducts(filtered=null,sort='latest'){
   else if(sort==='popular')prods=[...prods].sort((a,b)=>(b.sold||0)-(a.sold||0));
   else if(sort==='rating')prods=[...prods].sort((a,b)=>(b.rating||0)-(a.rating||0));
   const show=prods.slice(0,displayedCount);
-  g.innerHTML=show.length?show.map(productCard).join(''):(window._mallDataReady?`<div style="color:var(--mu);font-size:13px;padding:20px 0;grid-column:1/-1;">No products found.</div>`:brandLoaderHTML('Fetching products...'));
+  g.innerHTML=show.length?show.map(productCard).join(''):(window._mallDataReady?`<div style="color:var(--wh);font-weight:700;font-size:13px;padding:20px 0;grid-column:1/-1;">No products found.</div>`:brandLoaderHTML('Fetching products...'));
   const lm=document.getElementById('load-more-wrap');if(lm)lm.style.display=prods.length>displayedCount?'block':'none';
 }
 function sortProducts(v){renderAllProducts(null,v);}
@@ -1668,16 +1672,16 @@ async function openProduct(id){
     <div class="modal-info">
       <div class="modal-cat">${catName(p.category)}</div>
       <div class="modal-title">${p.name}</div>
-      ${p.vendorId&&p.vendorName?`<div style="font-size:11px;color:var(--mu);margin-bottom:4px;">Sold by <span style="color:var(--or);font-weight:700;">${p.vendorName}</span> <span onclick="openAskSellerModal('${p.vendorId}','${p.vendorName.replace(/'/g,"\\'")}')" style="color:var(--or);cursor:pointer;text-decoration:underline;font-weight:600;">Ask a question</span></div>`:''}
-      ${p.code?`<div style="font-size:11px;color:var(--mu);margin-bottom:8px;">Product Code: <span style="color:var(--w2);font-weight:600;">${p.code}</span></div>`:''}
-      <div class="modal-stars">${stars(avgRating)} <span style="color:var(--mu);font-size:11px;">(${reviews.length} reviews)</span></div>
+      ${p.vendorId&&p.vendorName?`<div style="font-size:11px;color:var(--wh);font-weight:700;margin-bottom:4px;">Sold by <span style="color:var(--or);font-weight:700;">${p.vendorName}</span> <span onclick="openAskSellerModal('${p.vendorId}','${p.vendorName.replace(/'/g,"\\'")}')" style="color:var(--or);cursor:pointer;text-decoration:underline;font-weight:600;">Ask a question</span></div>`:''}
+      ${p.code?`<div style="font-size:11px;color:var(--wh);font-weight:700;margin-bottom:8px;">Product Code: <span style="color:var(--w2);font-weight:600;">${p.code}</span></div>`:''}
+      <div class="modal-stars">${stars(avgRating)} <span style="color:var(--wh);font-weight:700;font-size:11px;">(${reviews.length} reviews)</span></div>
       ${stockBadge}
       ${(p.freeShipping||settings.freeShippingAll)?'<div style="font-size:11px;color:var(--su);font-weight:700;margin-bottom:8px;">FREE SHIPPING on this item</div>':''}
       <div class="modal-price-row">
         <div class="modal-price">${isFree?'<span style="color:var(--su);font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:900;">FREE</span>':fmt(price)}</div>
         ${p.salePrice&&p.salePrice<p.price?`<div class="modal-old">${fmt(p.price)}</div><span style="font-size:11px;color:var(--re);">${Math.round((p.price-p.salePrice)/p.price*100)}% off</span>`:''}
       </div>
-      ${!isFree&&currency==='NGN'?`<div style="font-size:11px;color:var(--mu);margin-bottom:10px;">≈ $${(price/exchangeRate).toFixed(0)} USD</div>`:''}
+      ${!isFree&&currency==='NGN'?`<div style="font-size:11px;color:var(--wh);font-weight:700;margin-bottom:10px;">≈ $${(price/exchangeRate).toFixed(0)} USD</div>`:''}
       <div class="modal-desc">${formatDescription(p.description)}</div>
       ${preorder?`<div class="pre-order-box"><strong style="color:var(--or);">PRE-ORDER</strong><br>${p.preOrderNote||'Reserve now, we contact you when ready.'}</div>`:''}
       ${p.colors&&p.colors.length?renderColorGrid(p):(p.variants&&p.variants.length?`<div class="var-title">${p.variantLabel||'Select Option'}</div><div class="var-opts">${p.variants.map(v=>{
@@ -1688,8 +1692,8 @@ async function openProduct(id){
         return `<div class="var-opt" onclick="selectVar(this,'${v.value}')">${swatch}${v.label||v.value}</div>`;
       }).join('')}</div>`:'')}
       ${p.sizes&&p.sizes.length?renderSizeList(p):''}
-      ${(p.colors&&p.colors.length)||(p.sizes&&p.sizes.length)?'<div id="msel-summary" style="font-size:12px;color:var(--mu);margin:-6px 0 12px;"></div>':''}
-      ${!isFree&&!(p.sizes&&p.sizes.length)?`<div class="qty-row"><div class="var-title" style="margin:0;">Quantity</div><button class="qty-btn" onclick="changeQty(-1)">&#8722;</button><div class="qty-num" id="modal-qty">1</div><button class="qty-btn" onclick="changeQty(1)">+</button>${p.stock!==null&&p.stock>0?`<span style="font-size:10px;color:var(--mu);">${p.stock} available</span>`:''}</div>`:''}
+      ${(p.colors&&p.colors.length)||(p.sizes&&p.sizes.length)?'<div id="msel-summary" style="font-size:12px;color:var(--wh);font-weight:700;margin:-6px 0 12px;"></div>':''}
+      ${!isFree&&!(p.sizes&&p.sizes.length)?`<div class="qty-row"><div class="var-title" style="margin:0;">Quantity</div><button class="qty-btn" onclick="changeQty(-1)">&#8722;</button><div class="qty-num" id="modal-qty">1</div><button class="qty-btn" onclick="changeQty(1)">+</button>${p.stock!==null&&p.stock>0?`<span style="font-size:10px;color:var(--wh);font-weight:700;">${p.stock} available</span>`:''}</div>`:''}
       <div class="modal-btns">
         <button class="modal-btn ${preorder?'modal-btn-pre':isFree?'modal-btn-free':'modal-btn-or'}" ${oos&&!preorder?'disabled':''} onclick="addFromModal()">
           ${preorder?t('preorder'):oos?t('outstock'):isFree?t('getfree'):t('addCart')}
@@ -1699,7 +1703,7 @@ async function openProduct(id){
       <button onclick="shareProduct('${p.id}','${(p.name||'').replace(/'/g,"\\'")}')" style="width:100%;margin-top:8px;background:var(--card2);border:1px solid var(--bdr);border-radius:8px;padding:10px;color:var(--w2);font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>Share &amp; Earn RichPoints</button>
       ${window._mBundle?`<div style="margin-top:14px;background:rgba(255,140,0,0.06);border:1px solid rgba(255,140,0,0.25);border-radius:10px;padding:14px;">
         <div style="font-weight:800;font-size:13px;color:var(--or);margin-bottom:6px;">${iconBadge('gift',18)} ${window._mBundle.name}, Save ${window._mBundle.discountPct}%</div>
-        <div style="font-size:11px;color:var(--mu);margin-bottom:10px;">Buy all ${(window._mBundle.productIds||[]).length} items in this bundle together and get ${window._mBundle.discountPct}% off automatically at checkout.</div>
+        <div style="font-size:11px;color:var(--wh);font-weight:700;margin-bottom:10px;">Buy all ${(window._mBundle.productIds||[]).length} items in this bundle together and get ${window._mBundle.discountPct}% off automatically at checkout.</div>
         <button onclick="addBundleToCart('${window._mBundle.id}')" style="width:100%;background:linear-gradient(135deg,var(--or),var(--gold));border:none;border-radius:8px;padding:10px;color:#000;font-weight:800;font-size:12px;cursor:pointer;">Add Whole Bundle to Cart</button>
       </div>`:''}
       <div id="fbt-section-${p.id}"></div>
@@ -1709,8 +1713,8 @@ async function openProduct(id){
         <span style="color:var(--w2);display:flex;align-items:center;gap:5px;">${iconBadge('tag',15)} <span>Price Adjustment</span></span>
         ${p.freeShipping||settings.freeShippingAll?'<span style="color:var(--su);font-weight:700;display:flex;align-items:center;gap:5px;">'+iconBadge('truck',15)+' <span>Free Shipping</span></span>':''}
       </div>
-      ${p.sold||p.stock!==null?`<div style="font-size:11px;color:var(--mu);margin-top:10px;">${p.sold?`<span style="color:var(--or);font-weight:700;">${p.sold}</span> sold · `:''}${p.stock!==null&&p.stock!==undefined?`<span style="color:var(--or);font-weight:700;">${p.stock}</span> remaining`:''}</div>`:''}
-      ${(p.dimensions||p.specs)?`<div class="specs-table"><div style="font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:1px;margin:12px 0 8px;">Specifications</div>
+      ${p.sold||p.stock!==null?`<div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:10px;">${p.sold?`<span style="color:var(--or);font-weight:700;">${p.sold}</span> sold · `:''}${p.stock!==null&&p.stock!==undefined?`<span style="color:var(--or);font-weight:700;">${p.stock}</span> remaining`:''}</div>`:''}
+      ${(p.dimensions||p.specs)?`<div class="specs-table"><div style="font-size:10px;font-weight:700;color:var(--wh);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:12px 0 8px;">Specifications</div>
         ${p.dimensions&&(p.dimensions.length||p.dimensions.width||p.dimensions.height)?`<div class="spec-row"><span class="spec-key">Dimensions (L×W×H)</span><span class="spec-val">${p.dimensions.length||'N/A'} × ${p.dimensions.width||'N/A'} × ${p.dimensions.height||'N/A'} cm</span></div>`:''}
         ${p.dimensions&&p.dimensions.weight?`<div class="spec-row"><span class="spec-key">Weight</span><span class="spec-val">${p.dimensions.weight} kg</span></div>`:''}
         ${p.specs?Object.entries(p.specs).map(([k,v])=>`<div class="spec-row"><span class="spec-key">${k}</span><span class="spec-val">${v}</span></div>`).join(''):''}
@@ -1722,13 +1726,13 @@ async function openProduct(id){
   </div>
   <div class="reviews-sec">
     <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;margin-bottom:16px;">${t('reviews')} (${reviews.length})</div>
-    ${reviews.map(r=>`<div class="review-card"><div class="review-hdr"><div class="review-av">${ini(r.name||'A')}</div><div><div class="review-name">${r.name||'Anonymous'}${r.verified?'<span class="verified">Verified</span>':''}</div><div class="review-date">${r.date||''}</div></div><div class="review-stars" style="margin-left:auto;">${stars(r.rating||5)}</div></div><div class="review-text">${r.review||''}</div>${r.images&&r.images.length?`<div class="review-imgs">${r.images.map(img=>`<img class="review-img" src="${img}" onclick="window.open('${img}','_blank')"/>`).join('')}</div>`:''}</div>`).join('')||`<div style="color:var(--mu);font-size:13px;padding:14px 0;">No reviews yet. Be the first!</div>`}
+    ${reviews.map(r=>`<div class="review-card"><div class="review-hdr"><div class="review-av">${ini(r.name||'A')}</div><div><div class="review-name">${r.name||'Anonymous'}${r.verified?'<span class="verified">Verified</span>':''}</div><div class="review-date">${r.date||''}</div></div><div class="review-stars" style="margin-left:auto;">${stars(r.rating||5)}</div></div><div class="review-text">${r.review||''}</div>${r.images&&r.images.length?`<div class="review-imgs">${r.images.map(img=>`<img class="review-img" src="${img}" onclick="window.open('${img}','_blank')"/>`).join('')}</div>`:''}</div>`).join('')||`<div style="color:var(--wh);font-weight:700;font-size:13px;padding:14px 0;">No reviews yet. Be the first!</div>`}
     <div class="write-review">
       <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;margin-bottom:12px;">${t('writeReview')}</div>
       <div class="star-select" id="star-sel">${[1,2,3,4,5].map(n=>`<span class="star-opt" onclick="setStars(${n},'star-sel')" data-val="${n}" style="color:var(--or);">&#9733;</span>`).join('')}</div>
       <input class="fi" id="rev-name" placeholder="Your name" autocomplete="off" style="margin-top:10px;"/>
       <textarea class="fi" id="rev-text" rows="3" placeholder="Share your experience..." style="resize:vertical;min-height:80px;margin-top:8px;line-height:1.7;"></textarea>
-      <div class="upload-area" onclick="document.getElementById('rev-imgs').click()" style="margin-top:8px;"><input type="file" id="rev-imgs" accept="image/*" multiple onchange="handleRevImgs(this,'rev-previews')" style="display:none;"/><div style="font-size:12px;color:var(--mu);">Upload photos (optional), max 5</div><div class="upload-previews" id="rev-previews"></div></div>
+      <div class="upload-area" onclick="document.getElementById('rev-imgs').click()" style="margin-top:8px;"><input type="file" id="rev-imgs" accept="image/*" multiple onchange="handleRevImgs(this,'rev-previews')" style="display:none;"/><div style="font-size:12px;color:var(--wh);font-weight:700;">Upload photos (optional), max 5</div><div class="upload-previews" id="rev-previews"></div></div>
       <button class="auth-btn" style="max-width:200px;margin-top:10px;" onclick="submitReview('${id}')">${t('submitReview')}</button>
       <div id="rev-msg" style="font-size:11px;margin-top:8px;display:none;"></div>
     </div>
@@ -1810,7 +1814,7 @@ function renderColorGrid(p){
   return '<div class="var-title">Colour</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;">'
     + p.colors.map((c,i)=>`
       <div onclick="selectColorSwatch(${i})" id="clrsw-${i}" style="cursor:pointer;border-radius:8px;overflow:hidden;border:2px solid ${i===0?'var(--or)':'var(--bdr)'};background:var(--card2);">
-        <div style="aspect-ratio:1;overflow:hidden;">${c.image?`<img loading="lazy" decoding="async" src="${c.image}" alt="${c.name}" style="width:100%;height:100%;object-fit:cover;display:block;"/>`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--mu);font-size:10px;">No photo</div>`}</div>
+        <div style="aspect-ratio:1;overflow:hidden;">${c.image?`<img loading="lazy" decoding="async" src="${c.image}" alt="${c.name}" style="width:100%;height:100%;object-fit:cover;display:block;"/>`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--wh);font-weight:700;font-size:10px;">No photo</div>`}</div>
         <div id="clrlbl-${i}" style="font-size:11px;text-align:center;padding:5px 2px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${i===0?'background:var(--or);color:#000;':'color:var(--w2);'}">${c.name}</div>
       </div>`).join('')
     + '</div>';
@@ -1839,7 +1843,7 @@ function renderSizeList(p){
   return '<div class="var-title">Size</div><div style="margin-bottom:14px;">'
     + p.sizes.map((s,i)=>`
       <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bdr);">
-        <div><div style="font-size:13px;font-weight:700;color:var(--wh);">${s.name}</div><div style="font-size:11px;color:var(--mu);">Inventory ${s.stock}</div></div>
+        <div><div style="font-size:13px;font-weight:700;color:var(--wh);">${s.name}</div><div style="font-size:11px;color:var(--wh);font-weight:700;">Inventory ${s.stock}</div></div>
         <div style="display:flex;align-items:center;gap:10px;">
           <button onclick="changeSizeQty(${i},-1)" style="width:26px;height:26px;border-radius:6px;background:var(--card2);border:1px solid var(--bdr);color:var(--wh);cursor:pointer;font-size:16px;line-height:1;">&#8722;</button>
           <span id="szqty-${i}" style="min-width:16px;text-align:center;font-weight:700;color:var(--wh);">0</span>
@@ -1934,15 +1938,15 @@ function openReviewModal(productId,productName,productImage){
   overlay.innerHTML=`<div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;padding:22px;">
     <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;">
       <div style="width:44px;height:44px;border-radius:8px;overflow:hidden;background:var(--card2);flex-shrink:0;">${productImage?`<img loading="lazy" decoding="async" src="${productImage}" style="width:100%;height:100%;object-fit:cover;"/>`:''}</div>
-      <div><div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14px;color:var(--wh);">Rate Your Purchase</div><div style="font-size:11px;color:var(--mu);">${productName||''}</div></div>
+      <div><div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14px;color:var(--wh);">Rate Your Purchase</div><div style="font-size:11px;color:var(--wh);font-weight:700;">${productName||''}</div></div>
     </div>
     <div class="star-select" id="srev-star-sel">${[1,2,3,4,5].map(n=>`<span class="star-opt" onclick="setStars(${n},'srev-star-sel')" data-val="${n}" style="color:var(--or);font-size:24px;cursor:pointer;">&#9733;</span>`).join('')}</div>
     <input class="fi" id="srev-name" placeholder="Your name" autocomplete="off" style="margin-top:10px;" value="${currUser?.fname||''}"/>
     <textarea class="fi" id="srev-text" rows="3" placeholder="Share your experience... (optional)" style="resize:vertical;min-height:80px;margin-top:8px;line-height:1.7;"></textarea>
-    <div class="upload-area" onclick="document.getElementById('srev-imgs').click()" style="margin-top:8px;cursor:pointer;"><input type="file" id="srev-imgs" accept="image/*" multiple onchange="handleRevImgs(this,'srev-previews')" style="display:none;"/><div style="font-size:12px;color:var(--mu);">📷 Upload photos of the product (optional), max 5</div><div class="upload-previews" id="srev-previews"></div></div>
+    <div class="upload-area" onclick="document.getElementById('srev-imgs').click()" style="margin-top:8px;cursor:pointer;"><input type="file" id="srev-imgs" accept="image/*" multiple onchange="handleRevImgs(this,'srev-previews')" style="display:none;"/><div style="font-size:12px;color:var(--wh);font-weight:700;">📷 Upload photos of the product (optional), max 5</div><div class="upload-previews" id="srev-previews"></div></div>
     <div style="display:flex;gap:8px;margin-top:14px;">
       <button class="auth-btn" style="flex:1;" onclick="submitReview('${productId}',true)">Submit Review</button>
-      <button onclick="document.getElementById('standalone-review-overlay').remove()" style="padding:0 18px;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;color:var(--mu);font-weight:700;font-size:13px;cursor:pointer;">Skip</button>
+      <button onclick="document.getElementById('standalone-review-overlay').remove()" style="padding:0 18px;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;color:var(--wh);font-weight:700;font-weight:700;font-size:13px;cursor:pointer;">Skip</button>
     </div>
     <div id="srev-msg" style="font-size:11px;margin-top:8px;display:none;"></div>
   </div>`;
@@ -2044,7 +2048,7 @@ function updateCartUI(){
   updateCartBadge();const list=document.getElementById('cart-items-list');if(!list)return;
   const footWrap=document.getElementById('cart-footer-wrap');
   if(!cart.length){
-    list.innerHTML='<div class="cart-empty-state"><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:900;font-size:36px;color:var(--or);">🛒</div><div style="font-weight:700;margin-top:10px;">Your cart is empty</div><div style="font-size:12px;color:var(--mu);margin-top:4px;">Add products to get started</div></div>';
+    list.innerHTML='<div class="cart-empty-state"><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:900;font-size:36px;color:var(--or);">🛒</div><div style="font-weight:700;margin-top:10px;">Your cart is empty</div><div style="font-size:12px;color:var(--wh);font-weight:700;margin-top:4px;">Add products to get started</div></div>';
     if(footWrap)footWrap.style.display='none';
   }
   else{
@@ -2109,7 +2113,7 @@ function renderCheckout(isPreorder=false){
       <div class="co-card" style="background:rgba(255,140,0,0.04);border-color:rgba(255,140,0,0.2);margin-bottom:14px;">
         <div style="display:flex;align-items:center;gap:10px;">
           <div style="width:36px;height:36px;border-radius:99px;background:rgba(255,140,0,0.15);display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:12px;color:var(--or);">${ini(currUser?.name||'?')}</div>
-          <div><div style="font-weight:700;font-size:13px;">${currUser?.fname} ${currUser?.lname}</div><div style="font-size:11px;color:var(--mu);">${currUser?.email}</div></div>
+          <div><div style="font-weight:700;font-size:13px;">${currUser?.fname} ${currUser?.lname}</div><div style="font-size:11px;color:var(--wh);font-weight:700;">${currUser?.email}</div></div>
           <button class="tb-btn tb-btn-dk" onclick="logout()" style="margin-left:auto;font-size:10px;padding:5px 10px;">Switch</button>
         </div>
       </div>
@@ -2158,14 +2162,14 @@ function renderCheckout(isPreorder=false){
         </div>
         <div id="del-info" class="del-badge" style="display:none;margin-top:8px;padding:8px 12px;background:rgba(255,106,0,0.07);border:1px solid rgba(255,106,0,0.2);border-radius:7px;font-size:12px;color:var(--su);"></div>
         </div>
-        <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mu);margin-top:8px;cursor:pointer;">
+        <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--wh);font-weight:700;margin-top:8px;cursor:pointer;">
           <input type="checkbox" id="save-addr" checked style="accent-color:var(--or);"/> Save address to my account
         </label>
       </div>
       ${!isPreorder?`
       <div class="co-card" id="co-free-note" style="display:none;background:rgba(255,106,0,0.07);border-color:rgba(255,106,0,0.25);">
         <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;color:var(--su);font-size:13px;">This order is FREE</div>
-        <div style="font-size:12px;color:var(--mu);margin-top:4px;">No payment is required, just confirm your delivery details and place the order.</div>
+        <div style="font-size:12px;color:var(--wh);font-weight:700;margin-top:4px;">No payment is required, just confirm your delivery details and place the order.</div>
       </div>
       <div class="co-card" style="background:linear-gradient(135deg,#1a1a1a,#0e0e0e);border:1px solid rgba(255,106,0,0.35);display:flex;align-items:center;gap:14px;">
         <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--or),var(--gold));display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;box-shadow:0 4px 14px rgba(255,106,0,0.35);">⚡</div>
@@ -2209,8 +2213,8 @@ function renderCheckout(isPreorder=false){
       </div>`:''}
       <div class="co-card">
         <div class="co-title">Terms & Conditions</div>
-        <div style="font-size:12px;color:var(--mu);line-height:1.9;margin-bottom:12px;max-height:110px;overflow-y:auto;background:var(--card2);border-radius:7px;padding:10px;border:1px solid var(--bdr);">By placing this order you agree to RichNation Mall's terms. All sales are subject to availability. Returns accepted within 7 days for undamaged items. Pay on Delivery orders require a 50% deposit at checkout, with the balance collected by the rider on delivery. Late deliveries will be compensated. Price adjustment available within 30 days of payment.</div>
-        <label style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--mu);cursor:pointer;">
+        <div style="font-size:12px;color:var(--wh);font-weight:700;line-height:1.9;margin-bottom:12px;max-height:110px;overflow-y:auto;background:var(--card2);border-radius:7px;padding:10px;border:1px solid var(--bdr);">By placing this order you agree to RichNation Mall's terms. All sales are subject to availability. Returns accepted within 7 days for undamaged items. Pay on Delivery orders require a 50% deposit at checkout, with the balance collected by the rider on delivery. Late deliveries will be compensated. Price adjustment available within 30 days of payment.</div>
+        <label style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--wh);font-weight:700;cursor:pointer;">
           <input type="checkbox" id="terms-check" style="accent-color:var(--or);margin-top:2px;"/>
           <span>I agree to the <span style="color:var(--or);cursor:pointer;" onclick="showPolicyPage('terms')">Terms</span>, <span style="color:var(--or);cursor:pointer;" onclick="showPolicyPage('returns')">Refund Policy</span> and <span style="color:var(--or);cursor:pointer;" onclick="showPolicyPage('payment')">Payment Policy</span>.</span>
         </label>
@@ -2227,7 +2231,7 @@ function renderCheckout(isPreorder=false){
           <div class="sum-row" id="co-disc-row" style="display:none;color:var(--su);"><span>Discount</span><span id="co-disc">-&#8358;0</span></div>
           <div class="sum-row total"><span>Total</span><span id="co-total">&#8358;0</span></div>
         </div>
-        <div style="margin:12px 0;padding:10px;background:var(--card2);border-radius:7px;font-size:11px;color:var(--mu);line-height:2.2;border:1px solid var(--bdr);">
+        <div style="margin:12px 0;padding:10px;background:var(--card2);border-radius:7px;font-size:11px;color:var(--wh);font-weight:700;line-height:2.2;border:1px solid var(--bdr);">
           <div><span style="color:var(--or);font-weight:700;margin-right:6px;">SEC</span>Secured checkout</div>
           <div><span style="color:var(--or);font-weight:700;margin-right:6px;">7D</span>7-day no-questions returns</div>
           <div><span style="color:var(--or);font-weight:700;margin-right:6px;">ADJ</span>Price adjustment 30 days</div>
@@ -2435,9 +2439,9 @@ async function saveOrder(order){
   pg.innerHTML=`<div style="text-align:center;padding:40px 20px;max-width:580px;margin:0 auto;">
     <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:56px;color:var(--or);animation:scaleIn 0.6s cubic-bezier(0.22,1,0.36,1);">✓</div>
     <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:24px;color:var(--su);margin:12px 0 8px;">${order.preOrder?'Pre-Order Placed!':isPOD?'Deposit Paid, Order Confirmed!':'Order Confirmed!'}</div>
-    <div style="font-size:13px;color:var(--mu);margin-bottom:24px;line-height:1.9;">${order.preOrder?'We will contact you via WhatsApp and email when your item is ready.':isPOD?('You paid a 50% deposit of '+fmt(order.podDepositAmount)+'. Our rider will collect the remaining '+fmt(order.podBalanceDue)+' (cash or transfer) when your order arrives.'):'Your order has been received and is being processed.'}<br><strong style="color:var(--wh);">Total: ₦${parseInt(order.total).toLocaleString()}</strong></div>
+    <div style="font-size:13px;color:var(--wh);font-weight:700;margin-bottom:24px;line-height:1.9;">${order.preOrder?'We will contact you via WhatsApp and email when your item is ready.':isPOD?('You paid a 50% deposit of '+fmt(order.podDepositAmount)+'. Our rider will collect the remaining '+fmt(order.podBalanceDue)+' (cash or transfer) when your order arrives.'):'Your order has been received and is being processed.'}<br><strong style="color:var(--wh);">Total: ₦${parseInt(order.total).toLocaleString()}</strong></div>
     <div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:22px;margin-bottom:18px;">
-      <div style="font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;">Tracking Number</div>
+      <div style="font-size:11px;color:var(--wh);font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;">Tracking Number</div>
       <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:22px;color:var(--or);letter-spacing:2px;margin-bottom:8px;">${order.tracking}</div>
       <button onclick="navigator.clipboard?.writeText('${order.tracking}').then(()=>toast('Copied!'))" style="font-size:11px;color:var(--or);background:none;border:1px solid rgba(255,140,0,0.3);border-radius:5px;padding:4px 10px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;">Copy Number</button>
     </div>
@@ -2459,7 +2463,7 @@ async function showDeliveryConfirm(trackingNum){
   overlay.innerHTML=`<div style="background:var(--card);border:1px solid var(--bdr);border-radius:16px;width:100%;max-width:500px;overflow:hidden;max-height:96vh;overflow-y:auto;">
     <div style="background:linear-gradient(135deg,#FF6A00,#FFA733);padding:22px 24px;border-bottom:1px solid var(--bdr);text-align:center;">
       <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:18px;color:var(--or);margin-bottom:4px;">Confirm Delivery Receipt</div>
-      <div style="font-size:12px;color:var(--mu);">Order: <strong style="color:var(--wh);">${trackingNum}</strong></div>
+      <div style="font-size:12px;color:var(--wh);font-weight:700;">Order: <strong style="color:var(--wh);">${trackingNum}</strong></div>
       <div style="font-size:12px;color:var(--wh);margin-top:6px;">${order.items?.map(i=>i.name).join(', ')}</div>
     </div>
     <div style="padding:22px 24px;">
@@ -2468,13 +2472,13 @@ async function showDeliveryConfirm(trackingNum){
       <div style="font-size:11px;font-weight:700;color:var(--or);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Sign Below to Confirm Receipt</div>
       <div style="position:relative;border:2px solid rgba(255,71,71,0.3);border-radius:10px;overflow:hidden;background:#fff;">
         <canvas id="sig-canvas" width="440" height="160" style="display:block;touch-action:none;cursor:crosshair;width:100%;height:auto;"></canvas>
-        <div id="sig-hint" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--mu);pointer-events:none;">Draw your signature here</div>
+        <div id="sig-hint" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:#83838A;pointer-events:none;">Draw your signature here</div>
         <button onclick="clearSig()" style="position:absolute;top:8px;right:8px;background:rgba(255,71,71,0.1);border:1px solid rgba(255,71,71,0.3);border-radius:5px;padding:4px 9px;color:var(--or);font-size:10px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;">Clear</button>
       </div>
-      <div style="font-size:11px;color:var(--mu);margin:10px 0 16px;line-height:1.7;">Your signature confirms you have received this order in good condition. This will be recorded with timestamp.</div>
+      <div style="font-size:11px;color:var(--wh);font-weight:700;margin:10px 0 16px;line-height:1.7;">Your signature confirms you have received this order in good condition. This will be recorded with timestamp.</div>
       <div style="display:flex;gap:10px;">
         <button class="auth-btn" onclick="submitDeliveryConfirm('${trackingNum}')" style="flex:1;">Confirm & Sign</button>
-        <button onclick="history.back()" style="flex:0 0 80px;background:var(--card2);border:1px solid var(--bdr);border-radius:8px;color:var(--mu);font-size:12px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;">Cancel</button>
+        <button onclick="history.back()" style="flex:0 0 80px;background:var(--card2);border:1px solid var(--bdr);border-radius:8px;color:var(--wh);font-weight:700;font-size:12px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;">Cancel</button>
       </div>
     </div>
   </div>`;
@@ -2510,13 +2514,13 @@ async function submitDeliveryConfirm(trackingNum){
   const riderRatingHtml=existing.riderId?`<div style="margin-bottom:16px;">
     <div style="font-size:12px;color:var(--w2);margin-bottom:8px;">How was your delivery from ${existing.riderName||'your rider'}?</div>
     <div id="rider-star-row" style="display:flex;justify-content:center;gap:6px;">
-      ${[1,2,3,4,5].map(function(n){return '<span onclick="rateMyRider(\''+trackingNum+'\',\''+existing.riderId+'\','+n+')" style="font-size:26px;cursor:pointer;color:var(--mu);" id="rider-star-'+n+'">☆</span>';}).join('')}
+      ${[1,2,3,4,5].map(function(n){return '<span onclick="rateMyRider(\''+trackingNum+'\',\''+existing.riderId+'\','+n+')" style="font-size:26px;cursor:pointer;color:var(--wh);font-weight:700;" id="rider-star-'+n+'">☆</span>';}).join('')}
     </div>
   </div>`:'';
   pg.innerHTML=`<div style="background:var(--card);border:1px solid rgba(255,106,0,0.3);border-radius:16px;max-width:380px;width:100%;padding:32px;text-align:center;">
     <div style="font-size:48px;">🎉</div>
     <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:20px;color:var(--su);margin:12px 0 8px;">Congratulations! Delivery Confirmed 🎊</div>
-    <div style="font-size:13px;color:var(--mu);line-height:1.7;margin-bottom:20px;">Your receipt has been recorded and sent to RichNation Mall. Thank you for shopping with us!</div>
+    <div style="font-size:13px;color:var(--wh);font-weight:700;line-height:1.7;margin-bottom:20px;">Your receipt has been recorded and sent to RichNation Mall. Thank you for shopping with us!</div>
     ${riderRatingHtml}
     ${firstItem?`<button class="auth-btn" style="background:var(--gold);margin-bottom:8px;" onclick="this.closest('[style*=z-index]').remove();openReviewModal('${firstItem.id||''}','${(firstItem.name||'').replace(/'/g,"")}','${firstItem.image||''}')">${iconBadge('star',16)} Rate Your Purchase</button>`:''}
     <button class="auth-btn" onclick="this.closest('[style*=z-index]').remove();showPage('home')">Continue Shopping</button>
@@ -2614,7 +2618,7 @@ async function renderDeliveryMap(order,force){
   const el=document.getElementById('delivery-map');if(!el)return;
   await loadLeafletIfNeeded();
   if(typeof L==='undefined'){
-    el.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;padding:16px;text-align:center;font-size:12px;color:var(--mu);">🗺️ Map couldn\'t load. If you\'re viewing this from a downloaded file, try opening the site from its live web address instead.</div>';
+    el.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;padding:16px;text-align:center;font-size:12px;color:var(--wh);font-weight:700;">🗺️ Map couldn\'t load. If you\'re viewing this from a downloaded file, try opening the site from its live web address instead.</div>';
     return;
   }
   const needsFullRebuild=force||!_deliveryMapInstance||_deliveryMapOrderId!==order.tracking;
@@ -2711,7 +2715,7 @@ async function renderDeliveryMap(order,force){
   setTimeout(function(){
     if(!window._deliveryMapTileLoaded){
       const mapEl=document.getElementById('delivery-map');
-      if(mapEl)mapEl.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;padding:16px;text-align:center;background:var(--card2);"><div style="font-size:12px;color:var(--mu);">Map couldn\'t load, this can happen on a slow connection or with certain browser extensions.</div><button style="background:var(--or);color:#fff;border:none;border-radius:var(--r-sm);font-weight:700;font-size:12px;padding:8px 16px;cursor:pointer;" onclick="renderDeliveryMap(window._lastTrackedOrder,true)">Reload Map</button></div>';
+      if(mapEl)mapEl.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;padding:16px;text-align:center;background:var(--card2);"><div style="font-size:12px;color:var(--wh);font-weight:700;">Map couldn\'t load, this can happen on a slow connection or with certain browser extensions.</div><button style="background:var(--or);color:#fff;border:none;border-radius:var(--r-sm);font-weight:700;font-size:12px;padding:8px 16px;cursor:pointer;" onclick="renderDeliveryMap(window._lastTrackedOrder,true)">Reload Map</button></div>';
     }
   },9000);
   const homeIcon=L.divIcon({html:'<div style="background:#15151A;width:26px;height:26px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);">📍</div>',iconSize:[26,26],className:''});
@@ -2752,14 +2756,14 @@ async function trackOrder(silentNum){
   const num=silentNum||document.getElementById('track-inp')?.value.trim().toUpperCase();
   if(!num){toast('Enter your tracking number','err');return;}
   const r=document.getElementById('track-result');if(!r)return;
-  if(!silentNum)r.innerHTML='<div style="color:var(--mu);font-size:13px;padding:10px;">Looking up order...</div>';
+  if(!silentNum)r.innerHTML='<div style="color:var(--wh);font-weight:700;font-size:13px;padding:10px;">Looking up order...</div>';
   const order=await fbG('rn_mall_orders/'+num);
   if(!order){if(!silentNum){r.innerHTML='<div style="color:var(--re);font-size:13px;padding:10px 0;">Order not found. Please check your tracking number.</div>';stopTrackPoll();}return;}
   const isPOD=order.payMethod==='pod';
   const isPickup=order.deliveryMethod==='pickup';
   r.innerHTML=`<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:20px;animation:slideUp 0.4s ease;">
     <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:16px;color:var(--or);">${order.tracking}</div>
-    <div style="font-size:12px;color:var(--mu);margin:4px 0 16px;">${order.customer?.name} · ${order.date} · ${order.items?.length} item(s) · ₦${parseInt(order.total||0).toLocaleString()}</div>
+    <div style="font-size:12px;color:var(--wh);font-weight:700;margin:4px 0 16px;">${order.customer?.name} · ${order.date} · ${order.items?.length} item(s) · ₦${parseInt(order.total||0).toLocaleString()}</div>
     ${isPOD&&!order.podApproved&&order.status==='pending_pod'?'<div style="background:rgba(255,140,0,0.07);border:1px solid rgba(255,140,0,0.2);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--or);margin-bottom:14px;"><strong>PAY ON DELIVERY PENDING:</strong> Awaiting admin approval.</div>':''}
     ${isPOD&&order.podDepositAmount!=null&&order.status!=='delivered'&&!order.podBalanceCollected?'<div style="background:rgba(255,140,0,0.07);border:1px solid rgba(255,140,0,0.2);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--or);margin-bottom:14px;"><strong>50% DEPOSIT PAID</strong> ('+fmt(order.podDepositAmount)+'). Balance of '+fmt(order.podBalanceDue)+' due to the rider on delivery.</div>':''}
     ${isPOD&&order.podBalanceCollected?'<div style="background:rgba(255,106,0,0.07);border:1px solid rgba(255,106,0,0.2);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--su);margin-bottom:14px;"><strong>PAID IN FULL</strong>, balance collected on delivery.</div>':''}
@@ -2767,11 +2771,11 @@ async function trackOrder(silentNum){
     ${order.lastLocation&&order.status!=='delivered'&&order.status!=='delivered confirmed'?`<div style="background:rgba(91,155,245,0.08);border:1px solid rgba(91,155,245,0.25);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--bl);margin-bottom:14px;"><strong>📍 Latest Update:</strong> ${order.lastLocation}</div>`:''}
     ${order.status==='ready_for_pickup'?'<div style="background:rgba(255,106,0,0.1);border:1px solid rgba(255,106,0,0.3);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--or);margin-bottom:14px;"><strong>📍 READY FOR PICKUP</strong>, Your order has arrived! Please come collect it at your convenience.</div>':''}
     ${order.riderId&&order.riderName&&order.deliveryStage!=='delivered'&&order.status!=='cancelled'&&order.status!=='deleted'?`<div style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
-      <div><div style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:0.5px;">🏍️ Your Dispatch Rider</div><div style="font-size:13px;font-weight:800;color:var(--wh);margin-top:2px;">${order.riderName}</div>${order.riderPhone?`<div style="font-size:11px;color:var(--mu);">${order.riderPhone}</div>`:''}</div>
+      <div><div style="font-size:10px;color:var(--wh);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">🏍️ Your Dispatch Rider</div><div style="font-size:13px;font-weight:800;color:var(--wh);margin-top:2px;">${order.riderName}</div>${order.riderPhone?`<div style="font-size:11px;color:var(--wh);font-weight:700;">${order.riderPhone}</div>`:''}</div>
       ${order.riderPhone?`<a href="tel:${order.riderPhone}" style="text-decoration:none;"><button style="background:var(--or);border:none;color:#000;font-weight:800;font-size:11px;padding:8px 14px;border-radius:7px;cursor:pointer;">📞 Call</button></a>`:''}
     </div>
     <div class="live-map-card" style="display:${order.riderId&&order.deliveryStage!=='delivered'&&order.status!=='cancelled'&&order.status!=='deleted'?'block':'none'};">
-      <div id="delivery-map" style="width:100%;height:260px;border-radius:9px 9px 0 0;overflow:hidden;background:var(--card2);display:flex;align-items:center;justify-content:center;"><div style="display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--mu);font-size:12px;"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="var(--or)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="animation:mapPulse 1.4s ease-in-out infinite;"><path d="M9 4L3 6v14l6-2m0-14l6 2m-6-2v14m6-12l6-2v14l-6 2m0-14v14"/></svg>Loading map…</div></div>
+      <div id="delivery-map" style="width:100%;height:260px;border-radius:9px 9px 0 0;overflow:hidden;background:var(--card2);display:flex;align-items:center;justify-content:center;"><div style="display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--wh);font-weight:700;font-size:12px;"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="var(--or)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="animation:mapPulse 1.4s ease-in-out infinite;"><path d="M9 4L3 6v14l6-2m0-14l6 2m-6-2v14m6-12l6-2v14l-6 2m0-14v14"/></svg>Loading map…</div></div>
       <div id="delivery-map-status" class="live-map-status"><span class="live-dot"></span> Loading location…</div>
     </div>`:''}
     ${order.status==='cancelled'?'<div style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--re);margin-bottom:14px;"><strong>ORDER CANCELLED</strong>, '+(order.cancelReason||order.timeline?.[order.timeline.length-1]?.note||'This order was cancelled.')+'</div>':''}
@@ -2781,14 +2785,14 @@ async function trackOrder(silentNum){
     <div style="margin-bottom:16px;">
       ${(order.timeline||[]).map((t,ti,arr)=>{
         const s=(t.status||'').toLowerCase();
-        const color=/cancel|declin|delet|refund/.test(s)?'#f43f5e':/deliver|approv|confirm|pick|ready|complet/.test(s)?'#FF6A00':(ti===arr.length-1?'#FF6A00':'#15151A');
+        const color=/cancel|declin|delet|refund/.test(s)?'#f43f5e':/deliver|approv|confirm|pick|ready|complet/.test(s)?'#ffffff':(ti===arr.length-1?'#FF6A00':'#84848d');
         return `<div style="display:flex;gap:12px;padding:10px 0;position:relative;">
           ${ti<arr.length-1?`<div style="position:absolute;left:15px;top:22px;width:2px;height:calc(100% - 4px);background:${color};"></div>`:''}
           <div style="width:10px;height:10px;border-radius:99px;background:${color};box-shadow:0 0 0 3px ${color}22;margin-top:4px;flex-shrink:0;"></div>
           <div style="padding-bottom:6px;"><div style="font-size:12px;font-weight:700;color:${color};">${t.status}</div>
-          <div style="font-size:11px;color:var(--mu);margin-top:2px;">${new Date(t.time).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}, ${t.note||''}</div></div>
+          <div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:2px;">${new Date(t.time).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}, ${t.note||''}</div></div>
         </div>`;
-      }).join('')||'<div style="color:var(--mu);font-size:12px;">No timeline yet</div>'}
+      }).join('')||'<div style="color:var(--wh);font-weight:700;font-size:12px;">No timeline yet</div>'}
     </div>
     ${(order.status==='shipped'||order.status==='out for delivery')&&order.deliveryMethod!=='pickup'&&!order.deliveryConfirmed?`<button onclick="showDeliveryConfirm('${num}')" style="width:100%;background:linear-gradient(135deg,var(--or),var(--or-dk));color:#fff;border:none;padding:12px;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:13px;cursor:pointer;margin-bottom:10px;">CONFIRM DELIVERY, Sign to Confirm Receipt</button>`:''}
     <button style="width:100%;background:#FF6A00;color:#fff;border:none;padding:12px;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:13px;cursor:pointer;margin-top:8px;" onclick="window.open('https://wa.me/${WA_NUM}?text='+encodeURIComponent('Hi RichNation Mall! My tracking number is ${num}. Please update me.'),'_blank')">WhatsApp Update</button>
@@ -2824,14 +2828,14 @@ function showPolicyPage(type){
   function card(content){return '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:18px;margin-bottom:14px;">'+content+'</div>';}
   function orange(text){return '<div style="font-weight:800;color:var(--or);margin-bottom:8px;font-size:14px;">'+text+'</div>';}
   function body(text){return '<div style="font-size:13px;color:var(--w2);line-height:1.9;">'+text+'</div>';}
-  function row(loc,time,fee,i){return '<div style="display:flex;justify-content:space-between;padding:10px 14px;background:'+(i%2===0?'var(--card)':'var(--card2)')+'"><span style="font-size:13px;color:var(--w2);">'+loc+'</span><span style="font-size:12px;color:var(--mu);">'+time+'</span><span style="font-size:13px;font-weight:700;color:var(--or);">'+fee+'</span></div>';}
+  function row(loc,time,fee,i){return '<div style="display:flex;justify-content:space-between;padding:10px 14px;background:'+(i%2===0?'var(--card)':'var(--card2)')+'"><span style="font-size:13px;color:var(--w2);">'+loc+'</span><span style="font-size:12px;color:var(--wh);font-weight:700;">'+time+'</span><span style="font-size:13px;font-weight:700;color:var(--or);">'+fee+'</span></div>';}
 
   var content='';
 
   if(type==='about'){
     content='<div style="text-align:center;margin-bottom:24px;"><div style="font-size:36px;margin-bottom:10px;">🛒</div>'
       +'<div style="font-weight:900;font-size:22px;color:var(--wh);">RichNation Mall</div>'
-      +'<div style="font-size:12px;color:var(--mu);margin-top:4px;">RC 8998019 · RichNation Global Ltd</div></div>'
+      +'<div style="font-size:12px;color:var(--wh);font-weight:700;margin-top:4px;">RC 8998019 · RichNation Global Ltd</div></div>'
       +card('<p style="font-size:13px;color:var(--w2);line-height:1.9;">RichNation Mall is Nigeria\'s fastest-growing online shopping destination, proudly owned and operated by <strong style="color:var(--wh);">RichNation Global Ltd (RC 8998019)</strong>.</p>'
         +'<p style="font-size:13px;color:var(--w2);line-height:1.9;margin-top:10px;">We started with a bold idea, that every Nigerian, no matter where they live, deserves access to quality products at prices that make sense. From Lagos to Kano, from Uyo to Enugu, from Abuja to the diaspora, RichNation Mall was built for you.</p>')
       +card(orange('What makes us different')
@@ -2840,7 +2844,7 @@ function showPolicyPage(type){
         +'<div style="font-size:13px;color:var(--w2);line-height:2.4;">🎓 <strong style="color:var(--wh);">RichNation Academy</strong>, world-class digital education<br>🎵 <strong style="color:var(--wh);">RichNation Music</strong>, faith-inspired music for Africa<br>🎬 <strong style="color:var(--wh);">RichNation Animation</strong>, creative storytelling<br>🎙️ <strong style="color:var(--wh);">WBPT Podcast</strong>, We Bring People Together<br>📖 <strong style="color:var(--wh);">RichNation Stories</strong>, content that builds and inspires</div>')
       +'<div style="background:rgba(255,140,0,0.08);border:1px solid rgba(255,140,0,0.25);border-radius:12px;padding:16px;text-align:center;">'
       +'<div style="font-weight:900;color:var(--or);font-size:15px;margin-bottom:8px;">"Build People · Build Platforms · Create Millionaires"</div>'
-      +'<div style="font-size:12px;color:var(--mu);display:flex;align-items:center;gap:14px;flex-wrap:wrap;"><span style="display:inline-flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--mu)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h4l2 6-3 2a13 13 0 006 6l2-3 6 2v4a2 2 0 01-2 2C10.5 22 2 13.5 2 5a2 2 0 012-2z"/></svg>+234 916 467 8560</span><span style="display:inline-flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--mu)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18v14H3z"/><path d="M3 6l9 7 9-7"/></svg>rnm.office@richnationmall.com</span></div></div>';
+      +'<div style="font-size:12px;color:var(--wh);font-weight:700;display:flex;align-items:center;gap:14px;flex-wrap:wrap;"><span style="display:inline-flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--mu)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h4l2 6-3 2a13 13 0 006 6l2-3 6 2v4a2 2 0 01-2 2C10.5 22 2 13.5 2 5a2 2 0 012-2z"/></svg>+234 916 467 8560</span><span style="display:inline-flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--mu)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18v14H3z"/><path d="M3 6l9 7 9-7"/></svg>rnm.office@richnationmall.com</span></div></div>';
   }
   else if(type==='faq'){
     var faqs=[
@@ -2864,7 +2868,7 @@ function showPolicyPage(type){
     content='<div style="background:rgba(255,140,0,0.08);border:1px solid rgba(255,140,0,0.25);border-radius:12px;padding:16px;margin-bottom:16px;text-align:center;">'
       +'<div style="font-size:28px;margin-bottom:8px;">↩️</div>'
       +'<div style="font-weight:900;color:var(--or);font-size:16px;">7-Day Return Window</div>'
-      +'<div style="font-size:12px;color:var(--mu);margin-top:4px;">Returns must be requested within 7 days of confirmed delivery</div></div>'
+      +'<div style="font-size:12px;color:var(--wh);font-weight:700;margin-top:4px;">Returns must be requested within 7 days of confirmed delivery</div></div>'
       +'<div style="background:rgba(244,63,94,0.07);border:1px solid rgba(244,63,94,0.2);border-radius:10px;padding:14px;margin-bottom:14px;">'
       +'<div style="font-weight:800;color:#f43f5e;margin-bottom:6px;">⚠️ Important</div>'
       +'<div style="font-size:13px;color:var(--w2);line-height:1.9;">Once your order has been <strong>shipped and dispatched</strong>, it cannot be cancelled. No refunds are issued after the 7-day window, no exceptions.</div></div>'
@@ -2886,10 +2890,10 @@ function showPolicyPage(type){
       +'<div style="background:rgba(255,106,0,0.07);border:1px solid rgba(255,106,0,0.2);border-radius:10px;padding:14px;margin-bottom:14px;">'
       +'<div style="font-weight:800;color:var(--su);margin-bottom:6px;">🚀 Dispatch Schedule</div>'
       +'<div style="font-size:13px;color:var(--w2);line-height:1.9;">Orders placed before <strong>2:00pm</strong> on weekdays are dispatched same day. Weekend orders dispatched next business day. Tracking number sent to you by WhatsApp upon dispatch.</div></div>'
-      +'<div style="font-size:12px;color:var(--mu);line-height:1.9;">⚠️ Delivery times are estimates. Remote areas may add 1–2 extra days. RichNation is not responsible for delays caused by incorrect addresses provided by the customer.</div>';
+      +'<div style="font-size:12px;color:var(--wh);font-weight:700;line-height:1.9;">⚠️ Delivery times are estimates. Remote areas may add 1–2 extra days. RichNation is not responsible for delays caused by incorrect addresses provided by the customer.</div>';
   }
   else if(type==='privacy'){
-    content='<div style="font-size:12px;color:var(--mu);margin-bottom:16px;">Effective Date: July 2026</div>'
+    content='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:16px;">Effective Date: July 2026</div>'
       +card(orange('Information We Collect')
         +'<div style="font-size:13px;color:var(--w2);line-height:2.2;">• Name, email, and phone when you create an account<br>• Delivery address when you place an order<br>• Order history and product preferences<br>• Payment transaction references (not card numbers)<br>• Device and browser type for technical purposes only</div>')
       +card(orange('How We Use Your Information')
@@ -2901,7 +2905,7 @@ function showPolicyPage(type){
         +'<div style="font-size:13px;color:var(--w2);line-height:1.9;">Your personal information is protected using industry-standard security protocols and encryption. Access to customer data is strictly limited to authorised RichNation personnel on a need-to-know basis. We conduct regular security reviews to ensure your data remains safe at all times.</div>')
       +card(orange('Your Rights')
         +'<div style="font-size:13px;color:var(--w2);line-height:2.2;">• Request a copy of the data we hold about you<br>• Request correction of any inaccurate information<br>• Request deletion of your account and all data<br>• Withdraw consent for marketing at any time</div>')
-      +'<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:14px;font-size:12px;color:var(--mu);">To exercise your rights: 📧 rnm.office@richnationmall.com · 📱 +234 916 467 8560</div>';
+      +'<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:14px;font-size:12px;color:var(--wh);font-weight:700;">To exercise your rights: 📧 rnm.office@richnationmall.com · 📱 +234 916 467 8560</div>';
   }
   else if(type==='terms'){
     var clauses=[
@@ -2915,7 +2919,7 @@ function showPolicyPage(type){
       ['8. Governing Law','These terms are governed by the laws of the Federal Republic of Nigeria. All disputes are subject to Nigerian jurisdiction.'],
       ['9. Amendments','We reserve the right to update these terms at any time. Continued use after changes constitutes acceptance.']
     ];
-    content='<div style="font-size:12px;color:var(--mu);margin-bottom:16px;">Effective Date: July 2026</div>'
+    content='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:16px;">Effective Date: July 2026</div>'
       +'<p style="font-size:13px;color:var(--w2);line-height:1.8;margin-bottom:16px;">By accessing or using RichNation Mall, you agree to be bound by the following terms.</p>'
       +clauses.map(function(c){return card(orange(c[0])+body(c[1]));}).join('');
   }
@@ -2924,12 +2928,12 @@ function showPolicyPage(type){
       +'<div style="background:rgba(37,211,102,0.08);border:1px solid rgba(37,211,102,0.25);border-radius:12px;padding:18px;margin-bottom:14px;">'
       +'<div style="font-weight:800;color:#FF6A00;margin-bottom:8px;font-size:14px;display:flex;align-items:center;gap:6px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#FF6A00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h4l2 6-3 2a13 13 0 006 6l2-3 6 2v4a2 2 0 01-2 2C10.5 22 2 13.5 2 5a2 2 0 012-2z"/></svg>WhatsApp, Fastest Response</div>'
       +'<div style="font-size:16px;font-weight:900;color:var(--wh);margin-bottom:4px;">+234 916 467 8560</div>'
-      +'<div style="font-size:12px;color:var(--mu);">Monday to Friday · 8:00am to 9:00pm WAT</div>'
-      +'<div style="font-size:11px;color:var(--mu);margin-top:6px;font-style:italic;">For order issues, send your order number and a photo if applicable</div>'
+      +'<div style="font-size:12px;color:var(--wh);font-weight:700;">Monday to Friday · 8:00am to 9:00pm WAT</div>'
+      +'<div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:6px;font-style:italic;">For order issues, send your order number and a photo if applicable</div>'
       +'<a href="https://wa.me/2349164678560" target="_blank" style="display:inline-block;margin-top:12px;background:#FF6A00;color:#fff;padding:9px 20px;border-radius:8px;font-size:12px;font-weight:800;text-decoration:none;">Open WhatsApp</a></div>'
       +card(orange('📧 Email')
         +'<div style="font-size:13px;color:var(--wh);margin-bottom:8px;">rnm.office@richnationmall.com</div>'
-        +'<div style="font-size:12px;color:var(--mu);">We respond within 24 hours on business days</div>')
+        +'<div style="font-size:12px;color:var(--wh);font-weight:700;">We respond within 24 hours on business days</div>')
       +card(orange('🌐 Online')
         +'<div style="font-size:13px;color:var(--w2);line-height:2.2;">🌐 richnationmall.com</div>')
       +card(orange('📍 Company')
@@ -2969,14 +2973,14 @@ function switchAuth(tab){
     <div class="auth-err" id="auth-err"></div>
     <button class="auth-btn" onclick="doLogin()" style="margin-top:10px;">Sign In</button>
     <div class="auth-forgot" onclick="switchAuth('forgot')">Forgot your password?</div>
-    <div style="text-align:center;font-size:12px;color:var(--mu);margin-top:10px;">No account? <span style="color:var(--or);cursor:pointer;font-weight:700;" onclick="switchAuth('register')">Create one free &#8594;</span></div>`;}
+    <div style="text-align:center;font-size:12px;color:var(--wh);font-weight:700;margin-top:10px;">No account? <span style="color:var(--or);cursor:pointer;font-weight:700;" onclick="switchAuth('register')">Create one free &#8594;</span></div>`;}
   else if(tab==='forgot'){body.innerHTML=`<div class="auth-sub">Enter your account email. Our support team will send you a password reset link.</div>
     <input class="fi" id="forgot-email" type="email" placeholder="Email address" autocomplete="off"/>
     <div class="auth-err" id="forgot-err"></div>
     <div class="auth-err" id="forgot-ok" style="display:none;color:var(--su);"></div>
     <button class="auth-btn" onclick="doForgotPassword()" style="margin-top:6px;">Send Reset Request</button>
-    <div style="text-align:center;font-size:12px;color:var(--mu);margin-top:12px;">Remembered it? <span style="color:var(--or);cursor:pointer;font-weight:700;" onclick="switchAuth('login')">Sign In</span></div>
-    <div style="text-align:center;font-size:11px;color:var(--mu);margin-top:14px;line-height:1.7;">Prefer to talk to someone? <span style="color:var(--or);cursor:pointer;font-weight:700;" onclick="closeAuth();toggleChat();">Contact Support</span></div>`;}
+    <div style="text-align:center;font-size:12px;color:var(--wh);font-weight:700;margin-top:12px;">Remembered it? <span style="color:var(--or);cursor:pointer;font-weight:700;" onclick="switchAuth('login')">Sign In</span></div>
+    <div style="text-align:center;font-size:11px;color:var(--wh);font-weight:700;margin-top:14px;line-height:1.7;">Prefer to talk to someone? <span style="color:var(--or);cursor:pointer;font-weight:700;" onclick="closeAuth();toggleChat();">Contact Support</span></div>`;}
   else{body.innerHTML=`<div class="auth-sub">Create your free account, required to shop</div>
     <div class="g2"><input class="fi" id="reg-fn" placeholder="First name" autocomplete="off"/><input class="fi" id="reg-ln" placeholder="Last name" autocomplete="off"/></div>
     <input class="fi" id="reg-email" type="email" placeholder="Email address" autocomplete="off"/>
@@ -2984,9 +2988,9 @@ function switchAuth(tab){
     <div class="pw-wrap"><input class="fi" id="reg-pass" type="password" placeholder="Password (min 6 chars)" style="margin-bottom:0;"/><button class="pw-eye" onclick="this.previousElementSibling.type=this.previousElementSibling.type==='password'?'text':'password'">Show</button></div>
     <input class="fi" id="reg-ref" placeholder="Referral Code (optional)" autocomplete="off" value="${sessionStorage.getItem('rnm_ref')||''}"/>
     <div class="auth-err" id="reg-err"></div>
-    <div style="font-size:11px;color:var(--mu);margin:8px 0;line-height:1.7;">By signing up you agree to our <span style="color:var(--or);cursor:pointer;" onclick="showPolicyPage('terms')">Terms</span> and <span style="color:var(--or);cursor:pointer;" onclick="showPolicyPage('returns')">Refund Policy</span>.</div>
+    <div style="font-size:11px;color:var(--wh);font-weight:700;margin:8px 0;line-height:1.7;">By signing up you agree to our <span style="color:var(--or);cursor:pointer;" onclick="showPolicyPage('terms')">Terms</span> and <span style="color:var(--or);cursor:pointer;" onclick="showPolicyPage('returns')">Refund Policy</span>.</div>
     <button class="auth-btn" onclick="doRegister()" style="margin-top:4px;">Create Free Account</button>
-    <div style="text-align:center;font-size:12px;color:var(--mu);margin-top:10px;">Already have an account? <span style="color:var(--or);cursor:pointer;font-weight:700;" onclick="switchAuth('login')">Sign In</span></div>`;}
+    <div style="text-align:center;font-size:12px;color:var(--wh);font-weight:700;margin-top:10px;">Already have an account? <span style="color:var(--or);cursor:pointer;font-weight:700;" onclick="switchAuth('login')">Sign In</span></div>`;}
 }
 async function doForgotPassword(){
   const email=document.getElementById('forgot-email')?.value.trim().toLowerCase();
@@ -3058,12 +3062,12 @@ async function loadCustNotifs(){
   const badge=document.getElementById('cnotif-badge');
   if(badge){badge.style.display=unread>0?'flex':'none';badge.textContent=unread;}
   const box=document.getElementById('cnotif-list');if(!box)return;
-  if(!list.length){box.innerHTML='<div style="padding:20px;text-align:center;color:var(--mu);font-size:12px;">No notifications yet.</div>';return;}
+  if(!list.length){box.innerHTML='<div style="padding:20px;text-align:center;color:var(--wh);font-weight:700;font-size:12px;">No notifications yet.</div>';return;}
   box.innerHTML=list.slice(0,25).map(n=>{
     const ico=n.type==='status_update'?'📦':n.type==='pod_approved'?'✅':n.type==='pod_cancelled'?'❌':n.type==='pickup_ready'?'📍':n.type==='pw_reset'?'🔑':n.type==='review_prompt'?'⭐':n.type==='chat_reply'?'💬':'🔔';
     return `<div onclick="openCustNotif('${n._key}','${n.orderId||''}','${n.type||''}','${n.chatKey||''}')" style="display:flex;gap:10px;padding:10px;border-radius:8px;cursor:pointer;background:${n.read?'transparent':'rgba(255,106,0,0.06)'};margin-bottom:2px;" onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background='${n.read?'transparent':'rgba(255,106,0,0.06)'}'">
       <div style="font-size:16px;flex-shrink:0;">${ico}</div>
-      <div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:${n.read?'600':'800'};color:var(--wh);line-height:1.4;">${n.message||n.title||'Update'}</div><div style="font-size:10px;color:var(--mu);margin-top:3px;">${n.date||''}</div></div>
+      <div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:${n.read?'600':'800'};color:var(--wh);line-height:1.4;">${n.message||n.title||'Update'}</div><div style="font-size:10px;color:var(--wh);font-weight:700;margin-top:3px;">${n.date||''}</div></div>
     </div>`;
   }).join('');
 }
@@ -3220,7 +3224,7 @@ setInterval(()=>{if(document.getElementById('chat-panel')?.classList.contains('o
 // ── ACCOUNT ──
 async function showAccountPage(){
   const pg=document.getElementById('account-page');if(!pg)return;
-  if(!currUser){pg.innerHTML=`<div style="padding:40px 20px;text-align:center;"><div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:22px;color:var(--or);margin-bottom:12px;">Sign In to Your Account</div><div style="font-size:13px;color:var(--mu);margin-bottom:20px;">Track orders, view history, manage your profile</div><button class="auth-btn" style="max-width:200px;display:inline-block;" onclick="openAuth('login')">Sign In</button><div style="margin-top:12px;font-size:12px;color:var(--mu);">No account? <span style="color:var(--or);cursor:pointer;font-weight:700;" onclick="openAuth('register')">Create one free</span></div></div>`;return;}
+  if(!currUser){pg.innerHTML=`<div style="padding:40px 20px;text-align:center;"><div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:22px;color:var(--or);margin-bottom:12px;">Sign In to Your Account</div><div style="font-size:13px;color:var(--wh);font-weight:700;margin-bottom:20px;">Track orders, view history, manage your profile</div><button class="auth-btn" style="max-width:200px;display:inline-block;" onclick="openAuth('login')">Sign In</button><div style="margin-top:12px;font-size:12px;color:var(--wh);font-weight:700;">No account? <span style="color:var(--or);cursor:pointer;font-weight:700;" onclick="openAuth('register')">Create one free</span></div></div>`;return;}
   const ems=settings.mallEmojis||{};
   const orderIds=await fbG('rn_mall_customer_orders/'+currUser.id)||{};
   const ids=Object.values(orderIds).map(o=>o.orderId).filter(Boolean);
@@ -3239,7 +3243,7 @@ async function showAccountPage(){
   };
   pg.innerHTML=`<div style="padding:20px;max-width:860px;margin:0 auto;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
-      <div style="display:flex;align-items:center;gap:12px;"><div style="width:48px;height:48px;border-radius:99px;background:rgba(255,140,0,0.15);display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:16px;color:var(--or);">${ini(currUser.name||'?')}</div><div><div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:18px;">${currUser.name}</div><div style="font-size:12px;color:var(--mu);">${currUser.email}</div></div></div>
+      <div style="display:flex;align-items:center;gap:12px;"><div style="width:48px;height:48px;border-radius:99px;background:rgba(255,140,0,0.15);display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:16px;color:var(--or);">${ini(currUser.name||'?')}</div><div><div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:18px;">${currUser.name}</div><div style="font-size:12px;color:var(--wh);font-weight:700;">${currUser.email}</div></div></div>
       <button class="tb-btn tb-btn-dk" onclick="logout()">Sign Out</button>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
@@ -3262,7 +3266,7 @@ async function showAccountPage(){
         return `<div onclick="accTab('${item.key}',this)" style="position:relative;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:14px 10px;text-align:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--or)'" onmouseout="this.style.borderColor='var(--bdr)'">
           ${cnt>0?`<div style="position:absolute;top:6px;right:6px;background:var(--or);color:#000;font-size:10px;font-weight:900;min-width:18px;height:18px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 4px;">${cnt>99?'99+':cnt}</div>`:''}
           <div style="margin-bottom:6px;">${iconBadge(item.ico,26)}</div>
-          <div style="font-size:11px;font-weight:600;color:var(--mu);">${item.label}</div>
+          <div style="font-size:11px;font-weight:600;color:var(--wh);font-weight:700;">${item.label}</div>
         </div>`;
       }).join('')}
     </div>
@@ -3276,31 +3280,31 @@ async function accTab(tab,el,silent){
   document.querySelectorAll('#acc-tabs-grid>div').forEach(c=>c.style.borderColor='var(--bdr)');if(el)el.style.borderColor='var(--or)';
   const c=document.getElementById('acc-content');if(!c)return;
   if(['orders','topay','toship','torecv','toreview','refunds'].includes(tab)){
-    if(!silent)c.innerHTML='<div style="color:var(--mu);font-size:12px;">Loading...</div>';
+    if(!silent)c.innerHTML='<div style="color:var(--wh);font-weight:700;font-size:12px;">Loading...</div>';
     const orderIds=await fbG('rn_mall_customer_orders/'+currUser.id)||{};const ids=Object.values(orderIds).map(o=>o.orderId).filter(Boolean);
-    if(!ids.length){c.innerHTML='<div style="color:var(--mu);font-size:13px;padding:20px 0;">No orders yet.</div>';return;}
+    if(!ids.length){c.innerHTML='<div style="color:var(--wh);font-weight:700;font-size:13px;padding:20px 0;">No orders yet.</div>';return;}
     const orderResults=await Promise.all(ids.slice(0,30).map(oid=>fbG('rn_mall_orders/'+oid)));
     let orders=orderResults.filter(Boolean);
     const statusMap={topay:['pending','pending_pod'],toship:['confirmed','pod_approved'],torecv:['packed','shipped','out for delivery'],toreview:['delivered','delivered confirmed'],refunds:['refund_requested','refunded']};
     if(tab!=='orders')orders=orders.filter(o=>statusMap[tab]?.includes(o.status));
     orders=orders.sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
-    if(!orders.length){c.innerHTML=`<div style="color:var(--mu);font-size:13px;padding:20px 0;">No orders in this category.</div>`;return;}
+    if(!orders.length){c.innerHTML=`<div style="color:var(--wh);font-weight:700;font-size:13px;padding:20px 0;">No orders in this category.</div>`;return;}
     c.innerHTML=orders.map(o=>{const st=o.timeline?.[o.timeline.length-1]?.status||'Pending';return `<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:16px;margin-bottom:10px;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
-        <div><div style="font-weight:700;font-size:13px;color:var(--or);">${o.tracking}${o.preOrder?' [PRE-ORDER]':''}${o.payMethod==='pod'?' [PAY ON DELIVERY]':''}</div><div style="font-size:11px;color:var(--mu);">${o.date} · ${o.items?.length} item(s) · ₦${parseInt(o.total||0).toLocaleString()}</div></div>
+        <div><div style="font-weight:700;font-size:13px;color:var(--or);">${o.tracking}${o.preOrder?' [PRE-ORDER]':''}${o.payMethod==='pod'?' [PAY ON DELIVERY]':''}</div><div style="font-size:11px;color:var(--wh);font-weight:700;">${o.date} · ${o.items?.length} item(s) · ₦${parseInt(o.total||0).toLocaleString()}</div></div>
         <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:${o.status==='cancelled'||o.status==='deleted'?'rgba(244,63,94,0.12)':st==='Delivered'?'rgba(255,106,0,0.1)':'rgba(255,140,0,0.1)'};color:${o.status==='cancelled'||o.status==='deleted'?'var(--re)':st==='Delivered'?'var(--su)':'var(--or)'};">${o.status==='cancelled'?'Cancelled':o.status==='deleted'?'Deleted':st}</span>
       </div>
       <div style="display:flex;gap:7px;flex-wrap:wrap;">
-        <button onclick="showPage('track');showTrackPage();setTimeout(()=>{const ti=document.getElementById('track-inp');if(ti){ti.value='${o.tracking}';trackOrder();}},200)" style="font-size:11px;font-weight:700;padding:6px 12px;border-radius:7px;background:var(--card2);border:1px solid var(--bdr);color:var(--mu);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;">Track</button>
+        <button onclick="showPage('track');showTrackPage();setTimeout(()=>{const ti=document.getElementById('track-inp');if(ti){ti.value='${o.tracking}';trackOrder();}},200)" style="font-size:11px;font-weight:700;padding:6px 12px;border-radius:7px;background:var(--card2);border:1px solid var(--bdr);color:var(--wh);font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;">Track</button>
         ${(o.status==='shipped'||o.status==='out for delivery')&&o.deliveryMethod!=='pickup'&&!o.deliveryConfirmed?`<button onclick="showDeliveryConfirm('${o.tracking}')" style="font-size:11px;font-weight:700;padding:6px 12px;border-radius:7px;background:rgba(255,106,0,0.1);border:1px solid rgba(255,106,0,0.3);color:var(--su);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;">Confirm Receipt</button>`:''}
         ${['pending','pending_pod','confirmed','pod_approved','packed'].includes(o.status)?`<button onclick="cancelMyOrder('${o.tracking}')" style="font-size:11px;font-weight:700;padding:6px 12px;border-radius:7px;background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.25);color:var(--re);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;">Cancel Order</button>`:''}
         ${(o.status==='delivered'||o.status==='delivered confirmed')&&!o.refundRequested?`<button onclick="requestRefund('${o.tracking}')" style="font-size:11px;font-weight:700;padding:6px 12px;border-radius:7px;background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.25);color:var(--re);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;">Refund</button>`:''}
         <button onclick="chatOrderId='${o.tracking}';toggleChat()" style="font-size:11px;font-weight:700;padding:6px 12px;border-radius:7px;background:rgba(255,140,0,0.08);border:1px solid rgba(255,140,0,0.2);color:var(--or);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;">Chat</button>
       </div>
-      <div style="margin-top:10px;">${(o.items||[]).map(i=>`<div style="display:flex;gap:10px;padding-top:10px;border-top:1px solid var(--bdr);align-items:center;"><div style="width:38px;height:38px;background:var(--card2);border-radius:6px;flex-shrink:0;overflow:hidden;">${i.image?`<img loading="lazy" decoding="async" src="${i.image}" style="width:100%;height:100%;object-fit:cover;"/>`:''}</div><div style="flex:1;"><div style="font-size:12px;font-weight:600;">${i.name}</div><div style="font-size:11px;color:var(--mu);">x${i.qty} · ₦${parseInt((i.price||0)*i.qty).toLocaleString()}</div></div>${tab==='toreview'?`<button onclick="openReviewModal('${i.id||''}','${(i.name||'').replace(/'/g,"")}','${i.image||''}')" style="font-size:11px;font-weight:700;padding:6px 12px;border-radius:7px;background:rgba(255,167,51,0.1);border:1px solid rgba(255,167,51,0.3);color:var(--gold);cursor:pointer;flex-shrink:0;font-family:'Plus Jakarta Sans',sans-serif;">${iconBadge('star',14)} Review</button>`:''}</div>`).join('')}</div>
+      <div style="margin-top:10px;">${(o.items||[]).map(i=>`<div style="display:flex;gap:10px;padding-top:10px;border-top:1px solid var(--bdr);align-items:center;"><div style="width:38px;height:38px;background:var(--card2);border-radius:6px;flex-shrink:0;overflow:hidden;">${i.image?`<img loading="lazy" decoding="async" src="${i.image}" style="width:100%;height:100%;object-fit:cover;"/>`:''}</div><div style="flex:1;"><div style="font-size:12px;font-weight:600;">${i.name}</div><div style="font-size:11px;color:var(--wh);font-weight:700;">x${i.qty} · ₦${parseInt((i.price||0)*i.qty).toLocaleString()}</div></div>${tab==='toreview'?`<button onclick="openReviewModal('${i.id||''}','${(i.name||'').replace(/'/g,"")}','${i.image||''}')" style="font-size:11px;font-weight:700;padding:6px 12px;border-radius:7px;background:rgba(255,167,51,0.1);border:1px solid rgba(255,167,51,0.3);color:var(--gold);cursor:pointer;flex-shrink:0;font-family:'Plus Jakarta Sans',sans-serif;">${iconBadge('star',14)} Review</button>`:''}</div>`).join('')}</div>
     </div>`;}).join('');
   }else if(tab==='wallet'){
-    if(!silent)c.innerHTML='<div style="color:var(--mu);font-size:12px;">Loading...</div>';
+    if(!silent)c.innerHTML='<div style="color:var(--wh);font-weight:700;font-size:12px;">Loading...</div>';
     const txns=await fbG('rn_mall_wallet_transactions/'+currUser.id)||{};
     const txList=Object.values(txns).sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0,20);
     const issuesData=await fbG('rn_mall_wallet_issues')||{};
@@ -3319,7 +3323,7 @@ async function accTab(tab,el,silent){
       </div>
       <div class="card" style="margin-bottom:14px;">
         <div class="card-title">${iconBadge('card',18)} Top Up via Card</div>
-        <div style="font-size:12px;color:var(--mu);margin:8px 0 10px;">Instant top-up, funds are available immediately, secured by Paystack.</div>
+        <div style="font-size:12px;color:var(--wh);font-weight:700;margin:8px 0 10px;">Instant top-up, funds are available immediately, secured by Paystack.</div>
         <div style="display:flex;gap:8px;">
           <input class="inp" id="wallet-topup-amt" type="number" min="100" placeholder="Amount (₦)" style="flex:1;"/>
           <button class="auth-btn" style="max-width:140px;margin:0;" onclick="topUpWalletCard()">Top Up Now</button>
@@ -3327,9 +3331,9 @@ async function accTab(tab,el,silent){
       </div>
       <div class="card" style="margin-bottom:14px;">
         <div class="card-title">${iconBadge('bank',18)} Top Up via Bank Transfer</div>
-        <div style="font-size:12px;color:var(--mu);margin:8px 0 10px;">Send a bank transfer, then submit the details below, our team confirms and credits your wallet, usually within a few hours.</div>
+        <div style="font-size:12px;color:var(--wh);font-weight:700;margin:8px 0 10px;">Send a bank transfer, then submit the details below, our team confirms and credits your wallet, usually within a few hours.</div>
         ${(settings.bankDetails&&settings.bankDetails.acctNo)?`<div style="background:var(--card2);border:1px dashed var(--bdr);border-radius:8px;padding:12px 14px;margin-bottom:12px;">
-          <div style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:0.5px;font-weight:700;margin-bottom:6px;">Send your transfer to:</div>
+          <div style="font-size:10px;color:var(--wh);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;margin-bottom:6px;">Send your transfer to:</div>
           <div style="font-size:13px;color:var(--w2);line-height:1.9;">
             <strong style="color:var(--wh);">${settings.bankDetails.bank||''}</strong><br>
             Account Number: <strong style="color:var(--or);font-family:monospace;letter-spacing:1px;">${settings.bankDetails.acctNo}</strong> <span onclick="navigator.clipboard.writeText('${settings.bankDetails.acctNo}');toast('Account number copied!')" style="color:var(--or);cursor:pointer;font-weight:700;font-size:11px;">Copy</span><br>
@@ -3345,12 +3349,12 @@ async function accTab(tab,el,silent){
           <div class="card-title">${iconBadge('info',18)} Report an Issue</div>
           <button class="btn" style="font-size:11px;padding:6px 12px;background:var(--card2);border:1px solid var(--bdr);border-radius:7px;color:var(--w2);cursor:pointer;" onclick="showWalletIssueForm()">+ New Report</button>
         </div>
-        <div style="font-size:12px;color:var(--mu);margin:8px 0 0;">Requesting a refund to your bank account, reporting a mistaken top-up, or any other wallet issue, start here.</div>
-        <div id="wallet-issues-list" style="margin-top:10px;">${issuesList.length?issuesList.map(renderWalletIssueRow).join(''):'<div style="color:var(--mu);font-size:12px;">No reports yet.</div>'}</div>
+        <div style="font-size:12px;color:var(--wh);font-weight:700;margin:8px 0 0;">Requesting a refund to your bank account, reporting a mistaken top-up, or any other wallet issue, start here.</div>
+        <div id="wallet-issues-list" style="margin-top:10px;">${issuesList.length?issuesList.map(renderWalletIssueRow).join(''):'<div style="color:var(--wh);font-weight:700;font-size:12px;">No reports yet.</div>'}</div>
       </div>
       <div class="card">
         <div class="card-title">Transaction History</div>
-        <div style="margin-top:8px;">${txList.length?txList.map(t=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--bdr);font-size:12px;"><div><div style="color:var(--w2);">${t.description||t.type}</div><div style="color:var(--mu);font-size:10px;">${t.date||''}</div></div><div style="font-weight:700;color:${t.amount>=0?'var(--su)':'var(--re)'};">${t.amount>=0?'+':''}${fmt(t.amount)}</div></div>`).join(''):'<div style="color:var(--mu);font-size:12px;">No transactions yet.</div>'}</div>
+        <div style="margin-top:8px;">${txList.length?txList.map(t=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--bdr);font-size:12px;"><div><div style="color:var(--w2);">${t.description||t.type}</div><div style="color:var(--wh);font-weight:700;font-size:10px;">${t.date||''}</div></div><div style="font-weight:700;color:${t.amount>=0?'var(--su)':'var(--re)'};">${t.amount>=0?'+':''}${fmt(t.amount)}</div></div>`).join(''):'<div style="color:var(--wh);font-weight:700;font-size:12px;">No transactions yet.</div>'}</div>
       </div>
     </div>`;
   }else if(tab==='richpoints'){
@@ -3371,24 +3375,24 @@ async function accTab(tab,el,silent){
       <div class="card" style="margin-bottom:14px;">
         <div class="card-title">${iconBadge('trophy',18)} Loyalty Tier: ${tier.name}</div>
         <div style="font-size:13px;color:var(--w2);margin-top:8px;">You get a permanent <strong style="color:var(--or);">${tier.pct}% discount</strong> on every order, automatically applied at checkout.</div>
-        <div style="font-size:12px;color:var(--mu);margin-top:6px;">Lifetime spend: ${fmt(tier.spend)}${tier.next?', spend '+fmt(tier.next.min-tier.spend)+' more to reach '+tier.next.name+' ('+tier.next.pct+'% off)':', you have reached the top tier!'}</div>
+        <div style="font-size:12px;color:var(--wh);font-weight:700;margin-top:6px;">Lifetime spend: ${fmt(tier.spend)}${tier.next?', spend '+fmt(tier.next.min-tier.spend)+' more to reach '+tier.next.name+' ('+tier.next.pct+'% off)':', you have reached the top tier!'}</div>
       </div>
       <div class="card" style="margin-bottom:14px;text-align:center;">
         <div onclick="showRichPointsInfo()" style="cursor:pointer;color:var(--or);font-weight:700;font-size:13px;">${iconBadge('info',16)} How RichPoints Works, Earning &amp; Redeeming →</div>
       </div>
       <div class="card">
         <div class="card-title">Your Referral Code</div>
-        <div style="font-size:12px;color:var(--mu);margin:8px 0 10px;">Share your code${refLink?' or link':''}, when a friend signs up and makes their first purchase, you earn ${rpRates().referral} RichPoints.</div>
+        <div style="font-size:12px;color:var(--wh);font-weight:700;margin:8px 0 10px;">Share your code${refLink?' or link':''}, when a friend signs up and makes their first purchase, you earn ${rpRates().referral} RichPoints.</div>
         <div style="text-align:center;background:var(--card2);border:1px dashed var(--bdr);border-radius:8px;padding:14px;margin-bottom:12px;">
           <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:22px;letter-spacing:2px;color:var(--or);">${currUser.referralCode}</div>
         </div>
         ${refLink?`<div style="display:flex;gap:8px;">
           <input class="inp" readonly value="${refLink}" style="flex:1;font-size:11px;" onclick="this.select()"/>
           <button class="auth-btn" style="max-width:100px;margin:0;" onclick="navigator.clipboard.writeText('${refLink}');toast('Referral link copied!')">Copy Link</button>
-        </div>`:`<div style="font-size:11px;color:var(--mu);text-align:center;">Just share the code above, your friend can enter it when they sign up.</div>`}
+        </div>`:`<div style="font-size:11px;color:var(--wh);font-weight:700;text-align:center;">Just share the code above, your friend can enter it when they sign up.</div>`}
       </div>
     </div>`;
-  }else if(tab==='vouchers'){c.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:24px;text-align:center;"><div style="margin-bottom:12px;display:flex;justify-content:center;">'+iconBadge('ticket',40)+'</div><div style="font-weight:700;margin-bottom:8px;">My Vouchers</div><div style="font-size:13px;color:var(--mu);">No active vouchers. Vouchers from promotions appear here.</div></div>';}
+  }else if(tab==='vouchers'){c.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:24px;text-align:center;"><div style="margin-bottom:12px;display:flex;justify-content:center;">'+iconBadge('ticket',40)+'</div><div style="font-weight:700;margin-bottom:8px;">My Vouchers</div><div style="font-size:13px;color:var(--wh);font-weight:700;">No active vouchers. Vouchers from promotions appear here.</div></div>';}
   else if(tab==='addresses'){c.innerHTML=`<div style="max-width:480px;"><div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;margin-bottom:14px;">Saved Address</div><div class="fg"><label class="lbl">Address</label><input class="inp" id="addr-addr" value="${currUser.address||''}" placeholder="Street address"/></div>
     <div class="fg"><label class="lbl">Country</label><select class="inp-sel" id="addr-country" onchange="onAddrCountry()">
       <option value="">Select Country</option>
@@ -3415,7 +3419,7 @@ async function accTab(tab,el,silent){
       <div style="font-weight:800;margin-bottom:6px;">📦 Wholesale Pricing</div>
       ${currUser.wholesaleStatus==='approved'?'<div style="font-size:12px;color:var(--su);">✅ You are an approved wholesale buyer, bulk pricing applies automatically on eligible products.</div>'
         :currUser.wholesaleStatus==='pending'?'<div style="font-size:12px;color:var(--or);">⏳ Your wholesale application is under review.</div>'
-        :`<div style="font-size:12px;color:var(--mu);margin-bottom:10px;">Are you a small business, reseller, or institutional buyer? Apply for wholesale pricing on eligible bulk orders.</div>
+        :`<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:10px;">Are you a small business, reseller, or institutional buyer? Apply for wholesale pricing on eligible bulk orders.</div>
           <input class="inp" id="wh-business" placeholder="Business name" style="margin-bottom:8px;"/>
           <textarea class="ta" id="wh-reason" rows="2" placeholder="Tell us about your business (what you sell, expected order volume, etc.)" style="margin-bottom:8px;"></textarea>
           <button class="auth-btn" style="max-width:200px;" onclick="applyWholesale()">Apply for Wholesale</button>`}
@@ -3483,7 +3487,7 @@ function openAskSellerModal(vendorId,vendorName){
   overlay.id='ask-seller-overlay';
   overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:800;display:flex;align-items:center;justify-content:center;padding:16px;';
   overlay.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;width:100%;max-width:420px;padding:20px;">'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;"><div style="font-weight:800;">Ask '+vendorName+'</div><span onclick="document.getElementById(\'ask-seller-overlay\').remove()" style="cursor:pointer;font-size:20px;color:var(--mu);">&times;</span></div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;"><div style="font-weight:800;">Ask '+vendorName+'</div><span onclick="document.getElementById(\'ask-seller-overlay\').remove()" style="cursor:pointer;font-size:20px;color:var(--wh);font-weight:700;">&times;</span></div>'
     +(currUser?'':'<input class="fi" id="ask-seller-name" placeholder="Your name" style="margin-bottom:10px;"/>')
     +'<textarea class="fi" id="ask-seller-text" rows="4" placeholder="What would you like to ask?"></textarea>'
     +'<button class="auth-btn" onclick="sendAskSeller(\''+vendorId+'\')">Send</button>'
@@ -3518,7 +3522,7 @@ function showPage(page,fromBack){
   const backBtn=document.getElementById('global-back-btn');if(backBtn)backBtn.style.display=page==='home'?'none':'block';
   if(page==='track')showTrackPage();
   if(page==='account')showAccountPage();
-  if(page==='wishlist'){const g=document.getElementById('wishlist-page');if(g){const items=allProducts.filter(p=>wishlist.includes(p.id));g.innerHTML='<div style="padding:20px;"><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;font-size:22px;margin-bottom:20px;">My Wishlist</div>'+(items.length?`<div class="products-grid stagger">${items.map(productCard).join('')}</div>`:'<div style="color:var(--mu);">Wishlist is empty.</div>')+'</div>';}if(!currUser&&!sessionStorage.getItem('rnm_prompt_shown'))setTimeout(()=>showAccPrompt(),400);}
+  if(page==='wishlist'){const g=document.getElementById('wishlist-page');if(g){const items=allProducts.filter(p=>wishlist.includes(p.id));g.innerHTML='<div style="padding:20px;"><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;font-size:22px;margin-bottom:20px;">My Wishlist</div>'+(items.length?`<div class="products-grid stagger">${items.map(productCard).join('')}</div>`:'<div style="color:var(--wh);font-weight:700;">Wishlist is empty.</div>')+'</div>';}if(!currUser&&!sessionStorage.getItem('rnm_prompt_shown'))setTimeout(()=>showAccPrompt(),400);}
   window.scrollTo({top:0,behavior:'smooth'});
 }
 

@@ -5,7 +5,7 @@
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
 <meta charset="UTF-8">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="dark">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>RichNation Mall, Investor Portal</title>
 <style>
@@ -14,28 +14,28 @@
 @keyframes iconColorCycle{0%{stroke:#FF6A00;}50%{stroke:#ffffff;}100%{stroke:#FF6A00;}}
 .icon-color-cycle{animation:none;}
 :root{
-  --ink:#0B0B0C;--bg:#FFFFFF;--card:#FFFFFF;--card2:#F4F4F3;--bdr:#E4E4E1;
-  --or:#FF6A00;--or-dk:#E15E00;--gold:#B8720A;--wh:#15151A;--w2:#48484E;--mu:#6B6B71;
+  --ink:#0B0B0C;--bg:#0A0A0B;--card:#111113;--card2:#17171A;--bdr:#242428;
+  --or:#FF6A00;--or-dk:#E15E00;--gold:#B8720A;--wh:#fff;--w2:#e0e0e0;--mu:#84848d;
   --su:#FF6A00;--re:#DC2626;--bl:#2054C7;
   --r-sm:6px;--r-md:10px;--r-lg:14px;--r-pill:999px;
   --sh-sm:0 1px 2px rgba(15,15,20,.06);
   --sh-md:0 8px 24px rgba(15,15,20,.10);
   --sh-lg:0 24px 64px rgba(15,15,20,.16);
 }
-html,body{color-scheme:light;height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:var(--wh);overflow-x:hidden;width:100%;}
+html,body{color-scheme:dark;height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:var(--wh);overflow-x:hidden;width:100%;}
 ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:4px;}
 button{font-family:inherit;}
 #login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg);}
 .lcard{width:100%;max-width:480px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-lg);padding:36px 30px;box-shadow:var(--sh-lg);overflow:hidden;}
 .llogo{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;letter-spacing:.3px;color:#fff;background:var(--ink);margin:-36px -30px 24px;padding:20px 30px 16px;}
 .ltitle{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;margin-bottom:6px;color:var(--wh);}
-.lsub{text-align:center;font-size:11px;color:var(--mu);margin-bottom:20px;line-height:1.6;}
+.lsub{text-align:center;font-size:11px;color:var(--wh);font-weight:700;margin-bottom:20px;line-height:1.6;}
 .fi{width:100%;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:12px 14px;color:var(--wh);font-size:13px;outline:none;margin-bottom:10px;transition:border-color .15s,box-shadow .15s;}
 .fi:focus{border-color:var(--or);box-shadow:0 0 0 3px rgba(255,106,0,.15);}
 .lbtn{width:100%;background:var(--or);color:#fff;border:none;padding:13px;border-radius:var(--r-md);font-weight:800;font-size:13px;cursor:pointer;margin-top:4px;transition:background .15s;}
 .lbtn:hover{background:var(--or-dk);}
 .lerr{font-size:12px;color:var(--re);margin-top:10px;display:none;background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.25);border-radius:7px;padding:10px 12px;}
-.lbl{font-size:11px;font-weight:700;color:var(--mu);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;}
+.lbl{font-size:11px;font-weight:700;color:var(--wh);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;}
 #app{display:none;min-height:100vh;}
 .topbar{min-height:56px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;position:sticky;top:0;background:var(--ink);z-index:100;box-shadow:var(--sh-sm);}
 .tb-left{display:flex;align-items:center;gap:8px;min-width:0;flex:1;}
@@ -54,15 +54,15 @@ button{font-family:inherit;}
 .sb-item.active{background:rgba(255,106,0,0.08);border-left-color:var(--or);color:var(--or);font-weight:700;}
 .content{flex:1;padding:24px;overflow-x:hidden;}
 .page-hdr-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:22px;color:var(--wh);}
-.page-hdr-sub{font-size:12px;color:var(--mu);margin-top:2px;}
+.page-hdr-sub{font-size:12px;color:var(--wh);font-weight:700;margin-top:2px;}
 .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px;}
 .stat-card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);padding:18px;box-shadow:var(--sh-sm);}
 .stat-num{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:26px;color:var(--wh);}
-.stat-lbl{font-size:11px;font-weight:600;color:var(--mu);margin-top:4px;text-transform:uppercase;letter-spacing:.4px;}
+.stat-lbl{font-size:11px;font-weight:700;color:var(--wh);margin-top:4px;text-transform:uppercase;letter-spacing:.4px;}
 .card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);padding:18px;margin-bottom:14px;box-shadow:var(--sh-sm);}
 .card-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14px;color:var(--wh);}
 .fg{margin-bottom:12px;}
-.btn{background:#fff;border:1.5px solid var(--bdr);border-radius:var(--r-md);padding:9px 16px;font-size:12px;font-weight:700;color:var(--wh);cursor:pointer;transition:border-color .15s,background .15s;}
+.btn{background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r-md);padding:9px 16px;font-size:12px;font-weight:700;color:var(--wh);cursor:pointer;transition:border-color .15s,background .15s;}
 .btn:hover{background:var(--card2);}
 .btn-or{background:var(--or);border:none;color:#fff;font-weight:800;transition:background .15s;}
 .btn-or:hover{background:var(--or-dk);}
@@ -102,7 +102,7 @@ button{font-family:inherit;}
     <div id="apply-form" style="display:none;">
       <div class="g2">
         <input class="fi" id="ap-fname" placeholder="Full Name"/>
-        <div><div style="font-size:11px;color:var(--mu);margin-bottom:6px;">Date of Birth</div><input class="fi" id="ap-dob" type="date"/></div>
+        <div><div style="font-size:11px;color:var(--wh);font-weight:700;margin-bottom:6px;">Date of Birth</div><input class="fi" id="ap-dob" type="date"/></div>
       </div>
       <div class="g2">
         <select class="fi" id="ap-gender"><option value="">Gender</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select>
@@ -126,7 +126,7 @@ button{font-family:inherit;}
       <div id="package-preview" style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;margin-bottom:12px;font-size:12px;color:var(--w2);display:none;"></div>
       <div style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;margin-bottom:12px;max-height:180px;overflow-y:auto;">
         <div style="font-weight:800;font-size:12px;margin-bottom:8px;color:var(--wh);">RichNation Mall Investor Agreement</div>
-        <div style="font-size:11px;color:var(--mu);line-height:1.7;">
+        <div style="font-size:11px;color:var(--wh);font-weight:700;line-height:1.7;">
           By checking "I Agree" below, you enter into this agreement electronically, no physical signature required.<br><br>
           <strong>1. Nature of Investment.</strong> This is a business investment in RichNation Mall, not a loan or bank product. Returns depend on your selected package and structure.<br><br>
           <strong>2. Risk Disclosure.</strong> All business investment carries risk. Past performance is not a guarantee of future results.<br><br>
@@ -145,7 +145,7 @@ button{font-family:inherit;}
       <div class="lerr" id="apply-err"></div>
     </div>
 
-    <div style="text-align:center;font-size:11px;color:var(--mu);margin-top:16px;" id="toggle-note">New partner? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Apply to invest</span></div>
+    <div style="text-align:center;font-size:11px;color:var(--wh);font-weight:700;margin-top:16px;" id="toggle-note">New partner? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Apply to invest</span></div>
   </div>
 </div>
 
@@ -356,7 +356,7 @@ async function submitInvestorApplication(){
   });
   await fbP('rn_mall_notifications',{type:'new_investor_application',name:fname,amount,option,email,date:ds(),read:false,ts:Date.now()});
   err.style.display='none';
-  document.getElementById('apply-form').innerHTML='<div style="text-align:center;padding:10px 0;"><div style="font-size:32px;margin-bottom:10px;">✅</div><div style="font-weight:800;margin-bottom:8px;">Application Submitted!</div><div style="font-size:12px;color:var(--mu);line-height:1.7;">Thank you, '+fname+'! Our team will review your application and follow up with a formal partnership agreement. Once signed and confirmed, your investor portal will be activated.</div></div>';
+  document.getElementById('apply-form').innerHTML='<div style="text-align:center;padding:10px 0;"><div style="font-size:32px;margin-bottom:10px;">✅</div><div style="font-weight:800;margin-bottom:8px;">Application Submitted!</div><div style="font-size:12px;color:var(--wh);font-weight:700;line-height:1.7;">Thank you, '+fname+'! Our team will review your application and follow up with a formal partnership agreement. Once signed and confirmed, your investor portal will be activated.</div></div>';
 }
 async function doInvestorLogin(){
   const email=document.getElementById('in-email').value.trim().toLowerCase();
@@ -418,7 +418,7 @@ async function inav(page){
 // dashboard live-refresh interval removed, was causing a disruptive flash every 15s
 
 async function renderDashboard(c){
-  c.innerHTML='<div class="page-hdr-title">Welcome, '+investor.name+'</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
+  c.innerHTML='<div class="page-hdr-title">Welcome, '+investor.name+'</div><div style="color:var(--wh);font-weight:700;margin-top:8px;">Loading...</div>';
   const tier=investor.tier||tierFor(investor.investmentAmount);
   const [settings,payoutsData]=await Promise.all([fbG('rn_mall_settings'),fbG('rn_mall_investor_payouts/'+investor._id)]);
   const totalTarget=(settings||{}).investorCapitalTarget||3000000;
@@ -431,12 +431,12 @@ async function renderDashboard(c){
   <div class="card" style="display:flex;align-items:center;gap:16px;justify-content:space-between;flex-wrap:wrap;">
     <div style="display:flex;align-items:center;gap:16px;">
     <div onclick="document.getElementById('dash-photo-upload').click()" style="width:64px;height:64px;border-radius:99px;background:var(--card2);border:2px solid var(--bdr);cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-      ${investor.photo?'<img src="'+investor.photo+'" style="width:100%;height:100%;object-fit:cover;"/>':'<span style="font-size:22px;color:var(--mu);">'+investor.name.slice(0,2).toUpperCase()+'</span>'}
+      ${investor.photo?'<img src="'+investor.photo+'" style="width:100%;height:100%;object-fit:cover;"/>':'<span style="font-size:22px;color:var(--wh);font-weight:700;">'+investor.name.slice(0,2).toUpperCase()+'</span>'}
     </div>
     <input type="file" id="dash-photo-upload" accept="image/*" style="display:none;" onchange="uploadMyPhoto('dash-photo-upload')">
     <div>
       <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:18px;">${investor.name}</div>
-      <div style="font-size:12px;color:var(--mu);margin-top:2px;">${tier} &middot; Partner since ${investor.joinDate||'N/A'}</div>
+      <div style="font-size:12px;color:var(--wh);font-weight:700;margin-top:2px;">${tier} &middot; Partner since ${investor.joinDate||'N/A'}</div>
       <div onclick="document.getElementById('dash-photo-upload').click()" style="font-size:11px;color:var(--or);cursor:pointer;margin-top:4px;">Change Photo</div>
     </div>
     </div>
@@ -444,7 +444,7 @@ async function renderDashboard(c){
   </div>
   ${latestPayout&&latestPayout.expectedDate&&new Date(latestPayout.expectedDate)>=now?`<div class="card">
     <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:var(--or);">💰 A payment is on its way!</div>
-    <div style="font-size:12px;color:var(--mu);margin-top:4px;">Expect ${fmt(latestPayout.amount)} around ${new Date(latestPayout.expectedDate).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}</div>
+    <div style="font-size:12px;color:var(--wh);font-weight:700;margin-top:4px;">Expect ${fmt(latestPayout.amount)} around ${new Date(latestPayout.expectedDate).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}</div>
     ${latestPayout.message?`<div style="font-size:12px;color:var(--w2);margin-top:6px;">${latestPayout.message}</div>`:''}
   </div>`:''}
   <div class="stats-grid">
@@ -466,13 +466,13 @@ async function renderDashboard(c){
   </div>
   <div class="card">
     <div class="card-title">📊 Earnings Analytics</div>
-    <div style="font-size:11px;color:var(--mu);margin:6px 0 14px;">Last 6 months, and how often you've been paid.</div>
+    <div style="font-size:11px;color:var(--wh);font-weight:700;margin:6px 0 14px;">Last 6 months, and how often you've been paid.</div>
     <div id="earnings-chart" style="display:flex;align-items:flex-end;gap:8px;height:100px;margin-bottom:10px;"></div>
     <div id="earnings-freq" style="font-size:12px;color:var(--w2);"></div>
   </div>
   <div class="card">
     <div class="card-title">💰 What You've Been Paid</div>
-    <div style="margin-top:8px;">${payouts.length?payouts.map(function(p){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);"><div style="display:flex;justify-content:space-between;"><span style="font-size:13px;color:var(--w2);">'+(p.description||'Payment')+'</span><span style="font-weight:800;color:var(--su);">'+fmt(p.amount)+'</span></div>'+(p.message?'<div style="font-size:11px;color:var(--mu);margin-top:3px;">'+p.message+'</div>':'')+'<div style="font-size:10px;color:var(--mu);margin-top:3px;">'+p.date+(p.expectedDate?' &middot; Expected: '+new Date(p.expectedDate).toLocaleDateString('en-GB'):'')+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No payments recorded yet.</div>'}</div>
+    <div style="margin-top:8px;">${payouts.length?payouts.map(function(p){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);"><div style="display:flex;justify-content:space-between;"><span style="font-size:13px;color:var(--w2);">'+(p.description||'Payment')+'</span><span style="font-weight:800;color:var(--su);">'+fmt(p.amount)+'</span></div>'+(p.message?'<div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:3px;">'+p.message+'</div>':'')+'<div style="font-size:10px;color:var(--wh);font-weight:700;margin-top:3px;">'+p.date+(p.expectedDate?' &middot; Expected: '+new Date(p.expectedDate).toLocaleDateString('en-GB'):'')+'</div></div>';}).join(''):'<div style="color:var(--wh);font-weight:700;font-size:12px;">No payments recorded yet.</div>'}</div>
   </div>`;
   renderEarningsChart(payouts);
 }
@@ -492,7 +492,7 @@ function renderEarningsChart(payouts){
   const maxVal=Math.max.apply(null,totals.concat([1]));
   chartEl.innerHTML=months.map(function(m,i){
     const h=Math.max(4,Math.round((totals[i]/maxVal)*90));
-    return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:100%;height:'+h+'px;background:'+(totals[i]>0?'var(--or)':'var(--card2)')+';border-radius:4px 4px 0 0;"></div><div style="font-size:9px;color:var(--mu);">'+m.label+'</div></div>';
+    return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:100%;height:'+h+'px;background:'+(totals[i]>0?'var(--or)':'var(--card2)')+';border-radius:4px 4px 0 0;"></div><div style="font-size:9px;color:var(--wh);font-weight:700;">'+m.label+'</div></div>';
   }).join('');
   const paidMonths=totals.filter(function(t){return t>0;}).length;
   if(freqEl){
@@ -503,7 +503,7 @@ function renderEarningsChart(payouts){
 }
 
 async function renderStats(c){
-  c.innerHTML='<div class="page-hdr-title">Live Mall Stats</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
+  c.innerHTML='<div class="page-hdr-title">Live Mall Stats</div><div style="color:var(--wh);font-weight:700;margin-top:8px;">Loading...</div>';
   const orders=Object.values(await fbG('rn_mall_orders')||{}).filter(function(o){return o.status!=='cancelled'&&o.status!=='deleted';});
   const totalRev=orders.reduce(function(s,o){return s+(o.total||0);},0);
   const custs=await fbG('rn_mall_customers')||{};
@@ -534,20 +534,20 @@ async function renderStats(c){
   <div class="card">
     <div class="card-title">Monthly Revenue (Last 6 Months)</div>
     <div style="display:flex;align-items:flex-end;gap:12px;height:160px;margin-top:16px;">
-      ${months.map(function(m){const h=Math.max(4,Math.round((m.rev/maxRev)*120));return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="font-size:9px;color:var(--mu);">'+(m.rev>0?fmt(m.rev):'')+'</div><div style="width:100%;background:var(--or);border-radius:4px 4px 0 0;height:'+h+'px;"></div><div style="font-size:10px;color:var(--mu);">'+m.label+'</div></div>';}).join('')}
+      ${months.map(function(m){const h=Math.max(4,Math.round((m.rev/maxRev)*120));return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="font-size:9px;color:var(--wh);font-weight:700;">'+(m.rev>0?fmt(m.rev):'')+'</div><div style="width:100%;background:var(--or);border-radius:4px 4px 0 0;height:'+h+'px;"></div><div style="font-size:10px;color:var(--wh);font-weight:700;">'+m.label+'</div></div>';}).join('')}
     </div>
   </div>`;
 }
 
 async function renderUpdates(c){
-  c.innerHTML='<div class="page-hdr-title">Updates from Ubong Rich</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
+  c.innerHTML='<div class="page-hdr-title">Updates from Ubong Rich</div><div style="color:var(--wh);font-weight:700;margin-top:8px;">Loading...</div>';
   const updates=Object.values(await fbG('rn_mall_investor_updates')||{}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
   c.innerHTML='<div class="page-hdr-title">Updates from Ubong Rich</div><div class="page-hdr-sub" style="margin-bottom:20px;">Announcements, milestones, and monthly reports.</div>'
-    +(updates.length?updates.map(function(u){return '<div class="card"><div style="font-size:13px;color:var(--w2);line-height:1.7;">'+u.message+'</div><div style="font-size:10px;color:var(--mu);margin-top:8px;">'+u.date+'</div></div>';}).join(''):'<div class="card" style="text-align:center;padding:40px;color:var(--mu);">No updates yet, check back soon.</div>');
+    +(updates.length?updates.map(function(u){return '<div class="card"><div style="font-size:13px;color:var(--w2);line-height:1.7;">'+u.message+'</div><div style="font-size:10px;color:var(--wh);font-weight:700;margin-top:8px;">'+u.date+'</div></div>';}).join(''):'<div class="card" style="text-align:center;padding:40px;color:var(--wh);font-weight:700;">No updates yet, check back soon.</div>');
 }
 
 async function renderSwitchPlan(c){
-  c.innerHTML='<div class="page-hdr-title">Switch Plan</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
+  c.innerHTML='<div class="page-hdr-title">Switch Plan</div><div style="color:var(--wh);font-weight:700;margin-top:8px;">Loading...</div>';
   const planStart=new Date(investor.planStartDate||investor.joinDate||Date.now());
   const monthsHeld=(Date.now()-planStart.getTime())/(1000*60*60*24*30);
   const canSwitch=monthsHeld>=3;
@@ -559,12 +559,12 @@ async function renderSwitchPlan(c){
   <div class="card">
     <div class="card-title">Your Current Plan</div>
     <div style="font-size:13px;color:var(--w2);margin-top:8px;">${investor.tier||tierFor(investor.investmentAmount)} &middot; ${OPTION_LABELS[investor.investmentOption]||investor.investmentOption} &middot; ${fmt(investor.investmentAmount)}</div>
-    <div style="font-size:11px;color:var(--mu);margin-top:4px;">Active since ${planStart.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})} (${Math.floor(monthsHeld)} month${Math.floor(monthsHeld)===1?'':'s'} ago)</div>
+    <div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:4px;">Active since ${planStart.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})} (${Math.floor(monthsHeld)} month${Math.floor(monthsHeld)===1?'':'s'} ago)</div>
   </div>
   ${pendingReq?`<div class="card" style="border-color:rgba(255,140,0,0.4);background:rgba(255,140,0,0.06);">
     <div style="font-weight:800;color:var(--or);">⏳ Switch request pending admin approval</div>
     <div style="font-size:12px;color:var(--w2);margin-top:6px;">Requested: ${OPTION_LABELS[pendingReq.option]}${pendingReq.newAmount&&pendingReq.newAmount>investor.investmentAmount?' &middot; Top-up to '+fmt(pendingReq.newAmount):''}</div>
-    <div style="font-size:11px;color:var(--mu);margin-top:6px;">${pendingReq.newAmount&&pendingReq.newAmount>investor.investmentAmount?'Admin will confirm your top-up payment before approving.':'We\'ll notify you once admin reviews this.'}</div>
+    <div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:6px;">${pendingReq.newAmount&&pendingReq.newAmount>investor.investmentAmount?'Admin will confirm your top-up payment before approving.':'We\'ll notify you once admin reviews this.'}</div>
   </div>`:!canSwitch?`<div class="card" style="border-color:rgba(244,63,94,0.4);background:rgba(244,63,94,0.06);">
     <div style="font-weight:800;color:var(--re);">🔒 Not eligible to switch yet</div>
     <div style="font-size:12px;color:var(--w2);margin-top:6px;">You can request a switch starting <strong>${nextEligible.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}</strong>, plans must be held at least 3 months before switching.</div>
@@ -577,7 +577,7 @@ async function renderSwitchPlan(c){
       <option value="fixed_return" ${investor.investmentOption==='fixed_return'?'disabled':''}>Fixed Return</option>
     </select></div>
     <div class="fg"><label class="lbl">New Investment Amount (optional, leave blank to keep ${fmt(investor.investmentAmount)})</label><input class="fi" type="number" id="sw-amount" placeholder="${investor.investmentAmount}"/></div>
-    <div style="font-size:11px;color:var(--mu);margin-bottom:10px;">If your new amount is higher than your current investment, you'll need to make a top-up payment, admin confirms this before your switch is approved.</div>
+    <div style="font-size:11px;color:var(--wh);font-weight:700;margin-bottom:10px;">If your new amount is higher than your current investment, you'll need to make a top-up payment, admin confirms this before your switch is approved.</div>
     <button class="btn btn-or" onclick="previewPlanSwitch()">Preview Request</button>
     <div id="switch-preview" style="margin-top:14px;"></div>
   </div>`}
@@ -617,20 +617,20 @@ async function submitSwitchRequest(newOption,newAmount){
   inav('switch');
 }
 async function renderInvestorWallet(c){
-  c.innerHTML='<div class="page-hdr-title">Wallet</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
+  c.innerHTML='<div class="page-hdr-title">Wallet</div><div style="color:var(--wh);font-weight:700;margin-top:8px;">Loading...</div>';
   const txns=Object.values(await fbG('rn_mall_wallet_transactions_investor/'+investor._id)||{}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
   const withdrawals=Object.values(await fbG('rn_mall_investor_withdrawals/'+investor._id)||{}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
   c.innerHTML=`
   <div class="page-hdr-title">Wallet</div>
   <div class="page-hdr-sub" style="margin-bottom:16px;">Your investment returns are credited here. Withdraw to your bank anytime.</div>
   <div class="card" style="text-align:center;">
-    <div style="font-size:11px;color:var(--mu);text-transform:uppercase;">Wallet Balance</div>
+    <div style="font-size:11px;color:var(--wh);font-weight:700;text-transform:uppercase;">Wallet Balance</div>
     <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:32px;color:var(--su);margin-top:6px;">${fmt(investor.walletBalance||0)}</div>
     <button class="btn btn-or" style="margin-top:12px;" onclick="requestInvestorWithdrawal()">💸 Request Withdrawal</button>
   </div>
   <div class="card">
     <div class="card-title">🏦 Bank Account Details</div>
-    <div style="font-size:11px;color:var(--mu);margin:8px 0 12px;">Where withdrawals will be sent.${investor.bankVerified?' <strong style="color:var(--su);">✔ Verified by admin</strong>':investor.bankAcctNo?' <strong style="color:var(--or);">Awaiting admin verification</strong>':''}</div>
+    <div style="font-size:11px;color:var(--wh);font-weight:700;margin:8px 0 12px;">Where withdrawals will be sent.${investor.bankVerified?' <strong style="color:var(--su);">✔ Verified by admin</strong>':investor.bankAcctNo?' <strong style="color:var(--or);">Awaiting admin verification</strong>':''}</div>
     <div class="fg"><label class="lbl">Bank Name</label><input class="fi" id="iw-bank" value="${investor.bankName||''}" placeholder="e.g. GTBank"/></div>
     <div class="fg"><label class="lbl">Account Number</label><input class="fi" id="iw-acctno" value="${investor.bankAcctNo||''}" placeholder="0123456789"/></div>
     <div class="fg"><label class="lbl">Account Name</label><input class="fi" id="iw-acctname" value="${investor.bankAcctName||''}" placeholder="Must match your name on file"/></div>
@@ -638,11 +638,11 @@ async function renderInvestorWallet(c){
   </div>
   <div class="card">
     <div class="card-title">Withdrawal Requests</div>
-    <div style="margin-top:8px;">${withdrawals.length?withdrawals.map(function(w){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);"><div style="display:flex;justify-content:space-between;"><span style="font-size:13px;color:var(--w2);">'+fmt(w.amount)+'</span><span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;background:'+(w.status==='paid'?'rgba(255,106,0,0.15)':w.status==='declined'?'rgba(244,63,94,0.15)':'rgba(255,140,0,0.15)')+';color:'+(w.status==='paid'?'var(--su)':w.status==='declined'?'var(--re)':'var(--or)')+';">'+(w.status||'pending').toUpperCase()+'</span></div><div style="font-size:10px;color:var(--mu);margin-top:3px;">'+w.date+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No withdrawal requests yet.</div>'}</div>
+    <div style="margin-top:8px;">${withdrawals.length?withdrawals.map(function(w){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);"><div style="display:flex;justify-content:space-between;"><span style="font-size:13px;color:var(--w2);">'+fmt(w.amount)+'</span><span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;background:'+(w.status==='paid'?'rgba(255,106,0,0.15)':w.status==='declined'?'rgba(244,63,94,0.15)':'rgba(255,140,0,0.15)')+';color:'+(w.status==='paid'?'var(--su)':w.status==='declined'?'var(--re)':'var(--or)')+';">'+(w.status||'pending').toUpperCase()+'</span></div><div style="font-size:10px;color:var(--wh);font-weight:700;margin-top:3px;">'+w.date+'</div></div>';}).join(''):'<div style="color:var(--wh);font-weight:700;font-size:12px;">No withdrawal requests yet.</div>'}</div>
   </div>
   <div class="card">
     <div class="card-title">Wallet History</div>
-    <div style="margin-top:8px;">${txns.length?txns.map(function(t){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);"><div style="display:flex;justify-content:space-between;"><span style="font-size:13px;color:var(--w2);">'+(t.description||t.type)+'</span><span style="font-weight:800;color:'+(t.type==='withdrawal'?'var(--re)':'var(--su)')+';">'+(t.type==='withdrawal'?'-':'+')+fmt(t.amount)+'</span></div><div style="font-size:10px;color:var(--mu);margin-top:3px;">'+t.date+'</div></div>';}).join(''):'<div style="color:var(--mu);font-size:12px;">No wallet activity yet.</div>'}</div>
+    <div style="margin-top:8px;">${txns.length?txns.map(function(t){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);"><div style="display:flex;justify-content:space-between;"><span style="font-size:13px;color:var(--w2);">'+(t.description||t.type)+'</span><span style="font-weight:800;color:'+(t.type==='withdrawal'?'var(--re)':'var(--su)')+';">'+(t.type==='withdrawal'?'-':'+')+fmt(t.amount)+'</span></div><div style="font-size:10px;color:var(--wh);font-weight:700;margin-top:3px;">'+t.date+'</div></div>';}).join(''):'<div style="color:var(--wh);font-weight:700;font-size:12px;">No wallet activity yet.</div>'}</div>
   </div>`;
 }
 async function saveInvestorBankDetails(){
@@ -667,11 +667,11 @@ async function requestInvestorWithdrawal(){
   inav('wallet');
 }
 async function renderDocuments(c){
-  c.innerHTML='<div class="page-hdr-title">My Documents</div><div style="color:var(--mu);margin-top:8px;">Loading...</div>';
+  c.innerHTML='<div class="page-hdr-title">My Documents</div><div style="color:var(--wh);font-weight:700;margin-top:8px;">Loading...</div>';
   const doc=investor.agreementDoc;
   c.innerHTML='<div class="page-hdr-title">My Documents</div><div class="page-hdr-sub" style="margin-bottom:20px;">Your signed partnership agreement.</div>'
-    +(doc?'<div class="card"><div class="card-title">📄 Partnership Agreement</div><div style="font-size:12px;color:var(--mu);margin:8px 0 12px;">Uploaded by RichNation Mall.</div><button class="btn btn-or" onclick="downloadDataDoc(investor.agreementDoc,\'RichNation_Mall_Agreement.pdf\')">Download Agreement</button></div>'
-    :'<div class="card" style="text-align:center;padding:40px;color:var(--mu);">Your signed agreement hasn\'t been uploaded yet, it will appear here once ready.</div>');
+    +(doc?'<div class="card"><div class="card-title">📄 Partnership Agreement</div><div style="font-size:12px;color:var(--wh);font-weight:700;margin:8px 0 12px;">Uploaded by RichNation Mall.</div><button class="btn btn-or" onclick="downloadDataDoc(investor.agreementDoc,\'RichNation_Mall_Agreement.pdf\')">Download Agreement</button></div>'
+    :'<div class="card" style="text-align:center;padding:40px;color:var(--wh);font-weight:700;">Your signed agreement hasn\'t been uploaded yet, it will appear here once ready.</div>');
 }
 
 async function renderChat(c){
@@ -684,7 +684,7 @@ async function loadInvestorChat(){
   el.innerHTML=msgs.length?msgs.map(function(m){
     const mine=!m.isAdmin;
     return '<div class="chat-msg'+(mine?' own':'')+'"><div class="chat-av">'+(mine?investor.name[0]:'RN')+'</div><div><div class="chat-bubble">'+m.text+'</div></div></div>';
-  }).join(''):'<div style="color:var(--mu);font-size:12px;text-align:center;padding:20px;">Say hello to Ubong Rich!</div>';
+  }).join(''):'<div style="color:var(--wh);font-weight:700;font-size:12px;text-align:center;padding:20px;">Say hello to Ubong Rich!</div>';
   el.scrollTop=el.scrollHeight;
 }
 async function sendInvestorMsg(){
@@ -699,7 +699,7 @@ function renderProfile(c){
   <div class="page-hdr-title">My Profile</div>
   <div class="card" style="max-width:460px;margin-top:16px;text-align:center;">
     <div onclick="document.getElementById('pf-photo-upload').click()" style="width:80px;height:80px;border-radius:99px;background:var(--card2);border:2px solid var(--bdr);margin:0 auto;cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;">
-      ${investor.photo?'<img src="'+investor.photo+'" style="width:100%;height:100%;object-fit:cover;"/>':'<span style="font-size:11px;color:var(--mu);">Upload Photo</span>'}
+      ${investor.photo?'<img src="'+investor.photo+'" style="width:100%;height:100%;object-fit:cover;"/>':'<span style="font-size:11px;color:var(--wh);font-weight:700;">Upload Photo</span>'}
     </div>
     <input type="file" id="pf-photo-upload" accept="image/*" style="display:none;" onchange="uploadMyPhoto()">
     <div style="font-size:11px;color:var(--or);cursor:pointer;margin-top:6px;" onclick="document.getElementById('pf-photo-upload').click()">Change Photo</div>
@@ -712,20 +712,20 @@ function renderProfile(c){
   </div>
   <div class="card" style="max-width:460px;text-align:left;">
     <div class="card-title">Personal Details</div>
-    <div style="font-size:11px;color:var(--mu);margin:6px 0 12px;">Managed by admin, to request a change, use Chat with Founder.</div>
-    <div class="lbl">Full Name</div><div class="fi" style="color:var(--mu);">${investor.name||'N/A'}</div>
-    <div class="lbl">Email</div><div class="fi" style="color:var(--mu);">${investor.email||'N/A'}</div>
-    <div class="lbl">Phone</div><div class="fi" style="color:var(--mu);">${investor.phone||'N/A'}</div>
-    <div class="lbl">Date of Birth</div><div class="fi" style="color:var(--mu);">${investor.dob?new Date(investor.dob).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}):'Not provided'}</div>
-    <div class="lbl">Address</div><div class="fi" style="color:var(--mu);">${investor.address||'N/A'}</div>
-    <div class="lbl">Local Government Area</div><div class="fi" style="color:var(--mu);">${investor.lga||'N/A'}</div>
-    <div class="lbl">Country</div><div class="fi" style="color:var(--mu);">${investor.country||'N/A'}</div>
+    <div style="font-size:11px;color:var(--wh);font-weight:700;margin:6px 0 12px;">Managed by admin, to request a change, use Chat with Founder.</div>
+    <div class="lbl">Full Name</div><div class="fi" style="color:var(--wh);font-weight:700;">${investor.name||'N/A'}</div>
+    <div class="lbl">Email</div><div class="fi" style="color:var(--wh);font-weight:700;">${investor.email||'N/A'}</div>
+    <div class="lbl">Phone</div><div class="fi" style="color:var(--wh);font-weight:700;">${investor.phone||'N/A'}</div>
+    <div class="lbl">Date of Birth</div><div class="fi" style="color:var(--wh);font-weight:700;">${investor.dob?new Date(investor.dob).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}):'Not provided'}</div>
+    <div class="lbl">Address</div><div class="fi" style="color:var(--wh);font-weight:700;">${investor.address||'N/A'}</div>
+    <div class="lbl">Local Government Area</div><div class="fi" style="color:var(--wh);font-weight:700;">${investor.lga||'N/A'}</div>
+    <div class="lbl">Country</div><div class="fi" style="color:var(--wh);font-weight:700;">${investor.country||'N/A'}</div>
     <div class="lbl">New Password (leave blank to keep current)</div><div style="position:relative;"><input class="fi" id="pf-pass" type="password" placeholder="New password" style="padding-right:56px;"/><span onclick="togglePwVisibility('pf-pass',this)" style="position:absolute;right:12px;top:12px;font-size:11px;color:var(--or);cursor:pointer;font-weight:700;">Show</span></div>
     <button class="btn btn-or btn-lg" onclick="saveInvestorProfile()">Save Password</button>
   </div>
   <div class="card" style="max-width:460px;text-align:left;">
     <div class="card-title">🏦 Bank Account Details</div>
-    <div style="font-size:11px;color:var(--mu);margin:6px 0 12px;">Manage your bank details and withdrawals from the <span onclick="inav('wallet')" style="color:var(--or);cursor:pointer;font-weight:700;">Wallet</span> tab.</div>
+    <div style="font-size:11px;color:var(--wh);font-weight:700;margin:6px 0 12px;">Manage your bank details and withdrawals from the <span onclick="inav('wallet')" style="color:var(--or);cursor:pointer;font-weight:700;">Wallet</span> tab.</div>
   </div>`;
 }
 function compressPhotoFile(file,maxDim,quality){
@@ -819,8 +819,8 @@ async function loadInvestorNotifs(){
   const panel=document.getElementById('inv-notif-panel');
   if(panel){
     panel.innerHTML=list.length?list.slice(0,25).map(function(n){
-      return '<div style="padding:8px;border-radius:8px;background:'+(n.read?'transparent':'rgba(255,106,0,0.06)')+';margin-bottom:2px;"><div style="font-size:11px;color:var(--wh);line-height:1.4;">'+invNotifMsg(n)+'</div><div style="font-size:9px;color:var(--mu);margin-top:2px;">'+n.date+'</div></div>';
-    }).join(''):'<div style="padding:16px;text-align:center;color:var(--mu);font-size:12px;">No notifications yet.</div>';
+      return '<div style="padding:8px;border-radius:8px;background:'+(n.read?'transparent':'rgba(255,106,0,0.06)')+';margin-bottom:2px;"><div style="font-size:11px;color:var(--wh);line-height:1.4;">'+invNotifMsg(n)+'</div><div style="font-size:9px;color:var(--wh);font-weight:700;margin-top:2px;">'+n.date+'</div></div>';
+    }).join(''):'<div style="padding:16px;text-align:center;color:var(--wh);font-weight:700;font-size:12px;">No notifications yet.</div>';
   }
 }
 async function toggleInvestorNotifPanel(){
