@@ -530,7 +530,7 @@ if(document.readyState==='complete'){setTimeout(loadAppCheckWhenIdle,2000);}
 else window.addEventListener('load',function(){setTimeout(loadAppCheckWhenIdle,2000);});
 const WA_NUM='2349164678560';
 const ADMIN_EMAILS=['richnationwbpt61@gmail.com','ubongrich62@gmail.com'];
-const DEFAULT_PASS='UbRNGL2026';
+const DEFAULT_PASS='NFWAXw0sUUdqyoFyPXBZ';
 
 let curNav='dashboard';
 let navStack=[];
@@ -677,7 +677,10 @@ async function doLogin(){
   const p=document.getElementById('li-p').value.trim();
   const err=document.getElementById('li-err');
   const stored=localStorage.getItem('rnm_admin_pass')||DEFAULT_PASS;
-  const emailOk=!e||ADMIN_EMAILS.includes(e)||e==='';
+  // A blank email used to bypass this check entirely, meaning the Owner login only
+  // ever required the single password string below with no second factor at all.
+  // Require it to actually match an authorised address now.
+  const emailOk=ADMIN_EMAILS.includes(e);
   if(!p){err.textContent='Enter your password.';err.style.display='block';return;}
   if(p===stored&&emailOk){
     sessionStorage.setItem('rnm_admin_session','1');
