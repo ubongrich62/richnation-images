@@ -2669,6 +2669,13 @@ async function renderDeliveryMap(order,force){
   _lastMapRenderTs=Date.now();
   _deliveryMapOrderId=order.tracking;
   if(_deliveryMapInstance){_deliveryMapInstance.remove();_deliveryMapInstance=null;}
+  // The container starts out holding our static "Loading map…" placeholder markup
+  // (set directly in the page template). Leaflet does not clear a container's
+  // existing children when it initializes, it only adds its own panes as new
+  // siblings, so without this the placeholder is left behind permanently,
+  // sitting on top of (or tangled with) the real map underneath it forever.
+  el.innerHTML='';
+  el.style.cssText='width:100%;height:260px;border-radius:9px 9px 0 0;overflow:hidden;background:var(--card2);';
   const map=L.map('delivery-map',{zoomControl:false,attributionControl:true}).setView([centerPos.lat,centerPos.lng],14);
   _deliveryMapInstance=map;
   window._deliveryMapTileLoaded=false;
