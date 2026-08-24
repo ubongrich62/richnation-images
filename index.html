@@ -3250,13 +3250,13 @@ async function showAccountPage(){
       <div onclick="accTab('wallet',null)" style="cursor:pointer;background:linear-gradient(135deg,#1a1a1a,#0e0e0e);border:1px solid rgba(255,106,0,0.3);border-radius:12px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;">
         <div style="display:flex;align-items:center;gap:12px;">
           <div>${iconBadge('wallet',26)}</div>
-          <div><div style="font-size:11px;color:rgba(255,255,255,.55);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Wallet Balance</div><div data-live-wallet style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:20px;color:var(--su);">${fmt(currUser.walletBalance||0)}</div></div>
+          <div><div style="font-size:11px;color:var(--wh);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Wallet Balance</div><div data-live-wallet style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:20px;color:var(--su);">${fmt(currUser.walletBalance||0)}</div></div>
         </div>
       </div>
       <div onclick="accTab('richpoints',null)" style="cursor:pointer;background:linear-gradient(135deg,#1a1a1a,#0e0e0e);border:1px solid rgba(255,140,0,0.3);border-radius:12px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;">
         <div style="display:flex;align-items:center;gap:12px;">
           <div>${iconBadge('star',26)}</div>
-          <div><div style="font-size:11px;color:rgba(255,255,255,.55);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">RichPoints</div><div data-live-points style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:20px;color:var(--or);">${(currUser.points||0).toLocaleString()} pts</div></div>
+          <div><div style="font-size:11px;color:var(--wh);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">RichPoints</div><div data-live-points style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:20px;color:var(--or);">${(currUser.points||0).toLocaleString()} pts</div></div>
         </div>
       </div>
     </div>
@@ -3313,7 +3313,7 @@ async function accTab(tab,el,silent){
       <div style="background:linear-gradient(135deg,#1a1a1a,#0e0e0e);border:1px solid rgba(255,106,0,0.3);border-radius:12px;padding:20px;margin-bottom:16px;text-align:center;">
         <div>${iconBadge('wallet',32)}</div>
         <div data-live-wallet style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:28px;color:var(--su);margin-top:4px;">${fmt(currUser.walletBalance||0)}</div>
-        <div style="font-size:12px;color:rgba(255,255,255,.55);margin-top:2px;">Available wallet balance</div>
+        <div style="font-size:12px;color:var(--wh);font-weight:700;margin-top:2px;">Available wallet balance</div>
       </div>
       <div class="card" style="margin-bottom:14px;text-align:center;">
         <div onclick="showWalletInfo()" style="cursor:pointer;color:var(--or);font-weight:700;font-size:13px;">${iconBadge('info',16)} How the Wallet Works →</div>
@@ -3370,7 +3370,7 @@ async function accTab(tab,el,silent){
       <div style="background:linear-gradient(135deg,#1a1a1a,#0e0e0e);border:1px solid rgba(255,140,0,0.3);border-radius:12px;padding:20px;margin-bottom:16px;text-align:center;">
         <div>${iconBadge('star',32)}</div>
         <div data-live-points style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:28px;color:var(--or);margin-top:4px;">${(currUser.points||0).toLocaleString()} pts</div>
-        <div style="font-size:12px;color:rgba(255,255,255,.55);margin-top:2px;">≈ ${fmt((currUser.points||0)*rpRates().redeemRate)} in discounts</div>
+        <div style="font-size:12px;color:var(--wh);font-weight:700;margin-top:2px;">≈ ${fmt((currUser.points||0)*rpRates().redeemRate)} in discounts</div>
       </div>
       <div class="card" style="margin-bottom:14px;">
         <div class="card-title">${iconBadge('trophy',18)} Loyalty Tier: ${tier.name}</div>
