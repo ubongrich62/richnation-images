@@ -8,8 +8,17 @@
 <meta name="color-scheme" content="dark">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>RichNation Mall, Staff Portal</title>
+<!-- Loaded as a non-blocking link (instead of an @import inside the style block) because a
+     render-blocking stylesheet delays execution of every classic, non-deferred script that
+     comes after it in the document; on a slow/flaky connection to fonts.googleapis.com that
+     meant the entire app, including the login screen, stayed inert until it finished or
+     timed out. media="print" makes the browser fetch it without blocking, the onload swap
+     then applies it once it's actually ready. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap"></noscript>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
   --bg:#0A0A0B;--card:#151517;--card2:#1C1C20;--bdr:#2B2B31;
@@ -115,7 +124,7 @@ button{font-family:inherit;}
         <input class="fi" id="s-pass" type="password" placeholder="Password" style="padding-right:56px;"/>
         <span onclick="togglePwVisibility('s-pass',this)" style="position:absolute;right:12px;top:12px;font-size:11px;color:var(--or);cursor:pointer;font-weight:700;">Show</span>
       </div>
-      <button class="lbtn" onclick="doStaffLogin()">Sign In</button>
+      <button class="lbtn" id="staff-login-btn" onclick="doStaffLogin()">Sign In</button>
       <div class="lerr" id="login-err"></div>
     </div>
 
@@ -393,17 +402,27 @@ async function doStaffLogin(){
   const pass=document.getElementById('s-pass').value.trim();
   const err=document.getElementById('login-err');err.style.display='none';
   if(!email||!pass){err.textContent='Enter your email and password.';err.style.display='block';return;}
-  const all=await fbG('rn_mall_staff')||{};
-  const byEmail=Object.entries(all).find(function(e){return e[1].email===email;});
-  if(!byEmail){err.textContent='Incorrect email or password.';err.style.display='block';return;}
-  const found=Object.assign({_id:byEmail[0]},byEmail[1]);
-  if(found.status==='pending_review'){err.textContent='Your application is still under review. You\'ll be able to sign in once approved.';err.style.display='block';return;}
-  if(found.status==='suspended'){err.textContent='Your account has been suspended. Contact your admin.';err.style.display='block';return;}
-  if(found.password!==pass){err.textContent='Incorrect email or password.';err.style.display='block';return;}
-  staff=found;
-  sessionStorage.setItem('rnm_staff_session',JSON.stringify(staff));
-  sessionStorage.setItem('rnm_staff_email',staff.email);
-  startApp();
+  // Sign-in makes a single unavoidable network round-trip (looking up the staff
+  // record) with no other visual change on screen until it resolves, so give it
+  // an explicit loading state instead of leaving the button looking inert.
+  const btn=document.getElementById('staff-login-btn');
+  const origLabel=btn.textContent;
+  btn.disabled=true;btn.textContent='Signing in…';
+  try{
+    const all=await fbG('rn_mall_staff')||{};
+    const byEmail=Object.entries(all).find(function(e){return e[1].email===email;});
+    if(!byEmail){err.textContent='Incorrect email or password.';err.style.display='block';return;}
+    const found=Object.assign({_id:byEmail[0]},byEmail[1]);
+    if(found.status==='pending_review'){err.textContent='Your application is still under review. You\'ll be able to sign in once approved.';err.style.display='block';return;}
+    if(found.status==='suspended'){err.textContent='Your account has been suspended. Contact your admin.';err.style.display='block';return;}
+    if(found.password!==pass){err.textContent='Incorrect email or password.';err.style.display='block';return;}
+    staff=found;
+    sessionStorage.setItem('rnm_staff_session',JSON.stringify(staff));
+    sessionStorage.setItem('rnm_staff_email',staff.email);
+    startApp();
+  }finally{
+    btn.disabled=false;btn.textContent=origLabel;
+  }
 }
 function staffLogout(){sessionStorage.removeItem('rnm_staff_session');staff=null;document.getElementById('app').style.display='none';document.getElementById('login').style.display='flex';}
 function checkStaffSession(){const s=sessionStorage.getItem('rnm_staff_session');if(s){try{staff=JSON.parse(s);startApp();}catch(e){}}}
@@ -1573,14 +1592,16 @@ async function loadStaffNotifs(){
       return '<div style="display:flex;gap:8px;padding:8px;border-radius:8px;background:'+(n.read?'transparent':'rgba(255,106,0,0.06)')+';margin-bottom:2px;"><div style="font-size:15px;">'+notifIcon(n.type)+'</div><div style="flex:1;"><div style="font-size:11px;color:var(--wh);line-height:1.4;">'+notifMsg(n)+'</div><div style="font-size:9px;color:var(--wh);font-weight:700;margin-top:2px;">'+n.date+'</div></div></div>';
     }).join(''):'<div style="padding:16px;text-align:center;color:var(--wh);font-weight:700;font-size:12px;">No notifications yet.</div>';
   }
+  return data;
 }
 async function toggleStaffNotifPanel(){
   const panel=document.getElementById('staff-notif-panel');
   const open=panel.style.display==='block';
   panel.style.display=open?'none':'block';
   if(!open){
-    await loadStaffNotifs();
-    const data=await fbG('rn_mall_staff_notifications/'+staff._id)||{};
+    // loadStaffNotifs() already fetched this exact path, reuse its result
+    // instead of fetching rn_mall_staff_notifications/<id> a second time.
+    const data=await loadStaffNotifs()||{};
     for(const k of Object.keys(data)){if(!data[k].read)fbU('rn_mall_staff_notifications/'+staff._id+'/'+k,{read:true});}
     setTimeout(loadStaffNotifs,600);
   }
