@@ -308,6 +308,15 @@ function toggleApplyMode(){
   document.getElementById('l-sub').textContent=isLogin?'Fill in your details, our team reviews every application before you start receiving deliveries.':'Manage your deliveries and update your status in real time.';
   document.getElementById('toggle-note').innerHTML=isLogin?'Already a rider? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Sign in</span>':'New rider? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Apply here</span>';
 }
+// A record's own ID doubles as its access key everywhere in this app, so it must not
+// be guessable. Date.now() alone produces a predictable, enumerable value, crypto.randomUUID() does not.
+function secureId(prefix){
+  try{if(window.crypto&&crypto.randomUUID)return prefix+'_'+crypto.randomUUID();}catch(e){}
+  var bytes=new Uint8Array(16);
+  (window.crypto||window.msCrypto).getRandomValues(bytes);
+  var hex=Array.prototype.map.call(bytes,function(b){return b.toString(16).padStart(2,'0');}).join('');
+  return prefix+'_'+hex;
+}
 async function submitRiderApplication(){
   const fname=document.getElementById('ap-fname').value.trim();
   const dob=document.getElementById('ap-dob').value;
@@ -325,7 +334,7 @@ async function submitRiderApplication(){
   if(!document.getElementById('ap-conduct-agree').checked){err.textContent='Please confirm you have read and understood the founder\'s message before submitting.';err.style.display='block';return;}
   const all=await fbG('rn_mall_riders')||{};
   if(Object.values(all).find(function(s){return s.email===email;})){err.textContent='An application or account with this email already exists.';err.style.display='block';return;}
-  const id='rider_'+Date.now();
+  const id=secureId('rider');
   await fbS('rn_mall_riders/'+id,{
     id,name:fname,dob,gender,phone,email,address,country,lga,vehicleType,idNumber,note,
     password:'',status:'pending_review',joinDate:ds(),ts:Date.now(),

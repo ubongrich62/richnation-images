@@ -373,6 +373,15 @@ function toggleApplyMode(){
   document.getElementById('l-title').textContent=isLogin?'Apply to Join the Team':'Staff Sign In';
   document.getElementById('toggle-note').innerHTML=isLogin?'Already have login details? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Sign in</span>':'Don\'t have an account? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Apply here</span>';
 }
+// A record's own ID doubles as its access key everywhere in this app, so it must not
+// be guessable. Date.now() alone produces a predictable, enumerable value, crypto.randomUUID() does not.
+function secureId(prefix){
+  try{if(window.crypto&&crypto.randomUUID)return prefix+'_'+crypto.randomUUID();}catch(e){}
+  var bytes=new Uint8Array(16);
+  (window.crypto||window.msCrypto).getRandomValues(bytes);
+  var hex=Array.prototype.map.call(bytes,function(b){return b.toString(16).padStart(2,'0');}).join('');
+  return prefix+'_'+hex;
+}
 async function submitStaffApplication(){
   const fname=document.getElementById('ap-fname').value.trim();
   const dob=document.getElementById('ap-dob').value;
@@ -388,7 +397,7 @@ async function submitStaffApplication(){
   if(!fname||!phone||!email||!address||!requestedRole){err.textContent='Please fill in your name, phone, email, address, and the role you\'re applying for.';err.style.display='block';return;}
   const all=await fbG('rn_mall_staff')||{};
   if(Object.values(all).find(function(s){return s.email===email;})){err.textContent='An application or account with this email already exists.';err.style.display='block';return;}
-  const id='staff_'+Date.now();
+  const id=secureId('staff');
   await fbS('rn_mall_staff/'+id,{
     id,name:fname,dob,gender,phone,email,address,country,lga,requestedRole,note,
     password:'',role:requestedRole,salary:0,salaryStatus:'pending',points:0,
@@ -903,7 +912,7 @@ async function initFleetMap(allRiders){
 async function searchFleetMapLocation(query){
   if(!query||!_fleetMap)return;
   try{
-    const res=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(query+', Nigeria'));
+    const res=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ng&email=rnm.office@richnationmall.com&q='+encodeURIComponent(query+', Nigeria'));
     const data=await res.json();
     if(data&&data[0]){
       const lat=parseFloat(data[0].lat),lng=parseFloat(data[0].lon);

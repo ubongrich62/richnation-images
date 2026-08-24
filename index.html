@@ -2986,7 +2986,7 @@ function switchAuth(tab){
     <button class="auth-btn" onclick="doLogin()" style="margin-top:10px;">Sign In</button>
     <div class="auth-forgot" onclick="switchAuth('forgot')">Forgot your password?</div>
     <div style="text-align:center;font-size:12px;color:var(--wh);font-weight:700;margin-top:10px;">No account? <span style="color:var(--or);cursor:pointer;font-weight:700;" onclick="switchAuth('register')">Create one free &#8594;</span></div>`;}
-  else if(tab==='forgot'){body.innerHTML=`<div class="auth-sub">Enter your account email. Our support team will send you a password reset link.</div>
+  else if(tab==='forgot'){body.innerHTML=`<div class="auth-sub">Enter your account email. This isn't an automatic reset yet, our support team will reach out directly to verify you and help you back in.</div>
     <input class="fi" id="forgot-email" type="email" placeholder="Email address" autocomplete="off"/>
     <div class="auth-err" id="forgot-err"></div>
     <div class="auth-err" id="forgot-ok" style="display:none;color:var(--su);"></div>
@@ -3015,7 +3015,7 @@ async function doForgotPassword(){
   const [custId]=found;
   await fbP('rn_mall_notifications',{type:'password_reset_request',email,customerId:custId,date:ds(),read:false,ts:Date.now()});
   await fbU('rn_mall_customers/'+custId,{resetRequested:true,resetRequestDate:ds()});
-  if(ok){ok.textContent='Request sent! Our support team will email you a reset link shortly.';ok.style.display='block';}
+  if(ok){ok.textContent='Request received. Our support team will contact you directly (by phone, WhatsApp, or email) to verify your identity and help you regain access, this is a manual step for now, not an automatic email.';ok.style.display='block';}
   toast('Reset request sent to support.');
 }
 async function doLogin(){
@@ -3047,12 +3047,22 @@ async function doLogin(){
   if(found.loginAttempts)await fbU('rn_mall_customers/'+custId,{loginAttempts:0});
   currUser=found;localStorage.setItem('rnm_user',JSON.stringify(currUser));updateAuthUI();closeAuth();toast('Welcome back, '+currUser.fname+'!');
 }
+// A record's own ID doubles as its access key everywhere in this app (order lookups,
+// chat threads, notification targets), so it must not be guessable. Date.now() alone
+// produces a predictable, enumerable value, crypto.randomUUID() does not.
+function secureId(prefix){
+  try{if(window.crypto&&crypto.randomUUID)return prefix+'_'+crypto.randomUUID();}catch(e){}
+  var bytes=new Uint8Array(16);
+  (window.crypto||window.msCrypto).getRandomValues(bytes);
+  var hex=Array.prototype.map.call(bytes,function(b){return b.toString(16).padStart(2,'0');}).join('');
+  return prefix+'_'+hex;
+}
 async function doRegister(){
   const fn=document.getElementById('reg-fn')?.value.trim();const ln=document.getElementById('reg-ln')?.value.trim();const email=document.getElementById('reg-email')?.value.trim().toLowerCase();const phone=document.getElementById('reg-phone')?.value.trim();const pass=document.getElementById('reg-pass')?.value.trim();const refInput=(document.getElementById('reg-ref')?.value||'').trim().toUpperCase();const err=document.getElementById('reg-err');
   if(!fn||!ln||!email||!pass){err.textContent='Please fill all fields.';err.style.display='block';return;}
   if(pass.length<6){err.textContent='Password must be at least 6 characters.';err.style.display='block';return;}
   const all=await fbG('rn_mall_customers')||{};if(Object.values(all).find(c=>c.email===email)){err.textContent='An account with this email already exists.';err.style.display='block';return;}
-  const id='cust_'+Date.now();
+  const id=secureId('cust');
   const referralCode=(fn.slice(0,4)+Math.random().toString(36).slice(2,6)).toUpperCase();
   const customer={id,fname:fn,lname:ln,name:fn+' '+ln,email,phone,password:pass,joinDate:ds(),accountStatus:'active',points:0,referralCode};
   if(refInput){

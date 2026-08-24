@@ -467,6 +467,15 @@ async function updateLogisticsPreview(){
     el.innerHTML='RichNation Mall commission for this option: <strong style="color:var(--or);">'+selfRate+'%</strong>, you pack and deliver orders yourself.';
   }
 }
+// A record's own ID doubles as its access key everywhere in this app, so it must not
+// be guessable. Date.now() alone produces a predictable, enumerable value, crypto.randomUUID() does not.
+function secureId(prefix){
+  try{if(window.crypto&&crypto.randomUUID)return prefix+'_'+crypto.randomUUID();}catch(e){}
+  var bytes=new Uint8Array(16);
+  (window.crypto||window.msCrypto).getRandomValues(bytes);
+  var hex=Array.prototype.map.call(bytes,function(b){return b.toString(16).padStart(2,'0');}).join('');
+  return prefix+'_'+hex;
+}
 async function doVendorRegister(){
   const store=document.getElementById('r-store').value.trim();
   const owner=document.getElementById('r-owner').value.trim();
@@ -486,7 +495,7 @@ async function doVendorRegister(){
   if(Object.values(all).find(v=>v.email===email)){err.textContent='A vendor account with this email already exists.';err.style.display='block';return;}
   err.style.display='none';
   toast('Uploading your documents, this may take a moment…');
-  const id='vend_'+Date.now();
+  const id=secureId('vend');
   let photo=await compressImage(photoFile,600,0.8);
   const photoUrl=isGithubConfigured()?await uploadDataUrlToGithub(photo,'vendor-photos'):null;
   if(photoUrl)photo=photoUrl;

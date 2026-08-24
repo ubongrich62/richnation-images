@@ -3012,7 +3012,7 @@ async function renderAdminDeliveryMap(order){
   let dest=order.deliveryLat!=null?{lat:order.deliveryLat,lng:order.deliveryLng}:null;
   if(!dest&&order.customer?.address){
     try{
-      const res=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(order.customer.address+', '+(order.customer.city||'')+', Nigeria'));
+      const res=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ng&email=rnm.office@richnationmall.com&q='+encodeURIComponent(order.customer.address+', '+(order.customer.city||'')+', Nigeria'));
       const data=await res.json();
       if(data&&data[0]){dest={lat:parseFloat(data[0].lat),lng:parseFloat(data[0].lon)};fbU('rn_mall_orders/'+order.tracking,{deliveryLat:dest.lat,deliveryLng:dest.lng});}
     }catch(e){}
@@ -4197,7 +4197,7 @@ async function searchPickupAddress(){
   if(!query){if(statusEl){statusEl.textContent='Type an address to search first.';statusEl.style.color='var(--or)';}return;}
   if(statusEl){statusEl.textContent='🔍 Searching…';statusEl.style.color='var(--wh);'}
   try{
-    const res=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(query+', Nigeria'));
+    const res=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ng&email=rnm.office@richnationmall.com&q='+encodeURIComponent(query+', Nigeria'));
     const data=await res.json();
     if(data&&data[0]){
       const lat=parseFloat(data[0].lat),lng=parseFloat(data[0].lon);
@@ -4224,7 +4224,7 @@ async function savePickupPinPosition(){
   // Best-effort background label for readability, doesn't block the save above,
   // and if it fails or comes back incomplete, the saved coordinates are unaffected.
   try{
-    const res=await fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+pos.lat+'&lon='+pos.lng);
+    const res=await fetch('https://nominatim.openstreetmap.org/reverse?format=json&email=rnm.office@richnationmall.com&lat='+pos.lat+'&lon='+pos.lng);
     const data=await res.json();
     if(data&&data.address){
       const address=[data.address.road,data.address.house_number].filter(Boolean).join(' ')||(data.display_name||'').split(',')[0]||'';
@@ -4426,22 +4426,6 @@ async function declinePOD(id){
 
 // ── QUICK TOGGLE ──
 async function quickToggleVisible(pid){var p=allProds[pid];if(!p)return;var vis=p.visible===false;await fbU('rn_mall_products/'+pid,{visible:vis});allProds[pid]=Object.assign({},p,{visible:vis});bumpCatalogUpdate();toast(vis?'Product now visible':'Product hidden');nav('products',false);}
-
-// ── AI CHAT REPLY ──
-async function sendAIReply(chatId,inpId){
-  var btn=document.getElementById('ai-btn-'+chatId);
-  if(btn){btn.textContent='Thinking...';btn.disabled=true;}
-  try{
-    var msgs=await fbG('rn_mall_chat/'+chatId)||{};
-    var history=Object.values(msgs).sort(function(a,b){return a.ts-b.ts;}).slice(-6).map(function(m){return {role:m.isAdmin?'assistant':'user',content:m.text};});
-    var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:500,system:'You are a friendly customer service agent for RichNation Mall Nigeria. Be warm and concise.',messages:history.length?history:[{role:'user',content:'Hello'}]})});
-    var data=await res.json();
-    var text=(data.content&&data.content[0]&&data.content[0].text)||'';
-    var inp=document.getElementById(inpId);if(inp&&text){inp.value=text;inp.focus();}
-    toast('AI reply ready, review and send!');
-  }catch(e){toast('AI reply failed','err');}
-  if(btn){btn.textContent='AI Reply';btn.disabled=false;}
-}
 
 
 

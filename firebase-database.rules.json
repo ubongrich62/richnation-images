@@ -1,0 +1,176 @@
+// RichNation Mall — Firebase Realtime Database Security Rules, INTERIM version.
+//
+// This file is NOT applied automatically. Nothing in this repo, and no tool
+// this session has access to, can push rules to your live Firebase project.
+// Paste the "rules" object below into:
+//   Firebase Console -> your project -> Realtime Database -> Rules -> Publish
+// The Firebase rules editor accepts these // comments directly, this is not
+// stripped-down JSON, you can paste the whole file as-is.
+//
+// WHY THIS IS "INTERIM", NOT FINAL:
+// Every portal's login (doLogin/doStaffLogin/doVendorRegister/etc.) works by
+// downloading the ENTIRE customers/staff/vendors/riders/investors table into
+// the browser and searching it client-side for a matching email, because
+// there is no Firebase Auth yet, only a custom password field checked in JS.
+// Firebase Rules cannot tell "the app doing a legitimate login lookup" apart
+// from "anyone else hitting the same REST endpoint" — they see an identical
+// request either way. So those five collections MUST stay readable as a
+// whole table for the app to keep working at all under its current design,
+// or every login screen breaks. That is a real, known, accepted residual
+// exposure that only goes away once Firebase Auth actually replaces this
+// login flow (see the audit's Section F migration plan) — these rules
+// cannot fix it, and pretending otherwise would be dishonest.
+//
+// A handful of other collections have the same problem for the same reason:
+// admin.html's Orders list, Wallet Issues page, notification bell, and
+// activity feed, and staff.html's leave/complaints/reports/submissions/
+// tasks/vehicles admin views, all fetch their whole collection and render
+// it as a list, exactly like the login lookups above. Those stay
+// collection-readable too, marked individually below with the same caveat.
+//
+// What these rules DO fix, right now, without Firebase Auth:
+//   - No more wildcard writes that could overwrite/wipe an entire collection
+//     in one request — writes are scoped to a specific record id, matching
+//     how the app already writes.
+//   - New account records must at least have the shape of a real account
+//     (an email and an id), rejecting arbitrary junk payloads.
+//   - Every genuinely internal/financial collection that the app only ever
+//     accesses by a specific known id is locked to per-id access, closing
+//     off full-collection dumps of wallet transactions, payouts, chat
+//     threads, and per-role notification/activity data.
+//   - The newsletter list can still accept public signups, but can no
+//     longer be downloaded wholesale by anyone who finds the URL.
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "rn_mall_products":        { ".read": true, ".write": true, "$id": { ".validate": "newData.hasChildren(['name','price'])" } },
+    "rn_mall_categories":      { ".read": true, ".write": true },
+    "rn_mall_reviews":         { ".read": true, ".write": true },
+    "rn_mall_seasonal_promos": { ".read": true, ".write": true },
+    "rn_mall_coupons":         { ".read": true, ".write": true },
+    "rn_mall_bundles":         { ".read": true, ".write": true },
+    "rn_mall_settings":        { ".read": true, ".write": true },
+    "rn_mall_announcements":   { ".read": true, ".write": true },
+
+    // Login lookups: whole-collection read is required for the current
+    // login flow to work at all, see the note above. Writes are scoped to
+    // a specific $id so a request can't replace or wipe the whole table.
+    "rn_mall_customers": {
+      ".read": true,
+      "$id": { ".write": true, ".validate": "newData.hasChildren(['email','id'])" }
+    },
+    "rn_mall_staff": {
+      ".read": true,
+      "$id": { ".write": true, ".validate": "newData.hasChildren(['email','id'])" }
+    },
+    "rn_mall_vendors": {
+      ".read": true,
+      "$id": { ".write": true, ".validate": "newData.hasChildren(['email','id'])" }
+    },
+    "rn_mall_riders": {
+      ".read": true,
+      "$id": { ".write": true, ".validate": "newData.hasChildren(['email','id'])" }
+    },
+    "rn_mall_investors": {
+      ".read": true,
+      "$id": { ".write": true, ".validate": "newData.hasChildren(['email','id'])" }
+    },
+
+    // Orders and money. rn_mall_orders needs collection-level read: admin's
+    // order list, and the customer/rider tracking flows, all fetch the whole
+    // collection and filter client-side, same limitation as the login
+    // lookups above. The rest are only ever accessed by a specific id in
+    // the app's own code, so they stay id-scoped, closing off a full dump.
+    "rn_mall_orders": {
+      ".read": true,
+      "$id": { ".write": true }
+    },
+    "rn_mall_customer_orders":              { "$id": { ".read": true, ".write": true } },
+    "rn_mall_wallet_transactions":          { "$id": { ".read": true, ".write": true } },
+    "rn_mall_wallet_transactions_investor": { "$id": { ".read": true, ".write": true } },
+    // rn_mall_wallet_issues: admin's Wallet Issues page lists the whole
+    // collection, same limitation as rn_mall_orders above.
+    "rn_mall_wallet_issues": {
+      ".read": true,
+      "$id": { ".write": true }
+    },
+    "rn_mall_vendor_payouts":               { "$id": { ".read": true, ".write": true } },
+    "rn_mall_rider_payouts":                { "$id": { ".read": true, ".write": true } },
+    "rn_mall_investor_payouts":             { "$id": { ".read": true, ".write": true } },
+    "rn_mall_investor_withdrawals":         { "$id": { ".read": true, ".write": true } },
+    "rn_mall_staff_withdrawals":            { "$id": { ".read": true, ".write": true } },
+    "rn_mall_staff_salary_history":         { "$id": { ".read": true, ".write": true } },
+
+    // Chat: id-scoped only, no reason to ever list the whole table.
+    "rn_mall_chat": { "$id": { ".read": true, ".write": true } },
+
+    // Vendor/investor/rider-admin chat threads are NOT nested under a common
+    // parent in this app, the code builds a flat, one-off top-level path per
+    // thread by string concatenation (e.g. 'rn_mall_vendor_chat_'+vendor.id
+    // -> a literal path named "rn_mall_vendor_chat_vend_xxxxx"). A named
+    // rule for "rn_mall_vendor_chat_" would never match any of these and
+    // they'd all fall through to the deny-by-default root rule, breaking
+    // vendor/investor/rider chat entirely. This wildcard matches any
+    // top-level path with one of those three prefixes instead, whatever id
+    // happens to be appended, and denies everything else at this level, so
+    // it can't be used to reach any other collection.
+    "$topLevelPath": {
+      ".read": "$topLevelPath.beginsWith('rn_mall_vendor_chat_') || $topLevelPath.beginsWith('rn_mall_investor_chat_') || $topLevelPath.beginsWith('rn_mall_rider_admin_chat_')",
+      ".write": "$topLevelPath.beginsWith('rn_mall_vendor_chat_') || $topLevelPath.beginsWith('rn_mall_investor_chat_') || $topLevelPath.beginsWith('rn_mall_rider_admin_chat_')"
+    },
+    // rn_mall_notifications: admin's own notification bell lists the whole
+    // collection, same limitation as rn_mall_orders above. The per-role
+    // notification collections below it ARE id-scoped, only this shared
+    // admin one needs the wider read.
+    "rn_mall_notifications": {
+      ".read": true,
+      "$id": { ".write": true }
+    },
+    "rn_mall_customer_notifications": { "$id": { ".read": true, ".write": true } },
+    "rn_mall_vendor_notifications":   { "$id": { ".read": true, ".write": true } },
+    "rn_mall_staff_notifications":    { "$id": { ".read": true, ".write": true } },
+    "rn_mall_rider_notifications":    { "$id": { ".read": true, ".write": true } },
+    "rn_mall_investor_notifications": { "$id": { ".read": true, ".write": true } },
+    "rn_mall_announcement_reads":     { "$id": { ".read": true, ".write": true } },
+    // rn_mall_activity_log and rn_mall_investor_updates: both render as a
+    // full feed/list in admin.html and investor.html, same limitation.
+    "rn_mall_activity_log": {
+      ".read": true,
+      "$id": { ".write": true }
+    },
+    "rn_mall_investor_updates": {
+      ".read": true,
+      "$id": { ".write": true }
+    },
+    "rn_mall_rider_activity_log":   { "$id": { ".read": true, ".write": true } },
+    "rn_mall_deleted_products_log": { "$id": { ".read": true, ".write": true } },
+    "rn_mall_investor_switch_log":  { "$id": { ".read": true, ".write": true } },
+    "rn_mall_rider_points_log":     { "$id": { ".read": true, ".write": true } },
+    "rn_mall_staff_points_log":     { "$id": { ".read": true, ".write": true } },
+
+    // HR/ops: leave requests, complaints, reports, submissions, tasks,
+    // vehicles. The rider-side ones are only ever accessed by a specific
+    // id, but staff.html's admin views for staff leave/complaints/reports/
+    // submissions/tasks, and the logistics vehicle list, all render as a
+    // full list, same limitation as rn_mall_orders above.
+    "rn_mall_rider_leave":      { "$id": { ".read": true, ".write": true } },
+    "rn_mall_staff_leave":      { ".read": true, "$id": { ".write": true } },
+    "rn_mall_rider_complaints": { "$id": { ".read": true, ".write": true } },
+    "rn_mall_staff_complaints": { ".read": true, "$id": { ".write": true } },
+    "rn_mall_rider_reports":    { "$id": { ".read": true, ".write": true } },
+    "rn_mall_staff_reports":    { ".read": true, "$id": { ".write": true } },
+    "rn_mall_staff_submissions": { ".read": true, "$id": { ".write": true } },
+    "rn_mall_staff_tasks":      { ".read": true, "$id": { ".write": true } },
+    "rn_mall_logistics_vehicles": { ".read": true, "$id": { ".write": true } },
+
+    // Newsletter: public write (the signup form has no login), but no
+    // longer publicly listable — nobody can download the whole subscriber
+    // list without already knowing a specific record id.
+    "rn_mall_newsletter_subscribers": {
+      ".write": true,
+      "$id": { ".read": true }
+    }
+  }
+}

@@ -337,6 +337,15 @@ function toggleApplyMode(){
   document.getElementById('l-sub').textContent=isLogin?'Minimum investment ₦200,000. Fill in your details below and our team will follow up with a formal partnership agreement.':'Full transparency into your investment, live stats, revenue charts, updates, and direct access to the founder.';
   document.getElementById('toggle-note').innerHTML=isLogin?'Already a partner? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Sign in</span>':'New partner? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Apply to invest</span>';
 }
+// A record's own ID doubles as its access key everywhere in this app, so it must not
+// be guessable. Date.now() alone produces a predictable, enumerable value, crypto.randomUUID() does not.
+function secureId(prefix){
+  try{if(window.crypto&&crypto.randomUUID)return prefix+'_'+crypto.randomUUID();}catch(e){}
+  var bytes=new Uint8Array(16);
+  (window.crypto||window.msCrypto).getRandomValues(bytes);
+  var hex=Array.prototype.map.call(bytes,function(b){return b.toString(16).padStart(2,'0');}).join('');
+  return prefix+'_'+hex;
+}
 async function submitInvestorApplication(){
   const fname=document.getElementById('ap-fname').value.trim();
   const dob=document.getElementById('ap-dob').value;
@@ -355,7 +364,7 @@ async function submitInvestorApplication(){
   if(!document.getElementById('ap-agree').checked){err.textContent='Please read and agree to the Investor Agreement to continue.';err.style.display='block';return;}
   const all=await fbG('rn_mall_investors')||{};
   if(Object.values(all).find(function(s){return s.email===email;})){err.textContent='An application or account with this email already exists.';err.style.display='block';return;}
-  const id='inv_'+Date.now();
+  const id=secureId('inv');
   const pkg=packageForAmount(amount);
   await fbS('rn_mall_investors/'+id,{
     id,name:fname,dob,gender,phone,email,address,country,lga,
