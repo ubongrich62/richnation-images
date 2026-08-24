@@ -2004,7 +2004,7 @@ async function loadInvestorChatAdmin(id){
   const msgs=Object.values(await fbG('rn_mall_investor_chat_'+id)||{}).sort(function(a,b){return (a.ts||0)-(b.ts||0);});
   const el=document.getElementById('inv-chat-msgs');if(!el)return;
   el.innerHTML=msgs.length?msgs.map(function(m){
-    return '<div class="timeline-item" style="border-bottom:none;padding:6px 0;"><div style="font-size:12px;color:'+(m.isAdmin?'var(--or)':'var(--wh)')+';"><strong>'+(m.isAdmin?'You':'Investor')+':</strong> '+m.text+'</div></div>';
+    return '<div class="timeline-item" style="border-bottom:none;padding:6px 0;"><div style="font-size:12px;font-weight:700;color:'+(m.isAdmin?'var(--or)':'var(--wh)')+';"><strong>'+(m.isAdmin?'You':'Investor')+':</strong> '+m.text+'</div></div>';
   }).join(''):'<div style="color:var(--wh);font-weight:700;font-size:12px;">No messages yet.</div>';
   el.scrollTop=el.scrollHeight;
 }
@@ -3249,7 +3249,7 @@ async function loadOrderChat(tracking){
     const mine=m.isAdmin;
     const d=document.createElement('div');d.className='chat-msg'+(mine?' own':'');
     const av=`<div class="chat-av">${mine?(m.isBot?'AI':'RN'):ini(m.senderName||'C')}</div>`;
-    const tick=mine&&!m.isBot?'<div style="font-size:9px;color:'+(m.readByCustomer?'#5b9bf5':'var(--wh)')+';margin-top:2px;">'+(m.readByCustomer?'✔✔ Read':'✔ Sent')+'</div>':'';
+    const tick=mine&&!m.isBot?'<div style="font-size:9px;font-weight:700;color:'+(m.readByCustomer?'#5b9bf5':'var(--wh)')+';margin-top:2px;">'+(m.readByCustomer?'✔✔ Read':'✔ Sent')+'</div>':'';
     d.innerHTML=(mine?'':av)+'<div><div class="chat-bubble'+(mine?' own-b':'')+'">'+m.text+'</div><div class="chat-time">'+m.date+' '+m.time+(m.senderName?' &middot; '+m.senderName:'')+'</div>'+tick+'</div>'+(mine?av:'');
     el.appendChild(d);
     if(!mine&&!m.readByAdmin)fbU('rn_mall_chat/'+tracking+'/'+key,{readByAdmin:true});
@@ -3621,7 +3621,7 @@ async function loadGeneralChatMsgs(chatKey){
   const msgs=await fbG('rn_mall_chat/'+chatKey)||{};
   const list=Object.entries(msgs).map(e=>Object.assign({_key:e[0]},e[1])).sort((a,b)=>(a.ts||0)-(b.ts||0));
   const wrap=document.getElementById('gc-msgs');if(!wrap)return;
-  wrap.innerHTML=list.length?list.map(m=>`<div style="display:flex;${m.isAdmin?'flex-direction:row-reverse;':''}gap:10px;margin-bottom:10px;"><div style="width:28px;height:28px;border-radius:99px;background:${m.isAdmin?'var(--or)':'rgba(91,155,245,0.15)'};color:${m.isAdmin?'#fff':'var(--bl)'};font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${m.isAdmin?(m.isBot?'AI':'RN'):ini(m.senderName||'?')}</div><div style="background:${m.isAdmin?'rgba(255,106,0,0.1)':'var(--card2)'};padding:8px 12px;border-radius:9px;font-size:13px;max-width:70%;color:var(--wh);">${m.text}${m.isAdmin&&!m.isBot?'<div style="font-size:9px;color:'+(m.readByCustomer?'#5b9bf5':'var(--wh)')+';text-align:right;margin-top:3px;">'+(m.readByCustomer?'✔✔ Read':'✔ Sent')+'</div>':''}</div></div>`).join(''):'<div style="color:var(--wh);font-weight:700;font-size:13px;">No messages yet.</div>';
+  wrap.innerHTML=list.length?list.map(m=>`<div style="display:flex;${m.isAdmin?'flex-direction:row-reverse;':''}gap:10px;margin-bottom:10px;"><div style="width:28px;height:28px;border-radius:99px;background:${m.isAdmin?'var(--or)':'rgba(91,155,245,0.15)'};color:${m.isAdmin?'#fff':'var(--bl)'};font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${m.isAdmin?(m.isBot?'AI':'RN'):ini(m.senderName||'?')}</div><div style="background:${m.isAdmin?'rgba(255,106,0,0.1)':'var(--card2)'};padding:8px 12px;border-radius:9px;font-size:13px;max-width:70%;color:var(--wh);">${m.text}${m.isAdmin&&!m.isBot?'<div style="font-size:9px;font-weight:700;color:'+(m.readByCustomer?'#5b9bf5':'var(--wh)')+';text-align:right;margin-top:3px;">'+(m.readByCustomer?'✔✔ Read':'✔ Sent')+'</div>':''}</div></div>`).join(''):'<div style="color:var(--wh);font-weight:700;font-size:13px;">No messages yet.</div>';
   wrap.scrollTop=wrap.scrollHeight;
   // Mark every customer message as read by admin now that this thread is open.
   list.forEach(function(m){if(!m.isAdmin&&!m.readByAdmin)fbU('rn_mall_chat/'+chatKey+'/'+m._key,{readByAdmin:true});});
