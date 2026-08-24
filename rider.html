@@ -93,8 +93,6 @@ button{font-family:inherit;}
   .curr-row{order:5;flex-basis:100%;justify-content:flex-end;}
 }
 </style>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
 
@@ -208,6 +206,29 @@ function loadAppCheckWhenIdle(){
 }
 if(document.readyState==='complete'){setTimeout(loadAppCheckWhenIdle,2000);}
 else window.addEventListener('load',function(){setTimeout(loadAppCheckWhenIdle,2000);});
+// Leaflet (map library) is only ever used inside showDeliveryMapModal(), when a
+// rider taps "View Map" on a delivery, never for the initial login/dashboard
+// render. It used to be a blocking <link>/<script> pair in <head>, which delays
+// first paint of the whole page (a pending stylesheet blocks script execution,
+// including inline scripts later in the document) by however long that CDN
+// request takes, on every single load. Fetch it in the background instead, it
+// costs the initial render nothing; showDeliveryMapModal() awaits this so L is
+// ready by the time a map is actually opened.
+let _leafletLoadPromise=null;
+function loadLeafletAssets(){
+  if(_leafletLoadPromise)return _leafletLoadPromise;
+  _leafletLoadPromise=new Promise(function(resolve){
+    const link=document.createElement('link');
+    link.rel='stylesheet';link.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    document.head.appendChild(link);
+    const s=document.createElement('script');
+    s.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    s.onload=resolve;s.onerror=resolve;
+    document.head.appendChild(s);
+  });
+  return _leafletLoadPromise;
+}
+loadLeafletAssets();
 let rider=null;
 let currency=localStorage.getItem('rnm_currency')||'NGN';let exchangeRate=1600;
 
@@ -549,7 +570,9 @@ async function showDeliveryMapModal(tracking){
     dest=await geocodeAddress(order.customer.address+', '+(order.customer.city||'')+', Nigeria');
     if(dest)fbU('rn_mall_orders/'+tracking,{deliveryLat:dest.lat,deliveryLng:dest.lng});
   }
-  if(!dest||typeof L==='undefined')return;
+  if(!dest)return;
+  await loadLeafletAssets();
+  if(typeof L==='undefined')return;
   if(_riderMapInstance){_riderMapInstance.remove();_riderMapInstance=null;}
   const map=L.map('rider-delivery-map',{zoomControl:false,attributionControl:true}).setView([pickup.lat,pickup.lng],12);
   _riderMapInstance=map;
