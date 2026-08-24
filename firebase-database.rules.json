@@ -45,6 +45,13 @@
     ".read": false,
     ".write": false,
 
+    // Not part of this app, unrelated data you already keep in this same
+    // Firebase project. Kept explicitly denied here (on top of the root
+    // deny-by-default above, which already covers them) since that's how
+    // your current live rules already have them.
+    "mgmt_vault": { ".read": false, ".write": false },
+    "mgmt_notes": { ".read": false, ".write": false },
+
     "rn_mall_products":        { ".read": true, ".write": true, "$id": { ".validate": "newData.hasChildren(['name','price'])" } },
     "rn_mall_categories":      { ".read": true, ".write": true },
     "rn_mall_reviews":         { ".read": true, ".write": true },
