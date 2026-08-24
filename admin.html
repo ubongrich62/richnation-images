@@ -8,13 +8,24 @@
 <meta name="color-scheme" content="dark">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>RichNation Mall, Admin Panel</title>
+<!-- Loaded as a non-blocking link (instead of an @import inside the style block) because a
+     render-blocking stylesheet delays execution of every classic, non-deferred script that
+     comes after it in the document; on a slow/flaky connection to fonts.googleapis.com that
+     meant the entire admin app, including the login screen, stayed inert until it finished
+     or timed out. media="print" makes the browser fetch it without blocking, the onload
+     swap then applies it once it's actually ready. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap"></noscript>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
 @keyframes iconColorCycle{0%{stroke:#FF6A00;}50%{stroke:#ffffff;}100%{stroke:#FF6A00;}}
 .icon-color-cycle{animation:none;}
 @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(8px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
 @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+@keyframes adminBootSpin{to{transform:rotate(360deg);}}
+.admin-boot-spinner{width:34px;height:34px;border-radius:50%;border:3px solid rgba(255,106,0,0.2);border-top-color:#FF6A00;animation:adminBootSpin 0.8s linear infinite;}
 .leaflet-control-attribution{font-size:8px!important;background:rgba(0,0,0,0.5)!important;color:#999!important;padding:1px 4px!important;}
 .leaflet-control-attribution a{color:#bbb!important;}
 :root{
@@ -740,6 +751,11 @@ async function manualRefreshAdmin(btn){
 async function initAdmin(){
   const badge=document.getElementById('tb-ceo-badge');
   if(badge)badge.style.display=sessionStorage.getItem('rnm_admin_is_ceo')==='1'?'inline-block':'none';
+  // Show an immediate loading state, the app shell (topbar/sidebar) is already
+  // visible at this point but content-inner is empty, without this the user
+  // sees a blank content area for however long the initial fetches take.
+  const ci0=document.getElementById('content-inner');
+  if(ci0)ci0.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:100px 20px;"><div class="admin-boot-spinner"></div><div style="color:var(--wh);font-weight:700;font-size:13px;">Loading your dashboard…</div></div>';
   const[prods,orders,cats,custs,sett]=await Promise.all([
     fbG('rn_mall_products'),fbG('rn_mall_orders'),
     fbG('rn_mall_categories'),fbG('rn_mall_customers'),fbG('rn_mall_settings')
