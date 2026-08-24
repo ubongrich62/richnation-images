@@ -2228,7 +2228,7 @@ function renderCheckout(isPreorder=false){
           <div class="sum-row total"><span>Total</span><span id="co-total">&#8358;0</span></div>
         </div>
         <div style="margin:12px 0;padding:10px;background:var(--card2);border-radius:7px;font-size:11px;color:var(--mu);line-height:2.2;border:1px solid var(--bdr);">
-          <div><span style="color:var(--or);font-weight:700;margin-right:6px;">SEC</span>SSL Secured checkout</div>
+          <div><span style="color:var(--or);font-weight:700;margin-right:6px;">SEC</span>Secured checkout</div>
           <div><span style="color:var(--or);font-weight:700;margin-right:6px;">7D</span>7-day no-questions returns</div>
           <div><span style="color:var(--or);font-weight:700;margin-right:6px;">ADJ</span>Price adjustment 30 days</div>
           <div><span style="color:var(--or);font-weight:700;margin-right:6px;">DEL</span>Late delivery compensated</div>
@@ -2924,7 +2924,7 @@ function showPolicyPage(type){
       +'<div style="background:rgba(37,211,102,0.08);border:1px solid rgba(37,211,102,0.25);border-radius:12px;padding:18px;margin-bottom:14px;">'
       +'<div style="font-weight:800;color:#FF6A00;margin-bottom:8px;font-size:14px;display:flex;align-items:center;gap:6px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#FF6A00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h4l2 6-3 2a13 13 0 006 6l2-3 6 2v4a2 2 0 01-2 2C10.5 22 2 13.5 2 5a2 2 0 012-2z"/></svg>WhatsApp, Fastest Response</div>'
       +'<div style="font-size:16px;font-weight:900;color:var(--wh);margin-bottom:4px;">+234 916 467 8560</div>'
-      +'<div style="font-size:12px;color:var(--mu);">Monday to Saturday · 8:00am to 9:00pm WAT</div>'
+      +'<div style="font-size:12px;color:var(--mu);">Monday to Friday · 8:00am to 9:00pm WAT</div>'
       +'<div style="font-size:11px;color:var(--mu);margin-top:6px;font-style:italic;">For order issues, send your order number and a photo if applicable</div>'
       +'<a href="https://wa.me/2349164678560" target="_blank" style="display:inline-block;margin-top:12px;background:#FF6A00;color:#fff;padding:9px 20px;border-radius:8px;font-size:12px;font-weight:800;text-decoration:none;">Open WhatsApp</a></div>'
       +card(orange('📧 Email')
@@ -3106,8 +3106,24 @@ const BOT_KNOWLEDGE=[
   {topic:'products',keywords:['do you have','do you sell','looking for','is there','availability','in stock'],answer:'Use the search bar at the top to check, we add new products regularly across many categories. If you can\'t find something specific, tell me what you\'re looking for and I\'ll flag it for the team.'},
   {topic:'price',keywords:['too expensive','discount code','coupon','price adjustment','cheaper','lower price'],answer:'We run seasonal promotions and bundle discounts regularly, check the homepage banner for current offers. If a price drops after you buy, our Price Adjustment policy may apply, chat with our team with your order number.'},
   {topic:'contact',keywords:['contact','phone number','email address','reach you','whatsapp','customer care','support number'],answer:'You can reach us right here in chat anytime, or check our Contact page for other ways to get in touch, we usually respond fast!'},
-  {topic:'human',keywords:['human','real person','agent','representative','talk to someone','speak to someone','live agent'],answer:'No problem, go ahead and type your question below. A real team member will see it and reply as soon as possible.'}
+  {topic:'human',keywords:['human','real person','agent','representative','talk to someone','speak to someone','live agent'],answer:'No problem, go ahead and type your question below. A real team member will see it and reply as soon as possible.'},
+  {topic:'edit_address',keywords:['change my address','wrong address','edit delivery address','update my address','change delivery details','wrong delivery address'],answer:'If your order hasn\'t been dispatched yet, we can update your delivery address, just send us your order number and the correct address here. Once a rider has picked it up, changes may not be possible, so please double check your address at checkout.'},
+  {topic:'payment_failed',keywords:['payment failed','payment declined','card declined','payment not going through','transaction failed','payment error','cant pay','cannot checkout','cant checkout'],answer:'If your payment didn\'t go through, no charge was made, you can simply try again with the same card or a different one. If money left your account but your order wasn\'t confirmed, send us your order number or transaction reference here and we\'ll investigate right away.'},
+  {topic:'promo_code',keywords:['promo code','discount code not working','voucher code','coupon not working','apply code','code not working'],answer:'Promo codes are entered at checkout in the discount code field before you pay. If a code isn\'t working, check it hasn\'t expired and applies to the items in your cart, or send us the code here and we\'ll check it for you.'},
+  {topic:'restock',keywords:['out of stock','when will it be back','restock','sold out','notify me when available'],answer:'If an item shows out of stock, tap Notify Me on the product page and we\'ll email you the moment it\'s back. You\'re also welcome to ask here and we\'ll flag it to the vendor directly.'},
+  {topic:'late_delivery',keywords:['order is late','havent received','have not received','order taking long','past delivery date','order delayed','still not delivered','my order hasnt arrived'],answer:'Sorry for the wait. Please check your tracking number under Track My Order first, it shows exactly where your rider is. If it\'s past the estimated delivery window shown there, send us your order number here and we\'ll chase it up immediately.'},
+  {topic:'invoice',keywords:['invoice','receipt','proof of purchase','order confirmation email'],answer:'You\'ll find an order confirmation and receipt in My Orders under your account, and one is also sent to your email when you check out. Need a formal invoice for business purposes? Send us your order number here and we\'ll send one over.'},
+  {topic:'authenticity',keywords:['is it original','are your products fake','authentic product','genuine product','counterfeit'],answer:'Every product sold on RichNation Mall is sourced from verified vendors and goes through our listing checks before it goes live. If anything ever arrives looking different from what was listed, tell us here with photos and your order number, and we\'ll make it right.'},
+  {topic:'vendor_apply',keywords:['become a vendor','sell on richnation','register as a seller','how to sell here','vendor application'],answer:'Selling on RichNation Mall is easy, tap Become a Vendor from the menu, fill in your business details, and our team reviews applications quickly. Once approved you can start listing products right away.'},
+  {topic:'international_currency',keywords:['pay in dollars','usd price','other currency','international payment','ship outside nigeria','ship abroad'],answer:'Yes, you can shop from outside Nigeria. Use the currency switcher at the top of the page to see prices in Naira, Dollars, Euros, or Pounds, though payment is still processed securely in Naira through Paystack at checkout.'},
+  {topic:'multiple_items',keywords:['add item to my order','combine my orders','one delivery for two orders'],answer:'Each checkout creates one order, but you can keep adding items to your cart before you pay, they\'ll all ship together where possible. Placed two separate orders by mistake? Send us both order numbers here and we\'ll see if we can combine delivery.'}
 ];
+const BOT_SMALL_TALK=[
+  {intent:'greeting',pattern:/^(hi|hello|hey|hiya|yo|good morning|good afternoon|good evening)[\s!.,]*$/i,answer:'Hi there! I\'m RichNation Support, ask me anything about your order, shipping, payments, or your account, and I\'ll do my best to help right away.'},
+  {intent:'thanks',pattern:/\b(thank you|thanks|thank u|tysm|appreciate it)\b/i,answer:'You\'re welcome! Let us know if there\'s anything else you need.'},
+  {intent:'bye',pattern:/^(bye|goodbye|see you|see ya|cheers)[\s!.,]*$/i,answer:'Take care, and thank you for shopping with RichNation Mall! We\'re here anytime you need us.'}
+];
+function matchSmallTalk(text){const t=text.trim();for(const s of BOT_SMALL_TALK){if(s.pattern.test(t))return s;}return null;}
 function matchBotKnowledge(text){
   const stopwords=new Set(['i','a','an','the','is','are','my','me','to','of','for','on','in','do','does','how','can','you','your','it','this','that','and','or','please','want','need']);
   const inputWords=text.toLowerCase().replace(/[^\w\s]/g,'').split(/\s+/).filter(function(w){return w&&!stopwords.has(w);});
@@ -3116,7 +3132,8 @@ function matchBotKnowledge(text){
   BOT_KNOWLEDGE.forEach(function(entry){
     let score=0;
     entry.keywords.forEach(function(kw){
-      if(lower.indexOf(kw)!==-1){score+=kw.split(' ').length*3;return;} // full phrase match, strong signal
+      const phraseRe=new RegExp('\\b'+kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b');
+      if(phraseRe.test(lower)){score+=kw.split(' ').length*3;return;} // full phrase match, strong signal
       const kwWords=kw.split(' ').filter(function(w){return !stopwords.has(w);});
       const matchedWords=kwWords.filter(function(w){return inputWords.indexOf(w)!==-1;});
       if(matchedWords.length){score+=matchedWords.length;}
@@ -3167,12 +3184,13 @@ async function botQuickReply(topic){
 }
 async function botReplyToFreeText(text){
   const path='rn_mall_chat/'+(chatOrderId||currUser?.id||getGuestChatId());
-  const match=matchBotKnowledge(text);
-  const answer=match?match.answer:'Good question, I\'m not fully sure on that one, so I\'ve flagged it for a real team member to answer here shortly.';
+  const smallTalk=matchSmallTalk(text);
+  const match=smallTalk?null:matchBotKnowledge(text);
+  const answer=smallTalk?smallTalk.answer:(match?match.answer:'Good question, I don\'t have a confident answer for that one yet, so I\'ve flagged it for a real RichNation Support team member to follow up here shortly.');
   await fbP(path,{text:answer,senderId:'bot',isAdmin:true,isBot:true,ts:Date.now(),date:ds(),time:ts2()});
   loadWidgetMsgs();
 }
-async function loadWidgetMsgs(){const path='rn_mall_chat/'+(chatOrderId||currUser?.id||getGuestChatId());const msgs=await fbG(path);const el=document.getElementById('widget-msgs');if(!el)return;el.innerHTML='<div class="chat-msg"><div class="chat-av">RN</div><div class="chat-bubble">Welcome to RichNation Mall! How can we help?</div></div>';if(msgs){Object.values(msgs).sort((a,b)=>a.ts-b.ts).forEach(m=>{const mine=!m.isAdmin;const d=document.createElement('div');d.className='chat-msg'+(mine?' own':'');const av=`<div class="chat-av" style="${m.isBot?'background:linear-gradient(135deg,#FF6A00,#FFA733);color:#000;':''}">${mine?ini(currUser?.fname||'?'):(m.isBot?'AI':'RN')}</div>`;d.innerHTML=(mine?'':av)+'<div class="chat-bubble'+(mine?' own-b':'')+'">'+m.text+(mine?msgReadTick(m):'')+'</div>'+(mine?av:'');el.appendChild(d);});
+async function loadWidgetMsgs(){const path='rn_mall_chat/'+(chatOrderId||currUser?.id||getGuestChatId());const msgs=await fbG(path);const el=document.getElementById('widget-msgs');if(!el)return;el.innerHTML='<div class="chat-msg"><div class="chat-av">RN</div><div class="chat-bubble">Welcome to RichNation Mall! How can we help?</div></div>';if(msgs){Object.values(msgs).sort((a,b)=>a.ts-b.ts).forEach(m=>{const mine=!m.isAdmin;const d=document.createElement('div');d.className='chat-msg'+(mine?' own':'');const av=`<div class="chat-av" style="${m.isBot?'background:linear-gradient(135deg,#FF6A00,#FFA733);color:#000;':''}">${mine?ini(currUser?.fname||'?'):'RN'}</div>`;d.innerHTML=(mine?'':av)+'<div class="chat-bubble'+(mine?' own-b':'')+'">'+m.text+(mine?msgReadTick(m):'')+'</div>'+(mine?av:'');el.appendChild(d);});
   // Mark every admin/bot message as read by this customer now that they're viewing the chat.
   Object.entries(msgs).forEach(function(e){if(e[1].isAdmin&&!e[1].readByCustomer)fbU(path+'/'+e[0],{readByCustomer:true});});
 }el.scrollTop=el.scrollHeight;}
