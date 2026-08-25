@@ -246,6 +246,21 @@ function downloadDataDoc(uri,filename){
   }catch(e){toast('Could not download this document','err');}
 }
 async function fbG(p){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{});return await r.json();}catch(e){try{await new Promise(res=>setTimeout(res,400));const r2=await fbFetchTimeout(FB+'/'+p+'.json',{});return await r2.json();}catch(e2){return null;}}}
+function watchFirebaseCollection(path,onChange){
+  if(typeof EventSource==='undefined')return null;
+  try{
+    var es=new EventSource(FB+'/'+path+'.json');
+    var debounceTimer=null;
+    function triggerRefresh(){
+      clearTimeout(debounceTimer);
+      debounceTimer=setTimeout(function(){fbG(path).then(onChange);},300);
+    }
+    es.addEventListener('put',triggerRefresh);
+    es.addEventListener('patch',triggerRefresh);
+    es.onerror=function(){/* EventSource retries on its own, nothing to do here */};
+    return es;
+  }catch(e){console.warn('Live watch unavailable for',path,':',e.message);return null;}
+}
 let _settingsPromise=null;
 function getSettingsData(){if(!_settingsPromise)_settingsPromise=fbG('rn_mall_settings');return _settingsPromise;}
 async function fbS(p,d){try{await fbFetchTimeout(FB+'/'+p+'.json',{method:'PUT',body:JSON.stringify(d)});}catch(e){}}
@@ -410,6 +425,20 @@ function startApp(){
   buildInvestorSidebar();
   inav('dashboard');
   loadInvestorNotifs();
+  watchFirebaseCollection('rn_mall_settings',function(sett){
+    if(!sett)return;
+    window._settings=sett;
+    if(curNav==='dashboard'){
+      var c=document.getElementById('content');
+      if(c)renderDashboard(c);
+    }
+  });
+  watchFirebaseCollection('rn_mall_investor_updates',function(updates){
+    if(curNav==='updates'){
+      var c=document.getElementById('content');
+      if(c)renderUpdates(c);
+    }
+  });
 }
 function toggleSidebar(){document.querySelector('.sb').classList.toggle('open');}
 
