@@ -270,6 +270,31 @@ const FB='https://richnation-portal-default-rtdb.firebaseio.com';
 const FIREBASE_CONFIG={apiKey:"AIzaSyDLGnyGB8ZnEc2u6TbVzjIAQi1pgSaZVyQ",authDomain:"richnation-portal.firebaseapp.com",databaseURL:"https://richnation-portal-default-rtdb.firebaseio.com",projectId:"richnation-portal",storageBucket:"richnation-portal.firebasestorage.app",messagingSenderId:"175550692963",appId:"1:175550692963:web:1e3c995b3ed0baaadac256"};
 const RECAPTCHA_SITE_KEY='6Ld2O5EtAAAAAN6fXMnn7kn5a6SWvDpJs97kckGC';
 let appCheckToken=null;
+// Loads the Firebase Auth SDK on demand (the first time a login/signup/reset actually
+// happens, not on every page load) and initializes the app if nothing else has yet.
+// Resolves to true once firebase.auth() is safe to call, or false if the SDK failed to
+// load (offline, blocked, etc.), in which case callers fall back to the pre-migration
+// plaintext-password path rather than failing outright.
+let _firebaseAuthReadyPromise=null;
+function ensureFirebaseAuthReady(){
+  if(_firebaseAuthReadyPromise)return _firebaseAuthReadyPromise;
+  _firebaseAuthReadyPromise=new Promise(function(resolve){
+    function loadScript(src){
+      return new Promise(function(res){
+        const s=document.createElement('script');
+        s.src=src;s.onload=function(){res(true);};s.onerror=function(){res(false);};
+        document.head.appendChild(s);
+      });
+    }
+    function afterAppLoaded(){
+      try{if(typeof firebase!=='undefined'&&(!firebase.apps||!firebase.apps.length))firebase.initializeApp(FIREBASE_CONFIG);}catch(e){}
+      loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js').then(function(ok){resolve(ok&&typeof firebase!=='undefined'&&!!firebase.auth);});
+    }
+    if(typeof firebase!=='undefined'&&firebase.apps){afterAppLoaded();}
+    else{loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js').then(function(ok){if(ok)afterAppLoaded();else resolve(false);});}
+  });
+  return _firebaseAuthReadyPromise;
+}
 // App Check isn't enforced yet, so it adds nothing functional right now, loaded only
 // after the page is fully done loading, so it costs the page nothing while unused.
 function loadAppCheckWhenIdle(){
@@ -403,6 +428,25 @@ function togglePwVisibility(id,el){
   el.textContent=inp.type==='password'?'Show':'Hide';
 }
 async function showVendorForgotPassword(){
+  const email=(document.getElementById('v-email')?.value||'').trim().toLowerCase();
+  if(email){
+    const ready=await ensureFirebaseAuthReady();
+    if(ready){
+      try{
+        await firebase.auth().sendPasswordResetEmail(email);
+        toast('Reset email sent! Check your inbox (and spam folder) for a link to set a new password.');
+        return;
+      }catch(authErr){
+        // auth/user-not-found here just means this particular email hasn't been
+        // migrated to Firebase Auth yet (or never registered at all), fall through to
+        // the legacy manual WhatsApp-request path below instead of a dead end either way.
+        if(authErr.code&&authErr.code!=='auth/user-not-found'){
+          toast('Something went wrong sending the reset email, please try again.','err');
+          return;
+        }
+      }
+    }
+  }
   const settingsData=await fbG('rn_mall_settings')||{};
   const waNumber=settingsData.waNumber||'2349164678560';
   const overlay=document.createElement('div');
@@ -509,9 +553,23 @@ async function doVendorRegister(){
   if(!document.getElementById('r-agree').checked){err.textContent='Please read and agree to the Vendor Terms & Conditions to continue.';err.style.display='block';return;}
   const all=await fbG('rn_mall_vendors')||{};
   if(Object.values(all).find(v=>v.email===email)){err.textContent='A vendor account with this email already exists.';err.style.display='block';return;}
+  const ready=await ensureFirebaseAuthReady();
+  let id=null,authUid=null;
+  if(ready){
+    try{
+      const cred=await firebase.auth().createUserWithEmailAndPassword(email,pass);
+      authUid=cred.user.uid;id=authUid;
+    }catch(createErr){
+      if(createErr.code==='auth/email-already-in-use'){err.textContent='A vendor account with this email already exists.';err.style.display='block';return;}
+      if(createErr.code==='auth/weak-password'){err.textContent='Password must be at least 6 characters.';err.style.display='block';return;}
+      console.warn('Firebase Auth signup failed, falling back to legacy account creation:',createErr.message);
+    }
+  }
+  // Auth unavailable or failed for an unexpected reason, fall back rather than block
+  // signup entirely, this account can still be upgraded transparently on its next login.
+  if(!id)id=secureId('vend');
   err.style.display='none';
   toast('Uploading your documents, this may take a moment…');
-  const id=secureId('vend');
   let photo=await compressImage(photoFile,600,0.8);
   const photoUrl=isGithubConfigured()?await uploadDataUrlToGithub(photo,'vendor-photos'):null;
   if(photoUrl)photo=photoUrl;
@@ -533,12 +591,13 @@ async function doVendorRegister(){
     otherDocs.push({name:f.name,data:u||b64});
   }
   const v={
-    id,storeName:store,ownerName:owner,email,phone,password:pass,status:'pending',joinDate:ds(),ts:Date.now(),
+    id,storeName:store,ownerName:owner,email,phone,status:'pending',joinDate:ds(),ts:Date.now(),
     photo:photo,
     documents:{idDocument:idDoc,businessRegDocument:bizDoc,licenseDocument:licenseDoc,otherDocuments:otherDocs},
     logisticsOption:document.getElementById('r-logistics-option').value,
     agreementAccepted:true,agreementAcceptedAt:Date.now()
   };
+  if(authUid)v.authUid=authUid;else v.password=pass;
   await fbS('rn_mall_vendors/'+id,v);
   await fbP('rn_mall_notifications',{type:'new_vendor_signup',name:store,owner:owner,email,date:ds(),read:false,ts:Date.now()});
   toast('Application submitted! We\'ll review it and email you once approved.');
@@ -550,14 +609,55 @@ async function doVendorLogin(){
   const err=document.getElementById('login-err');
   err.style.display='none';
   if(!email||!pass){err.textContent='Enter email and password.';err.style.display='block';return;}
+  function finishVendorLogin(record){
+    if(record.status==='pending'){err.innerHTML='Your vendor application is still under review. We\'ll notify you once approved.';err.style.display='block';return;}
+    if(record.status==='suspended'){err.textContent='Your vendor account has been suspended. Please contact RichNation Mall support.';err.style.display='block';return;}
+    vendor=record;
+    sessionStorage.setItem('rnm_vendor_session',JSON.stringify(vendor));
+    startApp();
+  }
+  const ready=await ensureFirebaseAuthReady();
+  if(ready){
+    try{
+      const cred=await firebase.auth().signInWithEmailAndPassword(email,pass);
+      const uid=cred.user.uid;
+      let record=await fbG('rn_mall_vendors/'+uid);
+      if(!record){
+        // Migrated account, its data still lives at the old key, look it up via
+        // the index written the first time this account was upgraded.
+        const oldId=await fbG('rn_mall_vendors_by_uid/'+uid);
+        if(oldId)record=await fbG('rn_mall_vendors/'+oldId);
+      }
+      if(!record){err.textContent='Account not found, please contact support.';err.style.display='block';return;}
+      finishVendorLogin(record);
+      return;
+    }catch(authErr){
+      // Any Firebase Auth error (wrong password, no such account yet, etc.) falls
+      // through to the legacy check below rather than failing immediately, that
+      // check is what upgrades a not-yet-migrated account transparently.
+    }
+  }
   const all=await fbG('rn_mall_vendors')||{};
   const found=Object.values(all).find(v=>v.email===email&&v.password===pass);
   if(!found){err.textContent='Incorrect email or password.';err.style.display='block';return;}
-  if(found.status==='pending'){err.innerHTML='Your vendor application is still under review. We\'ll notify you once approved.';err.style.display='block';return;}
-  if(found.status==='suspended'){err.textContent='Your vendor account has been suspended. Please contact RichNation Mall support.';err.style.display='block';return;}
-  vendor=found;
-  sessionStorage.setItem('rnm_vendor_session',JSON.stringify(vendor));
-  startApp();
+  // Correct legacy credentials confirmed, transparently create this account's real
+  // Firebase Auth record now using the exact password just typed, no separate reset
+  // step needed, then link it so this fallback is never needed again for this account.
+  let migrated=found;
+  if(ready){
+    try{
+      const cred2=await firebase.auth().createUserWithEmailAndPassword(email,pass);
+      const uid2=cred2.user.uid;
+      const updates={authUid:uid2,password:null};
+      await fbU('rn_mall_vendors/'+found.id,updates);
+      await fbS('rn_mall_vendors_by_uid/'+uid2,found.id);
+      migrated=Object.assign({},found,updates);
+      delete migrated.password;
+    }catch(migrateErr){
+      console.warn('Auth migration on login failed, will retry next login:',migrateErr.message);
+    }
+  }
+  finishVendorLogin(migrated);
 }
 function vendorLogout(){
   sessionStorage.removeItem('rnm_vendor_session');
@@ -1096,7 +1196,15 @@ async function saveVProfile(){
     phone:document.getElementById('vprof-phone').value.trim()
   };
   const pw=document.getElementById('vprof-pass').value.trim();
-  if(pw&&pw.length>=6)u.password=pw;
+  if(pw&&pw.length>=6){
+    if(vendor.authUid&&typeof firebase!=='undefined'&&firebase.auth&&firebase.auth().currentUser){
+      try{await firebase.auth().currentUser.updatePassword(pw);}
+      catch(pwErr){toast('Could not update password, please sign out and back in, then try again','err');}
+    }else{
+      // Not yet migrated to Firebase Auth, still on the legacy plaintext field.
+      u.password=pw;
+    }
+  }
   await fbU('rn_mall_vendors/'+vendor.id,u);
   vendor=Object.assign({},vendor,u);
   sessionStorage.setItem('rnm_vendor_session',JSON.stringify(vendor));
