@@ -915,6 +915,35 @@ async function fbG(p){
 }
 async function fbS(p,d){try{await fbFetchTimeout(FB+'/'+p+'.json',{method:'PUT',body:JSON.stringify(d)});}catch(e){console.warn('fbS failed for',p,':',e.message);}}
 async function fbU(p,d){try{await fbFetchTimeout(FB+'/'+p+'.json',{method:'PATCH',body:JSON.stringify(d)});}catch(e){console.warn('fbU failed for',p,':',e.message);}}
+// Live updates for the handful of paths customers are actually looking at while
+// admin might be editing (products, categories, homepage settings), using
+// Firebase Realtime Database's REST streaming endpoint (Server-Sent Events)
+// instead of the full Firebase SDK, since this app already talks to Firebase
+// purely over REST everywhere else. Firebase pushes a 'put' or 'patch' event the
+// instant any data under the watched path changes, we don't try to hand-apply
+// the partial diff ourselves (that's easy to get subtly wrong), we just treat it
+// as a "something changed, go re-fetch" signal and reuse the existing fbG().
+// EventSource auto-reconnects on a dropped connection per the browser spec, no
+// retry logic needed here. If the browser doesn't support EventSource (very
+// old browsers only) this quietly no-ops, the page still works exactly as
+// before, just without live updates.
+function watchFirebaseCollection(path,onChange){
+  if(typeof EventSource==='undefined')return null;
+  try{
+    var es=new EventSource(FB+'/'+path+'.json');
+    var debounceTimer=null;
+    function triggerRefresh(){
+      clearTimeout(debounceTimer);
+      // A single admin edit can fire several put/patch events in quick
+      // succession, debounce briefly so we don't re-render repeatedly for one change.
+      debounceTimer=setTimeout(function(){fbG(path).then(onChange);},300);
+    }
+    es.addEventListener('put',triggerRefresh);
+    es.addEventListener('patch',triggerRefresh);
+    es.onerror=function(){/* EventSource retries on its own, nothing to do here */};
+    return es;
+  }catch(e){console.warn('Live watch unavailable for',path,':',e.message);return null;}
+}
 async function fbP(p,d){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'POST',body:JSON.stringify(d)});return await r.json();}catch(e){console.warn('fbP failed for',p,':',e.message);return null;}}
 async function fbD(p){try{await fbFetchTimeout(FB+'/'+p+'.json',{method:'DELETE'});}catch(e){console.warn('fbD failed for',p,':',e.message);}}
 
@@ -1526,6 +1555,33 @@ async function init(){
   setLang(currentLang);
   checkResetLink();
   setTimeout(()=>{if(!currUser&&!sessionStorage.getItem('rnm_prompt_shown'))showAccPrompt();},9000);
+  // From here on the page stays live, an admin editing a product, category, or
+  // homepage setting shows up here within about a second, no reload needed.
+  watchFirebaseCollection('rn_mall_products',function(prods){
+    allProducts=Object.values(prods||{}).filter(p=>p.visible!==false);
+    try{localStorage.setItem('rnm_cache_products',JSON.stringify(allProducts));}catch(e){}
+    renderCatNav();renderCategories();renderFeatured();renderRecommended();renderNew();renderFlash();renderPreOrder();renderAllProducts();
+    const sc=document.getElementById('stat-count');if(sc)sc.textContent=allProducts.length;
+  });
+  watchFirebaseCollection('rn_mall_categories',function(cats){
+    allCategories=Object.values(cats||{}).sort((a,b)=>(a.order||99)-(b.order||99));
+    try{localStorage.setItem('rnm_cache_categories',JSON.stringify(allCategories));}catch(e){}
+    renderCatNav();renderCategories();
+    const fc2=document.getElementById('footer-cats');if(fc2)fc2.innerHTML=allCategories.slice(0,6).map(c=>`<div class="footer-link" onclick="filterCat('${c.id}')">${c.name}</div>`).join('');
+  });
+  watchFirebaseCollection('rn_mall_settings',function(sett){
+    if(!sett)return;
+    settings=sett;
+    exchangeRate=settings.exchangeRate||1600;
+    if(settings.paystackKey)PAYSTACK_KEY=settings.paystackKey;
+    if(settings.theme)applyTheme(settings.theme);
+    applyHeroConfig(settings);
+    try{localStorage.setItem('rnm_cache_settings',JSON.stringify(settings));}catch(e){}
+    const ab2=document.getElementById('announce-bar');
+    if(ab2)ab2.style.display=settings.announcement&&!activePromo?'block':(ab2.style.display==='block'&&!settings.announcement?'none':ab2.style.display);
+    if(ab2&&settings.announcement&&!activePromo)ab2.textContent=settings.announcement;
+    const vcSec2=document.getElementById('vendor-cta-sec');if(vcSec2)vcSec2.style.display=settings.showVendorCta===false?'none':'';
+  });
 }
 function checkResetLink(){
   const params=new URLSearchParams(window.location.search);
