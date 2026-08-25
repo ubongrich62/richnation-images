@@ -190,6 +190,31 @@ const FB='https://richnation-portal-default-rtdb.firebaseio.com';
 const FIREBASE_CONFIG={apiKey:"AIzaSyDLGnyGB8ZnEc2u6TbVzjIAQi1pgSaZVyQ",authDomain:"richnation-portal.firebaseapp.com",databaseURL:"https://richnation-portal-default-rtdb.firebaseio.com",projectId:"richnation-portal",storageBucket:"richnation-portal.firebasestorage.app",messagingSenderId:"175550692963",appId:"1:175550692963:web:1e3c995b3ed0baaadac256"};
 const RECAPTCHA_SITE_KEY='6Ld2O5EtAAAAAN6fXMnn7kn5a6SWvDpJs97kckGC';
 let appCheckToken=null;
+// Loads the Firebase Auth SDK on demand (the first time a login actually happens, not
+// on every page load) and initializes the app if nothing else has yet. Resolves to
+// true once firebase.auth() is safe to call, or false if the SDK failed to load
+// (offline, blocked, etc.), in which case callers fall back to the pre-migration
+// plaintext-password path rather than failing outright.
+let _firebaseAuthReadyPromise=null;
+function ensureFirebaseAuthReady(){
+  if(_firebaseAuthReadyPromise)return _firebaseAuthReadyPromise;
+  _firebaseAuthReadyPromise=new Promise(function(resolve){
+    function loadScript(src){
+      return new Promise(function(res){
+        const s=document.createElement('script');
+        s.src=src;s.onload=function(){res(true);};s.onerror=function(){res(false);};
+        document.head.appendChild(s);
+      });
+    }
+    function afterAppLoaded(){
+      try{if(typeof firebase!=='undefined'&&(!firebase.apps||!firebase.apps.length))firebase.initializeApp(FIREBASE_CONFIG);}catch(e){}
+      loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js').then(function(ok){resolve(ok&&typeof firebase!=='undefined'&&!!firebase.auth);});
+    }
+    if(typeof firebase!=='undefined'&&firebase.apps){afterAppLoaded();}
+    else{loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js').then(function(ok){if(ok)afterAppLoaded();else resolve(false);});}
+  });
+  return _firebaseAuthReadyPromise;
+}
 // App Check isn't enforced yet, so it adds nothing functional right now, loaded only
 // after the page is fully done loading, so it costs the page nothing while unused.
 function loadAppCheckWhenIdle(){
@@ -398,6 +423,39 @@ async function doInvestorLogin(){
   const pass=document.getElementById('in-pass').value.trim();
   const err=document.getElementById('login-err');err.style.display='none';
   if(!email||!pass){err.textContent='Enter your email and password.';err.style.display='block';return;}
+  function finishInvestorLogin(record){
+    if(record.status==='pending_review'){err.textContent='Your application is still under review. You\'ll be notified once your agreement is confirmed.';err.style.display='block';return;}
+    if(record.status==='suspended'){err.textContent='Your access has been suspended. Please contact us.';err.style.display='block';return;}
+    investor=record;
+    sessionStorage.setItem('rnm_investor_session',JSON.stringify(investor));
+    startApp();
+  }
+  const ready=await ensureFirebaseAuthReady();
+  if(ready){
+    try{
+      const cred=await firebase.auth().signInWithEmailAndPassword(email,pass);
+      const uid=cred.user.uid;
+      let record=await fbG('rn_mall_investors/'+uid);
+      if(record)record=Object.assign({_id:uid},record);
+      if(!record){
+        // Migrated account, its data still lives at the old key, look it up via
+        // the index written either at prior migration-on-login time, or by admin.html
+        // at approval time for newly-approved accounts.
+        const oldId=await fbG('rn_mall_investors_by_uid/'+uid);
+        if(oldId){
+          const rec=await fbG('rn_mall_investors/'+oldId);
+          if(rec)record=Object.assign({_id:oldId},rec);
+        }
+      }
+      if(!record){err.textContent='Account not found, please contact support.';err.style.display='block';return;}
+      finishInvestorLogin(record);
+      return;
+    }catch(authErr){
+      // Any Firebase Auth error (wrong password, no such account yet, etc.) falls
+      // through to the legacy check below rather than failing immediately, that
+      // check is what upgrades a not-yet-migrated account transparently.
+    }
+  }
   const all=await fbG('rn_mall_investors')||{};
   const byEmail=Object.entries(all).find(function(e){return e[1].email===email;});
   if(!byEmail){err.textContent='Incorrect email or password.';err.style.display='block';return;}
@@ -405,9 +463,24 @@ async function doInvestorLogin(){
   if(found.status==='pending_review'){err.textContent='Your application is still under review. You\'ll be notified once your agreement is confirmed.';err.style.display='block';return;}
   if(found.status==='suspended'){err.textContent='Your access has been suspended. Please contact us.';err.style.display='block';return;}
   if(found.password!==pass){err.textContent='Incorrect email or password.';err.style.display='block';return;}
-  investor=found;
-  sessionStorage.setItem('rnm_investor_session',JSON.stringify(investor));
-  startApp();
+  // Correct legacy credentials confirmed, transparently create this account's real
+  // Firebase Auth record now using the exact password just typed, no separate reset
+  // step needed, then link it so this fallback is never needed again for this account.
+  let migrated=found;
+  if(ready){
+    try{
+      const cred2=await firebase.auth().createUserWithEmailAndPassword(email,pass);
+      const uid2=cred2.user.uid;
+      const updates={authUid:uid2,password:null};
+      await fbU('rn_mall_investors/'+found._id,updates);
+      await fbS('rn_mall_investors_by_uid/'+uid2,found._id);
+      migrated=Object.assign({},found,updates);
+      delete migrated.password;
+    }catch(migrateErr){
+      console.warn('Auth migration on login failed, will retry next login:',migrateErr.message);
+    }
+  }
+  finishInvestorLogin(migrated);
 }
 function investorLogout(){sessionStorage.removeItem('rnm_investor_session');investor=null;document.getElementById('app').style.display='none';document.getElementById('login').style.display='flex';}
 function checkInvestorSession(){const s=sessionStorage.getItem('rnm_investor_session');if(s){try{investor=JSON.parse(s);startApp();}catch(e){}}}
@@ -842,8 +915,14 @@ async function saveInvestorProfile(){
   const pw=document.getElementById('pf-pass').value.trim();
   if(!pw){toast('Enter a new password to change it','err');return;}
   if(pw.length<6){toast('Password must be at least 6 characters','err');return;}
-  await fbU('rn_mall_investors/'+investor._id,{password:pw});
-  investor.password=pw;
+  if(investor.authUid&&typeof firebase!=='undefined'&&firebase.auth&&firebase.auth().currentUser){
+    try{await firebase.auth().currentUser.updatePassword(pw);}
+    catch(pwErr){toast('Could not update password, please sign out and back in, then try again','err');return;}
+  }else{
+    // Not yet migrated to Firebase Auth, still on the legacy plaintext field.
+    await fbU('rn_mall_investors/'+investor._id,{password:pw});
+    investor.password=pw;
+  }
   sessionStorage.setItem('rnm_investor_session',JSON.stringify(investor));
   toast('Password updated!');
 }
