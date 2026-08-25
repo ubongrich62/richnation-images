@@ -826,6 +826,31 @@ const FB='https://richnation-portal-default-rtdb.firebaseio.com';
 const FIREBASE_CONFIG={apiKey:"AIzaSyDLGnyGB8ZnEc2u6TbVzjIAQi1pgSaZVyQ",authDomain:"richnation-portal.firebaseapp.com",databaseURL:"https://richnation-portal-default-rtdb.firebaseio.com",projectId:"richnation-portal",storageBucket:"richnation-portal.firebasestorage.app",messagingSenderId:"175550692963",appId:"1:175550692963:web:1e3c995b3ed0baaadac256"};
 const RECAPTCHA_SITE_KEY='6Ld2O5EtAAAAAN6fXMnn7kn5a6SWvDpJs97kckGC';
 let appCheckToken=null;
+// Loads the Firebase Auth SDK on demand (the first time a login/signup/reset actually
+// happens, not on every page load) and initializes the app if nothing else has yet.
+// Resolves to true once firebase.auth() is safe to call, or false if the SDK failed to
+// load (offline, blocked, etc.), in which case callers fall back to the pre-migration
+// plaintext-password path rather than failing outright.
+let _firebaseAuthReadyPromise=null;
+function ensureFirebaseAuthReady(){
+  if(_firebaseAuthReadyPromise)return _firebaseAuthReadyPromise;
+  _firebaseAuthReadyPromise=new Promise(function(resolve){
+    function loadScript(src){
+      return new Promise(function(res){
+        const s=document.createElement('script');
+        s.src=src;s.onload=function(){res(true);};s.onerror=function(){res(false);};
+        document.head.appendChild(s);
+      });
+    }
+    function afterAppLoaded(){
+      try{if(typeof firebase!=='undefined'&&(!firebase.apps||!firebase.apps.length))firebase.initializeApp(FIREBASE_CONFIG);}catch(e){}
+      loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js').then(function(ok){resolve(ok&&typeof firebase!=='undefined'&&!!firebase.auth);});
+    }
+    if(typeof firebase!=='undefined'&&firebase.apps){afterAppLoaded();}
+    else{loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js').then(function(ok){if(ok)afterAppLoaded();else resolve(false);});}
+  });
+  return _firebaseAuthReadyPromise;
+}
 // App Check isn't enforced yet, so it adds nothing functional right now, loaded only
 // after the page is fully done loading, so it costs the page nothing while unused.
 function loadAppCheckWhenIdle(){
@@ -3042,7 +3067,7 @@ function switchAuth(tab){
     <button class="auth-btn" onclick="doLogin()" style="margin-top:10px;">Sign In</button>
     <div class="auth-forgot" onclick="switchAuth('forgot')">Forgot your password?</div>
     <div style="text-align:center;font-size:12px;color:var(--wh);font-weight:700;margin-top:10px;">No account? <span style="color:var(--or);cursor:pointer;font-weight:700;" onclick="switchAuth('register')">Create one free &#8594;</span></div>`;}
-  else if(tab==='forgot'){body.innerHTML=`<div class="auth-sub">Enter your account email. This isn't an automatic reset yet, our support team will reach out directly to verify you and help you back in.</div>
+  else if(tab==='forgot'){body.innerHTML=`<div class="auth-sub">Enter your account email and we'll send you a reset link. If your account hasn't been upgraded to our new login system yet, our support team will reach out directly instead.</div>
     <input class="fi" id="forgot-email" type="email" placeholder="Email address" autocomplete="off"/>
     <div class="auth-err" id="forgot-err"></div>
     <div class="auth-err" id="forgot-ok" style="display:none;color:var(--su);"></div>
@@ -3065,6 +3090,22 @@ async function doForgotPassword(){
   const err=document.getElementById('forgot-err');const ok=document.getElementById('forgot-ok');
   if(err)err.style.display='none';if(ok)ok.style.display='none';
   if(!email){if(err){err.textContent='Enter your email address.';err.style.display='block';}return;}
+  const ready=await ensureFirebaseAuthReady();
+  if(ready){
+    try{
+      await firebase.auth().sendPasswordResetEmail(email);
+      if(ok){ok.textContent='Reset email sent! Check your inbox (and spam folder) for a link to set a new password.';ok.style.display='block';}
+      return;
+    }catch(authErr){
+      // auth/user-not-found here just means this particular email hasn't been
+      // migrated to Firebase Auth yet (or never registered at all), fall through to
+      // the legacy manual-request path below instead of a dead end either way.
+      if(authErr.code&&authErr.code!=='auth/user-not-found'){
+        if(err){err.textContent='Something went wrong sending the reset email, please try again.';err.style.display='block';}
+        return;
+      }
+    }
+  }
   const all=await fbG('rn_mall_customers')||{};
   const found=Object.entries(all).find(([id,c])=>c.email===email);
   if(!found){if(err){err.textContent='No account found with that email.';err.style.display='block';}return;}
@@ -3077,17 +3118,42 @@ async function doForgotPassword(){
 async function doLogin(){
   const email=document.getElementById('auth-email')?.value.trim().toLowerCase();const pass=document.getElementById('auth-pass')?.value.trim();const err=document.getElementById('auth-err');
   if(!email||!pass){err.textContent='Enter email and password.';err.style.display='block';return;}
+  err.style.display='none';
+  const unlockLink='<span style="color:var(--or);cursor:pointer;font-weight:700;text-decoration:underline;" onclick="switchAuth(\'forgot\');setTimeout(()=>{const fe=document.getElementById(\'forgot-email\');if(fe)fe.value=\''+email.replace(/'/g,"\\'")+'\';},0);">reset your password</span>';
+  function finishLogin(record){
+    if(record.accountStatus==='suspended'||record.accountStatus==='blocked'){
+      err.innerHTML=record.suspendReason==='failed_attempts'
+        ?'This account was locked after 3 failed sign-in attempts. If this was you, '+unlockLink+' to unlock it. If not, please contact support.'
+        :'Your account has been suspended. Please contact our support team.';
+      err.style.display='block';return;
+    }
+    currUser=record;localStorage.setItem('rnm_user',JSON.stringify(currUser));updateAuthUI();closeAuth();toast('Welcome back, '+currUser.fname+'!');
+  }
+  const ready=await ensureFirebaseAuthReady();
+  if(ready){
+    try{
+      const cred=await firebase.auth().signInWithEmailAndPassword(email,pass);
+      const uid=cred.user.uid;
+      let record=await fbG('rn_mall_customers/'+uid);
+      if(!record){
+        // Migrated account, its data still lives at the old key, look it up via
+        // the index written the first time this account was upgraded.
+        const oldId=await fbG('rn_mall_customers_by_uid/'+uid);
+        if(oldId)record=await fbG('rn_mall_customers/'+oldId);
+      }
+      if(!record){err.textContent='Account not found, please contact support.';err.style.display='block';return;}
+      finishLogin(record);
+      return;
+    }catch(authErr){
+      // Any Firebase Auth error (wrong password, no such account yet, etc.) falls
+      // through to the legacy check below rather than failing immediately, that
+      // check is what upgrades a not-yet-migrated account transparently.
+    }
+  }
   const all=await fbG('rn_mall_customers')||{};
   const foundEntry=Object.entries(all).find(([id,c])=>c.email===email);
-  const unlockLink='<span style="color:var(--or);cursor:pointer;font-weight:700;text-decoration:underline;" onclick="switchAuth(\'forgot\');setTimeout(()=>{const fe=document.getElementById(\'forgot-email\');if(fe)fe.value=\''+email.replace(/'/g,"\\'")+'\';},0);">reset your password</span>';
   if(!foundEntry){err.textContent='Incorrect email or password.';err.style.display='block';return;}
   const [custId,found]=foundEntry;
-  if(found.accountStatus==='suspended'||found.accountStatus==='blocked'){
-    err.innerHTML=found.suspendReason==='failed_attempts'
-      ?'This account was locked after 3 failed sign-in attempts. If this was you, '+unlockLink+' to unlock it. If not, please contact support.'
-      :'Your account has been suspended. Please contact our support team.';
-    err.style.display='block';return;
-  }
   if(found.password!==pass){
     const attempts=(found.loginAttempts||0)+1;
     if(attempts>=3){
@@ -3101,7 +3167,24 @@ async function doLogin(){
     err.style.display='block';return;
   }
   if(found.loginAttempts)await fbU('rn_mall_customers/'+custId,{loginAttempts:0});
-  currUser=found;localStorage.setItem('rnm_user',JSON.stringify(currUser));updateAuthUI();closeAuth();toast('Welcome back, '+currUser.fname+'!');
+  // Correct legacy credentials confirmed, transparently create this account's real
+  // Firebase Auth record now using the exact password just typed, no separate reset
+  // step needed, then link it so this fallback is never needed again for this account.
+  let migrated=found;
+  if(ready){
+    try{
+      const cred2=await firebase.auth().createUserWithEmailAndPassword(email,pass);
+      const uid2=cred2.user.uid;
+      const updates={authUid:uid2,password:null};
+      await fbU('rn_mall_customers/'+custId,updates);
+      await fbS('rn_mall_customers_by_uid/'+uid2,custId);
+      migrated=Object.assign({},found,updates);
+      delete migrated.password;
+    }catch(migrateErr){
+      console.warn('Auth migration on login failed, will retry next login:',migrateErr.message);
+    }
+  }
+  finishLogin(migrated);
 }
 // A record's own ID doubles as its access key everywhere in this app (order lookups,
 // chat threads, notification targets), so it must not be guessable. Date.now() alone
@@ -3118,9 +3201,24 @@ async function doRegister(){
   if(!fn||!ln||!email||!pass){err.textContent='Please fill all fields.';err.style.display='block';return;}
   if(pass.length<6){err.textContent='Password must be at least 6 characters.';err.style.display='block';return;}
   const all=await fbG('rn_mall_customers')||{};if(Object.values(all).find(c=>c.email===email)){err.textContent='An account with this email already exists.';err.style.display='block';return;}
-  const id=secureId('cust');
+  const ready=await ensureFirebaseAuthReady();
+  let id=null,authUid=null;
+  if(ready){
+    try{
+      const cred=await firebase.auth().createUserWithEmailAndPassword(email,pass);
+      authUid=cred.user.uid;id=authUid;
+    }catch(createErr){
+      if(createErr.code==='auth/email-already-in-use'){err.textContent='An account with this email already exists.';err.style.display='block';return;}
+      if(createErr.code==='auth/weak-password'){err.textContent='Password must be at least 6 characters.';err.style.display='block';return;}
+      console.warn('Firebase Auth signup failed, falling back to legacy account creation:',createErr.message);
+    }
+  }
+  // Auth unavailable or failed for an unexpected reason, fall back rather than block
+  // signup entirely, this account can still be upgraded transparently on its next login.
+  if(!id)id=secureId('cust');
   const referralCode=(fn.slice(0,4)+Math.random().toString(36).slice(2,6)).toUpperCase();
-  const customer={id,fname:fn,lname:ln,name:fn+' '+ln,email,phone,password:pass,joinDate:ds(),accountStatus:'active',points:0,referralCode};
+  const customer={id,fname:fn,lname:ln,name:fn+' '+ln,email,phone,joinDate:ds(),accountStatus:'active',points:0,referralCode};
+  if(authUid)customer.authUid=authUid;else customer.password=pass;
   if(refInput){
     const referrer=Object.values(all).find(c=>(c.referralCode||'').toUpperCase()===refInput);
     if(referrer&&referrer.id!==id)customer.referredBy=referrer.id;
@@ -3514,7 +3612,17 @@ async function applyWholesale(){
   toast('Wholesale application submitted!');
   accTab('profile',document.querySelector('#acc-tabs-grid>div:nth-child(9)'));
 }
-async function saveProfile(){if(!currUser)return;const u={fname:document.getElementById('pf-fn')?.value.trim(),lname:document.getElementById('pf-ln')?.value.trim(),email:document.getElementById('pf-em')?.value.trim(),phone:document.getElementById('pf-ph')?.value.trim()};u.name=(u.fname||'')+(u.lname?' '+u.lname:'');const pw=document.getElementById('pf-pw')?.value.trim();if(pw&&pw.length>=6)u.password=pw;await fbU('rn_mall_customers/'+currUser.id,u);currUser={...currUser,...u};localStorage.setItem('rnm_user',JSON.stringify(currUser));
+async function saveProfile(){if(!currUser)return;const u={fname:document.getElementById('pf-fn')?.value.trim(),lname:document.getElementById('pf-ln')?.value.trim(),email:document.getElementById('pf-em')?.value.trim(),phone:document.getElementById('pf-ph')?.value.trim()};u.name=(u.fname||'')+(u.lname?' '+u.lname:'');const pw=document.getElementById('pf-pw')?.value.trim();
+  if(pw&&pw.length>=6){
+    if(currUser.authUid&&typeof firebase!=='undefined'&&firebase.auth&&firebase.auth().currentUser){
+      try{await firebase.auth().currentUser.updatePassword(pw);}
+      catch(pwErr){toast('Could not update password, please sign out and back in, then try again','err');}
+    }else{
+      // Not yet migrated to Firebase Auth, still on the legacy plaintext field.
+      u.password=pw;
+    }
+  }
+  await fbU('rn_mall_customers/'+currUser.id,u);currUser={...currUser,...u};localStorage.setItem('rnm_user',JSON.stringify(currUser));
   if(!currUser.profileBonusAwarded&&u.fname&&u.lname&&u.email&&u.phone){await fbU('rn_mall_customers/'+currUser.id,{profileBonusAwarded:true});currUser.profileBonusAwarded=true;localStorage.setItem('rnm_user',JSON.stringify(currUser));awardPoints(currUser.id,rpRates().profile,'completing your profile');}
   toast('Profile updated!');}
 function onAddrCountry(presetState){
