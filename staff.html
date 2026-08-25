@@ -211,6 +211,31 @@ function loadAppCheckWhenIdle(){
 }
 if(document.readyState==='complete'){setTimeout(loadAppCheckWhenIdle,2000);}
 else window.addEventListener('load',function(){setTimeout(loadAppCheckWhenIdle,2000);});
+// Loads the Firebase Auth SDK on demand (the first time a login/password-change actually
+// happens, not on every page load) and initializes the app if nothing else has yet.
+// Resolves to true once firebase.auth() is safe to call, or false if the SDK failed to
+// load (offline, blocked, etc.), in which case callers fall back to the pre-migration
+// plaintext-password path rather than failing outright.
+let _firebaseAuthReadyPromise=null;
+function ensureFirebaseAuthReady(){
+  if(_firebaseAuthReadyPromise)return _firebaseAuthReadyPromise;
+  _firebaseAuthReadyPromise=new Promise(function(resolve){
+    function loadScript(src){
+      return new Promise(function(res){
+        const s=document.createElement('script');
+        s.src=src;s.onload=function(){res(true);};s.onerror=function(){res(false);};
+        document.head.appendChild(s);
+      });
+    }
+    function afterAppLoaded(){
+      try{if(typeof firebase!=='undefined'&&(!firebase.apps||!firebase.apps.length))firebase.initializeApp(FIREBASE_CONFIG);}catch(e){}
+      loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js').then(function(ok){resolve(ok&&typeof firebase!=='undefined'&&!!firebase.auth);});
+    }
+    if(typeof firebase!=='undefined'&&firebase.apps){afterAppLoaded();}
+    else{loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js').then(function(ok){if(ok)afterAppLoaded();else resolve(false);});}
+  });
+  return _firebaseAuthReadyPromise;
+}
 let staff=null;
 let curNav='dashboard';
 let currency=localStorage.getItem('rnm_currency')||'NGN';let exchangeRate=1600;
@@ -433,6 +458,37 @@ async function doStaffLogin(){
   const origLabel=btn.textContent;
   btn.disabled=true;btn.textContent='Signing in…';
   try{
+    function finishStaffLogin(found){
+      if(found.status==='pending_review'){err.textContent='Your application is still under review. You\'ll be able to sign in once approved.';err.style.display='block';return;}
+      if(found.status==='suspended'){err.textContent='Your account has been suspended. Contact your admin.';err.style.display='block';return;}
+      staff=found;
+      sessionStorage.setItem('rnm_staff_session',JSON.stringify(staff));
+      sessionStorage.setItem('rnm_staff_email',staff.email);
+      startApp();
+    }
+    const ready=await ensureFirebaseAuthReady();
+    if(ready){
+      try{
+        const cred=await firebase.auth().signInWithEmailAndPassword(email,pass);
+        const uid=cred.user.uid;
+        let staffId=uid;
+        let record=await fbG('rn_mall_staff/'+uid);
+        if(!record){
+          // Migrated account, its data still lives at the old key, look it up via
+          // the index written when this account was upgraded (either at a prior
+          // login here, or by admin.html at approval time for newly-approved staff).
+          const oldId=await fbG('rn_mall_staff_by_uid/'+uid);
+          if(oldId){staffId=oldId;record=await fbG('rn_mall_staff/'+oldId);}
+        }
+        if(!record){err.textContent='Account not found, please contact your admin.';err.style.display='block';return;}
+        finishStaffLogin(Object.assign({_id:staffId},record));
+        return;
+      }catch(authErr){
+        // Any Firebase Auth error (wrong password, no such account yet, etc.) falls
+        // through to the legacy check below rather than failing immediately, that
+        // check is what upgrades a not-yet-migrated account transparently.
+      }
+    }
     const all=await fbG('rn_mall_staff')||{};
     const byEmail=Object.entries(all).find(function(e){return e[1].email===email;});
     if(!byEmail){err.textContent='Incorrect email or password.';err.style.display='block';return;}
@@ -440,10 +496,24 @@ async function doStaffLogin(){
     if(found.status==='pending_review'){err.textContent='Your application is still under review. You\'ll be able to sign in once approved.';err.style.display='block';return;}
     if(found.status==='suspended'){err.textContent='Your account has been suspended. Contact your admin.';err.style.display='block';return;}
     if(found.password!==pass){err.textContent='Incorrect email or password.';err.style.display='block';return;}
-    staff=found;
-    sessionStorage.setItem('rnm_staff_session',JSON.stringify(staff));
-    sessionStorage.setItem('rnm_staff_email',staff.email);
-    startApp();
+    // Correct legacy credentials confirmed, transparently create this account's real
+    // Firebase Auth record now using the exact password just typed, no separate reset
+    // step needed, then link it so this fallback is never needed again for this account.
+    let migrated=found;
+    if(ready){
+      try{
+        const cred2=await firebase.auth().createUserWithEmailAndPassword(email,pass);
+        const uid2=cred2.user.uid;
+        const updates={authUid:uid2,password:null};
+        await fbU('rn_mall_staff/'+found._id,updates);
+        await fbS('rn_mall_staff_by_uid/'+uid2,found._id);
+        migrated=Object.assign({},found,updates);
+        delete migrated.password;
+      }catch(migrateErr){
+        console.warn('Auth migration on login failed, will retry next login:',migrateErr.message);
+      }
+    }
+    finishStaffLogin(migrated);
   }finally{
     btn.disabled=false;btn.textContent=origLabel;
   }
@@ -1313,8 +1383,17 @@ async function saveMyProfile(){
   const pw=document.getElementById('pf-pass').value.trim();
   if(!pw){toast('Enter a new password to change it','err');return;}
   if(pw.length<6){toast('Password must be at least 6 characters','err');return;}
-  await fbU('rn_mall_staff/'+staff._id,{password:pw});
-  staff.password=pw;
+  if(staff.authUid&&typeof firebase!=='undefined'&&firebase.auth&&firebase.auth().currentUser){
+    try{
+      await firebase.auth().currentUser.updatePassword(pw);
+    }catch(pwErr){
+      toast('Could not update password, please sign out and back in, then try again','err');return;
+    }
+  }else{
+    // Not yet migrated to Firebase Auth, still on the legacy plaintext field.
+    await fbU('rn_mall_staff/'+staff._id,{password:pw});
+    staff.password=pw;
+  }
   sessionStorage.setItem('rnm_staff_session',JSON.stringify(staff));
   toast('Password updated!');
 }
