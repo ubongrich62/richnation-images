@@ -317,6 +317,22 @@ async function fbU(p,d){try{await fbFetchTimeout(FB+'/'+p+'.json',{method:'PATCH
 async function fbP(p,d){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'POST',body:JSON.stringify(d)});return await r.json();}catch(e){console.warn('fbP failed:',e.message);return null;}}
 async function fbD(p){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'DELETE'},4000);return !!(r&&r.ok);}catch{return false;}}
 
+function watchFirebaseCollection(path,onChange){
+  if(typeof EventSource==='undefined')return null;
+  try{
+    var es=new EventSource(FB+'/'+path+'.json');
+    var debounceTimer=null;
+    function triggerRefresh(){
+      clearTimeout(debounceTimer);
+      debounceTimer=setTimeout(function(){fbG(path).then(onChange);},300);
+    }
+    es.addEventListener('put',triggerRefresh);
+    es.addEventListener('patch',triggerRefresh);
+    es.onerror=function(){/* EventSource retries on its own, nothing to do here */};
+    return es;
+  }catch(e){console.warn('Live watch unavailable for',path,':',e.message);return null;}
+}
+
 function toast(msg,type){
   const t=document.getElementById('toast');
   t.textContent=msg;t.style.display='block';
@@ -563,6 +579,18 @@ async function startApp(){
   fbG('rn_mall_categories').then(function(cats){allCategories=Object.values(cats||{});});
   refreshVendorNotifBadge();
   setInterval(refreshVendorNotifBadge,20000);
+  watchFirebaseCollection('rn_mall_products',function(){
+    if(curNav==='products'){
+      var c=document.getElementById('content');
+      if(c)renderVProducts(c);
+    }
+  });
+  watchFirebaseCollection('rn_mall_orders',function(){
+    if(curNav==='orders'){
+      var c=document.getElementById('content');
+      if(c)renderVOrders(c);
+    }
+  });
 }
 function populateSidebarIcons(){
   var map={dashboard:'home',products:'box',orders:'clock',payouts:'money',performance:'chart',reviews:'star',promotions:'fire',messages:'chat',notifications:'bell',profile:'user'};
