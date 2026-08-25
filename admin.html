@@ -502,6 +502,32 @@ const FB='https://richnation-portal-default-rtdb.firebaseio.com';
 const FIREBASE_CONFIG={apiKey:"AIzaSyDLGnyGB8ZnEc2u6TbVzjIAQi1pgSaZVyQ",authDomain:"richnation-portal.firebaseapp.com",databaseURL:"https://richnation-portal-default-rtdb.firebaseio.com",projectId:"richnation-portal",storageBucket:"richnation-portal.firebasestorage.app",messagingSenderId:"175550692963",appId:"1:175550692963:web:1e3c995b3ed0baaadac256"};
 const RECAPTCHA_SITE_KEY='6Ld2O5EtAAAAAN6fXMnn7kn5a6SWvDpJs97kckGC';
 let appCheckToken=null;
+// Loads the Firebase Auth SDK on demand (the first time an approval flow actually
+// needs it, not on every page load) and initializes the app if nothing else has yet
+// (App Check, below, may already have done so). Resolves to true once firebase.auth()
+// is safe to call, or false if the SDK failed to load (offline, blocked, etc.), in
+// which case callers fall back to the pre-migration plaintext-password path rather
+// than blocking the approval outright.
+let _firebaseAuthReadyPromise=null;
+function ensureFirebaseAuthReady(){
+  if(_firebaseAuthReadyPromise)return _firebaseAuthReadyPromise;
+  _firebaseAuthReadyPromise=new Promise(function(resolve){
+    function loadScript(src){
+      return new Promise(function(res){
+        const s=document.createElement('script');
+        s.src=src;s.onload=function(){res(true);};s.onerror=function(){res(false);};
+        document.head.appendChild(s);
+      });
+    }
+    function afterAppLoaded(){
+      try{if(typeof firebase!=='undefined'&&(!firebase.apps||!firebase.apps.length))firebase.initializeApp(FIREBASE_CONFIG);}catch(e){}
+      loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js').then(function(ok){resolve(ok&&typeof firebase!=='undefined'&&!!firebase.auth);});
+    }
+    if(typeof firebase!=='undefined'&&firebase.apps){afterAppLoaded();}
+    else{loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js').then(function(ok){if(ok)afterAppLoaded();else resolve(false);});}
+  });
+  return _firebaseAuthReadyPromise;
+}
 // App Check isn't enforced yet, so it adds nothing functional right now, loaded only
 // after the page is fully done loading, so it costs the page nothing while unused.
 function loadAppCheckWhenIdle(){
@@ -1268,7 +1294,24 @@ async function finalizeApproveStaff(id,name,email){
   const roleObj=STAFF_ROLES.find(function(r){return r.id===role;});
   const department=roleObj?roleObj.dept:'';
   const bio=generateStaffBio(name,role,joinYear);
-  await fbU('rn_mall_staff/'+id,{status:'active',role:role,password:pass,salary:salary,staffNumber:staffNumber,department:department,companyDivision:companyDivision,bio:bio});
+  const update={status:'active',role:role,salary:salary,staffNumber:staffNumber,department:department,companyDivision:companyDivision,bio:bio};
+  let authUid=null;
+  const authReady=await ensureFirebaseAuthReady();
+  if(authReady){
+    try{
+      const cred=await firebase.auth().createUserWithEmailAndPassword(email,pass);
+      authUid=cred.user.uid;
+    }catch(authErr){
+      console.warn('Firebase Auth account creation failed for staff, falling back to plaintext password:',authErr.message);
+    }
+  }
+  if(authUid){
+    update.authUid=authUid;update.password=null;
+    await fbS('rn_mall_staff_by_uid/'+authUid,id);
+  }else{
+    update.password=pass;
+  }
+  await fbU('rn_mall_staff/'+id,update);
   logActivity('Approved staff application',name+' ('+role+'), '+staffNumber);
   alert('✅ '+name+' approved as '+staffNumber+'!\n\nSend them these login details:\n\nEmail: '+email+'\nPassword: '+pass+'\n\n(There is no automatic email, please send this to them yourself via WhatsApp/email.)');
   toast('Approved, credentials shown above');
@@ -1829,8 +1872,26 @@ async function approveInvestor(id,name){
   const tier=tierFor(v.investmentAmount);
   const investorNumber=v.investorNumber||await generateInvestorNumber();
   const bio=generateInvestorBio(name,tier,v.investmentOption,new Date().getFullYear());
-  await fbU('rn_mall_investors/'+id,{status:'active',password:pass.trim(),tier:tier,investorNumber:investorNumber,bio:bio,walletBalance:v.walletBalance||0,planStartDate:Date.now()});
-  alert('✅ '+name+' approved as '+investorNumber+'!\n\nSend them these login details:\n\nEmail: '+v.email+'\nPassword: '+pass.trim()+'\n\n(There is no automatic email, please send this to them yourself via WhatsApp/email. Their signed agreement is already recorded digitally in the portal, no physical document needed.)');
+  const trimmedPass=pass.trim();
+  const update={status:'active',tier:tier,investorNumber:investorNumber,bio:bio,walletBalance:v.walletBalance||0,planStartDate:Date.now()};
+  let authUid=null;
+  const authReady=await ensureFirebaseAuthReady();
+  if(authReady){
+    try{
+      const cred=await firebase.auth().createUserWithEmailAndPassword(v.email,trimmedPass);
+      authUid=cred.user.uid;
+    }catch(authErr){
+      console.warn('Firebase Auth account creation failed for investor, falling back to plaintext password:',authErr.message);
+    }
+  }
+  if(authUid){
+    update.authUid=authUid;update.password=null;
+    await fbS('rn_mall_investors_by_uid/'+authUid,id);
+  }else{
+    update.password=trimmedPass;
+  }
+  await fbU('rn_mall_investors/'+id,update);
+  alert('✅ '+name+' approved as '+investorNumber+'!\n\nSend them these login details:\n\nEmail: '+v.email+'\nPassword: '+trimmedPass+'\n\n(There is no automatic email, please send this to them yourself via WhatsApp/email. Their signed agreement is already recorded digitally in the portal, no physical document needed.)');
   toast('Approved, credentials shown above');
   nav('investors',false);
 }
@@ -2257,8 +2318,26 @@ async function approveRider(id,name){
   if(!pass.trim()){toast('Password cannot be empty','err');return;}
   const riderNumber=r.riderNumber||await generateRiderNumber();
   const bio=generateRiderBio(name,r.vehicleType,new Date().getFullYear());
-  await fbU('rn_mall_riders/'+id,{status:'active',password:pass.trim(),riderNumber:riderNumber,bio:bio});
-  alert('✅ '+name+' approved as '+riderNumber+'!\n\nSend them these login details:\n\nEmail: '+r.email+'\nPassword: '+pass.trim()+'\n\n(There is no automatic email, please send this to them yourself via WhatsApp/email.)');
+  const trimmedPass=pass.trim();
+  const update={status:'active',riderNumber:riderNumber,bio:bio};
+  let authUid=null;
+  const authReady=await ensureFirebaseAuthReady();
+  if(authReady){
+    try{
+      const cred=await firebase.auth().createUserWithEmailAndPassword(r.email,trimmedPass);
+      authUid=cred.user.uid;
+    }catch(authErr){
+      console.warn('Firebase Auth account creation failed for rider, falling back to plaintext password:',authErr.message);
+    }
+  }
+  if(authUid){
+    update.authUid=authUid;update.password=null;
+    await fbS('rn_mall_riders_by_uid/'+authUid,id);
+  }else{
+    update.password=trimmedPass;
+  }
+  await fbU('rn_mall_riders/'+id,update);
+  alert('✅ '+name+' approved as '+riderNumber+'!\n\nSend them these login details:\n\nEmail: '+r.email+'\nPassword: '+trimmedPass+'\n\n(There is no automatic email, please send this to them yourself via WhatsApp/email.)');
   toast('Approved, credentials shown above');
   nav('riders',false);
 }
