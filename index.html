@@ -7,10 +7,16 @@
 <meta charset="UTF-8">
 <meta name="color-scheme" content="dark">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
-<meta name="theme-color" content="#FF4747">
+<meta name="theme-color" content="#FF6A00">
 <title>RichNation Mall, Shop Smart. Shop RichNation.</title>
 <meta name="description" content="Nigeria's trusted online mall. Affordable prices, 7-day returns, secure payment, nationwide delivery.">
+<link rel="manifest" href="manifest.json">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23FF6A00'/%3E%3Ctext x='50' y='68' font-size='55' font-family='Arial,sans-serif' font-weight='900' fill='white' text-anchor='middle'%3ER%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="images/branding/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RichNation">
+<meta name="mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
@@ -877,6 +883,12 @@ function loadAppCheckWhenIdle(){
 }
 if(document.readyState==='complete'){setTimeout(loadAppCheckWhenIdle,2000);}
 else window.addEventListener('load',function(){setTimeout(loadAppCheckWhenIdle,2000);});
+// Registered only for PWA/TWA installability (the Android Play Store wrapper and
+// "Add to Home Screen" both require one), deferred so it costs nothing on first
+// load. sw.js deliberately caches only the static shell, never Firebase data.
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});
+}
 const WA_NUM='2349164678560';
 let PAYSTACK_KEY='pk_live_005d2ffa19fb3405849eb17c44af15e007c3027a';
 let cart=JSON.parse(localStorage.getItem('rnm_cart')||'[]');
