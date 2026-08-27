@@ -470,9 +470,26 @@ function toggleAuthMode(){
   document.getElementById('toggle-note').innerHTML=isLogin?'Already a vendor? <span onclick="toggleAuthMode()">Sign in</span>':'New vendor? <span onclick="toggleAuthMode()">Apply here</span>';
   if(isLogin)updateLogisticsPreview();
 }
-const GITHUB_CONFIG={owner:'ubongrich62',repo:'richnation-images',branch:'main',token:'YOUR_FINE_GRAINED_TOKEN'};
-const GITHUB_DOCS_CONFIG={owner:'ubongrich62',repo:'richnation-documents',branch:'main',token:GITHUB_CONFIG.token};
-function isGithubConfigured(){return GITHUB_CONFIG.owner!=='YOUR_GITHUB_USERNAME'&&GITHUB_CONFIG.token!=='YOUR_FINE_GRAINED_TOKEN';}
+const GITHUB_DOCS_CONFIG={owner:'ubongrich62',repo:'richnation-documents',branch:'main',token:'YOUR_FINE_GRAINED_TOKEN'};
+function isGithubConfigured(){return true;}
+const FIREBASE_STORAGE_BUCKET='richnation-portal.firebasestorage.app';
+// Same idea as an already-compressed base64 image upload for admin.html, moves image
+// bandwidth off the Realtime Database entirely instead of embedding it inline.
+async function uploadDataUrlToStorage(dataUrl,folder){
+  try{
+    const res=await fetch(dataUrl);
+    const blob=await res.blob();
+    const ext=(blob.type.split('/')[1]||'jpg').split('+')[0];
+    const path=folder+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
+    const encodedPath=encodeURIComponent(path);
+    const uploadUrl='https://firebasestorage.googleapis.com/v0/b/'+FIREBASE_STORAGE_BUCKET+'/o?name='+encodedPath;
+    const uploadRes=await fetch(uploadUrl,{method:'POST',headers:{'Content-Type':blob.type||'image/jpeg'},body:blob});
+    if(!uploadRes.ok)throw new Error('Upload failed: '+uploadRes.status);
+    const data=await uploadRes.json();
+    const token=data.downloadTokens;
+    return 'https://firebasestorage.googleapis.com/v0/b/'+FIREBASE_STORAGE_BUCKET+'/o/'+encodedPath+'?alt=media'+(token?'&token='+token:'');
+  }catch(e){console.warn('Storage upload failed:',e);return null;}
+}
 // Sensitive documents (IDs, business registration, licenses) go to a PRIVATE repo instead
 // of the public images one. Since private content can't be reached via a plain public
 // link, this stores a "github-private:<path>" reference, the admin panel knows to fetch
@@ -493,18 +510,7 @@ async function uploadDataUrlToGithubPrivate(dataUrl,folder){
   }catch(e){console.warn('GitHub private document upload failed:',e);return null;}
 }
 async function uploadDataUrlToGithub(dataUrl,folder){
-  if(!isGithubConfigured())return null;
-  try{
-    const commaIdx=dataUrl.indexOf(',');
-    const base64Content=dataUrl.slice(commaIdx+1);
-    const mimeMatch=dataUrl.slice(0,commaIdx).match(/data:[^/]+\/([^;]+)/);
-    const ext=(mimeMatch?mimeMatch[1]:'jpg').split('+')[0];
-    const path='images/'+folder+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
-    const apiUrl='https://api.github.com/repos/'+GITHUB_CONFIG.owner+'/'+GITHUB_CONFIG.repo+'/contents/'+path;
-    const res=await fetch(apiUrl,{method:'PUT',headers:{'Authorization':'token '+GITHUB_CONFIG.token,'Content-Type':'application/json','Accept':'application/vnd.github+json'},body:JSON.stringify({message:'Upload '+path,content:base64Content,branch:GITHUB_CONFIG.branch})});
-    if(!res.ok)throw new Error('GitHub upload failed: '+res.status);
-    return 'https://raw.githubusercontent.com/'+GITHUB_CONFIG.owner+'/'+GITHUB_CONFIG.repo+'/'+GITHUB_CONFIG.branch+'/'+path;
-  }catch(e){console.warn('GitHub image upload failed:',e);return null;}
+  return uploadDataUrlToStorage(dataUrl,folder);
 }
 function fileToBase64(file){
   return new Promise(function(resolve){

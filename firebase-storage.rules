@@ -1,0 +1,28 @@
+// Firebase Storage Security Rules for the richnation-portal project.
+//
+// Paste this into: Firebase Console -> Storage -> Rules -> replace contents -> Publish
+//
+// Public read (image URLs are displayed across the customer site, vendor
+// portal, and admin panel, so they need to load without authentication).
+// Writes are restricted to the specific folders this app actually uses,
+// must be an image content type, and capped at 8MB, images are already
+// compressed to well under 1MB client-side before upload, so this only
+// blocks abuse, not normal use. This mirrors the same risk profile
+// already accepted for the Realtime Database rules, scoped down further
+// with folder/type/size checks rather than a fully open write.
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{folder}/{allPaths=**} {
+      allow read: if true;
+      allow write: if folder in [
+                        'banners','products','staff','investors','riders',
+                        'vendors','orders','hero-banner','payment-icons',
+                        'colors','vendor-photos','vendor-products'
+                      ]
+                   && request.resource.size < 8 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+  }
+}

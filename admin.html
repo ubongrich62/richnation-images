@@ -4582,38 +4582,17 @@ function compressImage(file,maxDim,quality){
   });
 }
 
-// ── GitHub-based image hosting, moves image bandwidth off Firebase entirely.
-// The real GitHub token is never in this file, it lives only in Vercel's
-// encrypted environment variables. This just calls a small serverless proxy
-// (api/upload-image.js in this repo, deployed on Vercel) which holds that
-// token server-side and talks to GitHub on our behalf. APP_SECRET here is a
-// much lower-stakes shared value, if it leaked the worst case is someone
-// spams uploads through the proxy, not that they gain write access to GitHub.
-const UPLOAD_PROXY_CONFIG={
-  endpoint:'YOUR_VERCEL_PROXY_URL',   // e.g. https://your-project.vercel.app/api/upload-image
-  appSecret:'ShPrr8y--p0_UGikQ0y8ZWdajMB5sK-1tXG9mBA357c'
-};
+// ── Image hosting via Firebase Storage, moves image bandwidth off the
+// Realtime Database entirely (every product/order fetch was previously
+// pulling full base64 image data along with it, every single time).
+// Function names kept as "Github" for historical reasons, since many call
+// sites across this file and vendor.html already use them, they now upload
+// to Firebase Storage instead, no separate account or token needed.
 function isGithubConfigured(){
-  return UPLOAD_PROXY_CONFIG.endpoint!=='YOUR_VERCEL_PROXY_URL';
+  return true;
 }
 async function uploadDataUrlToGithub(dataUrl,folder){
-  if(!isGithubConfigured()){
-    console.warn('Image upload proxy is not configured yet, falling back to inline storage.');
-    return null;
-  }
-  try{
-    const res=await fetch(UPLOAD_PROXY_CONFIG.endpoint,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-app-secret':UPLOAD_PROXY_CONFIG.appSecret},
-      body:JSON.stringify({dataUrl,folder})
-    });
-    if(!res.ok){const errBody=await res.text();throw new Error('Upload proxy failed: '+res.status+', '+errBody);}
-    const data=await res.json();
-    return data.url||null;
-  }catch(e){
-    console.warn('GitHub image upload failed:',e);
-    return null;
-  }
+  return uploadDataUrlToStorage(dataUrl,folder);
 }
 // Sensitive documents go to the private repo, returns a github-private: reference
 // instead of a public URL, since private content needs authenticated access to view.
