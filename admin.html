@@ -2907,10 +2907,10 @@ function renderProducts(c){
     <div class="page-hdr-sub">${prods.length} product${prods.length!==1?'s':''} in your catalogue</div></div>
     <div class="page-hdr-actions">
       <button class="btn btn-dk btn-lg" onclick="compressAllProductImages()" title="Shrinks any large/uncompressed photos already saved on your products, run this once to speed up product load time">🗜️ Compress Images</button>
-      <button class="btn btn-or btn-lg" onclick="migrateProductImagesToGithub()" title="Moves your EXISTING product photos out of the database and onto GitHub, this is what actually reduces your Firebase bandwidth usage, not just stops it growing">☁️ Move Images to GitHub</button>
-      <button class="btn btn-or btn-lg" onclick="migrateEverythingElseToGithub()" title="Moves existing staff photos, vendor photos/logos/documents, investor photos, and rider photos onto GitHub too">☁️ Move Staff/Vendor/Investor/Rider Images</button>
-      <button class="btn btn-or btn-lg" onclick="migrateOrderImagesToGithub()" title="Orders freeze a snapshot of each item's image at checkout time, this moves those old frozen images (from before GitHub hosting existed) onto GitHub too">☁️ Move Order Images to GitHub</button>
-      <button class="btn btn-or btn-lg" onclick="migrateSettingsImagesToGithub()" title="Your hero banner, payment icons, and other site-wide images live in one settings record that loads on nearly every page, this moves any of those still stored as raw data onto GitHub">☁️ Move Hero Banner &amp; Site Images to GitHub</button>
+      <button class="btn btn-or btn-lg" onclick="migrateProductImagesToGithub()" title="Moves your EXISTING product photos out of the database and into Storage, this is what actually reduces your Firebase bandwidth usage, not just stops it growing">☁️ Move Images to Storage</button>
+      <button class="btn btn-or btn-lg" onclick="migrateEverythingElseToGithub()" title="Moves existing staff photos, vendor photos/logos/documents, investor photos, and rider photos into Storage too">☁️ Move Staff/Vendor/Investor/Rider Images</button>
+      <button class="btn btn-or btn-lg" onclick="migrateOrderImagesToGithub()" title="Orders freeze a snapshot of each item's image at checkout time, this moves those old frozen images (from before Storage hosting existed) into Storage too">☁️ Move Order Images to Storage</button>
+      <button class="btn btn-or btn-lg" onclick="migrateSettingsImagesToGithub()" title="Your hero banner, payment icons, and other site-wide images live in one settings record that loads on nearly every page, this moves any of those still stored as raw data into Storage">☁️ Move Hero Banner &amp; Site Images to Storage</button>
       <button class="btn btn-or btn-lg" onclick="openProdForm(null)">+ Add Product</button>
     </div>
   </div>
@@ -4733,16 +4733,16 @@ async function compressAllProductImages(){
 }
 
 // The actual fix for CURRENT database size, moves images that are still stored as
-// base64 text (from before GitHub hosting existed) onto GitHub, replacing them with a
+// base64 text (from before Storage hosting existed) into Storage, replacing them with a
 // short link. Unlike compression, this is what actually shrinks what's downloaded on
 // every product fetch, not just how big each image is.
 async function migrateProductImagesToGithub(){
-  if(!isGithubConfigured()){toast('GitHub image hosting isn\'t configured yet, set that up first','err');return;}
-  if(!confirm('This moves your EXISTING product photos out of the database and onto GitHub. It can take a while for a large catalogue, keep this tab open until it finishes. Continue?'))return;
+  if(!isGithubConfigured()){toast('Image storage isn\'t configured yet, set that up first','err');return;}
+  if(!confirm('This moves your EXISTING product photos out of the database and into Storage. It can take a while for a large catalogue, keep this tab open until it finishes. Continue?'))return;
   var prods=await fbG('rn_mall_products')||{};
   var pids=Object.keys(prods);
   var totalImgs=0,migrated=0,failed=0;
-  toast('Moving images to GitHub, please keep this tab open...');
+  toast('Moving images to Storage, please keep this tab open...');
   for(var pi=0;pi<pids.length;pi++){
     var pid=pids[pi],p=prods[pid];
     if(!p.images||!p.images.length)continue;
@@ -4764,16 +4764,16 @@ async function migrateProductImagesToGithub(){
     }
     toast('Migrating… '+migrated+' moved so far ('+(pi+1)+'/'+pids.length+' products checked)');
   }
-  toast('Done, moved '+migrated+' of '+totalImgs+' image(s) to GitHub'+(failed?' ('+failed+' failed, left as-is)':''));
+  toast('Done, moved '+migrated+' of '+totalImgs+' image(s) to Storage'+(failed?' ('+failed+' failed, left as-is)':''));
   nav('products',false);
 }
 
 // Same idea as the product migration, but for the simpler single-field photos on
 // staff/investor/rider records, plus vendor's photo, logo, and nested documents object.
 async function migrateEverythingElseToGithub(){
-  if(!isGithubConfigured()){toast('GitHub image hosting isn\'t configured yet, set that up first','err');return;}
-  if(!confirm('This moves existing staff, vendor, investor, and rider photos/documents out of the database and onto GitHub. It can take a while, keep this tab open until it finishes. Continue?'))return;
-  toast('Moving images to GitHub, please keep this tab open...');
+  if(!isGithubConfigured()){toast('Image storage isn\'t configured yet, set that up first','err');return;}
+  if(!confirm('This moves existing staff, vendor, investor, and rider photos/documents out of the database and into Storage. It can take a while, keep this tab open until it finishes. Continue?'))return;
+  toast('Moving images to Storage, please keep this tab open...');
   var totalMoved=0,totalFailed=0;
 
   async function migrateSimplePhoto(path,record,folder){
@@ -4831,17 +4831,17 @@ async function migrateEverythingElseToGithub(){
     if(dirty)await fbU('rn_mall_vendors/'+vid,updates);
   }
 
-  toast('Done, moved '+totalMoved+' image(s)/document(s) to GitHub'+(totalFailed?' ('+totalFailed+' failed, left as-is)':''));
+  toast('Done, moved '+totalMoved+' image(s)/document(s) to Storage'+(totalFailed?' ('+totalFailed+' failed, left as-is)':''));
 }
 
 // Orders freeze a snapshot of each item's image at the moment of checkout, migrating
 // the PRODUCT afterward doesn't touch orders already placed, so old orders can keep
 // carrying heavy base64 image data indefinitely, getting re-downloaded every time
-// anyone views that order. This moves those frozen images onto GitHub too.
+// anyone views that order. This moves those frozen images into Storage too.
 async function migrateOrderImagesToGithub(){
-  if(!isGithubConfigured()){toast('GitHub image hosting isn\'t configured yet, set that up first','err');return;}
-  if(!confirm('This moves images frozen inside your EXISTING orders onto GitHub. It can take a while for a large order history, keep this tab open until it finishes. Continue?'))return;
-  toast('Moving order images to GitHub, please keep this tab open...');
+  if(!isGithubConfigured()){toast('Image storage isn\'t configured yet, set that up first','err');return;}
+  if(!confirm('This moves images frozen inside your EXISTING orders into Storage. It can take a while for a large order history, keep this tab open until it finishes. Continue?'))return;
+  toast('Moving order images to Storage, please keep this tab open...');
   var orders=await fbG('rn_mall_orders')||{};
   var oids=Object.keys(orders);
   var totalImgs=0,migrated=0,failed=0;
@@ -4863,16 +4863,16 @@ async function migrateOrderImagesToGithub(){
     if(dirty)await fbU('rn_mall_orders/'+oid,{items:newItems});
     if((oi+1)%20===0)toast('Migrating… '+migrated+' moved so far ('+(oi+1)+'/'+oids.length+' orders checked)');
   }
-  toast('Done, moved '+migrated+' of '+totalImgs+' order image(s) to GitHub'+(failed?' ('+failed+' failed, left as-is)':''));
+  toast('Done, moved '+migrated+' of '+totalImgs+' order image(s) to Storage'+(failed?' ('+failed+' failed, left as-is)':''));
 }
 
 // The settings record (hero banner, payment icons) loads on nearly every single page
 // of the site, customer homepage included, so an unmigrated image here is one of the
 // single biggest bandwidth costs in the whole app, worse than any individual product.
 async function migrateSettingsImagesToGithub(){
-  if(!isGithubConfigured()){toast('GitHub image hosting isn\'t configured yet, set that up first','err');return;}
-  if(!confirm('This moves your hero banner images and payment icons out of your settings record and onto GitHub. Continue?'))return;
-  toast('Moving site images to GitHub, please keep this tab open...');
+  if(!isGithubConfigured()){toast('Image storage isn\'t configured yet, set that up first','err');return;}
+  if(!confirm('This moves your hero banner images and payment icons out of your settings record and into Storage. Continue?'))return;
+  toast('Moving site images to Storage, please keep this tab open...');
   var updates={},totalImgs=0,migrated=0,failed=0;
 
   var hc=settings.heroConfig||{};
@@ -4912,7 +4912,7 @@ async function migrateSettingsImagesToGithub(){
   }
 
   if(Object.keys(updates).length)await fbU('rn_mall_settings',updates);
-  toast('Done, moved '+migrated+' of '+totalImgs+' site image(s) to GitHub'+(failed?' ('+failed+' failed, left as-is)':''));
+  toast('Done, moved '+migrated+' of '+totalImgs+' site image(s) to Storage'+(failed?' ('+failed+' failed, left as-is)':''));
 }
 
 async function uploadProductVideo(){
