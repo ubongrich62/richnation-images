@@ -1513,6 +1513,10 @@ function applyHeroConfig(sett){
   const hlEl=document.getElementById('hero-highlight');if(hlEl&&hc.highlightColor)hlEl.style.color=hc.highlightColor;
 }
 async function init(){
+  // These icons never depend on fetched data, draw them immediately so the raw
+  // emoji fallback baked into the HTML is never visible, not even briefly while
+  // Firebase data is still loading.
+  applyBrandIcons();
   currentLang=localStorage.getItem('rnm_lang')||'en';
   try{const refParam=new URLSearchParams(window.location.search).get('ref');if(refParam)sessionStorage.setItem('rnm_ref',refParam);}catch(e){}
   window._mallDataReady=false;
