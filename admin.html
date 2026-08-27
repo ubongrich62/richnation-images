@@ -4582,43 +4582,34 @@ function compressImage(file,maxDim,quality){
   });
 }
 
-// ── GitHub-based image hosting, a free, no-card bridge solution while sorting out
-// payment for Firebase Blaze / Cloudflare R2. Moves image bandwidth off Firebase
-// entirely, which is the actual goal (not just switching where it's billed).
-//
-// SETUP: fill in these three values once you've created your GitHub repo + token.
-const GITHUB_CONFIG={
-  owner:'ubongrich62',
-  repo:'richnation-images',          // the repo you created
-  branch:'main',
-  token:'YOUR_FINE_GRAINED_TOKEN'
+// ── GitHub-based image hosting, moves image bandwidth off Firebase entirely.
+// The real GitHub token is never in this file, it lives only in Vercel's
+// encrypted environment variables. This just calls a small serverless proxy
+// (api/upload-image.js in this repo, deployed on Vercel) which holds that
+// token server-side and talks to GitHub on our behalf. APP_SECRET here is a
+// much lower-stakes shared value, if it leaked the worst case is someone
+// spams uploads through the proxy, not that they gain write access to GitHub.
+const UPLOAD_PROXY_CONFIG={
+  endpoint:'YOUR_VERCEL_PROXY_URL',   // e.g. https://your-project.vercel.app/api/upload-image
+  appSecret:'ShPrr8y--p0_UGikQ0y8ZWdajMB5sK-1tXG9mBA357c'
 };
 function isGithubConfigured(){
-  return GITHUB_CONFIG.owner!=='YOUR_GITHUB_USERNAME'&&GITHUB_CONFIG.token!=='YOUR_FINE_GRAINED_TOKEN';
+  return UPLOAD_PROXY_CONFIG.endpoint!=='YOUR_VERCEL_PROXY_URL';
 }
 async function uploadDataUrlToGithub(dataUrl,folder){
   if(!isGithubConfigured()){
-    console.warn('GitHub image hosting is not configured yet, falling back to inline storage.');
+    console.warn('Image upload proxy is not configured yet, falling back to inline storage.');
     return null;
   }
   try{
-    const commaIdx=dataUrl.indexOf(',');
-    const base64Content=dataUrl.slice(commaIdx+1);
-    const mimeMatch=dataUrl.slice(0,commaIdx).match(/data:[^/]+\/([^;]+)/);
-    const ext=(mimeMatch?mimeMatch[1]:'jpg').split('+')[0];
-    const path='images/'+folder+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
-    const apiUrl='https://api.github.com/repos/'+GITHUB_CONFIG.owner+'/'+GITHUB_CONFIG.repo+'/contents/'+path;
-    const res=await fetch(apiUrl,{
-      method:'PUT',
-      headers:{
-        'Authorization':'token '+GITHUB_CONFIG.token,
-        'Content-Type':'application/json',
-        'Accept':'application/vnd.github+json'
-      },
-      body:JSON.stringify({message:'Upload '+path,content:base64Content,branch:GITHUB_CONFIG.branch})
+    const res=await fetch(UPLOAD_PROXY_CONFIG.endpoint,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-app-secret':UPLOAD_PROXY_CONFIG.appSecret},
+      body:JSON.stringify({dataUrl,folder})
     });
-    if(!res.ok){const errBody=await res.text();throw new Error('GitHub upload failed: '+res.status+', '+errBody);}
-    return 'https://raw.githubusercontent.com/'+GITHUB_CONFIG.owner+'/'+GITHUB_CONFIG.repo+'/'+GITHUB_CONFIG.branch+'/'+path;
+    if(!res.ok){const errBody=await res.text();throw new Error('Upload proxy failed: '+res.status+', '+errBody);}
+    const data=await res.json();
+    return data.url||null;
   }catch(e){
     console.warn('GitHub image upload failed:',e);
     return null;
