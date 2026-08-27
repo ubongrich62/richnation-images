@@ -4130,7 +4130,7 @@ function renderSiteCustomiser(c){
   html += '<div class="cs-section"><div class="cs-section-title">🏠 Hero Section</div>';
   html += '<div class="fg"><label class="lbl">Eyebrow</label><input class="inp" id="cs-ey" value="'+(hc.eyebrow||'Delivering Across Nigeria and The World')+'"/></div>';
   html += '<div class="g2"><div class="fg"><label class="lbl">Title Line 1 (white)</label><input class="inp" id="cs-t1" value="'+(hc.title1||'Shop Smart.')+'"/></div>';
-  html += '<div class="fg"><label class="lbl">Title Line 2 (accent)</label><input class="inp" id="cs-t2" value="'+(hc.title2||'Live Better.')+'"/></div></div>';
+  html += '<div class="fg"><label class="lbl">Title Line 2 (accent)</label><input class="inp" id="cs-t2" value="'+(hc.title2||'Billionaire Lifestyle.')+'"/></div></div>';
   html += '<div class="fg"><label class="lbl">Subtitle</label><textarea class="ta" id="cs-sub" rows="2">'+(hc.subtitle||'Top quality products delivered to your door.')+'</textarea></div>';
   html += '<div class="g2"><div class="fg"><label class="lbl">Button 1</label><input class="inp" id="cs-b1" value="'+(hc.btn1||'Shop Now')+'"/></div>';
   html += '<div class="fg"><label class="lbl">Button 2</label><input class="inp" id="cs-b2" value="'+(hc.btn2||'Track My Order')+'"/></div></div>';
@@ -4346,7 +4346,7 @@ async function savePickupPinPosition(){
   }catch(e){/* label is a nice-to-have, coordinates are already safely saved */}
 }
 async function saveHeroText(){
-  var cfg=Object.assign({},settings.heroConfig||{},{eyebrow:(document.getElementById('cs-ey')||{}).value||'',title1:(document.getElementById('cs-t1')||{}).value||'Shop Smart.',title2:(document.getElementById('cs-t2')||{}).value||'Live Better.',subtitle:(document.getElementById('cs-sub')||{}).value||'',btn1:(document.getElementById('cs-b1')||{}).value||'Shop Now',btn2:(document.getElementById('cs-b2')||{}).value||'Track My Order',color1:(document.getElementById('hc-c1-hex')||{}).value||'#FF6A00',color2:(document.getElementById('hc-c2-hex')||{}).value||'#FFA733',highlightColor:(document.getElementById('hc-hl-hex')||{}).value||'#FFE066'});
+  var cfg=Object.assign({},settings.heroConfig||{},{eyebrow:(document.getElementById('cs-ey')||{}).value||'',title1:(document.getElementById('cs-t1')||{}).value||'Experience The',title2:(document.getElementById('cs-t2')||{}).value||'Billionaire Lifestyle.',subtitle:(document.getElementById('cs-sub')||{}).value||'',btn1:(document.getElementById('cs-b1')||{}).value||'Shop Now',btn2:(document.getElementById('cs-b2')||{}).value||'Track My Order',color1:(document.getElementById('hc-c1-hex')||{}).value||'#FF6A00',color2:(document.getElementById('hc-c2-hex')||{}).value||'#FFA733',highlightColor:(document.getElementById('hc-hl-hex')||{}).value||'#FFE066'});
   settings.heroConfig=cfg;await fbU('rn_mall_settings',{heroConfig:cfg});toast('Hero text & colours saved!');
 }
 async function saveAnn(){
@@ -4414,7 +4414,7 @@ function renderHeroEditor(c){
   html+='<div class="cs-section"><div class="cs-section-title">🏠 Hero Text</div>';
   html+='<div class="fg"><label class="lbl">Eyebrow</label><input class="inp" id="he-ey" value="'+(hc.eyebrow||'Delivering Across Nigeria and The World')+'"/></div>';
   html+='<div class="g2"><div class="fg"><label class="lbl">Title 1</label><input class="inp" id="he-t1" value="'+(hc.title1||'Shop Smart.')+'"/></div>';
-  html+='<div class="fg"><label class="lbl">Title 2</label><input class="inp" id="he-t2" value="'+(hc.title2||'Live Better.')+'"/></div></div>';
+  html+='<div class="fg"><label class="lbl">Title 2</label><input class="inp" id="he-t2" value="'+(hc.title2||'Billionaire Lifestyle.')+'"/></div></div>';
   html+='<div class="fg"><label class="lbl">Subtitle</label><textarea class="ta" id="he-sub" rows="2">'+(hc.subtitle||'')+'</textarea></div>';
   html+='<div class="g2"><div class="fg"><label class="lbl">Button 1</label><input class="inp" id="he-b1" value="'+(hc.btn1||'Shop Now')+'"/></div>';
   html+='<div class="fg"><label class="lbl">Button 2</label><input class="inp" id="he-b2" value="'+(hc.btn2||'Track My Order')+'"/></div></div>';
