@@ -185,7 +185,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 /* SLIDESHOW */
 .slideshow-wrap{position:relative;background:var(--card2);aspect-ratio:1;max-height:480px;overflow:hidden;display:flex;align-items:center;justify-content:center;border-radius:var(--r-md);}
 .slideshow-wrap img,.slideshow-wrap video,.slideshow-wrap iframe{width:100%;height:100%;object-fit:cover;}
-.slide-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.94);border:1px solid var(--bdr);border-radius:var(--r-pill);width:34px;height:34px;cursor:pointer;color:var(--wh);font-size:18px;display:flex;align-items:center;justify-content:center;z-index:5;box-shadow:var(--sh-sm);}
+.slide-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.94);border:1px solid var(--bdr);border-radius:var(--r-pill);width:34px;height:34px;cursor:pointer;color:var(--ink);font-size:18px;font-weight:900;display:flex;align-items:center;justify-content:center;z-index:5;box-shadow:var(--sh-sm);}
 .slide-prev{left:10px;}.slide-next{right:10px;}
 .slide-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:5;}
 .slide-dot{width:7px;height:7px;border-radius:var(--r-pill);background:rgba(255,255,255,0.7);border:1px solid rgba(0,0,0,0.15);cursor:pointer;transition:all .2s;}
@@ -336,15 +336,15 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .footer-link:hover{color:var(--or);}
 .footer-copy{max-width:var(--container);margin:0 auto;border-top:1px solid rgba(255,255,255,.12);padding-top:18px;font-size:11px;color:rgba(255,255,255,.4);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
 /* NEWSLETTER */
-.newsletter{background:var(--card2);border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);padding:44px 20px;}
+.newsletter{background:var(--or);border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);padding:44px 20px;}
 .newsletter-inner{max-width:640px;margin:0 auto;text-align:center;}
-.newsletter-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px;color:var(--wh);margin-bottom:8px;}
-.newsletter-sub{font-size:13px;color:var(--w2);margin-bottom:20px;}
+.newsletter-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px;color:#000;margin-bottom:8px;}
+.newsletter-sub{font-size:13px;color:#000;margin-bottom:20px;}
 .newsletter-form{display:flex;flex-wrap:wrap;gap:10px;max-width:520px;margin:0 auto;}
-.newsletter-form input{flex:1 1 160px;min-width:0;background:var(--card2);border:1.5px solid var(--bdr);border-radius:var(--r-sm);padding:12px 14px;font-size:13px;color:var(--wh);outline:none;}
-.newsletter-form input:focus{border-color:var(--or);}
+.newsletter-form input{flex:1 1 160px;min-width:0;background:#fff;border:1.5px solid var(--ink);border-radius:var(--r-sm);padding:12px 14px;font-size:13px;color:var(--ink);outline:none;}
+.newsletter-form input:focus{border-color:var(--ink);}
 .newsletter-form button{background:var(--ink);color:#fff;border:none;border-radius:var(--r-sm);padding:12px 22px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap;}
-.newsletter-form button:hover{background:var(--or);}
+.newsletter-form button:hover{background:#fff;color:var(--ink);}
 /* VENDOR / SELL WITH US */
 .vendor-cta{background:linear-gradient(110deg,var(--ink2),var(--ink) 60%);border-radius:var(--r-lg);padding:36px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;position:relative;overflow:hidden;}
 .vendor-cta::after{content:'';position:absolute;right:-6%;bottom:-40%;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(255,106,0,.18),transparent 70%);}
@@ -563,7 +563,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
   <div class="hero" id="hero-banner">
    <div class="hero-inner">
     <div class="hero-eyebrow" id="hero-eyebrow">Delivering Across Nigeria and The World</div>
-    <h1 class="hero-title"><span id="hero-t1">Shop Smart.</span><br><span id="hero-t2">Shop <span id="hero-highlight" style="color:var(--or);">RichNation.</span></span></h1>
+    <h1 class="hero-title"><span id="hero-t1">Shop Smart.</span><br><span id="hero-t2">Live <span id="hero-highlight" style="color:var(--or);">Better.</span></span></h1>
     <p class="hero-sub" id="hero-sub">Top quality products at affordable prices, delivered to your door with real-time tracking.</p>
     <div class="hero-btns">
       <button class="hero-btn hero-btn-or" id="hero-btn1" onclick="scrollToProds()">Shop Now</button>
@@ -671,8 +671,8 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 
   <div class="newsletter">
     <div class="newsletter-inner">
-      <div class="newsletter-title">Stay in the loop</div>
-      <div class="newsletter-sub">New arrivals, restocks and offers, straight to your inbox. No spam.</div>
+      <div class="newsletter-title">Stay Ahead of What's Next</div>
+      <div class="newsletter-sub">New arrivals, exclusive offers, restocks and more, delivered straight to your inbox.</div>
       <form class="newsletter-form" onsubmit="event.preventDefault();subscribeNewsletter(this)">
         <input type="text" name="name" placeholder="Your name" required>
         <input type="email" name="email" placeholder="Your email address" required>
@@ -685,7 +685,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
     <div class="footer-grid">
       <div>
         <img src="images/branding/richnation-logo-v2.png" style="height:34px;margin-bottom:12px;display:block;">
-        <div class="footer-brand" id="footer-brand">Nigeria's trusted online mall. Quality products at affordable prices, fast delivery, real support.</div>
+        <div class="footer-brand" id="footer-brand"><strong style="color:#fff;">Welcome to RichNation Mall. EXPERIENCE THE BILLIONAIRE LIFESTYLE.</strong><br><br>RichNation Mall is a premium online shopping destination built for people who appreciate quality, style, and exceptional value. We bring together quality products, modern convenience and exceptional value to help you discover more of what you love. Every product, every order, and every experience is designed with one goal, to make premium living more accessible.</div>
         <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
           <a href="https://wa.me/2349164678560" target="_blank" style="color:#FF6A00;font-size:11px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#FF6A00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h4l2 6-3 2a13 13 0 006 6l2-3 6 2v4a2 2 0 01-2 2C10.5 22 2 13.5 2 5a2 2 0 012-2z"/></svg>WhatsApp</a>
           <a href="https://www.youtube.com/@richnationwbpt" target="_blank" style="color:#FF6A00;font-size:11px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#FF6A00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4l14 8-14 8z"/></svg>YouTube</a>
