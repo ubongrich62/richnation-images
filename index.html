@@ -100,11 +100,9 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .hero-stat-lbl{font-size:11px;color:rgba(255,255,255,.55);margin-top:2px;text-transform:uppercase;letter-spacing:.5px;}
 /* TRUST */
 .trust-strip{display:flex;overflow:hidden;background:var(--card2);border-bottom:1px solid var(--bdr);max-width:100%;}
-.trust-track{display:flex;width:max-content;animation:trustScroll 28s linear infinite;}
-.trust-strip:hover .trust-track{animation-play-state:paused;}
+.trust-track{display:flex;width:max-content;animation:trustScroll 28s linear infinite;will-change:transform;}
 .trust-item{display:flex;align-items:center;gap:8px;padding:12px 22px;white-space:nowrap;flex-shrink:0;}
 @keyframes trustScroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
-@media (prefers-reduced-motion: reduce){.trust-track{animation:none;}}
 .trust-icon{font-size:15px;}
 .trust-text{font-size:11.5px;color:var(--w2);font-weight:600;}
 /* SECTIONS */
