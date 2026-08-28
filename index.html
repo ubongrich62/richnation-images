@@ -490,11 +490,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .live-dot{width:8px;height:8px;border-radius:99px;background:var(--mu);flex-shrink:0;}
 .live-dot.on{background:var(--su);animation:liveDotPulse 1.6s ease-in-out infinite;}
 @keyframes liveDotPulse{0%,100%{box-shadow:0 0 0 0 rgba(225,94,0,.45);}50%{box-shadow:0 0 0 5px rgba(225,94,0,0);}}
-.delivery-progress{position:relative;height:88px;background:var(--card2);padding:34px 26px 0;}
-.dp-track{position:relative;height:4px;border-radius:99px;background:var(--bdr);width:100%;}
-.dp-fill{position:absolute;left:0;top:0;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--or),#FFA733);transition:width 1s ease;}
-.dp-rider{position:absolute;top:16px;transform:translateX(-50%);width:34px;height:34px;border-radius:99px;background:var(--or);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:16px;transition:left 1s ease,opacity .3s ease;}
-.dp-endpoint{position:absolute;top:16px;right:26px;width:30px;height:30px;border-radius:99px;background:#15151A;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:13px;}
+@keyframes mapPulse{0%,100%{opacity:.5;}50%{opacity:1;}}
 </style>
 <link rel="preconnect" href="https://richnation-portal-default-rtdb.firebaseio.com"/>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin/>
@@ -2688,16 +2684,41 @@ async function geocodeAddress(address){
   }catch(e){}
   return null;
 }
-// Progress tracker, deliberately not a real map. A live interactive map depends on
-// external tile servers, a JS library, and a container that's already sized before
-// init, any of which failing is how the old version ended up showing a black box.
-// This is pure HTML/CSS driven by two numbers we already have (rider distance,
-// delivery distance), so there's nothing external that can fail into a blank page.
-let _deliveryInitialDistKm=null;
-let _deliveryProgressOrderId=null;
-async function renderDeliveryProgress(order){
-  const el=document.getElementById('delivery-progress');if(!el)return;
-  if(_deliveryProgressOrderId!==order.tracking){_deliveryInitialDistKm=null;_deliveryProgressOrderId=order.tracking;}
+// ── LIVE DELIVERY MAP, Google Maps ──
+// Google Maps is what real ride-hailing/delivery apps use, its tile and JS delivery
+// infrastructure is far more reliable than the free OpenStreetMap+Leaflet setup this
+// replaced, which kept intermittently rendering a black box for customers. The API
+// key below is meant to be public (restricted by HTTP referrer to this domain in the
+// Google Cloud Console), that's the standard, intended way to use it client-side,
+// unlike a GitHub token this is not a secret that needs hiding.
+const GOOGLE_MAPS_API_KEY='YOUR_GOOGLE_MAPS_API_KEY';
+const DARK_MAP_STYLE=[{elementType:'geometry',stylers:[{color:'#1a1a1d'}]},{elementType:'labels.text.stroke',stylers:[{color:'#1a1a1d'}]},{elementType:'labels.text.fill',stylers:[{color:'#8a8a8f'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#2a2a2e'}]},{featureType:'road',elementType:'geometry.stroke',stylers:[{color:'#1a1a1d'}]},{featureType:'road.highway',elementType:'geometry',stylers:[{color:'#3a3a3e'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#0e0e10'}]},{featureType:'poi',elementType:'geometry',stylers:[{color:'#212124'}]},{featureType:'poi',elementType:'labels',stylers:[{visibility:'off'}]},{featureType:'transit',stylers:[{visibility:'off'}]}];
+function loadGoogleMapsIfNeeded(){
+  if(window._gmapsLoadPromise)return window._gmapsLoadPromise;
+  window._gmapsLoadPromise=new Promise(function(resolve){
+    if(window.google&&window.google.maps){resolve();return;}
+    if(!GOOGLE_MAPS_API_KEY||GOOGLE_MAPS_API_KEY==='YOUR_GOOGLE_MAPS_API_KEY'){resolve();return;}
+    window._gmapsReady=function(){resolve();};
+    const script=document.createElement('script');
+    script.src='https://maps.googleapis.com/maps/api/js?key='+GOOGLE_MAPS_API_KEY+'&callback=_gmapsReady&loading=async';
+    script.onerror=function(){resolve();};
+    document.head.appendChild(script);
+  });
+  return window._gmapsLoadPromise;
+}
+function makeMarkerIcon(bg,size){
+  const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'"><circle cx="'+(size/2)+'" cy="'+(size/2)+'" r="'+(size/2-2)+'" fill="'+bg+'" stroke="white" stroke-width="2"/></svg>';
+  return {url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg),scaledSize:new google.maps.Size(size,size),labelOrigin:new google.maps.Point(size/2,size/2)};
+}
+let _deliveryMapInstance=null,_deliveryRiderMarker=null,_deliveryHomeMarker=null,_deliveryMapOrderId=null;
+async function renderDeliveryMap(order){
+  const el=document.getElementById('delivery-map');if(!el)return;
+  await loadGoogleMapsIfNeeded();
+  const statusEl=document.getElementById('delivery-map-status');
+  if(!(window.google&&window.google.maps)){
+    el.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;padding:16px;text-align:center;font-size:12px;color:var(--wh);font-weight:700;">🗺️ Map couldn\'t load right now. <span style="color:var(--or);cursor:pointer;text-decoration:underline;" onclick="renderDeliveryMap(window._lastTrackedOrder)">Try again</span></div>';
+    return;
+  }
   let riderPos=null,isLive=false;
   if(order.riderId){
     const riderRec=await fbG('rn_mall_riders/'+order.riderId);
@@ -2710,23 +2731,31 @@ async function renderDeliveryProgress(order){
     dest=await geocodeAddress(order.customer.address+', '+(order.customer.city||'')+', Nigeria');
     if(dest){fbU('rn_mall_orders/'+order.tracking,{deliveryLat:dest.lat,deliveryLng:dest.lng});}
   }
-  const statusEl=document.getElementById('delivery-map-status');
-  const vehicleEmoji=VEHICLE_ICONS[(order.riderVehicleType||'motorcycle').toLowerCase()]||'🏍️';
-  const riderEl=document.getElementById('dp-rider'),fillEl=document.getElementById('dp-fill');
-  if(riderEl)riderEl.textContent=vehicleEmoji;
-  if(!isLive||!dest){
-    if(riderEl)riderEl.style.opacity='0.35';
-    if(fillEl)fillEl.style.width='4%';
-    if(statusEl)statusEl.innerHTML='<span class="live-dot"></span> '+(!dest?'Setting up live tracking for this order, checking again shortly…':'Waiting for rider\'s live location');
+  if(!dest&&!riderPos){
+    if(statusEl)statusEl.innerHTML='<span class="live-dot"></span> Setting up live tracking for this order, checking again shortly…';
     return;
   }
-  const {distKm,mins}=estimateDeliveryTime(riderPos,dest,order.riderVehicleType);
-  if(_deliveryInitialDistKm==null||distKm>_deliveryInitialDistKm)_deliveryInitialDistKm=Math.max(distKm,0.1);
-  const pct=Math.max(4,Math.min(96,Math.round((1-distKm/_deliveryInitialDistKm)*100)));
-  if(fillEl)fillEl.style.width=pct+'%';
-  if(riderEl){riderEl.style.left=pct+'%';riderEl.style.opacity='1';}
-  const etaText=(mins<1?'<1':mins)+' min'+(mins===1?'':'s')+' away';
-  if(statusEl)statusEl.innerHTML='<span class="live-dot on"></span> <strong style="color:var(--wh);">Live</strong> rider location updating in real time<strong style="color:var(--or);margin-left:auto;">~'+etaText+'</strong>';
+  const centerPos=dest||riderPos;
+  const vehicleEmoji=VEHICLE_ICONS[(order.riderVehicleType||'motorcycle').toLowerCase()]||'🏍️';
+  const needsFullRebuild=!_deliveryMapInstance||_deliveryMapOrderId!==order.tracking;
+  if(needsFullRebuild){
+    _deliveryMapOrderId=order.tracking;
+    el.innerHTML='';
+    el.style.cssText='width:100%;height:260px;border-radius:9px 9px 0 0;overflow:hidden;background:var(--card2);';
+    _deliveryMapInstance=new google.maps.Map(el,{center:centerPos,zoom:14,disableDefaultUI:true,zoomControl:true,styles:DARK_MAP_STYLE});
+    _deliveryHomeMarker=dest?new google.maps.Marker({position:dest,map:_deliveryMapInstance,icon:makeMarkerIcon('#15151A',26),label:{text:'📍',fontSize:'13px'},title:'Delivery Address (You)'}):null;
+    _deliveryRiderMarker=new google.maps.Marker({position:isLive?riderPos:centerPos,map:_deliveryMapInstance,icon:makeMarkerIcon('#FF6A00',30),label:{text:vehicleEmoji,fontSize:'15px'},opacity:isLive?1:0,title:(order.riderName||'Your rider')+', live location'});
+  }else{
+    if(isLive&&_deliveryRiderMarker){_deliveryRiderMarker.setPosition(riderPos);_deliveryRiderMarker.setOpacity(1);}
+    else if(_deliveryRiderMarker)_deliveryRiderMarker.setOpacity(0);
+  }
+  if(isLive&&dest){
+    const bounds=new google.maps.LatLngBounds();
+    bounds.extend(riderPos);bounds.extend(dest);
+    _deliveryMapInstance.fitBounds(bounds,60);
+  }
+  const etaText=(isLive&&dest)?' &middot; ~'+(function(){const m=estimateDeliveryTime(riderPos,dest,order.riderVehicleType).mins;return (m<1?'<1':m)+' min'+(m===1?'':'s');})()+' away':'';
+  if(statusEl)statusEl.innerHTML='<span class="live-dot'+(isLive?' on':'')+'"></span> '+(isLive?'<strong style="color:var(--wh);">Live</strong> rider location updating in real time':'Waiting for rider\'s live location')+(!dest?' (still pinpointing your delivery address)':'')+(etaText?'<strong style="color:var(--or);margin-left:auto;">'+etaText.replace(' &middot; ~','~')+'</strong>':'');
 }
 function stopTrackPoll(){if(_trackPollTimer){clearInterval(_trackPollTimer);_trackPollTimer=null;}}
 async function trackOrder(silentNum){
@@ -2752,11 +2781,7 @@ async function trackOrder(silentNum){
       ${order.riderPhone?`<a href="tel:${order.riderPhone}" style="text-decoration:none;"><button style="background:var(--or);border:none;color:#000;font-weight:800;font-size:11px;padding:8px 14px;border-radius:7px;cursor:pointer;">📞 Call</button></a>`:''}
     </div>
     <div class="live-map-card" style="display:${order.riderId&&order.deliveryStage!=='delivered'&&order.status!=='cancelled'&&order.status!=='deleted'?'block':'none'};">
-      <div id="delivery-progress" class="delivery-progress">
-        <div class="dp-track"><div class="dp-fill" id="dp-fill" style="width:4%;"></div></div>
-        <div class="dp-rider" id="dp-rider" style="left:4%;">🏍️</div>
-        <div class="dp-endpoint">📍</div>
-      </div>
+      <div id="delivery-map" style="width:100%;height:260px;border-radius:9px 9px 0 0;overflow:hidden;background:var(--card2);display:flex;align-items:center;justify-content:center;"><div style="display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--wh);font-weight:700;font-size:12px;"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="var(--or)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="animation:mapPulse 1.4s ease-in-out infinite;"><path d="M9 4L3 6v14l6-2m0-14l6 2m-6-2v14m6-12l6-2v14l-6 2m0-14v14"/></svg>Loading map…</div></div>
       <div id="delivery-map-status" class="live-map-status"><span class="live-dot"></span> Loading location…</div>
     </div>`:''}
     ${order.status==='cancelled'?'<div style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--re);margin-bottom:14px;"><strong>ORDER CANCELLED</strong>, '+(order.cancelReason||order.timeline?.[order.timeline.length-1]?.note||'This order was cancelled.')+'</div>':''}
@@ -2778,7 +2803,7 @@ async function trackOrder(silentNum){
     ${(order.status==='shipped'||order.status==='out for delivery')&&order.deliveryMethod!=='pickup'&&!order.deliveryConfirmed?`<button onclick="showDeliveryConfirm('${num}')" style="width:100%;background:linear-gradient(135deg,var(--or),var(--or-dk));color:#fff;border:none;padding:12px;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:13px;cursor:pointer;margin-bottom:10px;">CONFIRM DELIVERY, Sign to Confirm Receipt</button>`:''}
     <button style="width:100%;background:#FF6A00;color:#fff;border:none;padding:12px;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:13px;cursor:pointer;margin-top:8px;" onclick="window.open('https://wa.me/${WA_NUM}?text='+encodeURIComponent('Hi RichNation Mall! My tracking number is ${num}. Please update me.'),'_blank')">WhatsApp Update</button>
   </div>`;
-  if(order.riderId&&order.deliveryStage!=='delivered'&&order.status!=='cancelled'&&order.status!=='deleted'){window._lastTrackedOrder=order;renderDeliveryProgress(order);}
+  if(order.riderId&&order.deliveryStage!=='delivered'&&order.status!=='cancelled'&&order.status!=='deleted'){window._lastTrackedOrder=order;renderDeliveryMap(order);}
   if(!silentNum){
     stopTrackPoll();
     _trackPollTimer=setInterval(function(){
