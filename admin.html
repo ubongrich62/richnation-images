@@ -717,7 +717,10 @@ async function doLogin(){
   const e=document.getElementById('li-e').value.trim().toLowerCase();
   const p=document.getElementById('li-p').value.trim();
   const err=document.getElementById('li-err');
-  const stored=localStorage.getItem('rnm_admin_pass')||DEFAULT_PASS;
+  // Checked in Firebase first, not just localStorage, so a changed password works
+  // from any device/browser, not only the one it was changed on.
+  const storedRemote=await fbG('rn_mall_settings/adminPassword');
+  const stored=storedRemote||localStorage.getItem('rnm_admin_pass')||DEFAULT_PASS;
   // A blank email used to bypass this check entirely, meaning the Owner login only
   // ever required the single password string below with no second factor at all.
   // Require it to actually match an authorised address now.
@@ -3996,16 +3999,20 @@ async function saveFlash(){
   settings.flashSaleEnd=v;await fbU('rn_mall_settings',{flashSaleEnd:v||null});
   toast('Flash sale timer saved!');
 }
-function changePass(){
+async function changePass(){
   const old=document.getElementById('set-old')?.value;
   const nw=document.getElementById('set-new')?.value;
   const cf=document.getElementById('set-conf')?.value;
   const msg=document.getElementById('pw-msg');
-  const stored=localStorage.getItem('rnm_admin_pass')||DEFAULT_PASS;
+  const storedRemote=await fbG('rn_mall_settings/adminPassword');
+  const stored=storedRemote||localStorage.getItem('rnm_admin_pass')||DEFAULT_PASS;
   if(!old||!nw||!cf){showPwMsg('Please fill all three password fields.','err');return;}
   if(old!==stored&&old!==DEFAULT_PASS){showPwMsg('Current password is incorrect.','err');return;}
   if(nw.length<6){showPwMsg('New password must be at least 6 characters.','err');return;}
   if(nw!==cf){showPwMsg('New passwords do not match.','err');return;}
+  // Saved in Firebase (not just localStorage) so the new password works when
+  // signing in from any device or browser, not only this one.
+  await fbU('rn_mall_settings',{adminPassword:nw});
   localStorage.setItem('rnm_admin_pass',nw);
   document.getElementById('set-old').value='';
   document.getElementById('set-new').value='';
