@@ -931,7 +931,7 @@ const LANGS={
 };
 function t(key){return LANGS[currentLang]?.[key]||LANGS.en[key]||key;}
 
-function fbFetchTimeout(url,opts,ms=8000){
+function fbFetchTimeout(url,opts,ms=15000){
   opts=opts||{};
   if(appCheckToken)opts.headers=Object.assign({},opts.headers,{'X-Firebase-AppCheck':appCheckToken});
   const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('timed out after '+ms+'ms')),ms));
@@ -947,14 +947,17 @@ async function fbG(p){
     var r=await fbFetchTimeout(FB+'/'+p+'.json');
     return r.ok?await r.json():null;
   }catch(e){
-    console.warn('fbG failed for',p,', retrying once:',e.message);
-    try{
-      var r2=await fbFetchTimeout(FB+'/'+p+'.json');
-      return r2.ok?await r2.json():null;
-    }catch(e2){
-      console.warn('fbG retry also failed for',p,':',e2.message);
-      return null;
+    console.warn('fbG failed for',p,', retrying:',e.message);
+    for(var attempt=0;attempt<2;attempt++){
+      try{
+        await new Promise(function(res){setTimeout(res,600);});
+        var r2=await fbFetchTimeout(FB+'/'+p+'.json');
+        return r2.ok?await r2.json():null;
+      }catch(e2){
+        console.warn('fbG retry',attempt+1,'also failed for',p,':',e2.message);
+      }
     }
+    return null;
   }
 }
 async function fbS(p,d){try{await fbFetchTimeout(FB+'/'+p+'.json',{method:'PUT',body:JSON.stringify(d)});}catch(e){console.warn('fbS failed for',p,':',e.message);}}

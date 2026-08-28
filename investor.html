@@ -246,7 +246,7 @@ let curNav='dashboard';
 let currency=localStorage.getItem('rnm_currency')||'NGN';
 
 async function fbFetchTimeout(url,opts,ms){
-  ms=ms||8000;const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),ms);
+  ms=ms||15000;const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),ms);
   opts=opts||{};
   if(typeof appCheckToken!=='undefined'&&appCheckToken)opts=Object.assign({},opts,{headers:Object.assign({},opts.headers,{'X-Firebase-AppCheck':appCheckToken})});
   try{const r=await fetch(url,Object.assign({},opts,{signal:ctrl.signal}));clearTimeout(t);return r;}

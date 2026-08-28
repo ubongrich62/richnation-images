@@ -328,7 +328,7 @@ let currency=localStorage.getItem('rnm_currency')||'NGN';
 let exchangeRate=1600;
 
 async function fbFetchTimeout(url,opts,ms){
-  ms=ms||8000;
+  ms=ms||15000;
   const ctrl=new AbortController();
   const t=setTimeout(()=>ctrl.abort(),ms);
   opts=opts||{};
