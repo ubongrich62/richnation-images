@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Diagnose Data Size, RichNation Mall</title>
+<style>
+:root{--bg:#0A0A0B;--card:#111113;--bdr:#242428;--or:#FF6A00;--wh:#fff;--w2:#e0e0e0;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--w2);font-family:'Segoe UI',Arial,sans-serif;line-height:1.7;padding:32px 16px 60px;}
+.wrap{max-width:640px;margin:0 auto;}
+h1{font-weight:900;font-size:22px;color:var(--wh);margin-bottom:8px;}
+p{font-size:13px;color:var(--w2);margin-bottom:20px;}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:18px;margin-bottom:14px;}
+.label{font-size:11px;font-weight:800;color:var(--or);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;}
+.val{font-size:15px;font-weight:700;color:var(--wh);margin-bottom:14px;}
+.val:last-child{margin-bottom:0;}
+button{width:100%;background:var(--or);color:#fff;border:none;border-radius:10px;padding:16px;font-size:15px;font-weight:800;cursor:pointer;}
+button:disabled{opacity:0.6;cursor:default;}
+#out{margin-top:16px;}
+.row{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--bdr);}
+.row:last-child{border-bottom:none;}
+.big{color:var(--or);font-weight:800;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Diagnose Data Size</h1>
+  <p>Checks exactly how big your products, orders, and settings records actually are right now, and how many images are stored as raw data vs. short links. No changes are made, this only reads.</p>
+  <button id="go-btn" onclick="runDiag()">Run Diagnosis</button>
+  <div id="out"></div>
+</div>
+<script>
+const FB='https://richnation-portal-default-rtdb.firebaseio.com';
+function fmtKB(bytes){return (bytes/1024).toFixed(1)+' KB';}
+function countImages(obj){
+  let base64=0,url=0;
+  function walk(v){
+    if(typeof v==='string'){
+      if(v.indexOf('data:image')===0)base64++;
+      else if(v.indexOf('http')===0&&/\.(jpg|jpeg|png|webp|gif)/i.test(v))url++;
+    }else if(Array.isArray(v)){v.forEach(walk);}
+    else if(v&&typeof v==='object'){Object.values(v).forEach(walk);}
+  }
+  walk(obj);
+  return {base64,url};
+}
+async function runDiag(){
+  const btn=document.getElementById('go-btn');
+  const out=document.getElementById('out');
+  btn.disabled=true;btn.textContent='Checking...';
+  out.innerHTML='';
+  const paths=['rn_mall_products','rn_mall_orders','rn_mall_settings'];
+  let html='';
+  for(const path of paths){
+    try{
+      const r=await fetch(FB+'/'+path+'.json');
+      const text=await r.text();
+      const sizeBytes=new Blob([text]).size;
+      const data=JSON.parse(text);
+      const count=data?Object.keys(data).length:0;
+      const imgs=countImages(data);
+      html+='<div class="card"><div class="label">'+path+'</div>'
+        +'<div class="row"><span>Total payload size</span><span class="big">'+fmtKB(sizeBytes)+'</span></div>'
+        +'<div class="row"><span>Record count</span><span>'+count+'</span></div>'
+        +'<div class="row"><span>Images stored as raw data (slow)</span><span class="big">'+imgs.base64+'</span></div>'
+        +'<div class="row"><span>Images stored as short links (fast)</span><span>'+imgs.url+'</span></div>'
+        +'</div>';
+    }catch(e){
+      html+='<div class="card"><div class="label">'+path+'</div><div class="val">Failed: '+e.message+'</div></div>';
+    }
+  }
+  out.innerHTML=html;
+  btn.disabled=false;btn.textContent='Run Diagnosis Again';
+}
+</script>
+</body>
+</html>
