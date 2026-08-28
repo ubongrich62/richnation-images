@@ -4849,11 +4849,20 @@ async function migrateOrderImagesToGithub(){
   if(!isGithubConfigured()){toast('Image storage isn\'t configured yet, set that up first','err');return;}
   if(!confirm('This moves images frozen inside your EXISTING orders into Storage. It can take a while for a large order history, keep this tab open until it finishes. Continue?'))return;
   toast('Moving order images to Storage, please keep this tab open...');
-  var orders=await fbG('rn_mall_orders')||{};
-  var oids=Object.keys(orders);
-  var totalImgs=0,migrated=0,failed=0;
+  // The whole rn_mall_orders collection has grown too large to fetch in one request
+  // (a single GET for everything was failing outright, not just slow). ?shallow=true
+  // gets just the list of order IDs with no content, then each order is fetched and
+  // migrated one at a time, that stays small and fast regardless of how many orders
+  // there are in total.
+  var oidsRes=await fbG('rn_mall_orders?shallow=true')||{};
+  var oids=Object.keys(oidsRes);
+  if(!oids.length){toast('No orders found.','err');return;}
+  var totalImgs=0,migrated=0,failed=0,ordersFailed=0;
   for(var oi=0;oi<oids.length;oi++){
-    var oid=oids[oi],o=orders[oid];
+    var oid=oids[oi];
+    var o;
+    try{o=await fbG('rn_mall_orders/'+oid);}catch(e){o=null;}
+    if(!o){ordersFailed++;continue;}
     if(!o.items||!o.items.length)continue;
     var newItems=[],dirty=false;
     for(var ii=0;ii<o.items.length;ii++){
@@ -4870,7 +4879,7 @@ async function migrateOrderImagesToGithub(){
     if(dirty)await fbU('rn_mall_orders/'+oid,{items:newItems});
     if((oi+1)%20===0)toast('Migrating… '+migrated+' moved so far ('+(oi+1)+'/'+oids.length+' orders checked)');
   }
-  toast('Done, moved '+migrated+' of '+totalImgs+' order image(s) to Storage'+(failed?' ('+failed+' failed, left as-is)':''));
+  toast('Done, moved '+migrated+' of '+totalImgs+' order image(s) to Storage'+(failed?' ('+failed+' failed, left as-is)':'')+(ordersFailed?' ('+ordersFailed+' order(s) couldn\'t be read, try running this again)':''));
 }
 
 // The settings record (hero banner, payment icons) loads on nearly every single page
