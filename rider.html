@@ -130,7 +130,7 @@ button{font-family:inherit;}
       <input class="fi" id="ap-email" type="email" placeholder="Email Address"/>
       <input class="fi" id="ap-address" placeholder="House Address"/>
       <div class="g2">
-        <input class="fi" id="ap-country" placeholder="Country" value="Nigeria"/>
+        <select class="fi" id="ap-state"><option value="">State</option><option>Lagos</option><option>FCT Abuja</option><option>Rivers</option><option>Akwa Ibom</option><option>Anambra</option><option>Enugu</option><option>Imo</option><option>Oyo</option><option>Ogun</option><option>Kano</option><option>Kaduna</option><option>Katsina</option><option>Borno</option><option>Delta</option><option>Edo</option><option>Cross River</option><option>Bayelsa</option><option>Abia</option><option>Ebonyi</option><option>Ekiti</option><option>Ondo</option><option>Osun</option><option>Kwara</option><option>Kogi</option><option>Benue</option><option>Plateau</option><option>Nasarawa</option><option>Niger</option><option>Kebbi</option><option>Sokoto</option><option>Zamfara</option><option>Jigawa</option><option>Bauchi</option><option>Gombe</option><option>Yobe</option><option>Adamawa</option><option>Taraba</option></select>
         <input class="fi" id="ap-lga" placeholder="Local Government Area"/>
       </div>
       <div class="g2">
@@ -364,19 +364,19 @@ async function submitRiderApplication(){
   const phone=document.getElementById('ap-phone').value.trim();
   const email=document.getElementById('ap-email').value.trim().toLowerCase();
   const address=document.getElementById('ap-address').value.trim();
-  const country=document.getElementById('ap-country').value.trim();
+  const state=document.getElementById('ap-state').value;
   const lga=document.getElementById('ap-lga').value.trim();
   const vehicleType=document.getElementById('ap-vehicle').value;
   const idNumber=document.getElementById('ap-idnum').value.trim();
   const note=document.getElementById('ap-note').value.trim();
   const err=document.getElementById('apply-err');err.style.display='none';
-  if(!fname||!phone||!email||!address||!vehicleType||!idNumber){err.textContent='Please fill in your name, phone, email, address, vehicle type, and ID number.';err.style.display='block';return;}
+  if(!fname||!phone||!email||!address||!state||!vehicleType||!idNumber){err.textContent='Please fill in your name, phone, email, address, state, vehicle type, and ID number.';err.style.display='block';return;}
   if(!document.getElementById('ap-conduct-agree').checked){err.textContent='Please confirm you have read and understood the founder\'s message before submitting.';err.style.display='block';return;}
   const all=await fbG('rn_mall_riders')||{};
   if(Object.values(all).find(function(s){return s.email===email;})){err.textContent='An application or account with this email already exists.';err.style.display='block';return;}
   const id=secureId('rider');
   await fbS('rn_mall_riders/'+id,{
-    id,name:fname,dob,gender,phone,email,address,country,lga,vehicleType,idNumber,note,
+    id,name:fname,dob,gender,phone,email,address,country:'Nigeria',state,lga,vehicleType,idNumber,note,
     password:'',status:'pending_review',joinDate:ds(),ts:Date.now(),
     conductMemoAcknowledged:true,conductMemoAcknowledgedAt:Date.now()
   });

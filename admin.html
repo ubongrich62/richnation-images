@@ -1260,7 +1260,7 @@ function pendingApplicationRow(s){
     +'<div style="font-weight:800;margin-bottom:6px;">'+s.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(255,106,0,0.12);color:var(--or);">Applying: '+roleLabel+'</span></div>'
     +'<div style="font-size:12px;color:var(--wh);font-weight:700;line-height:1.9;">'
     +'📧 '+s.email+' &middot; 📞 '+s.phone+'<br>'
-    +'🏠 '+s.address+', '+(s.lga||'')+', '+(s.country||'')+'<br>'
+    +'🏠 '+s.address+', '+(s.lga||'')+', '+(s.state||'')+', '+(s.country||'')+'<br>'
     +'🎂 DOB: '+(s.dob||'N/A')+' &middot; Gender: '+(s.gender||'N/A')
     +(s.note?'<br>📝 "'+s.note+'"':'')
     +'</div>'
@@ -1865,7 +1865,7 @@ function pendingInvestorRow(v){
     +'<div style="font-weight:800;margin-bottom:6px;">'+v.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(255,106,0,0.12);color:var(--or);">'+tierFor(v.investmentAmount)+', '+fmt(v.investmentAmount)+'</span></div>'
     +'<div style="font-size:12px;color:var(--wh);font-weight:700;line-height:2.1;">'
     +iconBadge('mail',14)+' '+v.email+' &middot; '+iconBadge('phone',14)+' '+v.phone+'<br>'
-    +iconBadge('home',14)+' '+v.address+', '+(v.lga||'')+', '+(v.country||'')+'<br>'
+    +iconBadge('home',14)+' '+v.address+', '+(v.lga||'')+', '+(v.state||'')+', '+(v.country||'')+'<br>'
     +iconBadge('cake',14)+' <label class="lbl" style="display:inline;text-transform:none;font-weight:700;">Date of Birth:</label> '+(v.dob?new Date(v.dob).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}):'Not provided')+' &middot; Gender: '+(v.gender||'N/A')+'<br>'
     +iconBadge('briefcase',14)+' Option: <strong>'+(({profit_share:'Monthly Profit Share',equity:'Equity Ownership',fixed_return:'Fixed Return'})[v.investmentOption]||v.investmentOption)+'</strong>'
     +(v.note?'<br>'+iconBadge('note',14)+' "'+v.note+'"':'')
@@ -2312,7 +2312,7 @@ function pendingRiderRow(r){
     +'<div style="font-weight:800;margin-bottom:6px;">'+r.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(255,106,0,0.12);color:var(--or);">'+(r.vehicleType||'')+'</span></div>'
     +'<div style="font-size:12px;color:var(--wh);font-weight:700;line-height:1.9;">'
     +'📧 '+r.email+' &middot; 📞 '+r.phone+'<br>'
-    +'🏠 '+r.address+', '+(r.lga||'')+', '+(r.country||'')+'<br>'
+    +'🏠 '+r.address+', '+(r.lga||'')+', '+(r.state||'')+', '+(r.country||'')+'<br>'
     +'🎂 DOB: '+(r.dob||'N/A')+' &middot; Gender: '+(r.gender||'N/A')+'<br>'
     +'🪪 ID: '+(r.idNumber||'N/A')
     +(r.note?'<br>📝 "'+r.note+'"':'')

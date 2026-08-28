@@ -228,25 +228,31 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 /* AUTH */
 .auth-overlay{position:fixed;inset:0;background:rgba(11,11,12,0.65);z-index:600;display:none;align-items:center;justify-content:center;padding:16px;}
 .auth-overlay.open{display:flex;}
-.auth-card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-lg);width:100%;max-width:400px;position:relative;overflow:hidden;box-shadow:var(--sh-lg);}
-.auth-hdr{padding:18px 22px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;background:var(--ink);}
+.auth-card{background:var(--or);border:1px solid var(--bdr);border-radius:var(--r-lg);width:100%;max-width:400px;position:relative;overflow:hidden;box-shadow:var(--sh-lg);}
+.auth-hdr{padding:18px 22px;border-bottom:1px solid rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:space-between;background:var(--or);}
 .auth-logo{height:30px;display:block;}
-.auth-close{background:none;border:none;color:rgba(255,255,255,.7);font-size:20px;cursor:pointer;width:30px;height:30px;border-radius:var(--r-pill);display:flex;align-items:center;justify-content:center;}
-.auth-close:hover{background:rgba(255,255,255,.1);color:#fff;}
+.auth-close{background:none;border:none;color:rgba(0,0,0,.65);font-size:20px;cursor:pointer;width:30px;height:30px;border-radius:var(--r-pill);display:flex;align-items:center;justify-content:center;}
+.auth-close:hover{background:rgba(0,0,0,.1);color:#000;}
 .auth-tabs{display:flex;gap:4px;margin-bottom:0;}
-.atab{font-weight:700;font-size:13px;padding:9px 16px;border-radius:var(--r-sm);cursor:pointer;color:var(--wh);font-weight:700;border:none;background:none;}
-.atab.active{color:var(--or);background:rgba(255,106,0,0.08);}
+.atab{font-weight:700;font-size:13px;padding:9px 16px;border-radius:var(--r-sm);cursor:pointer;color:rgba(0,0,0,.6);font-weight:700;border:none;background:none;}
+.atab.active{color:#000;background:rgba(0,0,0,0.1);}
 .auth-body{padding:20px 22px 24px;}
 .auth-sub{font-size:12px;color:var(--wh);font-weight:700;margin-bottom:14px;}
+.auth-card .auth-sub{color:#000;}
 .fi{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:10px 13px;color:var(--wh);font-size:13px;outline:none;margin-bottom:10px;box-sizing:border-box;}
 .fi:focus{border-color:var(--or);box-shadow:0 0 0 3px rgba(255,106,0,.15);}
+.auth-card .fi{background:#fff;color:#000;border-color:rgba(0,0,0,0.15);}
 .pw-wrap{position:relative;margin-bottom:10px;}
 .pw-wrap .fi{margin-bottom:0;padding-right:52px;}
 .pw-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--wh);font-weight:700;font-size:10px;cursor:pointer;font-weight:700;letter-spacing:.5px;}
+.auth-card .pw-eye{color:#000;}
 .auth-err{color:var(--re);font-size:11px;margin-bottom:8px;display:none;}
 .auth-btn{width:100%;background:var(--or);color:#fff;border:none;border-radius:var(--r-md);padding:12px;font-weight:800;font-size:14px;cursor:pointer;transition:background .15s;}
 .auth-btn:hover{background:var(--or-dk);}
+.auth-card .auth-btn{background:#000;color:#fff;}
+.auth-card .auth-btn:hover{background:#1a1a1a;}
 .auth-forgot{text-align:center;font-size:11px;color:var(--wh);font-weight:700;margin-top:10px;cursor:pointer;}
+.auth-card .auth-forgot{color:#000;text-decoration:underline;}
 .auth-forgot:hover{color:var(--or);}
 /* FORMS */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -2696,6 +2702,16 @@ async function geocodeAddress(address){
 // unlike a GitHub token this is not a secret that needs hiding.
 const GOOGLE_MAPS_API_KEY='AIzaSyDmJPhd4eZMXht6jtKfRRc6JAkUB_rgick';
 const DARK_MAP_STYLE=[{elementType:'geometry',stylers:[{color:'#1a1a1d'}]},{elementType:'labels.text.stroke',stylers:[{color:'#1a1a1d'}]},{elementType:'labels.text.fill',stylers:[{color:'#8a8a8f'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#2a2a2e'}]},{featureType:'road',elementType:'geometry.stroke',stylers:[{color:'#1a1a1d'}]},{featureType:'road.highway',elementType:'geometry',stylers:[{color:'#3a3a3e'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#0e0e10'}]},{featureType:'poi',elementType:'geometry',stylers:[{color:'#212124'}]},{featureType:'poi',elementType:'labels',stylers:[{visibility:'off'}]},{featureType:'transit',stylers:[{visibility:'off'}]}];
+// Google fires this global specifically for key/config problems, invalid key,
+// API not enabled in Cloud Console, referrer restriction mismatch, or no billing,
+// none of which trigger a plain script load error since the JS file itself still
+// loads fine, it just renders broken. Catching it lets us tell a config failure
+// apart from a network failure instead of silently showing a blank map either way.
+window.gm_authFailure=function(){
+  window._gmapsAuthFailed=true;
+  console.error('[GoogleMaps] Auth/config failure, check that the Maps JavaScript API is enabled, billing is linked, and the API key\'s HTTP referrer restrictions include this exact domain in Google Cloud Console.');
+  if(window._gmapsReady)window._gmapsReady();
+};
 function loadGoogleMapsIfNeeded(){
   if(window._gmapsLoadPromise)return window._gmapsLoadPromise;
   window._gmapsLoadPromise=new Promise(function(resolve){
@@ -2718,6 +2734,10 @@ async function renderDeliveryMap(order){
   const el=document.getElementById('delivery-map');if(!el)return;
   await loadGoogleMapsIfNeeded();
   const statusEl=document.getElementById('delivery-map-status');
+  if(window._gmapsAuthFailed){
+    el.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;padding:16px;text-align:center;font-size:12px;color:var(--wh);font-weight:700;">🗺️ Map is temporarily unavailable, we\'ve been notified and are looking into it.</div>';
+    return;
+  }
   if(!(window.google&&window.google.maps)){
     el.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;padding:16px;text-align:center;font-size:12px;color:var(--wh);font-weight:700;">🗺️ Map couldn\'t load right now. <span style="color:var(--or);cursor:pointer;text-decoration:underline;" onclick="renderDeliveryMap(window._lastTrackedOrder)">Try again</span></div>';
     return;
@@ -2982,14 +3002,14 @@ function switchAuth(tab){
     <div class="auth-err" id="auth-err"></div>
     <button class="auth-btn" onclick="doLogin()" style="margin-top:10px;">Sign In</button>
     <div class="auth-forgot" onclick="switchAuth('forgot')">Forgot your password?</div>
-    <div style="text-align:center;font-size:12px;color:var(--wh);font-weight:700;margin-top:10px;">No account? <span style="color:var(--or);cursor:pointer;font-weight:700;" onclick="switchAuth('register')">Create one free &#8594;</span></div>`;}
+    <div style="text-align:center;font-size:12px;color:#000;font-weight:700;margin-top:10px;">No account? <span style="color:#000;text-decoration:underline;cursor:pointer;font-weight:700;" onclick="switchAuth('register')">Create one free &#8594;</span></div>`;}
   else if(tab==='forgot'){body.innerHTML=`<div class="auth-sub">Enter your account email and we'll send you a reset link. If your account hasn't been upgraded to our new login system yet, our support team will reach out directly instead.</div>
     <input class="fi" id="forgot-email" type="email" placeholder="Email address" autocomplete="off"/>
     <div class="auth-err" id="forgot-err"></div>
-    <div class="auth-err" id="forgot-ok" style="display:none;color:var(--su);"></div>
+    <div class="auth-err" id="forgot-ok" style="display:none;color:#065f2d;"></div>
     <button class="auth-btn" onclick="doForgotPassword()" style="margin-top:6px;">Send Reset Request</button>
-    <div style="text-align:center;font-size:12px;color:var(--wh);font-weight:700;margin-top:12px;">Remembered it? <span style="color:var(--or);cursor:pointer;font-weight:700;" onclick="switchAuth('login')">Sign In</span></div>
-    <div style="text-align:center;font-size:11px;color:var(--wh);font-weight:700;margin-top:14px;line-height:1.7;">Prefer to talk to someone? <span style="color:var(--or);cursor:pointer;font-weight:700;" onclick="closeAuth();toggleChat();">Contact Support</span></div>`;}
+    <div style="text-align:center;font-size:12px;color:#000;font-weight:700;margin-top:12px;">Remembered it? <span style="color:#000;text-decoration:underline;cursor:pointer;font-weight:700;" onclick="switchAuth('login')">Sign In</span></div>
+    <div style="text-align:center;font-size:11px;color:#000;font-weight:700;margin-top:14px;line-height:1.7;">Prefer to talk to someone? <span style="color:#000;text-decoration:underline;cursor:pointer;font-weight:700;" onclick="closeAuth();toggleChat();">Contact Support</span></div>`;}
   else{body.innerHTML=`<div class="auth-sub">Create your free account, required to shop</div>
     <div class="g2"><input class="fi" id="reg-fn" placeholder="First name" autocomplete="off"/><input class="fi" id="reg-ln" placeholder="Last name" autocomplete="off"/></div>
     <input class="fi" id="reg-email" type="email" placeholder="Email address" autocomplete="off"/>
@@ -2997,9 +3017,9 @@ function switchAuth(tab){
     <div class="pw-wrap"><input class="fi" id="reg-pass" type="password" placeholder="Password (min 6 chars)" style="margin-bottom:0;"/><button class="pw-eye" onclick="this.previousElementSibling.type=this.previousElementSibling.type==='password'?'text':'password'">Show</button></div>
     <input class="fi" id="reg-ref" placeholder="Referral Code (optional)" autocomplete="off" value="${sessionStorage.getItem('rnm_ref')||''}"/>
     <div class="auth-err" id="reg-err"></div>
-    <div style="font-size:11px;color:var(--wh);font-weight:700;margin:8px 0;line-height:1.7;">By signing up you agree to our <span style="color:var(--or);cursor:pointer;" onclick="showPolicyPage('terms')">Terms</span> and <span style="color:var(--or);cursor:pointer;" onclick="showPolicyPage('returns')">Refund Policy</span>.</div>
+    <div style="font-size:11px;color:#000;font-weight:700;margin:8px 0;line-height:1.7;">By signing up you agree to our <span style="color:#000;text-decoration:underline;cursor:pointer;" onclick="showPolicyPage('terms')">Terms</span> and <span style="color:#000;text-decoration:underline;cursor:pointer;" onclick="showPolicyPage('returns')">Refund Policy</span>.</div>
     <button class="auth-btn" onclick="doRegister()" style="margin-top:4px;">Create Free Account</button>
-    <div style="text-align:center;font-size:12px;color:var(--wh);font-weight:700;margin-top:10px;">Already have an account? <span style="color:var(--or);cursor:pointer;font-weight:700;" onclick="switchAuth('login')">Sign In</span></div>`;}
+    <div style="text-align:center;font-size:12px;color:#000;font-weight:700;margin-top:10px;">Already have an account? <span style="color:#000;text-decoration:underline;cursor:pointer;font-weight:700;" onclick="switchAuth('login')">Sign In</span></div>`;}
 }
 async function doForgotPassword(){
   const email=document.getElementById('forgot-email')?.value.trim().toLowerCase();
@@ -3286,10 +3306,48 @@ async function botReplyToFreeText(text){
   await fbP(path,{text:answer,senderId:'bot',isAdmin:true,isBot:true,ts:Date.now(),date:ds(),time:ts2()});
   loadWidgetMsgs();
 }
-async function loadWidgetMsgs(){const path='rn_mall_chat/'+(chatOrderId||currUser?.id||getGuestChatId());const msgs=await fbG(path);const el=document.getElementById('widget-msgs');if(!el)return;el.innerHTML='<div class="chat-msg"><div class="chat-av">RN</div><div class="chat-bubble">Welcome to RichNation Mall! How can we help?</div></div>';if(msgs){Object.values(msgs).sort((a,b)=>a.ts-b.ts).forEach(m=>{const mine=!m.isAdmin;const d=document.createElement('div');d.className='chat-msg'+(mine?' own':'');const av=`<div class="chat-av" style="${m.isBot?'background:linear-gradient(135deg,#FF6A00,#FFA733);color:#000;':''}">${mine?ini(currUser?.fname||'?'):'RN'}</div>`;d.innerHTML=(mine?'':av)+'<div class="chat-bubble'+(mine?' own-b':'')+'">'+m.text+(mine?msgReadTick(m):'')+'</div>'+(mine?av:'');el.appendChild(d);});
-  // Mark every admin/bot message as read by this customer now that they're viewing the chat.
-  Object.entries(msgs).forEach(function(e){if(e[1].isAdmin&&!e[1].readByCustomer)fbU(path+'/'+e[0],{readByCustomer:true});});
-}el.scrollTop=el.scrollHeight;}
+let _widgetLastPath=null;
+let _widgetRendered=new Map();
+async function loadWidgetMsgs(){
+  const path='rn_mall_chat/'+(chatOrderId||currUser?.id||getGuestChatId());
+  const msgs=await fbG(path);
+  const el=document.getElementById('widget-msgs');if(!el)return;
+  if(path!==_widgetLastPath){
+    _widgetLastPath=path;
+    _widgetRendered=new Map();
+    el.innerHTML='<div class="chat-msg"><div class="chat-av">RN</div><div class="chat-bubble">Welcome to RichNation Mall! How can we help?</div></div>';
+  }
+  if(msgs){
+    // Only re-scroll to the bottom when the customer is already near it, so
+    // the 4-second background poll doesn't yank them away while they're
+    // scrolled up reading older messages.
+    const nearBottom=(el.scrollHeight-el.scrollTop-el.clientHeight)<80;
+    let appended=false;
+    Object.entries(msgs).sort((a,b)=>(a[1].ts||0)-(b[1].ts||0)).forEach(function(entry){
+      const id=entry[0],m=entry[1];
+      const mine=!m.isAdmin;
+      const existing=_widgetRendered.get(id);
+      if(existing){
+        if(mine&&existing.tickEl&&existing.readByAdmin!==!!m.readByAdmin){
+          existing.tickEl.outerHTML=msgReadTick(m);
+          existing.tickEl=existing.bubbleEl.lastElementChild;
+          existing.readByAdmin=!!m.readByAdmin;
+        }
+        return;
+      }
+      appended=true;
+      const d=document.createElement('div');d.className='chat-msg'+(mine?' own':'');
+      const av=`<div class="chat-av" style="${m.isBot?'background:linear-gradient(135deg,#FF6A00,#FFA733);color:#000;':''}">${mine?ini(currUser?.fname||'?'):'RN'}</div>`;
+      d.innerHTML=(mine?'':av)+'<div class="chat-bubble'+(mine?' own-b':'')+'">'+m.text+(mine?msgReadTick(m):'')+'</div>'+(mine?av:'');
+      el.appendChild(d);
+      const bubbleEl=d.querySelector('.chat-bubble');
+      _widgetRendered.set(id,{readByAdmin:!!m.readByAdmin,bubbleEl,tickEl:mine?bubbleEl.lastElementChild:null});
+    });
+    // Mark every admin/bot message as read by this customer now that they're viewing the chat.
+    Object.entries(msgs).forEach(function(e){if(e[1].isAdmin&&!e[1].readByCustomer)fbU(path+'/'+e[0],{readByCustomer:true});});
+    if(appended&&nearBottom)el.scrollTop=el.scrollHeight;
+  }
+}
 function msgReadTick(m){
   return '<div style="font-size:9px;color:'+(m.readByAdmin?'#5b9bf5':'var(--mu)')+';text-align:right;margin-top:3px;">'+(m.readByAdmin?'✔✔ Read':'✔ Sent')+'</div>';
 }
