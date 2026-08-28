@@ -717,15 +717,22 @@ async function doLogin(){
   const p=document.getElementById('li-p').value.trim();
   const err=document.getElementById('li-err');
   // Checked in Firebase first, not just localStorage, so a changed password works
-  // from any device/browser, not only the one it was changed on.
-  const storedRemote=await fbG('rn_mall_settings/adminPassword');
-  const stored=storedRemote||localStorage.getItem('rnm_admin_pass');
+  // from any device/browser, not only the one it was changed on. Two passwords are
+  // supported (either one signs in), stored as an array, editable anytime in
+  // Settings without needing to know the other one.
+  const s=await fbG('rn_mall_settings')||{};
+  let validList=Array.isArray(s.adminPasswords)&&s.adminPasswords.length?s.adminPasswords:null;
+  if(!validList){
+    const local=JSON.parse(localStorage.getItem('rnm_admin_passwords')||'null');
+    validList=Array.isArray(local)&&local.length?local:null;
+  }
+  if(!validList)validList=[];
   // A blank email used to bypass this check entirely, meaning the Owner login only
   // ever required the single password string below with no second factor at all.
   // Require it to actually match an authorised address now.
   const emailOk=ADMIN_EMAILS.includes(e);
   if(!p){err.textContent='Enter your password.';err.style.display='block';return;}
-  if(p===stored&&emailOk){
+  if(validList.includes(p)&&emailOk){
     sessionStorage.setItem('rnm_admin_session','1');
     sessionStorage.removeItem('rnm_admin_is_ceo');
     if(e)sessionStorage.setItem('rnm_admin_email',e);
@@ -3910,21 +3917,17 @@ function renderSettings(c){
   </div>
 
   <div class="card fade-in">
-    <div class="card-title">Change Admin Password</div>
-    <div class="card-sub">Update your admin panel password. You will need the current password to make a change.</div>
-    <div class="fg"><label class="lbl">Current Password</label>
-      <div class="pw-wrap2"><input class="inp" id="set-old" type="password" placeholder="Current password"/>
-      <button class="pw-eye2" onclick="togglePw('set-old',this)">&#128065;</button></div>
+    <div class="card-title">Admin Passwords</div>
+    <div class="card-sub">Either password below signs you in. Edit and save either one at any time, you don't need to know the current value first.</div>
+    <div class="fg"><label class="lbl">Password 1</label>
+      <div class="pw-wrap2"><input class="inp" id="adm-pw1" type="password" value="${((settings.adminPasswords||[])[0])||''}"/>
+      <button class="pw-eye2" onclick="togglePw('adm-pw1',this)">&#128065;</button></div>
     </div>
-    <div class="fg"><label class="lbl">New Password</label>
-      <div class="pw-wrap2"><input class="inp" id="set-new" type="password" placeholder="New password (min 6 characters)"/>
-      <button class="pw-eye2" onclick="togglePw('set-new',this)">&#128065;</button></div>
+    <div class="fg"><label class="lbl">Password 2</label>
+      <div class="pw-wrap2"><input class="inp" id="adm-pw2" type="password" value="${((settings.adminPasswords||[])[1])||''}"/>
+      <button class="pw-eye2" onclick="togglePw('adm-pw2',this)">&#128065;</button></div>
     </div>
-    <div class="fg"><label class="lbl">Confirm New Password</label>
-      <div class="pw-wrap2"><input class="inp" id="set-conf" type="password" placeholder="Confirm new password"/>
-      <button class="pw-eye2" onclick="togglePw('set-conf',this)">&#128065;</button></div>
-    </div>
-    <button class="btn btn-or" onclick="changePass()">Change Password</button>
+    <button class="btn btn-or" onclick="saveAdminPasswords()">Save Passwords</button>
     <div id="pw-msg" style="font-size:11px;margin-top:10px;display:none;padding:8px 12px;border-radius:6px;"></div>
   </div>
 
@@ -3998,26 +4001,20 @@ async function saveFlash(){
   settings.flashSaleEnd=v;await fbU('rn_mall_settings',{flashSaleEnd:v||null});
   toast('Flash sale timer saved!');
 }
-async function changePass(){
-  const old=document.getElementById('set-old')?.value;
-  const nw=document.getElementById('set-new')?.value;
-  const cf=document.getElementById('set-conf')?.value;
-  const msg=document.getElementById('pw-msg');
-  const storedRemote=await fbG('rn_mall_settings/adminPassword');
-  const stored=storedRemote||localStorage.getItem('rnm_admin_pass');
-  if(!old||!nw||!cf){showPwMsg('Please fill all three password fields.','err');return;}
-  if(old!==stored){showPwMsg('Current password is incorrect.','err');return;}
-  if(nw.length<6){showPwMsg('New password must be at least 6 characters.','err');return;}
-  if(nw!==cf){showPwMsg('New passwords do not match.','err');return;}
-  // Saved in Firebase (not just localStorage) so the new password works when
-  // signing in from any device or browser, not only this one.
-  await fbU('rn_mall_settings',{adminPassword:nw});
-  localStorage.setItem('rnm_admin_pass',nw);
-  document.getElementById('set-old').value='';
-  document.getElementById('set-new').value='';
-  document.getElementById('set-conf').value='';
-  showPwMsg('Password changed successfully! Use your new password next time you sign in.','ok');
-  toast('Admin password changed!');
+async function saveAdminPasswords(){
+  const p1=document.getElementById('adm-pw1')?.value.trim();
+  const p2=document.getElementById('adm-pw2')?.value.trim();
+  if(!p1||p1.length<6){showPwMsg('Password 1 must be at least 6 characters.','err');return;}
+  if(!p2||p2.length<6){showPwMsg('Password 2 must be at least 6 characters.','err');return;}
+  const list=[p1,p2];
+  // Saved in Firebase (not just localStorage) so both passwords work when
+  // signing in from any device or browser, not only this one. No "current
+  // password" check needed, this page is already behind the login itself.
+  await fbU('rn_mall_settings',{adminPasswords:list});
+  settings.adminPasswords=list;
+  localStorage.setItem('rnm_admin_passwords',JSON.stringify(list));
+  showPwMsg('Passwords saved! Either one can be used to sign in.','ok');
+  toast('Admin passwords updated!');
 }
 function showPwMsg(text,type){
   const el=document.getElementById('pw-msg');if(!el)return;
