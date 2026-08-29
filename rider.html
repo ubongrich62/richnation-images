@@ -130,7 +130,14 @@ button{font-family:inherit;}
     <div id="apply-form" style="display:none;">
       <div class="g2">
         <input class="fi" id="ap-fname" placeholder="Full Name"/>
-        <div><div style="font-size:11px;color:var(--wh);font-weight:700;margin-bottom:6px;">Date of Birth</div><input class="fi" id="ap-dob" type="date"/></div>
+        <div><div style="font-size:11px;color:var(--wh);font-weight:700;margin-bottom:6px;">Date of Birth</div>
+          <div style="display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:6px;">
+            <select class="fi" id="ap-dob-d" onchange="syncDobField('ap')" style="margin-bottom:0;padding:10px 4px;text-align:center;"></select>
+            <select class="fi" id="ap-dob-m" onchange="syncDobField('ap')" style="margin-bottom:0;padding:10px 4px;text-align:center;"></select>
+            <select class="fi" id="ap-dob-y" onchange="syncDobField('ap')" style="margin-bottom:0;padding:10px 4px;text-align:center;"></select>
+          </div>
+          <input type="hidden" id="ap-dob"/>
+        </div>
       </div>
       <div class="g2">
         <select class="fi" id="ap-gender"><option value="">Gender</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select>
@@ -350,6 +357,23 @@ function togglePwVisibility(id,el){
   if(inp.type==='password'){inp.type='text';el.textContent='Hide';}
   else{inp.type='password';el.textContent='Show';}
 }
+const DOB_MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function initDobPicker(prefix){
+  const d=document.getElementById(prefix+'-dob-d'),m=document.getElementById(prefix+'-dob-m'),y=document.getElementById(prefix+'-dob-y');
+  if(!d||!m||!y||d.dataset.built)return;
+  d.dataset.built='1';
+  d.innerHTML='<option value="">Day</option>'+Array.from({length:31},function(_,i){return i+1;}).map(function(n){return '<option value="'+n+'">'+n+'</option>';}).join('');
+  m.innerHTML='<option value="">Month</option>'+DOB_MONTHS.map(function(mo,i){return '<option value="'+(i+1)+'">'+mo+'</option>';}).join('');
+  const curY=new Date().getFullYear();
+  const years=[];for(let yr=curY-16;yr>=curY-90;yr--)years.push(yr);
+  y.innerHTML='<option value="">Year</option>'+years.map(function(yr){return '<option value="'+yr+'">'+yr+'</option>';}).join('');
+}
+function syncDobField(prefix){
+  const d=document.getElementById(prefix+'-dob-d').value,m=document.getElementById(prefix+'-dob-m').value,y=document.getElementById(prefix+'-dob-y').value;
+  const hidden=document.getElementById(prefix+'-dob');
+  hidden.value=(d&&m&&y)?(y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0')):'';
+}
+initDobPicker('ap');
 function toggleApplyMode(){
   const isLogin=document.getElementById('login-form').style.display!=='none';
   document.getElementById('login-form').style.display=isLogin?'none':'block';
