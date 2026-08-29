@@ -121,6 +121,36 @@ button{font-family:inherit;}
     </div>
 
     <div id="apply-form" style="display:none;">
+      <div id="agreement-gate">
+        <div class="tc-box" style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:14px;margin-bottom:14px;max-height:420px;overflow-y:auto;">
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14px;color:var(--or);margin-bottom:4px;">RichNation Mall</div>
+          <div style="font-weight:800;font-size:13px;margin-bottom:12px;color:var(--wh);">Partnership Agreement &amp; Investment Prospectus</div>
+          <div style="font-size:11.5px;color:var(--wh);font-weight:700;line-height:1.8;">
+            <strong>Welcome to RichNation.</strong> RichNation Global Ltd (RC 8998019) is a faith-centered digital media and education company, "Build People, Build Platforms, Create Millionaires." This partnership program is run through RichNation Mall, our e-commerce division, already built, live, and operational at richnationmall.com.<br><br>
+            <strong>The Opportunity.</strong> We are raising ₦7,000,000 in partnership capital to stock, market, and scale RichNation Mall. Your investment is not locked to what the mall is today, it grows as the business grows.<br><br>
+            <strong>Investment Packages</strong><br>
+            Bronze &middot; min ₦200,000 &middot; 12%/year<br>
+            Silver &middot; min ₦500,000 &middot; 15%/year<br>
+            Gold &middot; min ₦1,000,000 &middot; 18%/year<br>
+            Platinum &middot; min ₦2,000,000 &middot; 22%/year<br><br>
+            <strong>Investment Structures.</strong> Within any package you choose: <strong>Monthly Profit Share</strong> (a share of profits, paid monthly), <strong>Equity Ownership</strong> (a permanent stake tied to RichNation's growth), or <strong>Fixed Return</strong> (a set annual rate for an agreed term). You may request to switch structures after a minimum 3-month holding period, subject to admin approval, this resets your payout timeline.<br><br>
+            <strong>What Your Capital Funds.</strong> Product inventory, marketing and customer acquisition, warehouse/office space, logistics and delivery, technology, and staff and operations, so the mall can stock up, reach customers, and fulfil orders reliably.<br><br>
+            <strong>Terms You're Agreeing To</strong><br>
+            &middot; Approval is at RichNation's sole discretion and is not guaranteed.<br>
+            &middot; Your return rate is fixed at the rate active for your package on the date your partnership is approved.<br>
+            &middot; Profit Share and Equity returns depend on RichNation's actual performance and are not guaranteed; Fixed Return is contracted in writing.<br>
+            &middot; You are solely responsible for the accuracy of the bank details you provide for withdrawals.<br>
+            &middot; Your invested principal is committed for the term of your package, early exit is handled case-by-case, separate from your Wallet balance which is always yours to withdraw.<br>
+            &middot; Financial terms of your partnership are kept confidential by both parties.<br>
+            &middot; RichNation may update these terms with notice through your portal, continued partnership after an update constitutes acceptance, your locked-in rate is never changed retroactively.<br>
+            &middot; This agreement is governed by the laws of the Federal Republic of Nigeria.<br><br>
+            <strong>Our Policies.</strong> Live, real dashboard figures. Every payout, switch, and approval logged. Direct access to our actual team, never a call center. Every request reviewed individually.<br><br>
+            <strong>Important Notice.</strong> RichNation Mall is a business investment, not a bank product, a loan, or a deposit. Returns are not insured or guaranteed by any government or financial institution. As with any business investment, your capital is at risk. Seek independent financial or legal advice if you are unsure, before you invest.
+          </div>
+        </div>
+        <button class="lbtn" onclick="proceedToApplyForm()">I've Read This, Continue to Application</button>
+      </div>
+      <div id="apply-form-fields" style="display:none;">
       <div class="g2">
         <input class="fi" id="ap-fname" placeholder="Full Name"/>
         <div><div style="font-size:11px;color:var(--wh);font-weight:700;margin-bottom:6px;">Date of Birth</div><input class="fi" id="ap-dob" type="date"/></div>
@@ -145,25 +175,12 @@ button{font-family:inherit;}
         </select>
       </div>
       <div id="package-preview" style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;margin-bottom:12px;font-size:12px;color:var(--w2);display:none;"></div>
-      <div class="tc-box" style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;margin-bottom:12px;max-height:180px;overflow-y:auto;">
-        <div style="font-weight:800;font-size:12px;margin-bottom:8px;color:var(--wh);">RichNation Mall Investor Agreement</div>
-        <div style="font-size:11px;color:var(--wh);font-weight:700;line-height:1.7;">
-          By checking "I Agree" below, you enter into this agreement electronically, no physical signature required.<br><br>
-          <strong>1. Nature of Investment.</strong> This is a business investment in RichNation Mall, not a loan or bank product. Returns depend on your selected package and structure.<br><br>
-          <strong>2. Risk Disclosure.</strong> All business investment carries risk. Past performance is not a guarantee of future results.<br><br>
-          <strong>3. Transparency Commitment.</strong> RichNation Mall shows real revenue and order data, not just percentages, in your Live Mall Stats dashboard at all times.<br><br>
-          <strong>4. Payment of Returns.</strong> Returns are paid directly to your RichNation Investor Wallet on the schedule for your package. From there, you may request a withdrawal to your bank account at any time.<br><br>
-          <strong>5. Bank Details.</strong> You are solely responsible for entering accurate bank details for withdrawals. RichNation Mall is not liable for funds lost due to incorrect information you provided.<br><br>
-          <strong>6. Confidentiality.</strong> Financial figures and business information shared with you may not be disclosed to third parties without written consent.<br><br>
-          <strong>7. Principal Withdrawal.</strong> Your invested principal is committed for the term of your package. Early exit is not guaranteed and is handled case-by-case through Chat with Founder, separate from your Wallet balance, which is yours to withdraw freely.<br><br>
-          <strong>8. Communication.</strong> Official updates come only through this portal.<br><br>
-          <strong>9. Management Authority.</strong> RichNation Global Ltd may update platform policies with notice. Your individually agreed package terms are never changed without your consent.
-        </div>
-      </div>
-      <label style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#000;font-weight:700;cursor:pointer;margin-bottom:12px;"><input type="checkbox" id="ap-agree" style="width:16px;height:16px;accent-color:var(--or);margin-top:2px;flex-shrink:0;"/> I have read and agree to the RichNation Mall Investor Agreement above.</label>
+      <label style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#000;font-weight:700;cursor:pointer;margin-bottom:12px;"><input type="checkbox" id="ap-agree" style="width:16px;height:16px;accent-color:var(--or);margin-top:2px;flex-shrink:0;"/> I confirm I've read the Partnership Agreement &amp; Investment Prospectus above and agree to its terms.</label>
       <textarea class="fi" id="ap-note" rows="3" placeholder="Anything else you'd like us to know (optional)" style="resize:vertical;"></textarea>
-      <button class="lbtn" onclick="submitInvestorApplication()">Submit Application</button>
+      <div style="font-size:11px;color:var(--wh);font-weight:700;margin-bottom:10px;">Submitting takes you straight to payment for your chosen amount, paid securely by card. Your application (with payment confirmed) goes to our team for review right after.</div>
+      <button class="lbtn" onclick="submitInvestorApplication()">Continue to Payment</button>
       <div class="lerr" id="apply-err"></div>
+      </div>
     </div>
 
     <div style="text-align:center;font-size:11px;color:var(--wh);font-weight:700;margin-top:16px;" id="toggle-note">New partner? <span onclick="toggleApplyMode()" style="color:#000;text-decoration:underline;font-weight:700;cursor:pointer;">Apply to invest</span></div>
@@ -388,9 +405,16 @@ function toggleApplyMode(){
   const isLogin=document.getElementById('login-form').style.display!=='none';
   document.getElementById('login-form').style.display=isLogin?'none':'block';
   document.getElementById('apply-form').style.display=isLogin?'block':'none';
-  document.getElementById('l-title').textContent=isLogin?'Apply to Invest':'Investor Sign In';
-  document.getElementById('l-sub').textContent=isLogin?'Minimum investment ₦200,000. Fill in your details below and our team will follow up with a formal partnership agreement.':'Full transparency into your investment, live stats, revenue charts, updates, and direct access to the founder.';
+  document.getElementById('l-title').textContent=isLogin?'Partnership Agreement':'Investor Sign In';
+  document.getElementById('l-sub').textContent=isLogin?'Please read the agreement and prospectus below before applying.':'Full transparency into your investment, live stats, revenue charts, updates, and direct access to the founder.';
   document.getElementById('toggle-note').innerHTML=isLogin?'Already a partner? <span onclick="toggleApplyMode()" style="color:#000;text-decoration:underline;font-weight:700;cursor:pointer;">Sign in</span>':'New partner? <span onclick="toggleApplyMode()" style="color:#000;text-decoration:underline;font-weight:700;cursor:pointer;">Apply to invest</span>';
+  if(isLogin){document.getElementById('agreement-gate').style.display='block';document.getElementById('apply-form-fields').style.display='none';}
+}
+function proceedToApplyForm(){
+  document.getElementById('agreement-gate').style.display='none';
+  document.getElementById('apply-form-fields').style.display='block';
+  document.getElementById('l-title').textContent='Apply to Invest';
+  document.getElementById('l-sub').textContent='Minimum investment ₦200,000. Fill in your details below.';
 }
 // A record's own ID doubles as its access key everywhere in this app, so it must not
 // be guessable. Date.now() alone produces a predictable, enumerable value, crypto.randomUUID() does not.
@@ -416,22 +440,40 @@ async function submitInvestorApplication(){
   const err=document.getElementById('apply-err');err.style.display='none';
   if(!fname||!phone||!email||!address||!state||!option){err.textContent='Please fill in your name, phone, email, address, state, and chosen option.';err.style.display='block';return;}
   if(amount<200000){err.textContent='Minimum investment is ₦200,000.';err.style.display='block';return;}
-  if(!document.getElementById('ap-agree').checked){err.textContent='Please read and agree to the Investor Agreement to continue.';err.style.display='block';return;}
+  if(!document.getElementById('ap-agree').checked){err.textContent='Please confirm you\'ve read the Partnership Agreement to continue.';err.style.display='block';return;}
   const all=await fbG('rn_mall_investors')||{};
   if(Object.values(all).find(function(s){return s.email===email;})){err.textContent='An application or account with this email already exists.';err.style.display='block';return;}
+  const applicant={fname,dob,gender,phone,email,address,state,lga,amount,option,note};
+  payAndSubmitApplication(applicant);
+}
+function payAndSubmitApplication(a){
+  const err=document.getElementById('apply-err');
+  try{
+    if(typeof PaystackPop==='undefined')throw new Error('Payment system not loaded, please refresh and try again.');
+    const handler=PaystackPop.setup({
+      key:getPaystackKey(),email:a.email,amount:Math.round(a.amount)*100,currency:'NGN',
+      ref:'RNM-INV-APPLY-'+Date.now(),
+      metadata:{investor_name:a.fname,investor_email:a.email,type:'investor_application'},
+      callback:function(response){finalizeInvestorApplication(a,response.reference);},
+      onClose:function(){if(err){err.textContent='Payment window closed, your application was not submitted.';err.style.display='block';}}
+    });
+    handler.openIframe();
+  }catch(e){if(err){err.textContent='Payment error: '+e.message;err.style.display='block';}}
+}
+async function finalizeInvestorApplication(a,paymentRef){
   const id=secureId('inv');
-  const pkg=packageForAmount(amount);
+  const pkg=packageForAmount(a.amount);
   await fbS('rn_mall_investors/'+id,{
-    id,name:fname,dob,gender,phone,email,address,country:'Nigeria',state,lga,
-    investmentAmount:amount,investmentOption:option,note,
+    id,name:a.fname,dob:a.dob,gender:a.gender,phone:a.phone,email:a.email,address:a.address,country:'Nigeria',state:a.state,lga:a.lga,
+    investmentAmount:a.amount,investmentOption:a.option,note:a.note,
     package:pkg?pkg.id:null,packageRate:pkg?pkg.rate:null,
     agreementAccepted:true,agreementAcceptedAt:Date.now(),
+    applicationPaymentRef:paymentRef,applicationPaid:true,
     walletBalance:0,
     password:'',status:'pending_review',joinDate:ds(),ts:Date.now()
   });
-  await fbP('rn_mall_notifications',{type:'new_investor_application',name:fname,amount,option,email,date:ds(),read:false,ts:Date.now()});
-  err.style.display='none';
-  document.getElementById('apply-form').innerHTML='<div style="text-align:center;padding:10px 0;"><div style="font-size:32px;margin-bottom:10px;">✅</div><div style="font-weight:800;margin-bottom:8px;">Application Submitted!</div><div style="font-size:12px;color:var(--wh);font-weight:700;line-height:1.7;">Thank you, '+fname+'! Our team will review your application and follow up with a formal partnership agreement. Once signed and confirmed, your investor portal will be activated.</div></div>';
+  await fbP('rn_mall_notifications',{type:'new_investor_application',name:a.fname,amount:a.amount,option:a.option,email:a.email,paymentRef:paymentRef,date:ds(),read:false,ts:Date.now()});
+  document.getElementById('apply-form').innerHTML='<div style="text-align:center;padding:10px 0;"><div style="font-size:32px;margin-bottom:10px;">✅</div><div style="font-weight:800;margin-bottom:8px;">Payment Received, Application Submitted!</div><div style="font-size:12px;color:var(--wh);font-weight:700;line-height:1.7;">Thank you, '+a.fname+'! Your payment of '+fmt(a.amount)+' is confirmed (ref: '+paymentRef+'). Our team will review your application and activate your investor portal shortly.</div></div>';
 }
 async function doInvestorLogin(){
   const email=document.getElementById('in-email').value.trim().toLowerCase();
@@ -893,8 +935,16 @@ async function renderDocuments(c){
   const doc=investor.agreementDoc;
   c.innerHTML='<div class="page-hdr-title">My Documents</div><div class="page-hdr-sub" style="margin-bottom:20px;">Your signed partnership agreement.</div>'
     +(doc?'<div class="card"><div class="card-title">📄 Partnership Agreement</div><div style="font-size:12px;color:var(--wh);font-weight:700;margin:8px 0 12px;">Uploaded by RichNation Mall.</div><button class="btn btn-or" onclick="downloadDataDoc(investor.agreementDoc,\'RichNation_Mall_Agreement.pdf\')">Download Agreement</button></div>'
-    :'<div class="card" style="text-align:center;padding:40px;color:var(--wh);font-weight:700;">Your signed agreement hasn\'t been uploaded yet, it will appear here once ready.</div>');
+    :'<div class="card" style="text-align:center;padding:24px;color:var(--wh);font-weight:700;">Your individually signed agreement hasn\'t been uploaded yet, it will appear here once ready.</div>')
+    +'<div class="card"><div class="card-title">📜 Partnership Agreement &amp; Investment Prospectus</div><div style="font-size:12px;color:var(--w2);line-height:1.8;margin-top:10px;max-height:340px;overflow-y:auto;padding-right:4px;">'+PARTNERSHIP_AGREEMENT_TEXT+'</div></div>';
 }
+const PARTNERSHIP_AGREEMENT_TEXT='<strong style="color:var(--wh);">Welcome to RichNation.</strong> RichNation Global Ltd (RC 8998019) is a faith-centered digital media and education company, "Build People, Build Platforms, Create Millionaires." This partnership program is run through RichNation Mall, our e-commerce division, already built, live, and operational at richnationmall.com.<br><br>'
+  +'<strong style="color:var(--wh);">The Opportunity.</strong> We are raising ₦7,000,000 in partnership capital to stock, market, and scale RichNation Mall. Your investment is not locked to what the mall is today, it grows as the business grows.<br><br>'
+  +'<strong style="color:var(--wh);">Investment Packages</strong><br>Bronze &middot; min ₦200,000 &middot; 12%/year<br>Silver &middot; min ₦500,000 &middot; 15%/year<br>Gold &middot; min ₦1,000,000 &middot; 18%/year<br>Platinum &middot; min ₦2,000,000 &middot; 22%/year<br><br>'
+  +'<strong style="color:var(--wh);">Investment Structures.</strong> Monthly Profit Share (a share of profits, paid monthly), Equity Ownership (a permanent stake tied to RichNation\'s growth), or Fixed Return (a set annual rate for an agreed term). You may switch structures after a 3-month minimum holding period, subject to admin approval, resetting your payout timeline.<br><br>'
+  +'<strong style="color:var(--wh);">What Your Capital Funds.</strong> Product inventory, marketing and customer acquisition, warehouse/office space, logistics and delivery, technology, and staff and operations.<br><br>'
+  +'<strong style="color:var(--wh);">Key Terms.</strong> Approval is at RichNation\'s sole discretion and not guaranteed. Your rate is fixed at the rate active on your approval date. Profit Share and Equity returns depend on actual performance and are not guaranteed; Fixed Return is contracted in writing. You are solely responsible for the accuracy of your bank details. Your principal is committed for your package term, early exit is case-by-case, separate from your Wallet balance which is always yours. Financial terms stay confidential between both parties. RichNation may update terms with notice, your locked-in rate is never changed retroactively. Governed by the laws of the Federal Republic of Nigeria.<br><br>'
+  +'<strong style="color:var(--wh);">Important Notice.</strong> RichNation Mall is a business investment, not a bank product, a loan, or a deposit. Returns are not insured or guaranteed by any government or financial institution. As with any business investment, your capital is at risk.';
 
 async function renderChat(c){
   c.innerHTML='<div class="card"><div class="card-title">💬 Chat with Ubong Rich</div><div id="ch-msgs" style="margin:12px 0;max-height:400px;overflow-y:auto;"></div><div style="display:flex;gap:8px;"><input class="fi" id="ch-input" placeholder="Type a message..." style="flex:1;margin-bottom:0;" onkeydown="if(event.key===\'Enter\')sendInvestorMsg()"/><button class="btn btn-or" onclick="sendInvestorMsg()">Send</button></div></div>';
