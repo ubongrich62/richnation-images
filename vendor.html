@@ -485,7 +485,7 @@ async function showVendorForgotPassword(){
     +'<div style="font-size:28px;">🔑</div>'
     +'<div style="font-weight:800;font-size:15px;margin-top:10px;">Forgot Your Password?</div>'
     +'<div style="font-size:12px;color:var(--wh);font-weight:700;line-height:1.7;margin-top:10px;">We don\'t have automatic email reset yet, but RichNation Mall admin can reset it for you directly. Reach out with your store name and registered email.</div>'
-    +'<a href="https://wa.me/'+waNumber+'?text='+encodeURIComponent('Hi, I forgot my vendor password on RichNation Mall. My store name is: ')+'" target="_blank" style="text-decoration:none;"><button class="lbtn" style="margin-top:16px;">💬 Message Admin on WhatsApp</button></a>'
+    +'<a href="https://wa.me/'+waNumber+'?text='+encodeURIComponent('Hi, I forgot my vendor password on RichNation Mall. My store name is: ')+'" target="_blank" style="text-decoration:none;"><button class="lbtn" style="margin-top:16px;">'+iconBadge('chat',13)+' Message Admin on WhatsApp</button></a>'
     +'<div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:12px;cursor:pointer;" onclick="document.getElementById(\'vendor-forgot-overlay\').remove()">Close</div>'
     +'</div>';
   document.body.appendChild(overlay);
@@ -940,7 +940,7 @@ async function renderVMessages(c){
 }
 async function openVendorMsgThread(custId){
   const c=document.getElementById('content');
-  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Conversation</div></div><div class="card"><div style="display:flex;justify-content:flex-end;margin-bottom:8px;"><button class="wallpaper-btn" onclick="toggleWallpaperPanel(\'wp-panel\',\'wp-grid\',\'rnm_chat_wallpaper_vendor\')">🎨 Wallpaper</button></div><div class="wallpaper-panel" id="wp-panel"><div class="cwp-title">Chat Wallpaper</div><div class="cwp-grid" id="wp-grid"></div><div class="cwp-custom-row"><input type="color" onchange="applyAppWallpaper(this.value,\'rnm_chat_wallpaper_vendor\')"/><span>Or pick any color</span></div></div><div class="wallpaper-target" id="vm-msgs" style="margin-bottom:12px;max-height:360px;overflow-y:auto;"></div><div style="display:flex;gap:8px;"><input class="fi" id="vm-input" placeholder="Type a reply..." style="flex:1;margin-bottom:0;" onkeydown="if(event.key===\'Enter\')sendVendorMsgReply(\''+custId+'\')"/><button class="btn btn-or" onclick="sendVendorMsgReply(\''+custId+'\')">Send</button></div></div><button class="btn" style="margin-top:10px;" onclick="vnav(\'messages\')">← Back</button>';
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Conversation</div></div><div class="card"><div style="display:flex;justify-content:flex-end;margin-bottom:8px;"><button class="wallpaper-btn" onclick="toggleWallpaperPanel(\'wp-panel\',\'wp-grid\',\'rnm_chat_wallpaper_vendor\')"">'+iconBadge('palette',13)+' Wallpaper</button></div><div class="wallpaper-panel" id="wp-panel"><div class="cwp-title">Chat Wallpaper</div><div class="cwp-grid" id="wp-grid"></div><div class="cwp-custom-row"><input type="color" onchange="applyAppWallpaper(this.value,\'rnm_chat_wallpaper_vendor\')"/><span>Or pick any color</span></div></div><div class="wallpaper-target" id="vm-msgs" style="margin-bottom:12px;max-height:360px;overflow-y:auto;"></div><div style="display:flex;gap:8px;"><input class="fi" id="vm-input" placeholder="Type a reply..." style="flex:1;margin-bottom:0;" onkeydown="if(event.key===\'Enter\')sendVendorMsgReply(\''+custId+'\')"/><button class="btn btn-or" onclick="sendVendorMsgReply(\''+custId+'\')">Send</button></div></div><button class="btn" style="margin-top:10px;" onclick="vnav(\'messages\')">← Back</button>';
   loadAppWallpaper('rnm_chat_wallpaper_vendor');
   await loadVendorMsgThread(custId);
 }
@@ -953,7 +953,7 @@ async function loadVendorMsgThread(custId){
 async function sendVendorMsgReply(custId){
   const inp=document.getElementById('vm-input');const text=(inp.value||'').trim();if(!text)return;
   await fbP('rn_mall_vendor_chat_'+vendor.id+'/'+custId,{text:text,fromVendor:true,ts:Date.now()});
-  await fbP('rn_mall_customer_notifications/'+custId,{type:'vendor_reply',message:'💬 '+vendor.storeName+' replied: "'+text.slice(0,60)+'"',vendorName:vendor.storeName,preview:text.slice(0,60),date:ds(),read:false,ts:Date.now()});
+  await fbP('rn_mall_customer_notifications/'+custId,{type:'vendor_reply',message:vendor.storeName+' replied: "'+text.slice(0,60)+'"',vendorName:vendor.storeName,preview:text.slice(0,60),date:ds(),read:false,ts:Date.now()});
   inp.value='';await loadVendorMsgThread(custId);
 }
 
@@ -1219,7 +1219,7 @@ async function renderVProfile(c){
     <button class="btn btn-or btn-lg" onclick="saveVendorLogisticsOption()">Save Delivery Method</button>
   </div>
   <div class="card" style="max-width:500px;">
-    <div class="card-title">🎨 Store Branding</div>
+    <div class="card-title">${iconBadge('palette',15)} Store Branding</div>
     <div style="font-size:11px;color:var(--wh);font-weight:700;margin:6px 0 12px;">Shown next to your products on RichNation Mall.</div>
     <div style="text-align:center;margin-bottom:14px;">
       <div onclick="document.getElementById('vprof-logo-upload').click()" style="width:70px;height:70px;border-radius:99px;background:var(--card2);border:2px solid var(--bdr);margin:0 auto;cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;">

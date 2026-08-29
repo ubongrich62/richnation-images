@@ -349,7 +349,9 @@ function svgIconPaths(name){
     note:'<path d="M4 3h16v18l-4-3H4z"/><path d="M8 8h8M8 12h5"/>',
     alert:'<path d="M12 2L2 20h20L12 2z"/><path d="M12 9v5M12 17h.01"/>',
     palm:'<path d="M12 22V12M12 12C7 12 4 8 4 4c4 0 8 3 8 8zM12 12c5 0 8-4 8-8-4 0-8 3-8 8z"/>',
-    chat:'<path d="M21 12a8 8 0 11-3.5-6.6L21 4l-1 4.5A7.9 7.9 0 0121 12z"/>'
+    chat:'<path d="M21 12a8 8 0 11-3.5-6.6L21 4l-1 4.5A7.9 7.9 0 0121 12z"/>',
+    check:'<path d="M20 6L9 17l-5-5"/>',
+    noentry:'<circle cx="12" cy="12" r="9"/><path d="M5.5 12h13"/>'
   };
   return icons[name]||icons.star;
 }
@@ -926,7 +928,7 @@ async function submitRiderLeave(){
 async function renderRiderMessages(c){
   c.innerHTML='<div class="page-hdr-title">Messages</div><div style="color:var(--wh);font-weight:700;margin-top:8px;">Loading...</div>';
   c.innerHTML='<div class="page-hdr-title">Messages</div><div class="page-hdr-sub" style="margin-bottom:16px;">Direct line to admin, for anything, anytime</div>'
-    +'<div class="card"><div style="display:flex;justify-content:flex-end;margin-bottom:8px;"><button class="wallpaper-btn" onclick="toggleWallpaperPanel(\'wp-panel\',\'wp-grid\',\'rnm_chat_wallpaper_rider\')">🎨 Wallpaper</button></div><div class="wallpaper-panel" id="wp-panel"><div class="cwp-title">Chat Wallpaper</div><div class="cwp-grid" id="wp-grid"></div><div class="cwp-custom-row"><input type="color" onchange="applyAppWallpaper(this.value,\'rnm_chat_wallpaper_rider\')"/><span>Or pick any color</span></div></div><div class="wallpaper-target" id="rm-msgs" style="margin-bottom:12px;max-height:360px;overflow-y:auto;"></div><div style="display:flex;gap:8px;"><input class="fi" id="rm-input" placeholder="Type a message..." style="flex:1;" onkeydown="if(event.key===\'Enter\')sendRiderMessage()"/><button class="btn btn-or" onclick="sendRiderMessage()">Send</button></div></div>';
+    +'<div class="card"><div style="display:flex;justify-content:flex-end;margin-bottom:8px;"><button class="wallpaper-btn" onclick="toggleWallpaperPanel(\'wp-panel\',\'wp-grid\',\'rnm_chat_wallpaper_rider\')"">'+iconBadge('palette',13)+' Wallpaper</button></div><div class="wallpaper-panel" id="wp-panel"><div class="cwp-title">Chat Wallpaper</div><div class="cwp-grid" id="wp-grid"></div><div class="cwp-custom-row"><input type="color" onchange="applyAppWallpaper(this.value,\'rnm_chat_wallpaper_rider\')"/><span>Or pick any color</span></div></div><div class="wallpaper-target" id="rm-msgs" style="margin-bottom:12px;max-height:360px;overflow-y:auto;"></div><div style="display:flex;gap:8px;"><input class="fi" id="rm-input" placeholder="Type a message..." style="flex:1;" onkeydown="if(event.key===\'Enter\')sendRiderMessage()"/><button class="btn btn-or" onclick="sendRiderMessage()">Send</button></div></div>';
   loadAppWallpaper('rnm_chat_wallpaper_rider');
   await loadRiderMessages();
 }
@@ -1111,11 +1113,11 @@ async function saveRiderProfile(){
 
 // ── NOTIFICATIONS ──
 function riderNotifMsg(n){
-  if(n.type==='payout')return '💰 A payment of '+fmt(n.amount)+' was recorded for you, '+(n.description||'')+'. '+(n.message||'');
-  if(n.type==='strike')return n.strikes>=3?'🚫 You have been automatically suspended after 3 strikes, pending review. Last strike: '+n.reason:'⚠ You received a strike ('+n.strikes+'/3): '+n.reason;
-  if(n.type==='bank_verified')return '✔ Your bank account details have been verified by admin.';
-  if(n.type==='points_awarded')return '⭐ You earned '+n.amount+' StaffPoints, '+(n.reason||'');
-  if(n.type==='admin_reply')return '💬 Admin replied: '+(n.preview||'');
+  if(n.type==='payout')return iconBadge('money',13)+' A payment of '+fmt(n.amount)+' was recorded for you, '+(n.description||'')+'. '+(n.message||'');
+  if(n.type==='strike')return n.strikes>=3?iconBadge('noentry',13)+' You have been automatically suspended after 3 strikes, pending review. Last strike: '+n.reason:iconBadge('alert',13)+' You received a strike ('+n.strikes+'/3): '+n.reason;
+  if(n.type==='bank_verified')return iconBadge('check',13)+' Your bank account details have been verified by admin.';
+  if(n.type==='points_awarded')return iconBadge('star',13)+' You earned '+n.amount+' StaffPoints, '+(n.reason||'');
+  if(n.type==='admin_reply')return iconBadge('chat',13)+' Admin replied: '+(n.preview||'');
   return n.message||'New notification';
 }
 async function loadRiderNotifs(){
