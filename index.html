@@ -322,10 +322,25 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .chat-trigger{width:52px;height:52px;border-radius:var(--r-pill);background:var(--ink);border:none;cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-md);color:#fff;}
 .chat-panel{position:fixed;bottom:80px;right:20px;width:320px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-lg);overflow:hidden;z-index:299;display:none;flex-direction:column;box-shadow:var(--sh-lg);}
 .chat-panel.open{display:flex;}
-.chat-hdr{padding:13px 15px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;background:var(--ink);}
-.chat-hdr-title{font-weight:800;font-size:13px;color:#fff;}
+.chat-hdr{padding:13px 15px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;background:var(--ink);gap:8px;}
+.chat-hdr-title{font-weight:800;font-size:13px;color:#fff;flex:1;}
+.chat-hdr-btns{display:flex;align-items:center;gap:10px;}
+.chat-wallpaper-btn{background:none;border:none;color:rgba(255,255,255,.7);font-size:15px;cursor:pointer;padding:0;}
+.chat-wallpaper-btn:hover{color:#fff;}
 .chat-close-btn{background:none;border:none;color:rgba(255,255,255,.7);font-size:16px;cursor:pointer;}
-.chat-msgs{flex:1;min-height:200px;max-height:260px;overflow-y:auto;padding:10px;}
+.chat-msgs{flex:1;min-height:200px;max-height:260px;overflow-y:auto;padding:10px;transition:background .2s;}
+.chat-wallpaper-panel{display:none;position:absolute;top:52px;right:15px;left:15px;background:var(--card2);border:1px solid var(--bdr);border-radius:10px;padding:12px;z-index:301;box-shadow:var(--sh-lg);}
+.chat-wallpaper-panel.open{display:block;}
+.cwp-title{font-size:11px;font-weight:800;color:var(--or);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;}
+.cwp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px 8px;margin-bottom:10px;}
+.cwp-swatch-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;}
+.cwp-swatch{width:100%;height:38px;border-radius:8px;border:2px solid transparent;background-size:cover;background-position:center;overflow:hidden;}
+.cwp-swatch[data-id="pattern"]{background-size:110px!important;}
+.cwp-swatch.active{border-color:var(--or);}
+.cwp-swatch-label{font-size:8px;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.cwp-custom-row{display:flex;align-items:center;gap:8px;margin-top:18px;}
+.cwp-custom-row input[type=color]{width:36px;height:36px;border:none;border-radius:8px;padding:0;cursor:pointer;background:none;}
+.cwp-custom-row span{font-size:11px;color:var(--w2);font-weight:700;}
 .chat-msg{display:flex;gap:8px;margin-bottom:8px;}
 .chat-msg.own{flex-direction:row-reverse;}
 .chat-av{width:26px;height:26px;border-radius:var(--r-pill);background:var(--card2);font-size:9px;font-weight:900;color:var(--or);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
@@ -814,7 +829,18 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 <div class="chat-panel" id="chat-panel">
   <div class="chat-hdr">
     <div class="chat-hdr-title">💬 RichNation Support</div>
-    <button class="chat-close-btn" onclick="toggleChat()">✕</button>
+    <div class="chat-hdr-btns">
+      <button class="chat-wallpaper-btn" onclick="toggleWallpaperPicker(event)" title="Customize chat wallpaper">🎨</button>
+      <button class="chat-close-btn" onclick="toggleChat()">✕</button>
+    </div>
+  </div>
+  <div class="chat-wallpaper-panel" id="chat-wallpaper-panel">
+    <div class="cwp-title">Chat Wallpaper</div>
+    <div class="cwp-grid" id="cwp-grid"></div>
+    <div class="cwp-custom-row">
+      <input type="color" id="cwp-custom-color" onchange="applyChatWallpaper(this.value)"/>
+      <span>Or pick any color</span>
+    </div>
   </div>
   <div class="chat-msgs" id="widget-msgs"></div>
   <div class="chat-inp-row">
@@ -3263,16 +3289,62 @@ function isBusinessHours(){
   const hour=new Date().getHours();
   return hour>=(bh.start!=null?bh.start:8)&&hour<(bh.end!=null?bh.end:20);
 }
+const CHAT_WALLPAPERS=[
+  {id:'default',label:'Default',bg:'var(--card)'},
+  {id:'black',label:'Black',bg:'#0A0A0B'},
+  {id:'diagonal',label:'Diagonal',bg:'linear-gradient(135deg,#1a0f00 0%,#000000 55%,#2b1600 100%)'},
+  {id:'glow',label:'Orange Glow',bg:'radial-gradient(circle at 30% 15%,rgba(255,106,0,0.30),#0a0a0b 65%)'},
+  {id:'stripes',label:'Stripes',bg:'repeating-linear-gradient(45deg,#0a0a0b,#0a0a0b 18px,#1a0f00 18px,#1a0f00 20px)'},
+  {id:'sunset',label:'Sunset',bg:'linear-gradient(160deg,#3a1a00,#0a0a0b 70%)'},
+  {id:'pattern',label:'Shopping',bg:'#0a0a0b url("data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="260" height="92"><text x="12" y="34" font-family="Arial,sans-serif" font-size="13" font-weight="700" fill="#FF6A00" fill-opacity="0.16">\u{1F6CD} Shopping Online</text><text x="130" y="80" font-family="Arial,sans-serif" font-size="13" font-weight="700" fill="#FF6A00" fill-opacity="0.16">\u{1F6CD} Shopping Online</text></svg>')+'") repeat'},
+];
+function buildWallpaperPicker(){
+  const grid=document.getElementById('cwp-grid');if(!grid||grid.dataset.built)return;
+  grid.dataset.built='1';
+  const current=localStorage.getItem('rnm_chat_wallpaper')||'default';
+  grid.innerHTML=CHAT_WALLPAPERS.map(function(w){
+    return '<div class="cwp-swatch-wrap" onclick="applyChatWallpaper(\''+w.id+'\')"><div class="cwp-swatch'+(current===w.id?' active':'')+'" style="background:'+w.bg+';" data-id="'+w.id+'"></div><div class="cwp-swatch-label">'+w.label+'</div></div>';
+  }).join('');
+}
+function toggleWallpaperPicker(e){
+  if(e)e.stopPropagation();
+  buildWallpaperPicker();
+  document.getElementById('chat-wallpaper-panel').classList.toggle('open');
+}
+function applyChatWallpaper(value){
+  const preset=CHAT_WALLPAPERS.find(function(w){return w.id===value;});
+  const bg=preset?preset.bg:value;
+  const el=document.getElementById('widget-msgs');
+  if(el)el.style.background=bg;
+  localStorage.setItem('rnm_chat_wallpaper',preset?preset.id:value);
+  document.querySelectorAll('.cwp-swatch').forEach(function(s){s.classList.toggle('active',preset&&s.dataset.id===preset.id);});
+}
+function loadChatWallpaper(){
+  try{
+    const saved=localStorage.getItem('rnm_chat_wallpaper');
+    if(!saved)return;
+    const preset=CHAT_WALLPAPERS.find(function(w){return w.id===saved;});
+    const el=document.getElementById('widget-msgs');
+    if(el)el.style.background=preset?preset.bg:saved;
+  }catch(e){}
+}
 async function toggleChat(){
   document.getElementById('chat-panel').classList.toggle('open');
   if(document.getElementById('chat-panel').classList.contains('open')){
+    loadChatWallpaper();
     await loadWidgetMsgs();pushNavState({modal:'chat'});
     if(!sessionStorage.getItem('rnm_bot_greeted')){
       sessionStorage.setItem('rnm_bot_greeted','1');
       showBotGreeting();
     }
+  }else{
+    document.getElementById('chat-wallpaper-panel')?.classList.remove('open');
   }
 }
+document.addEventListener('click',function(e){
+  const panel=document.getElementById('chat-wallpaper-panel');
+  if(panel&&panel.classList.contains('open')&&!panel.contains(e.target)&&!e.target.closest('.chat-wallpaper-btn'))panel.classList.remove('open');
+});
 async function showBotGreeting(){
   const box=document.getElementById('widget-msgs');if(!box)return;
   const online=isBusinessHours();
