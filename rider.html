@@ -36,16 +36,22 @@ html,body{color-scheme:dark;height:100%;font-family:'Inter',sans-serif;backgroun
 ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:#000;}::-webkit-scrollbar-thumb{background:#222;border-radius:4px;}
 button{font-family:inherit;}
 #login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 25% 40%,rgba(255,106,0,0.07),transparent 50%),radial-gradient(circle at 75% 60%,rgba(255,167,51,0.04),transparent 50%);}
-.lcard{width:100%;max-width:460px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-lg);padding:36px 30px;box-shadow:var(--sh-lg);}
-.llogo{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:20px;color:var(--or);margin-bottom:4px;}
-.ltitle{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;margin-bottom:6px;}
-.lsub{text-align:center;font-size:11px;color:var(--wh);font-weight:700;margin-bottom:20px;line-height:1.6;}
+.lcard{width:100%;max-width:460px;background:var(--or);border:1px solid var(--bdr);border-radius:var(--r-lg);padding:36px 30px;box-shadow:var(--sh-lg);overflow:hidden;}
+.llogo{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:20px;color:#fff;background:#000;margin:-36px -30px 20px;padding:18px 30px 14px;}
+.ltitle{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;margin-bottom:6px;color:#000;}
+.lsub{text-align:center;font-size:11px;color:#000;font-weight:700;margin-bottom:20px;line-height:1.6;}
 .fi{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:13px 14px;color:var(--wh);font-size:13px;outline:none;margin-bottom:10px;color-scheme:dark;transition:border-color .15s,box-shadow .15s;}
 .fi:focus{border-color:var(--or);box-shadow:0 0 0 3px rgba(255,106,0,.18);}
+#login .fi{background:#fff;color:#000;border-color:rgba(0,0,0,.15);color-scheme:light;}
+#login{--wh:#000;}
+#login .tc-box{--wh:#e0e0e0;}
 .lbtn{width:100%;background:var(--or);color:#fff;border:none;padding:15px;border-radius:var(--r-md);font-weight:800;font-size:14px;cursor:pointer;margin-top:4px;transition:background .15s;}
 .lbtn:hover{background:var(--or-dk);}
 .lbtn:active{transform:translateY(1px);}
+#login .lbtn{background:#000;}
+#login .lbtn:hover{background:#1a1a1a;}
 .lerr{font-size:12px;color:var(--re);margin-top:10px;display:none;background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.25);border-radius:var(--r-sm);padding:10px 12px;}
+#login .lerr{color:#7a0010;background:rgba(0,0,0,.06);border-color:rgba(0,0,0,.15);}
 #app{display:none;min-height:100vh;}
 .topbar{min-height:56px;border-bottom:1px solid var(--bdr);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;position:sticky;top:0;background:var(--bg);z-index:100;}
 .tb-left{display:flex;align-items:center;gap:8px;min-width:0;flex:1;}
@@ -113,7 +119,7 @@ button{font-family:inherit;}
 
     <div id="login-form">
       <input class="fi" id="r-email" type="email" placeholder="Email"/>
-      <div style="position:relative;"><input class="fi" id="r-pass" type="password" placeholder="Password" style="padding-right:56px;"/><span onclick="togglePwVisibility('r-pass',this)" style="position:absolute;right:12px;top:12px;font-size:11px;color:var(--or);cursor:pointer;font-weight:700;">Show</span></div>
+      <div style="position:relative;"><input class="fi" id="r-pass" type="password" placeholder="Password" style="padding-right:56px;"/><span onclick="togglePwVisibility('r-pass',this)" style="position:absolute;right:12px;top:12px;font-size:11px;color:#000;text-decoration:underline;cursor:pointer;font-weight:700;">Show</span></div>
       <button class="lbtn" onclick="doRiderLogin()">Sign In</button>
       <div class="lerr" id="login-err"></div>
     </div>
@@ -138,7 +144,7 @@ button{font-family:inherit;}
         <input class="fi" id="ap-idnum" placeholder="ID Number (NIN/Driver's License)"/>
       </div>
       <textarea class="fi" id="ap-note" rows="2" placeholder="Anything else you'd like us to know (optional)" style="resize:vertical;"></textarea>
-      <div style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;margin:14px 0;max-height:220px;overflow-y:auto;">
+      <div class="tc-box" style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;margin:14px 0;max-height:220px;overflow-y:auto;">
         <div style="font-weight:800;font-size:13px;margin-bottom:8px;color:var(--wh);">A Direct Word From the Founder, Please Read</div>
         <div style="font-size:10.5px;color:var(--wh);font-weight:700;line-height:1.7;">
           You are the last person our customer sees before they hold what they paid for. To them, you are RichNation. Customers have complained before about riders being rude, impatient, or rough with packages. This will not be taken lightly.<br><br>
@@ -153,7 +159,7 @@ button{font-family:inherit;}
       <div class="lerr" id="apply-err"></div>
     </div>
 
-    <div style="text-align:center;font-size:11px;color:var(--wh);font-weight:700;margin-top:16px;" id="toggle-note">New rider? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Apply here</span></div>
+    <div style="text-align:center;font-size:11px;color:var(--wh);font-weight:700;margin-top:16px;" id="toggle-note">New rider? <span onclick="toggleApplyMode()" style="color:#000;text-decoration:underline;font-weight:700;cursor:pointer;">Apply here</span></div>
   </div>
 </div>
 
@@ -346,7 +352,7 @@ function toggleApplyMode(){
   document.getElementById('apply-form').style.display=isLogin?'block':'none';
   document.getElementById('l-title').textContent=isLogin?'Apply to Become a Rider':'Dispatch Rider Sign In';
   document.getElementById('l-sub').textContent=isLogin?'Fill in your details, our team reviews every application before you start receiving deliveries.':'Manage your deliveries and update your status in real time.';
-  document.getElementById('toggle-note').innerHTML=isLogin?'Already a rider? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Sign in</span>':'New rider? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Apply here</span>';
+  document.getElementById('toggle-note').innerHTML=isLogin?'Already a rider? <span onclick="toggleApplyMode()" style="color:#000;text-decoration:underline;font-weight:700;cursor:pointer;">Sign in</span>':'New rider? <span onclick="toggleApplyMode()" style="color:#000;text-decoration:underline;font-weight:700;cursor:pointer;">Apply here</span>';
 }
 // A record's own ID doubles as its access key everywhere in this app, so it must not
 // be guessable. Date.now() alone produces a predictable, enumerable value, crypto.randomUUID() does not.

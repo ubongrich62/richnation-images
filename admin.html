@@ -55,32 +55,34 @@ html,body{color-scheme:dark;height:100%;font-family:'Inter',sans-serif;backgroun
   radial-gradient(circle at 75% 60%,rgba(212,160,23,0.04),transparent 50%);
 }
 .lcard{
-  width:100%;max-width:400px;background:var(--card);
+  width:100%;max-width:400px;background:var(--or);
   border:1px solid var(--bdr);border-radius:var(--r-lg);padding:40px 34px;
   text-align:center;box-shadow:var(--sh-lg);
-  opacity:1;
+  opacity:1;overflow:hidden;
 }
+.lhdr{background:#000;margin:-40px -34px 20px;padding:18px 34px 14px;}
 .llogo{height:50px;margin-bottom:20px;}
-.ltitle{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:17px;color:var(--wh);margin-bottom:4px;}
-.lsub{font-size:11px;color:var(--wh);font-weight:700;margin-bottom:26px;line-height:1.6;}
+.lhdr .llogo{margin:0 auto;}
+.ltitle{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:17px;color:#000;margin-bottom:4px;}
+.lsub{font-size:11px;color:#000;font-weight:700;margin-bottom:26px;line-height:1.6;}
 .fi{
-  width:100%;background:#08080a;border:1px solid var(--bdr);border-radius:var(--r-sm);
-  padding:12px 14px;color:var(--wh);font-size:13px;font-family:'Inter',sans-serif;
+  width:100%;background:#fff;border:1px solid rgba(0,0,0,0.15);border-radius:var(--r-sm);
+  padding:12px 14px;color:#000;font-size:13px;font-family:'Inter',sans-serif;
   outline:none;margin-bottom:10px;transition:border-color 0.2s,box-shadow 0.2s;
 }
-.fi:focus{border-color:var(--or);box-shadow:0 0 0 3px rgba(255,106,0,0.15);}
-.fi::placeholder{color:#333338;}
+.fi:focus{border-color:#000;box-shadow:0 0 0 3px rgba(0,0,0,0.15);}
+.fi::placeholder{color:rgba(0,0,0,0.45);}
 .pw-wrap{position:relative;margin-bottom:10px;}
 .pw-wrap .fi{margin-bottom:0;padding-right:42px;}
-.pw-eye{position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--mu);font-size:15px;transition:color 0.2s;}
-.pw-eye:hover{color:var(--wh);}
+.pw-eye{position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#000;font-size:15px;transition:color 0.2s;}
+.pw-eye:hover{color:#000;opacity:0.7;}
 .lbtn{
-  width:100%;background:var(--or);color:#fff;border:none;
+  width:100%;background:#000;color:#fff;border:none;
   border-radius:var(--r-sm);padding:13px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;
   font-size:13px;cursor:pointer;transition:background 0.15s,transform 0.15s,box-shadow 0.15s;letter-spacing:0.3px;margin-top:4px;
 }
-.lbtn:hover{background:var(--or-dk);transform:translateY(-1px);box-shadow:var(--sh-md);}
-.lerr{color:var(--re);font-size:11px;margin-top:8px;display:none;}
+.lbtn:hover{background:#1a1a1a;transform:translateY(-1px);box-shadow:var(--sh-md);}
+.lerr{color:#7a0010;font-size:11px;margin-top:8px;display:none;}
 
 /* ── APP ── */
 #app{display:none;height:100vh;flex-direction:column;}
@@ -366,7 +368,7 @@ html,body{color-scheme:dark;height:100%;font-family:'Inter',sans-serif;backgroun
 <!-- LOGIN -->
 <div id="login" style="display:flex;min-height:100vh;align-items:center;justify-content:center;padding:20px;">
   <div class="lcard">
-    <img class="llogo" src="images/branding/richnation-logo-v2.png" style="height:44px;max-width:180px;object-fit:contain;display:block;margin:0 auto 18px;"/>
+    <div class="lhdr"><img class="llogo" src="images/branding/richnation-logo-v2.png" style="height:44px;max-width:180px;object-fit:contain;display:block;margin:0 auto;"/></div>
     <div class="ltitle">Admin Control Panel</div>
     <div class="lsub">RichNation Mall, Authorised Access Only</div>
     <input class="fi" id="li-e" type="email" placeholder="Admin email" autocomplete="off"/>

@@ -35,15 +35,21 @@ html,body{color-scheme:dark;height:100%;font-family:'Inter',sans-serif;backgroun
 ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:4px;}
 button{font-family:inherit;}
 #login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg);}
-.lcard{width:100%;max-width:480px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-lg);padding:36px 30px;box-shadow:var(--sh-lg);overflow:hidden;}
-.llogo{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;letter-spacing:.3px;color:#fff;background:var(--ink);margin:-36px -30px 24px;padding:20px 30px 16px;}
-.ltitle{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;margin-bottom:6px;color:var(--wh);}
-.lsub{text-align:center;font-size:11px;color:var(--wh);font-weight:700;margin-bottom:20px;line-height:1.6;}
+.lcard{width:100%;max-width:480px;background:var(--or);border:1px solid var(--bdr);border-radius:var(--r-lg);padding:36px 30px;box-shadow:var(--sh-lg);overflow:hidden;}
+.llogo{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;letter-spacing:.3px;color:#fff;background:#000;margin:-36px -30px 24px;padding:20px 30px 16px;}
+.ltitle{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;margin-bottom:6px;color:#000;}
+.lsub{text-align:center;font-size:11px;color:#000;font-weight:700;margin-bottom:20px;line-height:1.6;}
 .fi{width:100%;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:12px 14px;color:var(--wh);font-size:13px;outline:none;margin-bottom:10px;transition:border-color .15s,box-shadow .15s;}
 .fi:focus{border-color:var(--or);box-shadow:0 0 0 3px rgba(255,106,0,.15);}
+#login .fi{background:#fff;color:#000;border-color:rgba(0,0,0,.15);}
+#login{--wh:#000;}
+#login .tc-box{--wh:#e0e0e0;}
 .lbtn{width:100%;background:var(--or);color:#fff;border:none;padding:13px;border-radius:var(--r-md);font-weight:800;font-size:13px;cursor:pointer;margin-top:4px;transition:background .15s;}
 .lbtn:hover{background:var(--or-dk);}
+#login .lbtn{background:#000;}
+#login .lbtn:hover{background:#1a1a1a;}
 .lerr{font-size:12px;color:var(--re);margin-top:10px;display:none;background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.25);border-radius:7px;padding:10px 12px;}
+#login .lerr{color:#7a0010;background:rgba(0,0,0,.06);border-color:rgba(0,0,0,.15);}
 .lbl{font-size:11px;font-weight:700;color:var(--wh);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;}
 #app{display:none;min-height:100vh;}
 .topbar{min-height:56px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;position:sticky;top:0;background:var(--ink);z-index:100;box-shadow:var(--sh-sm);}
@@ -103,7 +109,7 @@ button{font-family:inherit;}
 
     <div id="login-form">
       <input class="fi" id="in-email" type="email" placeholder="Email"/>
-      <div style="position:relative;"><input class="fi" id="in-pass" type="password" placeholder="Password" style="padding-right:56px;"/><span onclick="togglePwVisibility('in-pass',this)" style="position:absolute;right:12px;top:12px;font-size:11px;color:var(--or);cursor:pointer;font-weight:700;">Show</span></div>
+      <div style="position:relative;"><input class="fi" id="in-pass" type="password" placeholder="Password" style="padding-right:56px;"/><span onclick="togglePwVisibility('in-pass',this)" style="position:absolute;right:12px;top:12px;font-size:11px;color:#000;text-decoration:underline;cursor:pointer;font-weight:700;">Show</span></div>
       <button class="lbtn" onclick="doInvestorLogin()">Sign In</button>
       <div class="lerr" id="login-err"></div>
     </div>
@@ -133,7 +139,7 @@ button{font-family:inherit;}
         </select>
       </div>
       <div id="package-preview" style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;margin-bottom:12px;font-size:12px;color:var(--w2);display:none;"></div>
-      <div style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;margin-bottom:12px;max-height:180px;overflow-y:auto;">
+      <div class="tc-box" style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;margin-bottom:12px;max-height:180px;overflow-y:auto;">
         <div style="font-weight:800;font-size:12px;margin-bottom:8px;color:var(--wh);">RichNation Mall Investor Agreement</div>
         <div style="font-size:11px;color:var(--wh);font-weight:700;line-height:1.7;">
           By checking "I Agree" below, you enter into this agreement electronically, no physical signature required.<br><br>
@@ -148,13 +154,13 @@ button{font-family:inherit;}
           <strong>9. Management Authority.</strong> RichNation Global Ltd may update platform policies with notice. Your individually agreed package terms are never changed without your consent.
         </div>
       </div>
-      <label style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--w2);cursor:pointer;margin-bottom:12px;"><input type="checkbox" id="ap-agree" style="width:16px;height:16px;accent-color:var(--or);margin-top:2px;flex-shrink:0;"/> I have read and agree to the RichNation Mall Investor Agreement above.</label>
+      <label style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#000;font-weight:700;cursor:pointer;margin-bottom:12px;"><input type="checkbox" id="ap-agree" style="width:16px;height:16px;accent-color:var(--or);margin-top:2px;flex-shrink:0;"/> I have read and agree to the RichNation Mall Investor Agreement above.</label>
       <textarea class="fi" id="ap-note" rows="3" placeholder="Anything else you'd like us to know (optional)" style="resize:vertical;"></textarea>
       <button class="lbtn" onclick="submitInvestorApplication()">Submit Application</button>
       <div class="lerr" id="apply-err"></div>
     </div>
 
-    <div style="text-align:center;font-size:11px;color:var(--wh);font-weight:700;margin-top:16px;" id="toggle-note">New partner? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Apply to invest</span></div>
+    <div style="text-align:center;font-size:11px;color:var(--wh);font-weight:700;margin-top:16px;" id="toggle-note">New partner? <span onclick="toggleApplyMode()" style="color:#000;text-decoration:underline;font-weight:700;cursor:pointer;">Apply to invest</span></div>
   </div>
 </div>
 
@@ -375,7 +381,7 @@ function toggleApplyMode(){
   document.getElementById('apply-form').style.display=isLogin?'block':'none';
   document.getElementById('l-title').textContent=isLogin?'Apply to Invest':'Investor Sign In';
   document.getElementById('l-sub').textContent=isLogin?'Minimum investment ₦200,000. Fill in your details below and our team will follow up with a formal partnership agreement.':'Full transparency into your investment, live stats, revenue charts, updates, and direct access to the founder.';
-  document.getElementById('toggle-note').innerHTML=isLogin?'Already a partner? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Sign in</span>':'New partner? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Apply to invest</span>';
+  document.getElementById('toggle-note').innerHTML=isLogin?'Already a partner? <span onclick="toggleApplyMode()" style="color:#000;text-decoration:underline;font-weight:700;cursor:pointer;">Sign in</span>':'New partner? <span onclick="toggleApplyMode()" style="color:#000;text-decoration:underline;font-weight:700;cursor:pointer;">Apply to invest</span>';
 }
 // A record's own ID doubles as its access key everywhere in this app, so it must not
 // be guessable. Date.now() alone produces a predictable, enumerable value, crypto.randomUUID() does not.

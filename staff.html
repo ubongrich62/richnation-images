@@ -35,14 +35,19 @@ html,body{color-scheme:dark;height:100%;font-family:'Inter',sans-serif;backgroun
 ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:#000;}::-webkit-scrollbar-thumb{background:#222;border-radius:4px;}
 button{font-family:inherit;}
 #login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 30% 20%,rgba(255,106,0,0.07),transparent 55%),var(--bg);}
-.lcard{width:100%;max-width:400px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-lg);padding:36px 30px;box-shadow:var(--sh-lg);}
-.llogo{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:20px;color:var(--or);margin-bottom:4px;}
-.ltitle{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;margin-bottom:22px;color:var(--wh);}
+.lcard{width:100%;max-width:400px;background:var(--or);border:1px solid var(--bdr);border-radius:var(--r-lg);padding:36px 30px;box-shadow:var(--sh-lg);overflow:hidden;}
+.llogo{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:20px;color:#fff;background:#000;margin:-36px -30px 20px;padding:18px 30px 14px;}
+.ltitle{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;margin-bottom:22px;color:#000;}
 .fi{width:100%;background:var(--bg);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:12px 14px;color:var(--wh);font-size:13px;outline:none;margin-bottom:10px;transition:border-color .15s,box-shadow .15s;}
 .fi:focus{border-color:var(--or);box-shadow:0 0 0 3px rgba(255,106,0,.15);}
+#login .fi{background:#fff;color:#000;border-color:rgba(0,0,0,.15);}
+#login{--wh:#000;}
 .lbtn{width:100%;background:var(--or);color:#fff;border:none;padding:13px;border-radius:var(--r-md);font-weight:800;font-size:13px;cursor:pointer;margin-top:4px;transition:background .15s;}
 .lbtn:hover{background:var(--or-dk);}
+#login .lbtn{background:#000;}
+#login .lbtn:hover{background:#1a1a1a;}
 .lerr{font-size:12px;color:var(--re);margin-top:10px;display:none;background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.25);border-radius:var(--r-sm);padding:10px 12px;}
+#login .lerr{color:#7a0010;background:rgba(0,0,0,.06);border-color:rgba(0,0,0,.15);}
 .lbl{font-size:11px;font-weight:700;color:var(--wh);font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;}
 #app{display:none;min-height:100vh;}
 .topbar{min-height:56px;border-bottom:1px solid var(--bdr);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;position:sticky;top:0;background:var(--bg);z-index:100;}
@@ -122,7 +127,7 @@ button{font-family:inherit;}
       <input class="fi" id="s-email" type="email" placeholder="Work email"/>
       <div style="position:relative;">
         <input class="fi" id="s-pass" type="password" placeholder="Password" style="padding-right:56px;"/>
-        <span onclick="togglePwVisibility('s-pass',this)" style="position:absolute;right:12px;top:12px;font-size:11px;color:var(--or);cursor:pointer;font-weight:700;">Show</span>
+        <span onclick="togglePwVisibility('s-pass',this)" style="position:absolute;right:12px;top:12px;font-size:11px;color:#000;text-decoration:underline;cursor:pointer;font-weight:700;">Show</span>
       </div>
       <button class="lbtn" id="staff-login-btn" onclick="doStaffLogin()">Sign In</button>
       <div class="lerr" id="login-err"></div>
@@ -149,7 +154,7 @@ button{font-family:inherit;}
       <div class="lerr" id="apply-err"></div>
     </div>
 
-    <div style="text-align:center;font-size:11px;color:var(--wh);font-weight:700;margin-top:16px;" id="toggle-note">Don't have an account? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Apply here</span></div>
+    <div style="text-align:center;font-size:11px;color:var(--wh);font-weight:700;margin-top:16px;" id="toggle-note">Don't have an account? <span onclick="toggleApplyMode()" style="color:#000;text-decoration:underline;font-weight:700;cursor:pointer;">Apply here</span></div>
   </div>
 </div>
 
@@ -411,7 +416,7 @@ function toggleApplyMode(){
   document.getElementById('login-form').style.display=isLogin?'none':'block';
   document.getElementById('apply-form').style.display=isLogin?'block':'none';
   document.getElementById('l-title').textContent=isLogin?'Apply to Join the Team':'Staff Sign In';
-  document.getElementById('toggle-note').innerHTML=isLogin?'Already have login details? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Sign in</span>':'Don\'t have an account? <span onclick="toggleApplyMode()" style="color:var(--or);font-weight:700;cursor:pointer;">Apply here</span>';
+  document.getElementById('toggle-note').innerHTML=isLogin?'Already have login details? <span onclick="toggleApplyMode()" style="color:#000;text-decoration:underline;font-weight:700;cursor:pointer;">Sign in</span>':'Don\'t have an account? <span onclick="toggleApplyMode()" style="color:#000;text-decoration:underline;font-weight:700;cursor:pointer;">Apply here</span>';
 }
 // A record's own ID doubles as its access key everywhere in this app, so it must not
 // be guessable. Date.now() alone produces a predictable, enumerable value, crypto.randomUUID() does not.

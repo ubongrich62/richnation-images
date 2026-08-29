@@ -46,18 +46,24 @@ button{font-family:inherit;}
 /* ── LOGIN / REGISTER ── */
 #login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
   background:var(--ink);}
-.lcard{width:100%;max-width:420px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-lg);padding:36px 30px;box-shadow:var(--sh-lg);}
-.llogo{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:20px;color:var(--or);margin-bottom:4px;}
-.ltitle{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:var(--wh);margin-bottom:4px;}
-.lsub{text-align:center;font-size:11px;color:var(--wh);font-weight:700;margin-bottom:22px;line-height:1.6;}
+.lcard{width:100%;max-width:420px;background:var(--or);border:1px solid var(--bdr);border-radius:var(--r-lg);padding:36px 30px;box-shadow:var(--sh-lg);overflow:hidden;}
+.llogo{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:20px;color:#fff;background:#000;margin:-36px -30px 20px;padding:18px 30px 14px;}
+.ltitle{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#000;margin-bottom:4px;}
+.lsub{text-align:center;font-size:11px;color:#000;font-weight:700;margin-bottom:22px;line-height:1.6;}
 .fi,.inp{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:12px 14px;color:var(--wh);font-size:13px;outline:none;margin-bottom:10px;color-scheme:dark;transition:border-color .15s,box-shadow .15s;}
 .fi:focus{border-color:var(--or);box-shadow:0 0 0 3px rgba(255,106,0,.15);}
+#login .fi{background:#fff;color:#000;border-color:rgba(0,0,0,.15);color-scheme:light;}
+#login{--wh:#000;}
+#login .tc-box{--wh:#e0e0e0;}
 .lbtn{width:100%;background:var(--or);color:#fff;border:none;padding:13px;border-radius:var(--r-sm);font-weight:800;font-size:13px;cursor:pointer;margin-top:4px;transition:background .15s;}
 .lbtn:hover{background:var(--or-dk);}
+#login .lbtn{background:#000;}
+#login .lbtn:hover{background:#1a1a1a;}
 .lerr{font-size:12px;color:var(--re);margin-top:10px;display:none;background:rgba(220,38,38,0.07);border:1px solid rgba(220,38,38,0.22);border-radius:var(--r-sm);padding:10px 12px;}
 .lnote{font-size:12px;color:var(--or-dk);margin-top:10px;display:none;background:rgba(255,106,0,0.07);border:1px solid rgba(255,106,0,0.2);border-radius:var(--r-sm);padding:10px 12px;line-height:1.6;}
 .ltoggle{text-align:center;font-size:12px;color:var(--wh);font-weight:700;margin-top:16px;}
 .ltoggle span{color:var(--or);font-weight:700;cursor:pointer;}
+#login .ltoggle span{color:#000;text-decoration:underline;}
 .lbl{font-size:11px;font-weight:700;color:var(--wh);font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;}
 
 /* ── APP SHELL ── */
@@ -133,8 +139,8 @@ button{font-family:inherit;}
 
     <div id="login-form">
       <input class="fi" id="v-email" type="email" placeholder="Email address"/>
-      <div style="position:relative;"><input class="fi" id="v-pass" type="password" placeholder="Password" style="padding-right:56px;"/><span onclick="togglePwVisibility('v-pass',this)" style="position:absolute;right:12px;top:12px;font-size:11px;color:var(--or);cursor:pointer;font-weight:700;">Show</span></div>
-      <div style="text-align:right;margin-bottom:10px;"><span onclick="showVendorForgotPassword()" style="font-size:11px;color:var(--or);cursor:pointer;">Forgot password?</span></div>
+      <div style="position:relative;"><input class="fi" id="v-pass" type="password" placeholder="Password" style="padding-right:56px;"/><span onclick="togglePwVisibility('v-pass',this)" style="position:absolute;right:12px;top:12px;font-size:11px;color:#000;text-decoration:underline;cursor:pointer;font-weight:700;">Show</span></div>
+      <div style="text-align:right;margin-bottom:10px;"><span onclick="showVendorForgotPassword()" style="font-size:11px;color:#000;text-decoration:underline;cursor:pointer;">Forgot password?</span></div>
       <button class="lbtn" onclick="doVendorLogin()">Sign In</button>
       <div class="lerr" id="login-err"></div>
     </div>
@@ -144,7 +150,7 @@ button{font-family:inherit;}
       <input class="fi" id="r-owner" placeholder="Owner Full Name"/>
       <input class="fi" id="r-email" type="email" placeholder="Email address"/>
       <input class="fi" id="r-phone" placeholder="Phone number"/>
-      <div style="position:relative;"><input class="fi" id="r-pass" type="password" placeholder="Password (min 6 characters)" style="padding-right:56px;"/><span onclick="togglePwVisibility('r-pass',this)" style="position:absolute;right:12px;top:12px;font-size:11px;color:var(--or);cursor:pointer;font-weight:700;">Show</span></div>
+      <div style="position:relative;"><input class="fi" id="r-pass" type="password" placeholder="Password (min 6 characters)" style="padding-right:56px;"/><span onclick="togglePwVisibility('r-pass',this)" style="position:absolute;right:12px;top:12px;font-size:11px;color:#000;text-decoration:underline;cursor:pointer;font-weight:700;">Show</span></div>
       <div style="font-size:11px;color:var(--wh);font-weight:700;margin:10px 0 6px;">Your Profile Picture (required)</div>
       <input class="fi" id="r-doc-photo" type="file" accept="image/*"/>
       <div style="font-size:11px;color:var(--wh);font-weight:700;margin:10px 0 6px;">Means of Identification (required)</div>
@@ -161,7 +167,7 @@ button{font-family:inherit;}
         <option value="richnation">RichNation Mall handles delivery for me</option>
       </select>
       <div id="logistics-preview" style="font-size:11px;color:var(--wh);font-weight:700;margin-bottom:14px;"></div>
-      <div style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;margin:14px 0;max-height:220px;overflow-y:auto;">
+      <div class="tc-box" style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;margin:14px 0;max-height:220px;overflow-y:auto;">
         <div style="font-weight:800;font-size:13px;margin-bottom:4px;color:var(--wh);">RichNation Mall, Vendor Terms &amp; Conditions</div>
         <div style="font-size:10px;color:var(--wh);font-weight:700;font-style:italic;margin-bottom:10px;">This agreement governs your participation as a vendor on RichNation Mall, a division of RichNation Global Ltd. By applying to sell on RichNation Mall, you agree to be bound by these terms.</div>
         <div style="font-size:10.5px;color:var(--wh);font-weight:700;line-height:1.7;">
