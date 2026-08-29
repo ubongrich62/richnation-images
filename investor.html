@@ -337,7 +337,8 @@ function svgIconPaths(name){
     mail:'<path d="M3 5h18v14H3z"/><path d="M3 6l9 7 9-7"/>',
     phone:'<path d="M4 3h4l2 6-3 2a12 12 0 006 6l2-3 6 2v4a2 2 0 01-2 2C10 22 2 14 2 5a2 2 0 012-2z"/>',
     cake:'<path d="M4 21h16v-8H4z"/><path d="M4 13a3 3 0 013-3h10a3 3 0 013 3"/><path d="M9 10V6M12 10V4M15 10V6"/>',
-    briefcase:'<path d="M3 7h18v13H3z"/><path d="M8 7V4h8v3"/>'
+    briefcase:'<path d="M3 7h18v13H3z"/><path d="M8 7V4h8v3"/>',
+    plus:'<path d="M12 5v14M5 12h14"/>'
   };
   return icons[name]||icons.star;
 }
@@ -499,7 +500,7 @@ async function doInvestorLogin(){
 function investorLogout(){sessionStorage.removeItem('rnm_investor_session');investor=null;document.getElementById('app').style.display='none';document.getElementById('login').style.display='flex';}
 function checkInvestorSession(){const s=sessionStorage.getItem('rnm_investor_session');if(s){try{investor=JSON.parse(s);startApp();}catch(e){}}}
 function buildInvestorSidebar(){
-  var items=[['dashboard','home','Dashboard'],['wallet','money','Wallet'],['switch','star','Switch Plan'],['stats','chart','Live Mall Stats'],['updates','note','Updates'],['documents','file','My Documents'],['chat','chat','Chat with Founder'],['profile','user','My Profile']];
+  var items=[['dashboard','home','Dashboard'],['wallet','money','Wallet'],['topup','plus','Top Up'],['switch','star','Switch Plan'],['stats','chart','Live Mall Stats'],['updates','note','Updates'],['documents','file','My Documents'],['chat','chat','Chat with Founder'],['profile','user','My Profile']];
   var html='';
   items.forEach(function(item,i){html+='<div class="sb-item'+(i===0?' active':'')+'" id="nav-'+item[0]+'" onclick="inav(\''+item[0]+'\')">'+iconBadge(item[1],16)+'&nbsp;'+item[2]+'</div>';});
   document.getElementById('sidebar').innerHTML=html;
@@ -541,7 +542,7 @@ async function inav(page){
   document.querySelector('.sb').classList.remove('open');
   document.getElementById('sb-backdrop')?.classList.remove('open');
   const c=document.getElementById('content');
-  const routes={dashboard:renderDashboard,wallet:renderInvestorWallet,switch:renderSwitchPlan,stats:renderStats,updates:renderUpdates,documents:renderDocuments,chat:renderChat,profile:renderProfile};
+  const routes={dashboard:renderDashboard,wallet:renderInvestorWallet,topup:renderTopUp,switch:renderSwitchPlan,stats:renderStats,updates:renderUpdates,documents:renderDocuments,chat:renderChat,profile:renderProfile};
   (routes[page]||renderDashboard)(c);
   const fresh=await fbG('rn_mall_investors/'+investor._id);
   if(fresh&&curNav===page){
@@ -684,6 +685,69 @@ async function renderUpdates(c){
     +(updates.length?updates.map(function(u){return '<div class="card"><div style="font-size:13px;color:var(--w2);line-height:1.7;">'+u.message+'</div><div style="font-size:10px;color:var(--wh);font-weight:700;margin-top:8px;">'+u.date+'</div></div>';}).join(''):'<div class="card" style="text-align:center;padding:40px;color:var(--wh);font-weight:700;">No updates yet, check back soon.</div>');
 }
 
+async function renderTopUp(c){
+  c.innerHTML='<div class="page-hdr-title">Top Up</div><div style="color:var(--wh);font-weight:700;margin-top:8px;">Loading...</div>';
+  c.innerHTML=`
+  <div class="page-hdr-title">Top Up Your Investment</div>
+  <div class="page-hdr-sub" style="margin-bottom:16px;">Add any amount to your current plan, pay securely by card, applied to your investment instantly.</div>
+  <div class="card">
+    <div class="card-title">Your Current Investment</div>
+    <div style="font-size:13px;color:var(--w2);margin-top:8px;">${investor.tier||tierFor(investor.investmentAmount)} &middot; ${OPTION_LABELS[investor.investmentOption]||investor.investmentOption} &middot; ${fmt(investor.investmentAmount)}</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Add Funds</div>
+    <div class="fg"><label class="lbl">Amount to Add (₦)</label><input class="fi" type="number" min="1000" id="topup-amount" placeholder="e.g. 100000" oninput="previewTopUp()"/></div>
+    <div id="topup-preview" style="margin-top:10px;"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📜 About Topping Up</div>
+    <div style="font-size:12px;color:var(--w2);line-height:1.9;margin-top:8px;">
+      • You can top up any amount, anytime, no minimum holding period.<br>
+      • Your plan structure (${OPTION_LABELS[investor.investmentOption]||investor.investmentOption}) stays exactly the same, this only adds capital.<br>
+      • If your new total crosses a tier threshold, your whole balance moves to the higher tier's rate.<br>
+      • Payment is processed instantly by card, your dashboard updates right after.<br>
+      • Want to change your structure instead? Use <span style="color:var(--or);cursor:pointer;text-decoration:underline;" onclick="inav('switch')">Switch Plan</span>.
+    </div>
+  </div>`;
+}
+function previewTopUp(){
+  const amt=parseFloat(document.getElementById('topup-amount').value)||0;
+  const box=document.getElementById('topup-preview');
+  if(amt<1000){box.innerHTML='';return;}
+  const newTotal=investor.investmentAmount+amt;
+  const currentTier=investor.tier||tierFor(investor.investmentAmount);
+  const newTier=tierFor(newTotal);
+  const tierChanged=newTier!==currentTier;
+  box.innerHTML='<div style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;font-size:12px;color:var(--w2);">'
+    +'New total investment: <strong style="color:var(--or);">'+fmt(newTotal)+'</strong><br>'
+    +(tierChanged?'🎉 This moves you up to <strong style="color:var(--or);">'+newTier+'</strong>!<br>':'')
+    +'Your plan structure ('+(OPTION_LABELS[investor.investmentOption]||investor.investmentOption)+') stays the same.<br><br>'
+    +'<button class="btn btn-or" onclick="payTopUp('+amt+')">💳 Pay '+fmt(amt)+' &amp; Top Up</button></div>';
+}
+function payTopUp(amount){
+  try{
+    if(typeof PaystackPop==='undefined')throw new Error('Payment system not loaded, please refresh and try again.');
+    const handler=PaystackPop.setup({
+      key:getPaystackKey(),email:investor.email,amount:Math.round(amount)*100,currency:'NGN',
+      ref:'RNM-TOPUP-'+investor._id+'-'+Date.now(),
+      metadata:{investor_id:investor._id,investor_name:investor.name,type:'investor_topup'},
+      callback:function(response){confirmTopUp(amount,response.reference);},
+      onClose:function(){toast('Payment window closed, top-up not completed','warn');}
+    });
+    handler.openIframe();
+  }catch(e){toast('Payment error: '+e.message,'err');}
+}
+async function confirmTopUp(amount,paymentRef){
+  const newTotal=investor.investmentAmount+amount;
+  const newTier=tierFor(newTotal);
+  await fbU('rn_mall_investors/'+investor._id,{investmentAmount:newTotal,tier:newTier});
+  await fbP('rn_mall_investor_topups/'+investor._id,{amount:amount,newTotal:newTotal,paymentRef:paymentRef,date:ds(),ts:Date.now()});
+  await fbP('rn_mall_notifications',{type:'investor_topup',investorName:investor.name,amount:amount,newTotal:newTotal,paymentRef:paymentRef,date:ds(),read:false,ts:Date.now()});
+  investor.investmentAmount=newTotal;investor.tier=newTier;
+  sessionStorage.setItem('rnm_investor_session',JSON.stringify(investor));
+  toast('Top-up successful! Your investment is now '+fmt(newTotal));
+  inav('topup');
+}
 async function renderSwitchPlan(c){
   c.innerHTML='<div class="page-hdr-title">Switch Plan</div><div style="color:var(--wh);font-weight:700;margin-top:8px;">Loading...</div>';
   const planStart=new Date(investor.planStartDate||investor.joinDate||Date.now());
