@@ -1299,6 +1299,9 @@ async function saveVProfile(){
 }
 
 checkVendorSession();
+// Start loading the Firebase Auth SDK now, in the background, instead of
+// waiting until the vendor actually taps Sign In.
+ensureFirebaseAuthReady();
 </script>
 </body>
 </html>

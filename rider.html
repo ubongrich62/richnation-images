@@ -722,12 +722,19 @@ async function toggleMyAvailability(){
   toast(newState?'You\'re online, ready for deliveries!':'You\'re offline now.');
   rnav('dashboard');
 }
-async function renderDeliveries(c){
-  c.innerHTML='<div class="page-hdr-title">My Deliveries</div><div style="color:var(--wh);font-weight:700;margin-top:8px;">Loading...</div>';
-  const orders=await getMyOrders();
+function renderDeliveriesInner(c,orders){
   const active=orders.filter(function(o){return o.deliveryStage&&o.deliveryStage!=='delivered';});
   c.innerHTML='<div class="page-hdr-title">My Deliveries</div><div class="page-hdr-sub" style="margin-bottom:20px;">Tap through each stage as it happens, customers see this live on their tracking page.</div>'
     +(active.length?active.map(deliveryCard).join(''):'<div class="card" style="text-align:center;padding:40px;color:var(--wh);font-weight:700;">No active deliveries right now.</div>');
+}
+async function renderDeliveries(c){
+  var cachedO=null;
+  try{cachedO=localStorage.getItem('rnm_rider_cache_orders');}catch(e){}
+  if(cachedO)renderDeliveriesInner(c,JSON.parse(cachedO));
+  else c.innerHTML='<div class="page-hdr-title">My Deliveries</div><div style="color:var(--wh);font-weight:700;margin-top:8px;">Loading...</div>';
+  const orders=await getMyOrders();
+  try{localStorage.setItem('rnm_rider_cache_orders',JSON.stringify(orders));}catch(e){}
+  if(curRNav==='deliveries')renderDeliveriesInner(c,orders);
 }
 function deliveryCard(o){
   const stage=o.deliveryStage||'assigned';
@@ -1162,6 +1169,11 @@ async function toggleRiderNotifPanel(){
 setInterval(function(){if(rider)loadRiderNotifs();},10000);
 
 checkRiderSession();
+// Start loading the Firebase Auth SDK now, in the background, instead of
+// waiting until the rider actually taps Sign In, that used to mean the two
+// external script loads only began after they'd already typed their
+// credentials and hit the button, adding dead time to every single login.
+ensureFirebaseAuthReady();
 </script>
 </body>
 </html>

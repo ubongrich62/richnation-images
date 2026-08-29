@@ -1815,6 +1815,9 @@ async function toggleStaffNotifPanel(){
 setInterval(function(){if(staff)loadStaffNotifs();},10000);
 
 checkStaffSession();
+// Start loading the Firebase Auth SDK now, in the background, instead of
+// waiting until staff actually taps Sign In.
+ensureFirebaseAuthReady();
 </script>
 </body>
 </html>

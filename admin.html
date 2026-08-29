@@ -816,6 +816,9 @@ function signOut(){
     initAdmin();
   }
 })();
+// Start loading the Firebase Auth SDK now, in the background, so it's ready
+// the moment a feature that needs it (e.g. creating a staff login) is used.
+ensureFirebaseAuthReady();
 
 async function manualRefreshAdmin(btn){
   const orig=btn?btn.innerHTML:'';

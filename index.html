@@ -3964,6 +3964,10 @@ document.addEventListener('DOMContentLoaded',function(){
     var t=document.getElementById('toast');
     if(t){var el=document.createElement('div');el.style.cssText='background:#f43f5e;color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:700;';el.textContent='Error: '+e.message;t.appendChild(el);setTimeout(function(){el.remove();},8000);}
   });
+  // Start loading the Firebase Auth SDK in the background too, so it's
+  // already warm by the time someone opens Sign In/Register instead of only
+  // starting those two script loads after they've already hit the button.
+  setTimeout(function(){ensureFirebaseAuthReady();},800);
 });
 
 
