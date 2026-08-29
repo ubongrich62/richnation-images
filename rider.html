@@ -110,6 +110,20 @@ button{font-family:inherit;}
   .content{padding:14px;}
   .curr-row{order:5;flex-basis:100%;justify-content:flex-end;}
 }
+.wallpaper-btn{background:var(--card2);border:1px solid var(--bdr);border-radius:7px;color:var(--wh);font-size:12px;font-weight:700;cursor:pointer;padding:6px 12px;}
+.wallpaper-btn:hover{border-color:var(--or);color:var(--or);}
+.wallpaper-panel{display:none;background:var(--bg);border:1px solid var(--bdr);border-radius:10px;padding:12px;margin-bottom:12px;}
+.wallpaper-panel.open{display:block;}
+.cwp-title{font-size:11px;font-weight:800;color:var(--or);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;}
+.cwp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px 8px;margin-bottom:10px;}
+.cwp-swatch-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;}
+.cwp-swatch{width:100%;height:38px;border-radius:8px;border:2px solid transparent;background-size:cover;background-position:center;}
+.cwp-swatch.active{border-color:var(--or);}
+.cwp-swatch[data-id="pattern"]{background-size:110px!important;}
+.cwp-swatch-label{font-size:8px;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.cwp-custom-row{display:flex;align-items:center;gap:8px;}
+.cwp-custom-row input[type=color]{width:36px;height:36px;border:none;border-radius:8px;padding:0;cursor:pointer;background:none;}
+.cwp-custom-row span{font-size:11px;color:var(--wh);font-weight:700;}
 </style>
 </head>
 <body>
@@ -531,6 +545,41 @@ function maybeShowRiderWelcomeSetup(){
   `);
 }
 function toggleSidebar(){document.querySelector('.sb').classList.toggle('open');document.getElementById('sb-backdrop')?.classList.toggle('open');}
+const CHAT_WALLPAPERS=[
+  {id:'default',label:'Default',bg:'var(--card2)'},
+  {id:'black',label:'Black',bg:'#0A0A0B'},
+  {id:'diagonal',label:'Diagonal',bg:'linear-gradient(135deg,#1a0f00 0%,#000000 55%,#2b1600 100%)'},
+  {id:'glow',label:'Orange Glow',bg:'radial-gradient(circle at 30% 15%,rgba(255,106,0,0.30),#0a0a0b 65%)'},
+  {id:'stripes',label:'Stripes',bg:'repeating-linear-gradient(45deg,#0a0a0b,#0a0a0b 18px,#1a0f00 18px,#1a0f00 20px)'},
+  {id:'sunset',label:'Sunset',bg:'linear-gradient(160deg,#3a1a00,#0a0a0b 70%)'},
+  {id:'pattern',label:'Shopping',bg:'#0a0a0b url("data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="340" height="100"><text x="10" y="32" font-family="Arial,sans-serif" font-size="11" font-weight="700" fill="#FF6A00" fill-opacity="0.16">\u{1F6CD} RichNation Mall online shopping</text><text x="175" y="82" font-family="Arial,sans-serif" font-size="11" font-weight="700" fill="#FF6A00" fill-opacity="0.16">\u{1F6CD} RichNation Mall online shopping</text></svg>')+'") repeat'},
+];
+function buildWallpaperPicker(gridId,storageKey){
+  const grid=document.getElementById(gridId);if(!grid)return;
+  const current=localStorage.getItem(storageKey)||'default';
+  grid.innerHTML=CHAT_WALLPAPERS.map(function(w){
+    return '<div class="cwp-swatch-wrap" onclick="applyAppWallpaper(\''+w.id+'\',\''+storageKey+'\')"><div class="cwp-swatch'+(current===w.id?' active':'')+'" data-id="'+w.id+'" style="background:'+w.bg+';"></div><div class="cwp-swatch-label">'+w.label+'</div></div>';
+  }).join('');
+}
+function toggleWallpaperPanel(panelId,gridId,storageKey){
+  buildWallpaperPicker(gridId,storageKey);
+  document.getElementById(panelId).classList.toggle('open');
+}
+function applyAppWallpaper(value,storageKey){
+  const preset=CHAT_WALLPAPERS.find(function(w){return w.id===value;});
+  const bg=preset?preset.bg:value;
+  document.querySelectorAll('.wallpaper-target').forEach(function(el){el.style.background=bg;});
+  localStorage.setItem(storageKey,preset?preset.id:value);
+  document.querySelectorAll('.cwp-swatch').forEach(function(s){s.classList.toggle('active',preset&&s.dataset.id===preset.id);});
+}
+function loadAppWallpaper(storageKey){
+  try{
+    const saved=localStorage.getItem(storageKey);if(!saved)return;
+    const preset=CHAT_WALLPAPERS.find(function(w){return w.id===saved;});
+    const bg=preset?preset.bg:saved;
+    document.querySelectorAll('.wallpaper-target').forEach(function(el){el.style.background=bg;});
+  }catch(e){}
+}
 let curRNav='dashboard';
 async function manualRefreshRiderDash(btn){
   const orig=btn.innerHTML;btn.innerHTML='⏳...';btn.disabled=true;
@@ -877,7 +926,8 @@ async function submitRiderLeave(){
 async function renderRiderMessages(c){
   c.innerHTML='<div class="page-hdr-title">Messages</div><div style="color:var(--wh);font-weight:700;margin-top:8px;">Loading...</div>';
   c.innerHTML='<div class="page-hdr-title">Messages</div><div class="page-hdr-sub" style="margin-bottom:16px;">Direct line to admin, for anything, anytime</div>'
-    +'<div class="card"><div id="rm-msgs" style="margin-bottom:12px;max-height:360px;overflow-y:auto;"></div><div style="display:flex;gap:8px;"><input class="fi" id="rm-input" placeholder="Type a message..." style="flex:1;" onkeydown="if(event.key===\'Enter\')sendRiderMessage()"/><button class="btn btn-or" onclick="sendRiderMessage()">Send</button></div></div>';
+    +'<div class="card"><div style="display:flex;justify-content:flex-end;margin-bottom:8px;"><button class="wallpaper-btn" onclick="toggleWallpaperPanel(\'wp-panel\',\'wp-grid\',\'rnm_chat_wallpaper_rider\')">🎨 Wallpaper</button></div><div class="wallpaper-panel" id="wp-panel"><div class="cwp-title">Chat Wallpaper</div><div class="cwp-grid" id="wp-grid"></div><div class="cwp-custom-row"><input type="color" onchange="applyAppWallpaper(this.value,\'rnm_chat_wallpaper_rider\')"/><span>Or pick any color</span></div></div><div class="wallpaper-target" id="rm-msgs" style="margin-bottom:12px;max-height:360px;overflow-y:auto;"></div><div style="display:flex;gap:8px;"><input class="fi" id="rm-input" placeholder="Type a message..." style="flex:1;" onkeydown="if(event.key===\'Enter\')sendRiderMessage()"/><button class="btn btn-or" onclick="sendRiderMessage()">Send</button></div></div>';
+  loadAppWallpaper('rnm_chat_wallpaper_rider');
   await loadRiderMessages();
 }
 async function loadRiderMessages(){

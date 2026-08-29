@@ -362,6 +362,20 @@ html,body{color-scheme:dark;height:100%;font-family:'Inter',sans-serif;backgroun
 .cs-section{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);padding:18px;margin-bottom:14px;}
 .cs-section-title{font-weight:800;font-size:14px;margin-bottom:14px;color:var(--wh);}
 .preset-btn{border:none;border-radius:var(--r-sm);padding:6px 14px;cursor:pointer;font-weight:800;font-size:12px;}
+.wallpaper-btn{background:var(--card2);border:1px solid var(--bdr);border-radius:7px;color:var(--wh);font-size:12px;font-weight:700;cursor:pointer;padding:6px 12px;}
+.wallpaper-btn:hover{border-color:var(--or);color:var(--or);}
+.wallpaper-panel{display:none;background:var(--bg);border:1px solid var(--bdr);border-radius:10px;padding:12px;margin-bottom:12px;}
+.wallpaper-panel.open{display:block;}
+.cwp-title{font-size:11px;font-weight:800;color:var(--or);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;}
+.cwp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px 8px;margin-bottom:10px;}
+.cwp-swatch-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;}
+.cwp-swatch{width:100%;height:38px;border-radius:8px;border:2px solid transparent;background-size:cover;background-position:center;}
+.cwp-swatch.active{border-color:var(--or);}
+.cwp-swatch[data-id="pattern"]{background-size:110px!important;}
+.cwp-swatch-label{font-size:8px;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.cwp-custom-row{display:flex;align-items:center;gap:8px;}
+.cwp-custom-row input[type=color]{width:36px;height:36px;border:none;border-radius:8px;padding:0;cursor:pointer;background:none;}
+.cwp-custom-row span{font-size:11px;color:var(--wh);font-weight:700;}
 </style>
 <link rel="preconnect" href="https://richnation-portal-default-rtdb.firebaseio.com"/>
 <link rel="preconnect" href="https://basemaps.cartocdn.com"/>
@@ -2133,7 +2147,8 @@ async function deleteInvestor(id,name){
 }
 async function openInvestorChat(id,name){
   const c=document.getElementById('content-inner')||document.getElementById('content');
-  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">💬 '+name+'</div></div><div class="card"><div id="inv-chat-msgs" style="margin-bottom:12px;max-height:400px;overflow-y:auto;"></div><div style="display:flex;gap:8px;"><input class="inp" id="inv-chat-input" placeholder="Type a message..." style="flex:1;"/><button class="btn btn-or" onclick="sendInvestorChatMsg(\''+id+'\')">Send</button></div><button class="btn" style="margin-top:10px;" onclick="nav(\'investors\',false)">← Back</button></div>';
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">💬 '+name+'</div></div><div class="card"><div style="display:flex;justify-content:flex-end;margin-bottom:8px;"><button class="wallpaper-btn" onclick="toggleWallpaperPanel(\'wp-panel\',\'wp-grid\',\'rnm_chat_wallpaper_admin\')">🎨 Wallpaper</button></div><div class="wallpaper-panel" id="wp-panel"><div class="cwp-title">Chat Wallpaper</div><div class="cwp-grid" id="wp-grid"></div><div class="cwp-custom-row"><input type="color" onchange="applyAppWallpaper(this.value,\'rnm_chat_wallpaper_admin\')"/><span>Or pick any color</span></div></div><div class="wallpaper-target" id="inv-chat-msgs" style="margin-bottom:12px;max-height:400px;overflow-y:auto;"></div><div style="display:flex;gap:8px;"><input class="inp" id="inv-chat-input" placeholder="Type a message..." style="flex:1;"/><button class="btn btn-or" onclick="sendInvestorChatMsg(\''+id+'\')">Send</button></div><button class="btn" style="margin-top:10px;" onclick="nav(\'investors\',false)">← Back</button></div>';
+  loadAppWallpaper('rnm_chat_wallpaper_admin');
   await loadInvestorChatAdmin(id);
 }
 async function loadInvestorChatAdmin(id){
@@ -2271,7 +2286,8 @@ async function renderRiderMessagesList(c){
 }
 async function openRiderMessageThread(riderId,riderName){
   const c=document.getElementById('rider-view-body');
-  c.innerHTML='<div class="card"><div class="card-title">💬 '+riderName+'</div><div id="rm-admin-msgs" style="margin:12px 0;max-height:360px;overflow-y:auto;"></div><div style="display:flex;gap:8px;"><input class="inp" id="rm-admin-input" placeholder="Type a reply..." style="flex:1;" onkeydown="if(event.key===\'Enter\')sendRiderAdminReply(\''+riderId+'\')"/><button class="btn btn-or" onclick="sendRiderAdminReply(\''+riderId+'\')">Send</button></div><button class="btn" style="margin-top:10px;" onclick="riderNav(\'messages\')">← Back</button></div>';
+  c.innerHTML='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;"><div class="card-title">💬 '+riderName+'</div><button class="wallpaper-btn" onclick="toggleWallpaperPanel(\'wp-panel\',\'wp-grid\',\'rnm_chat_wallpaper_admin\')">🎨</button></div><div class="wallpaper-panel" id="wp-panel"><div class="cwp-title">Chat Wallpaper</div><div class="cwp-grid" id="wp-grid"></div><div class="cwp-custom-row"><input type="color" onchange="applyAppWallpaper(this.value,\'rnm_chat_wallpaper_admin\')"/><span>Or pick any color</span></div></div><div class="wallpaper-target" id="rm-admin-msgs" style="margin:12px 0;max-height:360px;overflow-y:auto;"></div><div style="display:flex;gap:8px;"><input class="inp" id="rm-admin-input" placeholder="Type a reply..." style="flex:1;" onkeydown="if(event.key===\'Enter\')sendRiderAdminReply(\''+riderId+'\')"/><button class="btn btn-or" onclick="sendRiderAdminReply(\''+riderId+'\')">Send</button></div><button class="btn" style="margin-top:10px;" onclick="riderNav(\'messages\')">← Back</button></div>';
+  loadAppWallpaper('rnm_chat_wallpaper_admin');
   await loadRiderAdminMsgs(riderId);
 }
 async function loadRiderAdminMsgs(riderId){
@@ -3293,9 +3309,10 @@ async function openOrder(tracking){
       </div>
 
       <div class="card fade-in">
-        <div class="card-title">Chat with Customer</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;"><div class="card-title">Chat with Customer</div><button class="wallpaper-btn" onclick="toggleWallpaperPanel('wp-panel','wp-grid','rnm_chat_wallpaper_admin')">🎨</button></div>
+        <div class="wallpaper-panel" id="wp-panel"><div class="cwp-title">Chat Wallpaper</div><div class="cwp-grid" id="wp-grid"></div><div class="cwp-custom-row"><input type="color" onchange="applyAppWallpaper(this.value,'rnm_chat_wallpaper_admin')"/><span>Or pick any color</span></div></div>
         <div class="chat-wrap" style="margin-top:12px;">
-          <div class="chat-msgs" id="chat-msgs-${tracking}">
+          <div class="chat-msgs wallpaper-target" id="chat-msgs-${tracking}">
             <div style="text-align:center;font-size:11px;color:var(--wh);font-weight:700;padding:20px;">Loading messages...</div>
           </div>
           <div class="chat-compose">
@@ -3315,6 +3332,7 @@ async function openOrder(tracking){
       </div>
     </div>
   </div>`;
+  loadAppWallpaper('rnm_chat_wallpaper_admin');
   loadOrderChat(tracking);
   if(window._orderChatPoll)clearInterval(window._orderChatPoll);
   window._orderChatPoll=setInterval(()=>loadOrderChat(tracking),4000);
@@ -3766,9 +3784,11 @@ async function renderChat(c){
   </div>`}`;
 }
 async function openGeneralChat(chatKey,custName){
-  document.getElementById('content-inner').innerHTML='<div class="page-hdr slide-up"><div><div class="page-hdr-title">'+custName+'</div><div class="page-hdr-sub">General inquiry, not linked to a specific order</div></div><div class="page-hdr-actions"><button class="btn btn-dk" onclick="nav(\'chat\',false)">&#8592; Back to Messages</button></div></div>'
-    +'<div class="card" id="gc-msgs" style="max-height:400px;overflow-y:auto;margin-bottom:14px;"></div>'
+  document.getElementById('content-inner').innerHTML='<div class="page-hdr slide-up"><div><div class="page-hdr-title">'+custName+'</div><div class="page-hdr-sub">General inquiry, not linked to a specific order</div></div><div class="page-hdr-actions"><button class="wallpaper-btn" onclick="toggleWallpaperPanel(\'wp-panel\',\'wp-grid\',\'rnm_chat_wallpaper_admin\')">🎨 Wallpaper</button><button class="btn btn-dk" onclick="nav(\'chat\',false)">&#8592; Back to Messages</button></div></div>'
+    +'<div class="wallpaper-panel" id="wp-panel"><div class="cwp-title">Chat Wallpaper</div><div class="cwp-grid" id="wp-grid"></div><div class="cwp-custom-row"><input type="color" onchange="applyAppWallpaper(this.value,\'rnm_chat_wallpaper_admin\')"/><span>Or pick any color</span></div></div>'
+    +'<div class="card wallpaper-target" id="gc-msgs" style="max-height:400px;overflow-y:auto;margin-bottom:14px;"></div>'
     +'<div style="display:flex;gap:8px;"><input class="inp" id="gc-input" placeholder="Type your reply..." onkeydown="if(event.key===\'Enter\')sendGeneralReply(\''+chatKey+'\')" style="flex:1;"/><button class="btn btn-or" onclick="sendGeneralReply(\''+chatKey+'\')">Send</button></div>';
+  loadAppWallpaper('rnm_chat_wallpaper_admin');
   await loadGeneralChatMsgs(chatKey);
 }
 async function loadGeneralChatMsgs(chatKey){
@@ -4036,6 +4056,41 @@ function showPwMsg(text,type){
 
 // ── MOBILE SIDEBAR ──
 function toggleSidebar(){var s=document.querySelector('.sb');if(s)s.classList.toggle('open');document.getElementById('sb-backdrop')?.classList.toggle('open');}
+const CHAT_WALLPAPERS=[
+  {id:'default',label:'Default',bg:'var(--card2)'},
+  {id:'black',label:'Black',bg:'#0A0A0B'},
+  {id:'diagonal',label:'Diagonal',bg:'linear-gradient(135deg,#1a0f00 0%,#000000 55%,#2b1600 100%)'},
+  {id:'glow',label:'Orange Glow',bg:'radial-gradient(circle at 30% 15%,rgba(255,106,0,0.30),#0a0a0b 65%)'},
+  {id:'stripes',label:'Stripes',bg:'repeating-linear-gradient(45deg,#0a0a0b,#0a0a0b 18px,#1a0f00 18px,#1a0f00 20px)'},
+  {id:'sunset',label:'Sunset',bg:'linear-gradient(160deg,#3a1a00,#0a0a0b 70%)'},
+  {id:'pattern',label:'Shopping',bg:'#0a0a0b url("data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="340" height="100"><text x="10" y="32" font-family="Arial,sans-serif" font-size="11" font-weight="700" fill="#FF6A00" fill-opacity="0.16">\u{1F6CD} RichNation Mall online shopping</text><text x="175" y="82" font-family="Arial,sans-serif" font-size="11" font-weight="700" fill="#FF6A00" fill-opacity="0.16">\u{1F6CD} RichNation Mall online shopping</text></svg>')+'") repeat'},
+];
+function buildWallpaperPicker(gridId,storageKey){
+  const grid=document.getElementById(gridId);if(!grid)return;
+  const current=localStorage.getItem(storageKey)||'default';
+  grid.innerHTML=CHAT_WALLPAPERS.map(function(w){
+    return '<div class="cwp-swatch-wrap" onclick="applyAppWallpaper(\''+w.id+'\',\''+storageKey+'\')"><div class="cwp-swatch'+(current===w.id?' active':'')+'" data-id="'+w.id+'" style="background:'+w.bg+';"></div><div class="cwp-swatch-label">'+w.label+'</div></div>';
+  }).join('');
+}
+function toggleWallpaperPanel(panelId,gridId,storageKey){
+  buildWallpaperPicker(gridId,storageKey);
+  document.getElementById(panelId).classList.toggle('open');
+}
+function applyAppWallpaper(value,storageKey){
+  const preset=CHAT_WALLPAPERS.find(function(w){return w.id===value;});
+  const bg=preset?preset.bg:value;
+  document.querySelectorAll('.wallpaper-target').forEach(function(el){el.style.background=bg;});
+  localStorage.setItem(storageKey,preset?preset.id:value);
+  document.querySelectorAll('.cwp-swatch').forEach(function(s){s.classList.toggle('active',preset&&s.dataset.id===preset.id);});
+}
+function loadAppWallpaper(storageKey){
+  try{
+    const saved=localStorage.getItem(storageKey);if(!saved)return;
+    const preset=CHAT_WALLPAPERS.find(function(w){return w.id===saved;});
+    const bg=preset?preset.bg:saved;
+    document.querySelectorAll('.wallpaper-target').forEach(function(el){el.style.background=bg;});
+  }catch(e){}
+}
 document.addEventListener('click',function(e){
   if(window.innerWidth>768)return;
   var s=document.querySelector('.sb'),b=document.getElementById('mob-btn');
