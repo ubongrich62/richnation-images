@@ -33,7 +33,7 @@
   /* text, legacy names kept (--wh/--w2/--mu) so existing inline JS styles re-theme for free */
   --wh:#fff;--w2:#e0e0e0;--mu:#84848d;
   /* status */
-  --su:#FF6A00;--re:#DC2626;--bl:#2054C7;
+  --su:#22C55E;--re:#DC2626;--bl:#2054C7;
   /* system */
   --r-sm:6px;--r-md:10px;--r-lg:14px;--r-pill:999px;
   --sh-sm:0 1px 3px rgba(0,0,0,.5);
@@ -313,9 +313,9 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .order-date{font-size:11px;color:var(--wh);font-weight:700;}
 .status-badge{font-size:10px;font-weight:800;padding:4px 9px;border-radius:var(--r-pill);}
 .status-pending{background:rgba(255,255,255,0.10);color:var(--w2);}
-.status-confirmed{background:rgba(255,106,0,0.14);color:var(--su);}
+.status-confirmed{background:rgba(34,197,94,0.14);color:var(--su);}
 .status-shipped{background:rgba(32,84,199,0.16);color:var(--bl);}
-.status-delivered{background:rgba(255,106,0,0.14);color:var(--su);}
+.status-delivered{background:rgba(34,197,94,0.14);color:var(--su);}
 .status-cancelled{background:rgba(220,38,38,0.16);color:var(--re);}
 /* CHAT */
 .chat-float{position:fixed;bottom:20px;right:20px;z-index:300;}
@@ -440,7 +440,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .modal-price-row{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px;}
 .modal-desc{font-size:13px;color:var(--w2);line-height:1.8;margin:12px 0;}
 .stock-bdg{display:inline-block;font-size:10px;font-weight:800;padding:3px 9px;border-radius:5px;margin-bottom:10px;}
-.in-stock{background:rgba(225,94,0,0.10);color:var(--su);}
+.in-stock{background:rgba(34,197,94,0.10);color:var(--su);}
 .low-stock{background:rgba(184,114,10,0.12);color:var(--gold);}
 .out-stock{background:rgba(220,38,38,0.10);color:var(--re);}
 .pre-order-bdg{background:rgba(32,84,199,0.10);color:var(--bl);}
@@ -468,7 +468,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .review-hdr{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
 .review-av{width:32px;height:32px;border-radius:99px;background:rgba(255,106,0,0.12);color:var(--or);font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .review-name{font-size:13px;font-weight:700;color:var(--wh);}
-.verified{font-size:9px;color:var(--su);background:rgba(255,106,0,0.12);padding:2px 6px;border-radius:4px;margin-left:6px;font-weight:700;}
+.verified{font-size:9px;color:var(--su);background:rgba(34,197,94,0.12);padding:2px 6px;border-radius:4px;margin-left:6px;font-weight:700;}
 .review-date{font-size:10px;color:var(--wh);font-weight:700;}
 .review-stars{color:var(--gold);font-size:13px;}
 .review-text{font-size:13px;color:var(--w2);line-height:1.7;margin-top:4px;}
@@ -1326,7 +1326,7 @@ function renderWalletIssueRow(iss){
     </div>
     <div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:3px;">${iss.message}</div>
     ${iss.adminReply?`<div style="font-size:11px;color:var(--w2);margin-top:4px;background:var(--card2);padding:6px 8px;border-radius:6px;">Reply: ${iss.adminReply}</div>`:''}
-    ${iss.status==='approved_awaiting_bank'?`<button onclick="showBankDetailsForm('${iss._id}')" style="margin-top:6px;font-size:11px;font-weight:700;padding:6px 12px;border-radius:6px;background:rgba(255,106,0,0.1);border:1px solid rgba(255,106,0,0.3);color:var(--su);cursor:pointer;">Enter Bank Details</button>`:''}
+    ${iss.status==='approved_awaiting_bank'?`<button onclick="showBankDetailsForm('${iss._id}')" style="margin-top:6px;font-size:11px;font-weight:700;padding:6px 12px;border-radius:6px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--su);cursor:pointer;">Enter Bank Details</button>`:''}
     ${iss.status==='processing'||iss.status==='paid'?`<div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:4px;">Sending to: ${iss.bankAcctName}, ${iss.bankName} (${iss.bankAcctNo})</div>`:''}
   </div>`;
 }
@@ -1722,7 +1722,7 @@ function productCard(p){
   else if(p.salePrice&&p.salePrice<p.price)badges=`<span class="prod-badge bdg-sale">${Math.round((p.price-p.salePrice)/p.price*100)}% OFF</span>`;
   else if(p.isNew)badges='<span class="prod-badge bdg-new">NEW</span>';
   if(isFree&&!disabled)badges+='<span class="prod-badge bdg-free">FREE</span>';
-  if((p.freeShipping||settings.freeShippingAll)&&!disabled)badges+='<span class="prod-badge" style="background:rgba(255,106,0,0.15);color:var(--su);">FREE SHIP</span>';
+  if((p.freeShipping||settings.freeShippingAll)&&!disabled)badges+='<span class="prod-badge" style="background:rgba(34,197,94,0.15);color:var(--su);">FREE SHIP</span>';
   return `<div class="prod-card${disabled?' prod-disabled':''}" onclick="${disabled?'':'openProduct(\''+p.id+'\')'}">
     <div class="prod-img-wrap">
       ${p.images&&p.images[0]?`<img class="prod-img" src="${p.images[0]}" alt="${p.name}" loading="lazy" decoding="async" onerror="this.style.display='none';this.nextSibling.style.display='flex'"/><div class="prod-img-ph" style="display:none;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;color:var(--or);">${catIcon(p.category)}</div>`:`<div class="prod-img-ph" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;color:var(--or);">${catIcon(p.category)}</div>`}
@@ -2304,7 +2304,7 @@ function renderCheckout(isPreorder=false){
           <label class="lbl">Local Government Area</label>
           <select class="inp-sel" id="co-lga"><option value="">Select Local Government Area</option></select>
         </div>
-        <div id="del-info" class="del-badge" style="display:none;margin-top:8px;padding:8px 12px;background:rgba(255,106,0,0.07);border:1px solid rgba(255,106,0,0.2);border-radius:7px;font-size:12px;color:var(--su);"></div>
+        <div id="del-info" class="del-badge" style="display:none;margin-top:8px;padding:8px 12px;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.2);border-radius:7px;font-size:12px;color:var(--su);"></div>
         </div>
         <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--wh);font-weight:700;margin-top:8px;cursor:pointer;">
           <input type="checkbox" id="save-addr" checked style="accent-color:var(--or);"/> Save address to my account
@@ -3514,11 +3514,11 @@ async function accTab(tab,el,silent){
     c.innerHTML=orders.map(o=>{const st=o.timeline?.[o.timeline.length-1]?.status||'Pending';return `<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:16px;margin-bottom:10px;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
         <div><div style="font-weight:700;font-size:13px;color:var(--or);">${o.tracking}${o.preOrder?' [PRE-ORDER]':''}${o.payMethod==='pod'?' [PAY ON DELIVERY]':''}</div><div style="font-size:11px;color:var(--wh);font-weight:700;">${o.date} · ${o.items?.length} item(s) · ₦${parseInt(o.total||0).toLocaleString()}</div></div>
-        <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:${o.status==='cancelled'||o.status==='deleted'?'rgba(244,63,94,0.12)':st==='Delivered'?'rgba(255,106,0,0.1)':'rgba(255,140,0,0.1)'};color:${o.status==='cancelled'||o.status==='deleted'?'var(--re)':st==='Delivered'?'var(--su)':'var(--or)'};">${o.status==='cancelled'?'Cancelled':o.status==='deleted'?'Deleted':st}</span>
+        <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:${o.status==='cancelled'||o.status==='deleted'?'rgba(244,63,94,0.12)':st==='Delivered'?'rgba(34,197,94,0.1)':'rgba(255,140,0,0.1)'};color:${o.status==='cancelled'||o.status==='deleted'?'var(--re)':st==='Delivered'?'var(--su)':'var(--or)'};">${o.status==='cancelled'?'Cancelled':o.status==='deleted'?'Deleted':st}</span>
       </div>
       <div style="display:flex;gap:7px;flex-wrap:wrap;">
         <button onclick="showPage('track');showTrackPage();setTimeout(()=>{const ti=document.getElementById('track-inp');if(ti){ti.value='${o.tracking}';trackOrder();}},200)" style="font-size:11px;font-weight:700;padding:6px 12px;border-radius:7px;background:var(--card2);border:1px solid var(--bdr);color:var(--wh);font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;">Track</button>
-        ${(o.status==='shipped'||o.status==='out for delivery')&&o.deliveryMethod!=='pickup'&&!o.deliveryConfirmed?`<button onclick="showDeliveryConfirm('${o.tracking}')" style="font-size:11px;font-weight:700;padding:6px 12px;border-radius:7px;background:rgba(255,106,0,0.1);border:1px solid rgba(255,106,0,0.3);color:var(--su);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;">Confirm Receipt</button>`:''}
+        ${(o.status==='shipped'||o.status==='out for delivery')&&o.deliveryMethod!=='pickup'&&!o.deliveryConfirmed?`<button onclick="showDeliveryConfirm('${o.tracking}')" style="font-size:11px;font-weight:700;padding:6px 12px;border-radius:7px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--su);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;">Confirm Receipt</button>`:''}
         ${['pending','pending_pod','confirmed','pod_approved','packed'].includes(o.status)?`<button onclick="cancelMyOrder('${o.tracking}')" style="font-size:11px;font-weight:700;padding:6px 12px;border-radius:7px;background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.25);color:var(--re);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;">Cancel Order</button>`:''}
         ${(o.status==='delivered'||o.status==='delivered confirmed')&&!o.refundRequested?`<button onclick="requestRefund('${o.tracking}')" style="font-size:11px;font-weight:700;padding:6px 12px;border-radius:7px;background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.25);color:var(--re);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;">Refund</button>`:''}
         <button onclick="chatOrderId='${o.tracking}';toggleChat()" style="font-size:11px;font-weight:700;padding:6px 12px;border-radius:7px;background:rgba(255,140,0,0.08);border:1px solid rgba(255,140,0,0.2);color:var(--or);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;">Chat</button>

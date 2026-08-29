@@ -36,7 +36,7 @@
   /* text */
   --wh:#fff;--w2:#e0e0e0;--mu:#84848d;
   /* status */
-  --su:#FF6A00;--re:#f43f5e;--bl:#3b82f6;
+  --su:#22C55E;--re:#f43f5e;--bl:#3b82f6;
   /* system */
   --r-sm:6px;--r-md:10px;--r-lg:14px;--r-pill:999px;
   --sh-sm:0 1px 3px rgba(0,0,0,.5);
@@ -891,7 +891,7 @@ async function renderPromos(c){
     html+=list.map(function(p){
       const isLive=promoIsActive(p);
       return '<div class="data-row">'
-        +'<div style="flex:1;min-width:180px;"><div class="row-name">'+p.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;'+(isLive?'background:rgba(255,106,0,0.12);color:var(--su);':'background:rgba(153,153,153,0.12);color:var(--wh);')+'">'+(isLive?'LIVE NOW':(p.active===false?'PAUSED':'SCHEDULED'))+'</span></div>'
+        +'<div style="flex:1;min-width:180px;"><div class="row-name">'+p.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;'+(isLive?'background:rgba(34,197,94,0.12);color:var(--su);':'background:rgba(153,153,153,0.12);color:var(--wh);')+'">'+(isLive?'LIVE NOW':(p.active===false?'PAUSED':'SCHEDULED'))+'</span></div>'
         +'<div class="row-meta">'+p.startDate+' to '+p.endDate+' &middot; '+p.discountPct+'% off sitewide</div></div>'
         +'<button class="btn" onclick="openPromoForm(\''+p._id+'\')">Edit</button>'
         +'<button class="btn btn-re" onclick="delPromo(\''+p._id+'\',\''+p.name.replace(/'/g,"\\'")+'\')">Delete</button>'
@@ -958,7 +958,7 @@ async function renderBundles(c){
   }else{
     html+=list.map(function(b){
       return '<div class="data-row" style="align-items:flex-start;">'
-        +'<div style="flex:1;min-width:180px;"><div class="row-name">'+b.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;'+(b.active!==false?'background:rgba(255,106,0,0.12);color:var(--su);':'background:rgba(153,153,153,0.12);color:var(--wh);')+'">'+(b.active!==false?'ACTIVE':'PAUSED')+'</span></div>'
+        +'<div style="flex:1;min-width:180px;"><div class="row-name">'+b.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;'+(b.active!==false?'background:rgba(34,197,94,0.12);color:var(--su);':'background:rgba(153,153,153,0.12);color:var(--wh);')+'">'+(b.active!==false?'ACTIVE':'PAUSED')+'</span></div>'
         +'<div class="row-meta">'+(b.productIds||[]).length+' products &middot; '+b.discountPct+'% off when bought together</div></div>'
         +'<button class="btn" onclick="openBundleForm(\''+b._id+'\')">Edit</button>'
         +'<button class="btn btn-re" onclick="delBundle(\''+b._id+'\',\''+b.name.replace(/'/g,"\\'")+'\')">Delete</button>'
