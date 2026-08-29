@@ -574,7 +574,9 @@ function startApp(){
   document.getElementById('app').style.display='block';
   document.getElementById('tb-role-badge').textContent=staff.name+', '+(ROLE_LABELS[staff.role]||staff.role);
   buildSidebar();
-  snav('dashboard');
+  var validPages=['dashboard','orders','products','vendors','analytics','customers','wallet-issues','customer-chat','salary','points','reports','complaints','leave','messages','activity','policy','profile','submissions','approvals','fleet'];
+  var lastPage=sessionStorage.getItem('rnm_staff_lastpage');
+  snav(validPages.includes(lastPage)?lastPage:'dashboard');
   loadStaffNotifs();
   if(staff.role==='logistics_manager'&&!staff.conductMemoAcknowledged){
     showLogisticsConductMemo();
@@ -692,6 +694,7 @@ async function manualRefreshStaffDash(btn){
 }
 async function snav(page){
   curNav=page;
+  try{sessionStorage.setItem('rnm_staff_lastpage',page);}catch(e){}
   document.querySelectorAll('.sb-item').forEach(el=>el.classList.toggle('active',el.id==='nav-'+page));
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('sb-backdrop')?.classList.remove('open');
@@ -1486,11 +1489,18 @@ async function saveMyProfile(){
 }
 
 // ── ROLE WORK VIEWS (read/scoped access to shared store data) ──
-async function renderOrders(c){
-  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Orders</div></div><div style="color:var(--wh);font-weight:700;">Loading...</div>';
-  const orders=Object.values(await fbG('rn_mall_orders')||{}).sort(function(a,b){return new Date(b.createdAt||0)-new Date(a.createdAt||0);}).slice(0,50);
+function renderOrdersInner(c,orders){
   c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Orders</div><div class="page-hdr-sub">Most recent 50 orders, tap one to update its status</div></div>'
     +orders.map(function(o){return '<div class="data-row" onclick="openStaffOrder(\''+o.tracking+'\')" style="cursor:pointer;"><div style="flex:1;"><div class="row-name">'+o.tracking+'</div><div class="row-meta">'+(o.customer?o.customer.name:'')+' &middot; '+o.date+' &middot; '+fmt(o.total)+'</div></div><div class="row-meta">'+(o.status||'pending')+'</div></div>';}).join('');
+}
+async function renderOrders(c){
+  var cachedO=null;
+  try{cachedO=localStorage.getItem('rnm_staff_cache_orders');}catch(e){}
+  if(cachedO)renderOrdersInner(c,JSON.parse(cachedO));
+  else c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Orders</div></div><div style="color:var(--wh);font-weight:700;">Loading...</div>';
+  const orders=Object.values(await fbG('rn_mall_orders')||{}).sort(function(a,b){return new Date(b.createdAt||0)-new Date(a.createdAt||0);}).slice(0,50);
+  try{localStorage.setItem('rnm_staff_cache_orders',JSON.stringify(orders));}catch(e){}
+  if(curNav==='orders')renderOrdersInner(c,orders);
 }
 const STAFF_STATUSES=['pending','confirmed','packed','shipped','out for delivery','delivered','cancelled'];
 const STAFF_STATUSES_RIDER_ASSIGNED=['pending','confirmed','packed','cancelled'];

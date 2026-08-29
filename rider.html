@@ -524,7 +524,9 @@ function startApp(){
   document.getElementById('app').style.display='block';
   document.querySelectorAll('.curr-btn').forEach(el=>el.classList.toggle('active',el.dataset.curr===currency));
   buildRiderSidebar();
-  rnav('dashboard');
+  var validPages=['dashboard','deliveries','history','salary','points','reports','complaints','leave','messages','activity','policy','profile'];
+  var lastPage=sessionStorage.getItem('rnm_rider_lastpage');
+  rnav(validPages.includes(lastPage)?lastPage:'dashboard');
   loadRiderNotifs();
   maybeShowRiderWelcomeSetup();
   watchFirebaseCollection('rn_mall_orders',function(orders){
@@ -591,6 +593,7 @@ async function manualRefreshRiderDash(btn){
 }
 async function rnav(page){
   curRNav=page;
+  try{sessionStorage.setItem('rnm_rider_lastpage',page);}catch(e){}
   document.querySelectorAll('.sb-item').forEach(el=>el.classList.toggle('active',el.id==='nav-'+page));
   document.querySelector('.sb').classList.remove('open');
   document.getElementById('sb-backdrop')?.classList.remove('open');
@@ -637,8 +640,19 @@ async function getMyOrders(){
   return Object.values(all).filter(function(o){return o.riderId===rider._id;});
 }
 async function renderDashboard(c){
-  c.innerHTML='<div class="page-hdr-title">Welcome, '+rider.name+'</div><div style="color:var(--wh);font-weight:700;margin-top:8px;">Loading...</div>';
+  var cachedO=null,cachedP=null;
+  try{cachedO=localStorage.getItem('rnm_rider_cache_orders');cachedP=localStorage.getItem('rnm_rider_cache_payouts');}catch(e){}
+  var hadCache=cachedO&&cachedP;
+  if(hadCache)renderDashboardInner(c,JSON.parse(cachedO),JSON.parse(cachedP));
+  else c.innerHTML='<div class="page-hdr-title">Welcome, '+rider.name+'</div><div style="color:var(--wh);font-weight:700;margin-top:8px;">Loading...</div>';
   const [orders,payoutsData]=await Promise.all([getMyOrders(),fbG('rn_mall_rider_payouts/'+rider._id)]);
+  try{
+    localStorage.setItem('rnm_rider_cache_orders',JSON.stringify(orders));
+    localStorage.setItem('rnm_rider_cache_payouts',JSON.stringify(payoutsData||{}));
+  }catch(e){}
+  if(curRNav==='dashboard')renderDashboardInner(c,orders,payoutsData);
+}
+function renderDashboardInner(c,orders,payoutsData){
   const active=orders.filter(function(o){return o.deliveryStage&&o.deliveryStage!=='delivered';});
   const completed=orders.filter(function(o){return o.deliveryStage==='delivered';});
   if(active.length)startLiveLocationSharing();else stopLiveLocationSharing();

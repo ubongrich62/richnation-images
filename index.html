@@ -1637,6 +1637,10 @@ async function init(){
   const fc=document.getElementById('footer-cats');if(fc)fc.innerHTML=allCategories.slice(0,6).map(c=>`<div class="footer-link" onclick="filterCat('${c.id}')">${c.name}</div>`).join('');
   setLang(currentLang);
   checkResetLink();
+  try{
+    const lastPage=sessionStorage.getItem('rnm_last_page');
+    if(lastPage&&lastPage!=='home'&&['home','account','wishlist','track','search'].includes(lastPage))showPage(lastPage,true);
+  }catch(e){}
   setTimeout(()=>{if(!currUser&&!sessionStorage.getItem('rnm_prompt_shown'))showAccPrompt();},9000);
   // From here on the page stays live, an admin editing a product, category, or
   // homepage setting shows up here within about a second, no reload needed.
@@ -3074,8 +3078,10 @@ async function doForgotPassword(){
   const [custId]=found;
   await fbP('rn_mall_notifications',{type:'password_reset_request',email,customerId:custId,date:ds(),read:false,ts:Date.now()});
   await fbU('rn_mall_customers/'+custId,{resetRequested:true,resetRequestDate:ds()});
-  if(ok){ok.textContent='Request received. Our support team will contact you directly (by phone, WhatsApp, or email) to verify your identity and help you regain access, this is a manual step for now, not an automatic email.';ok.style.display='block';}
   toast('Reset request sent to support.');
+  const waNumber=(settings&&settings.waNumber)||'2349164678560';
+  const waText=encodeURIComponent('Hi, I forgot my password on RichNation Mall. My registered email is: '+email);
+  if(ok){ok.innerHTML='Request received, our team will follow up, but for the fastest fix, message us now on WhatsApp: <a href="https://wa.me/'+waNumber+'?text='+waText+'" target="_blank" rel="noopener" style="color:#065f2d;text-decoration:underline;font-weight:800;">Chat with Support on WhatsApp &#8594;</a>';ok.style.display='block';}
 }
 async function doLogin(){
   const email=document.getElementById('auth-email')?.value.trim().toLowerCase();const pass=document.getElementById('auth-pass')?.value.trim();const err=document.getElementById('auth-err');
@@ -3749,6 +3755,10 @@ function showPage(page,fromBack){
   if(pageHistory.length>20)pageHistory=pageHistory.slice(-20);
   currentPage=page;
   if(!fromBack)pushNavState({page});
+  try{
+    if(['home','account','wishlist','track','search'].includes(page))sessionStorage.setItem('rnm_last_page',page);
+    else sessionStorage.removeItem('rnm_last_page');
+  }catch(e){}
   ['home','checkout','confirm','track','account','wishlist','policy','search'].forEach(p=>{const el=document.getElementById(p+'-page');if(el)el.style.display=p===page?'block':'none';});
   const footer=document.getElementById('site-footer');if(footer)footer.style.display=page==='checkout'?'none':'block';
   const backBtn=document.getElementById('global-back-btn');if(backBtn)backBtn.style.display=page==='home'?'none':'block';

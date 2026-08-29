@@ -491,6 +491,9 @@ html,body{color-scheme:dark;height:100%;font-family:'Inter',sans-serif;backgroun
       <div class="sb-item" id="nav-customers" onclick="nav('customers')">
         <span class="sb-ico">&#9786;</span>Customers
       </div>
+      <div class="sb-item" id="nav-newsletter" onclick="nav('newsletter')">
+        <span class="sb-ico">&#9993;</span>Newsletter
+      </div>
       <div class="sb-item" id="nav-chat" onclick="nav('chat')">
         <span class="sb-ico">&#9998;</span>Messages
         <span class="sb-badge" id="chat-badge"></span>
@@ -832,20 +835,53 @@ async function manualRefreshAdmin(btn){
 async function initAdmin(){
   const badge=document.getElementById('tb-ceo-badge');
   if(badge)badge.style.display=sessionStorage.getItem('rnm_admin_is_ceo')==='1'?'inline-block':'none';
-  // Show an immediate loading state, the app shell (topbar/sidebar) is already
-  // visible at this point but content-inner is empty, without this the user
-  // sees a blank content area for however long the initial fetches take.
+  // Stale-while-revalidate: if we have a cached copy from last session, render
+  // the dashboard from it immediately instead of showing a spinner and making
+  // the admin wait on a fresh network round-trip every single time they load
+  // or refresh this page, then quietly refresh from the network below.
+  var hadCache=false;
+  try{
+    var cachedProds=localStorage.getItem('rnm_admin_cache_products');
+    var cachedOrders=localStorage.getItem('rnm_admin_cache_orders');
+    var cachedCats=localStorage.getItem('rnm_admin_cache_categories');
+    var cachedCusts=localStorage.getItem('rnm_admin_cache_customers');
+    var cachedSett=localStorage.getItem('rnm_admin_cache_settings');
+    if(cachedProds&&cachedOrders){
+      hadCache=true;
+      allProds=JSON.parse(cachedProds);allOrders=JSON.parse(cachedOrders);
+      allCats=cachedCats?JSON.parse(cachedCats):{};allCusts=cachedCusts?JSON.parse(cachedCusts):{};
+      settings=cachedSett?JSON.parse(cachedSett):{exchangeRate:1600,podEnabled:true};
+      var validPages0=['dashboard','analytics','vendors','wallet-issues','staff','investors','riders','bundles','promos','orders','products','categories','coupons','delivery','customers','chat','notifications','settings','customiser','hero','preorders','reviews','pod','newsletter'];
+      var lastPage0=sessionStorage.getItem('rnm_admin_lastpage');
+      nav(validPages0.includes(lastPage0)?lastPage0:'dashboard');
+    }
+  }catch(cacheErr){console.warn('Admin cache read failed:',cacheErr.message);}
+  // Show a loading state only when there's nothing cached to render yet, the
+  // app shell (topbar/sidebar) is already visible at this point but
+  // content-inner is empty, without this the admin sees a blank content area
+  // for however long the initial fetches take.
   const ci0=document.getElementById('content-inner');
-  if(ci0)ci0.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:100px 20px;"><div class="admin-boot-spinner"></div><div style="color:var(--wh);font-weight:700;font-size:13px;">Loading your dashboard…</div></div>';
+  if(ci0&&!hadCache)ci0.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:100px 20px;"><div class="admin-boot-spinner"></div><div style="color:var(--wh);font-weight:700;font-size:13px;">Loading your dashboard…</div></div>';
   try{
     const[prods,orders,cats,custs,sett]=await Promise.all([
       fbG('rn_mall_products'),fbG('rn_mall_orders'),
       fbG('rn_mall_categories'),fbG('rn_mall_customers'),fbG('rn_mall_settings')
     ]);
-    allProds=prods||{};allOrders=orders||{};
-    allCats=cats||{};allCusts=custs||{};
-    settings=sett||{exchangeRate:1600,podEnabled:true,paystackKey:'pk_test_REPLACE_WITH_YOUR_KEY'};
-    nav('dashboard');
+    if(prods)allProds=prods;else if(!hadCache)allProds={};
+    if(orders)allOrders=orders;else if(!hadCache)allOrders={};
+    if(cats)allCats=cats;else if(!hadCache)allCats={};
+    if(custs)allCusts=custs;else if(!hadCache)allCusts={};
+    try{
+      localStorage.setItem('rnm_admin_cache_products',JSON.stringify(allProds));
+      localStorage.setItem('rnm_admin_cache_orders',JSON.stringify(allOrders));
+      localStorage.setItem('rnm_admin_cache_categories',JSON.stringify(allCats));
+      localStorage.setItem('rnm_admin_cache_customers',JSON.stringify(allCusts));
+      localStorage.setItem('rnm_admin_cache_settings',JSON.stringify(sett||settings));
+    }catch(cacheWriteErr){/* storage full or unavailable, skip caching */}
+    settings=sett||settings||{exchangeRate:1600,podEnabled:true,paystackKey:'pk_test_REPLACE_WITH_YOUR_KEY'};
+    var validPages=['dashboard','analytics','vendors','wallet-issues','staff','investors','riders','bundles','promos','orders','products','categories','coupons','delivery','customers','chat','notifications','settings','customiser','hero','preorders','reviews','pod','newsletter'];
+    var lastPage=sessionStorage.getItem('rnm_admin_lastpage');
+    nav(validPages.includes(lastPage)?lastPage:'dashboard');
     pollNotifs();
     // From here on the Orders page stays live: a new order or a status change
     // shows up within about a second while the admin is looking at it, no
@@ -3746,6 +3782,39 @@ async function deleteCat(id,name){
   await fbD('rn_mall_categories/'+id);delete allCats[id];toast('Category removed');nav('categories',false);
 }
 
+// ── NEWSLETTER ──
+async function renderNewsletter(c){
+  c.innerHTML='<div class="page-hdr slide-up"><div><div class="page-hdr-title">Newsletter</div><div class="page-hdr-sub">Loading subscribers...</div></div></div>';
+  const data=await fbG('rn_mall_newsletter_subscribers')||{};
+  const subs=Object.values(data).filter(function(s){return s&&s.email;});
+  window._newsletterSubs=subs;
+  c.innerHTML='<div class="page-hdr slide-up"><div><div class="page-hdr-title">Newsletter</div><div class="page-hdr-sub">'+subs.length+' subscriber'+(subs.length!==1?'s':'')+'</div></div></div>'
+    +'<div class="card fade-in" style="margin-bottom:16px;">'
+    +'<div class="card-title">'+iconBadge('envelope',15)+' Send a Newsletter</div>'
+    +'<div style="font-size:12px;color:var(--wh);font-weight:700;margin:8px 0 12px;line-height:1.7;">There\'s no automated email sender wired up yet, so this opens your own email app with every subscriber address filled in as BCC. Write your update and hit send from there. Large lists are split into batches of 80 so no single email link gets too long for your email app to open.</div>'
+    +(subs.length?'<button class="btn btn-or btn-lg" onclick="composeNewsletterEmail()">Compose Newsletter</button>':'<div style="font-size:12px;color:var(--wh);font-weight:700;">No subscribers yet, nothing to send to.</div>')
+    +'</div>'
+    +(subs.length===0?'<div class="card fade-in"><div class="empty"><div class="empty-icon">&#9993;</div><div class="empty-title">No subscribers yet</div><div class="empty-sub">Newsletter sign-ups from the mall homepage will appear here.</div></div></div>':
+    '<div class="stagger">'+subs.slice().sort(function(a,b){return (b.ts||0)-(a.ts||0);}).map(function(s){
+      return '<div class="data-row"><div class="row-av">'+ini(s.name||'?')+'</div><div style="flex:1;min-width:180px;"><div class="row-name">'+(s.name||'Unnamed')+'</div><div class="row-meta">'+s.email+' &middot; Subscribed '+(s.date||'')+'</div></div></div>';
+    }).join('')+'</div>');
+}
+function composeNewsletterEmail(){
+  const subs=window._newsletterSubs||[];
+  if(!subs.length)return;
+  const emails=subs.map(function(s){return s.email;});
+  const batchSize=80;
+  const batches=[];
+  for(let i=0;i<emails.length;i+=batchSize)batches.push(emails.slice(i,i+batchSize));
+  batches.forEach(function(batch,i){
+    const subject=encodeURIComponent('RichNation Mall Newsletter');
+    const body=encodeURIComponent('Hi there,\n\nHere\'s what\'s new at RichNation Mall...\n\n');
+    const mailto='mailto:?bcc='+batch.join(',')+'&subject='+subject+'&body='+body;
+    setTimeout(function(){window.open(mailto,'_blank');},i*400);
+  });
+  toast(batches.length>1?('Opening '+batches.length+' email drafts, one per batch of 80...'):'Opening your email app...');
+}
+
 // ── CHAT HOME ──
 async function renderChat(c){
   c.innerHTML='<div class="page-hdr slide-up"><div><div class="page-hdr-title">Customer Messages</div><div class="page-hdr-sub">Loading conversations...</div></div></div>';
@@ -4099,6 +4168,7 @@ document.addEventListener('click',function(e){
 
 // ── NAV ──
 function nav(page,push){
+  try{sessionStorage.setItem('rnm_admin_lastpage',page);}catch(e){}
   if(push!==false){window._nh=window._nh||[];window._nh.push(page);pushAdminNavState();}
   var ci=document.getElementById('content-inner');if(!ci)return;
   document.querySelectorAll('.sb-item').forEach(function(el){el.classList.toggle('active',el.getAttribute('onclick')==="nav('"+page+"')");});
@@ -4118,6 +4188,7 @@ function nav(page,push){
   else if(page==='coupons')renderCoupons(ci);
   else if(page==='delivery')renderDelivery(ci);
   else if(page==='customers')renderCustomers(ci);
+  else if(page==='newsletter')renderNewsletter(ci);
   else if(page==='chat')renderChat(ci);
   else if(page==='notifications')renderNotifs(ci);
   else if(page==='settings')renderSettings(ci);

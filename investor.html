@@ -16,6 +16,7 @@
      then applies it once it's actually ready. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="prefetch" href="docs/RichNation_Mall_Partnership_Agreement.pdf" as="document">
 <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap"></noscript>
 <style>
@@ -136,7 +137,7 @@ button{font-family:inherit;}
 
     <div id="apply-form" style="display:none;">
       <div id="agreement-gate">
-        <a href="docs/RichNation_Mall_Partnership_Agreement.pdf" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;background:#000;color:#fff;text-decoration:none;border-radius:9px;padding:14px;margin-bottom:14px;font-weight:800;font-size:13px;">📄 View Full Partnership Agreement (PDF) <span style="margin-left:auto;font-size:16px;">↗</span></a>
+        <a href="javascript:void(0)" onclick="openAgreementViewer()" style="display:flex;align-items:center;gap:10px;background:#000;color:#fff;text-decoration:none;border-radius:9px;padding:14px;margin-bottom:14px;font-weight:800;font-size:13px;">Read Full RichNation Mall Partnership Agreement <span style="margin-left:auto;font-size:16px;">↗</span></a>
         <div class="tc-box" style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:14px;margin-bottom:14px;max-height:420px;overflow-y:auto;">
           <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14px;color:var(--or);margin-bottom:4px;">RichNation Mall</div>
           <div style="font-weight:800;font-size:13px;margin-bottom:4px;color:var(--wh);">Partnership Agreement &amp; Investment Prospectus</div>
@@ -230,6 +231,13 @@ button{font-family:inherit;}
     </div>
   </div>
   <div class="sb-backdrop" id="sb-backdrop" onclick="toggleSidebar()"></div>
+  <div id="agreement-viewer" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:900;">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#000;">
+      <div style="color:#fff;font-weight:800;font-size:13px;">RichNation Mall Partnership Agreement</div>
+      <button onclick="closeAgreementViewer()" style="background:var(--card2);border:1px solid var(--bdr);color:#fff;border-radius:7px;padding:6px 12px;font-weight:700;cursor:pointer;font-size:12px;">Close</button>
+    </div>
+    <iframe id="agreement-viewer-frame" src="" style="width:100%;height:calc(100% - 46px);border:none;background:#fff;"></iframe>
+  </div>
   <div class="wrap">
     <div class="sb" id="sidebar"></div>
     <div class="content" id="content"></div>
@@ -593,7 +601,9 @@ function startApp(){
   document.getElementById('tb-tier-badge').textContent=investor.tier||tierFor(investor.investmentAmount);
   document.querySelectorAll('.curr-btn').forEach(el=>el.classList.toggle('active',el.dataset.curr===currency));
   buildInvestorSidebar();
-  inav('dashboard');
+  var validPages=['dashboard','wallet','topup','switch','stats','updates','documents','chat','profile'];
+  var lastPage=sessionStorage.getItem('rnm_investor_lastpage');
+  inav(validPages.includes(lastPage)?lastPage:'dashboard');
   loadInvestorNotifs();
   watchFirebaseCollection('rn_mall_settings',function(sett){
     if(!sett)return;
@@ -611,6 +621,16 @@ function startApp(){
   });
 }
 function toggleSidebar(){document.querySelector('.sb').classList.toggle('open');document.getElementById('sb-backdrop')?.classList.toggle('open');}
+function openAgreementViewer(){
+  const v=document.getElementById('agreement-viewer');const f=document.getElementById('agreement-viewer-frame');
+  if(!v||!f)return;
+  if(!f.src)f.src='docs/RichNation_Mall_Partnership_Agreement.pdf';
+  v.style.display='block';document.body.style.overflow='hidden';
+}
+function closeAgreementViewer(){
+  const v=document.getElementById('agreement-viewer');if(!v)return;
+  v.style.display='none';document.body.style.overflow='';
+}
 const CHAT_WALLPAPERS=[
   {id:'default',label:'Default',bg:'var(--card2)'},
   {id:'black',label:'Black',bg:'#0A0A0B'},
@@ -655,6 +675,7 @@ async function manualRefreshInvestorDash(btn){
 }
 async function inav(page){
   curNav=page;
+  try{sessionStorage.setItem('rnm_investor_lastpage',page);}catch(e){}
   document.querySelectorAll('.sb-item').forEach(el=>el.classList.toggle('active',el.id==='nav-'+page));
   document.querySelector('.sb').classList.remove('open');
   document.getElementById('sb-backdrop')?.classList.remove('open');
@@ -673,9 +694,20 @@ async function inav(page){
 // dashboard live-refresh interval removed, was causing a disruptive flash every 15s
 
 async function renderDashboard(c){
-  c.innerHTML='<div class="page-hdr-title">Welcome, '+investor.name+'</div><div style="color:var(--wh);font-weight:700;margin-top:8px;">Loading...</div>';
-  const tier=investor.tier||tierFor(investor.investmentAmount);
+  var cachedS=null,cachedP=null;
+  try{cachedS=localStorage.getItem('rnm_investor_cache_settings');cachedP=localStorage.getItem('rnm_investor_cache_payouts');}catch(e){}
+  var hadCache=cachedS&&cachedP;
+  if(hadCache)renderDashboardInner(c,JSON.parse(cachedS),JSON.parse(cachedP));
+  else c.innerHTML='<div class="page-hdr-title">Welcome, '+investor.name+'</div><div style="color:var(--wh);font-weight:700;margin-top:8px;">Loading...</div>';
   const [settings,payoutsData]=await Promise.all([getSettingsData(),fbG('rn_mall_investor_payouts/'+investor._id)]);
+  try{
+    if(settings)localStorage.setItem('rnm_investor_cache_settings',JSON.stringify(settings));
+    localStorage.setItem('rnm_investor_cache_payouts',JSON.stringify(payoutsData||{}));
+  }catch(e){}
+  if(curNav==='dashboard')renderDashboardInner(c,settings,payoutsData);
+}
+function renderDashboardInner(c,settings,payoutsData){
+  const tier=investor.tier||tierFor(investor.investmentAmount);
   const totalTarget=(settings||{}).investorCapitalTarget||3000000;
   const equityPct=investor.investmentOption==='equity'?((investor.investmentAmount/totalTarget)*100).toFixed(2):null;
   const payouts=Object.values(payoutsData||{}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
@@ -1009,9 +1041,9 @@ async function renderDocuments(c){
   c.innerHTML='<div class="page-hdr-title">My Documents</div><div style="color:var(--wh);font-weight:700;margin-top:8px;">Loading...</div>';
   const doc=investor.agreementDoc;
   c.innerHTML='<div class="page-hdr-title">My Documents</div><div class="page-hdr-sub" style="margin-bottom:20px;">Your signed partnership agreement.</div>'
-    +(doc?'<div class="card"><div class="card-title">📄 Partnership Agreement</div><div style="font-size:12px;color:var(--wh);font-weight:700;margin:8px 0 12px;">Uploaded by RichNation Mall.</div><button class="btn btn-or" onclick="downloadDataDoc(investor.agreementDoc,\'RichNation_Mall_Agreement.pdf\')">Download Agreement</button></div>'
+    +(doc?'<div class="card"><div class="card-title">'+iconBadge('file',15)+' Partnership Agreement</div><div style="font-size:12px;color:var(--wh);font-weight:700;margin:8px 0 12px;">Uploaded by RichNation Mall.</div><button class="btn btn-or" onclick="downloadDataDoc(investor.agreementDoc,\'RichNation_Mall_Agreement.pdf\')">Download Agreement</button></div>'
     :'<div class="card" style="text-align:center;padding:24px;color:var(--wh);font-weight:700;">Your individually signed agreement hasn\'t been uploaded yet, it will appear here once ready.</div>')
-    +'<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;"><div class="card-title">📜 Partnership Agreement &amp; Investment Prospectus</div><a href="docs/RichNation_Mall_Partnership_Agreement.pdf" target="_blank" rel="noopener" class="btn btn-or" style="font-size:11px;padding:6px 12px;text-decoration:none;">📄 Full PDF ↗</a></div><div style="font-size:12px;color:var(--w2);line-height:1.8;margin-top:10px;max-height:340px;overflow-y:auto;padding-right:4px;">'+PARTNERSHIP_AGREEMENT_TEXT+'</div></div>';
+    +'<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;"><div class="card-title">'+iconBadge('file',15)+' Partnership Agreement &amp; Investment Prospectus</div><a href="javascript:void(0)" onclick="openAgreementViewer()" class="btn btn-or" style="font-size:11px;padding:6px 12px;text-decoration:none;">Read Full Agreement ↗</a></div><div style="font-size:12px;color:var(--w2);line-height:1.8;margin-top:10px;max-height:340px;overflow-y:auto;padding-right:4px;">'+PARTNERSHIP_AGREEMENT_TEXT+'</div></div>';
 }
 const PARTNERSHIP_AGREEMENT_TEXT='<strong style="color:var(--wh);">Welcome to RichNation.</strong> RichNation Global Ltd (RC 8998019) is a faith-centered digital media and education company, "Build People, Build Platforms, Create Millionaires." This partnership program is run through RichNation Mall, our e-commerce division, already built, live, and operational at richnationmall.com.<br><br>'
   +'<strong style="color:var(--wh);">The Opportunity.</strong> We are raising ₦7,000,000 in partnership capital to stock, market, and scale RichNation Mall. Your investment is not locked to what the mall is today, it grows as the business grows.<br><br>'

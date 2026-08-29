@@ -710,7 +710,9 @@ async function startApp(){
   document.getElementById('tb-store-name').textContent=vendor.storeName;
   populateSidebarIcons();
   document.querySelectorAll('.curr-btn').forEach(el=>el.classList.toggle('active',el.dataset.curr===currency));
-  vnav('dashboard');
+  var validPages=['dashboard','products','orders','payouts','performance','reviews','promotions','messages','notifications','profile'];
+  var lastPage=sessionStorage.getItem('rnm_vendor_lastpage');
+  vnav(validPages.includes(lastPage)?lastPage:'dashboard');
   fbG('rn_mall_categories').then(function(cats){allCategories=Object.values(cats||{});});
   refreshVendorNotifBadge();
   setInterval(refreshVendorNotifBadge,20000);
@@ -781,6 +783,7 @@ function loadAppWallpaper(storageKey){
 // ── NAVIGATION ──
 function vnav(page){
   curNav=page;
+  try{sessionStorage.setItem('rnm_vendor_lastpage',page);}catch(e){}
   document.querySelectorAll('.sb-item').forEach(el=>el.classList.toggle('active',el.id==='nav-'+page));
   document.querySelector('.sb').classList.remove('open');
   document.getElementById('sb-backdrop')?.classList.remove('open');
@@ -1017,8 +1020,19 @@ async function renderVPerformance(c){
 
 // ── DASHBOARD ──
 async function renderVDash(c){
-  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Dashboard</div></div><div style="color:var(--wh);font-weight:700;">Loading...</div>';
+  var cachedP=null,cachedO=null;
+  try{cachedP=localStorage.getItem('rnm_vendor_cache_products');cachedO=localStorage.getItem('rnm_vendor_cache_orders');}catch(e){}
+  var hadCache=cachedP&&cachedO;
+  if(hadCache)renderVDashInner(c,JSON.parse(cachedP),JSON.parse(cachedO));
+  else c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Dashboard</div></div><div style="color:var(--wh);font-weight:700;">Loading...</div>';
   const [allProds,allOrders]=await Promise.all([fbG('rn_mall_products'),fbG('rn_mall_orders')]);
+  try{
+    if(allProds)localStorage.setItem('rnm_vendor_cache_products',JSON.stringify(allProds));
+    if(allOrders)localStorage.setItem('rnm_vendor_cache_orders',JSON.stringify(allOrders));
+  }catch(e){}
+  if(curNav==='dashboard')renderVDashInner(c,allProds,allOrders);
+}
+function renderVDashInner(c,allProds,allOrders){
   const myProds=Object.values(allProds||{}).filter(p=>p.vendorId===vendor.id);
   const orders=Object.values(allOrders||{});
   let revenue=0,itemsSold=0,orderCount=0;
