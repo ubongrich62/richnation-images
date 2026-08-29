@@ -1819,7 +1819,7 @@ async function renderInvestorList(c){
       return '<div class="data-row" style="align-items:flex-start;flex-direction:column;">'
         +'<div style="width:100%;"><div class="row-name">'+v.name+'</div>'
         +'<div class="row-meta">'+(OPTION_LABELS_ADMIN[r.currentOption]||r.currentOption)+' → '+(OPTION_LABELS_ADMIN[r.option]||r.option)+(r.newAmount!==r.currentAmount?' &middot; '+fmt(r.currentAmount)+' → '+fmt(r.newAmount):'')+'</div>'
-        +(topUp>0?'<div class="row-meta">💰 Requires top-up payment of <strong style="color:var(--or);">'+fmt(topUp)+'</strong>, '+(r.paymentConfirmed?'<strong style="color:var(--su);">✔ Payment Confirmed</strong>':'<strong style="color:var(--re);">Not yet confirmed</strong>')+'</div>':'')
+        +(topUp>0?'<div class="row-meta">💰 Requires top-up payment of <strong style="color:var(--or);">'+fmt(topUp)+'</strong>, '+(r.paymentConfirmed?'<strong style="color:var(--su);">✔ '+(r.topUpPaymentRef?'Paid online (ref: '+r.topUpPaymentRef+')':'Payment Confirmed')+'</strong>':'<strong style="color:var(--re);">Not yet confirmed</strong>')+'</div>':'')
         +'</div>'
         +'<div class="row-actions" style="margin-top:8px;">'
         +(topUp>0&&!r.paymentConfirmed?'<button class="btn btn-gr" style="font-size:10px;padding:5px 10px;" onclick="confirmSwitchPayment(\''+v._id+'\')">✔ Confirm Payment Received</button>':'')

@@ -100,6 +100,7 @@ button{font-family:inherit;}
 </style>
 </head>
 <body>
+<script src="https://js.paystack.co/v1/inline.js" async></script>
 
 <div id="login">
   <div class="lcard">
@@ -347,6 +348,7 @@ function tierFor(amount){
   return 'Bronze Partner';
 }
 const DEFAULT_PACKAGES={bronze:{label:'Bronze',min:200000,rate:12},silver:{label:'Silver',min:500000,rate:15},gold:{label:'Gold',min:1000000,rate:18},platinum:{label:'Platinum',min:2000000,rate:22}};
+function getPaystackKey(){return (window._settings&&window._settings.paystackKey)||'pk_live_005d2ffa19fb3405849eb17c44af15e007c3027a';}
 function getPackages(){return (window._settings&&window._settings.investorPackages)||DEFAULT_PACKAGES;}
 function packageForAmount(amount){
   const pkgs=getPackages();
@@ -693,7 +695,7 @@ async function renderSwitchPlan(c){
   ${pendingReq?`<div class="card" style="border-color:rgba(255,140,0,0.4);background:rgba(255,140,0,0.06);">
     <div style="font-weight:800;color:var(--or);">⏳ Switch request pending admin approval</div>
     <div style="font-size:12px;color:var(--w2);margin-top:6px;">Requested: ${OPTION_LABELS[pendingReq.option]}${pendingReq.newAmount&&pendingReq.newAmount>investor.investmentAmount?' &middot; Top-up to '+fmt(pendingReq.newAmount):''}</div>
-    <div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:6px;">${pendingReq.newAmount&&pendingReq.newAmount>investor.investmentAmount?'Admin will confirm your top-up payment before approving.':'We\'ll notify you once admin reviews this.'}</div>
+    <div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:6px;">${pendingReq.newAmount&&pendingReq.newAmount>investor.investmentAmount?(pendingReq.paymentConfirmed?'✔ Your top-up payment was received. Waiting on admin approval.':'Admin will confirm your top-up payment before approving.'):'We\'ll notify you once admin reviews this.'}</div>
   </div>`:!canSwitch?`<div class="card" style="border-color:rgba(244,63,94,0.4);background:rgba(244,63,94,0.06);">
     <div style="font-weight:800;color:var(--re);">🔒 Not eligible to switch yet</div>
     <div style="font-size:12px;color:var(--w2);margin-top:6px;">You can request a switch starting <strong>${nextEligible.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}</strong>, plans must be held at least 3 months before switching.</div>
@@ -706,7 +708,7 @@ async function renderSwitchPlan(c){
       <option value="fixed_return" ${investor.investmentOption==='fixed_return'?'disabled':''}>Fixed Return</option>
     </select></div>
     <div class="fg"><label class="lbl">New Investment Amount (optional, leave blank to keep ${fmt(investor.investmentAmount)})</label><input class="fi" type="number" id="sw-amount" placeholder="${investor.investmentAmount}"/></div>
-    <div style="font-size:11px;color:var(--wh);font-weight:700;margin-bottom:10px;">If your new amount is higher than your current investment, you'll need to make a top-up payment, admin confirms this before your switch is approved.</div>
+    <div style="font-size:11px;color:var(--wh);font-weight:700;margin-bottom:10px;">If your new amount is higher than your current investment, you'll pay the top-up securely by card right here before your request is submitted.</div>
     <button class="btn btn-or" onclick="previewPlanSwitch()">Preview Request</button>
     <div id="switch-preview" style="margin-top:14px;"></div>
   </div>`}
@@ -714,7 +716,7 @@ async function renderSwitchPlan(c){
     <div class="card-title">📜 What Switching Means</div>
     <div style="font-size:12px;color:var(--w2);line-height:1.9;margin-top:8px;">
       • Every switch request requires admin approval, nothing changes until approved.<br>
-      • If you're increasing your investment amount, admin confirms your top-up payment first, no payment confirmed means the request is denied.<br>
+      • If you're increasing your investment amount, you pay the top-up securely by card when you submit, admin then reviews and approves.<br>
       • Your current plan stays active until admin approves the switch.<br>
       • Once approved, your payout timeline resets from that date.<br>
       • Your Wallet balance (${fmt(investor.walletBalance||0)}) is never affected, it's always yours.<br>
@@ -729,20 +731,39 @@ function previewPlanSwitch(){
   const newAmount=newAmountRaw?parseFloat(newAmountRaw):investor.investmentAmount;
   const box=document.getElementById('switch-preview');
   const isTopUp=newAmount>investor.investmentAmount;
+  const topUp=newAmount-investor.investmentAmount;
   box.innerHTML='<div style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;font-size:12px;color:var(--w2);">'
     +'Requesting <strong style="color:var(--or);">'+OPTION_LABELS[newOption]+'</strong>'+(newAmount!==investor.investmentAmount?' at '+fmt(newAmount):'')+'.<br><br>'
-    +(isTopUp?'⚠ This requires a top-up of <strong style="color:var(--or);">'+fmt(newAmount-investor.investmentAmount)+'</strong>, admin will confirm this payment before approving.<br>':'✔ No additional payment needed for this switch.<br>')
+    +(isTopUp?'⚠ This requires a top-up of <strong style="color:var(--or);">'+fmt(topUp)+'</strong>, pay securely below to submit your request.<br>':'✔ No additional payment needed for this switch.<br>')
     +'✔ Your Wallet balance of '+fmt(investor.walletBalance||0)+' is unaffected either way<br>'
     +'⚠ Nothing changes until admin approves<br><br>'
-    +'<button class="btn btn-or" onclick="submitSwitchRequest(\''+newOption+'\','+newAmount+')">Submit Request</button></div>';
+    +(isTopUp
+      ?'<button class="btn btn-or" onclick="payTopUpAndSubmitSwitch(\''+newOption+'\','+newAmount+')">💳 Pay '+fmt(topUp)+' &amp; Submit Request</button>'
+      :'<button class="btn btn-or" onclick="submitSwitchRequest(\''+newOption+'\','+newAmount+')">Submit Request</button>')
+    +'</div>';
 }
-async function submitSwitchRequest(newOption,newAmount){
-  const req={option:newOption,newAmount:newAmount,currentOption:investor.investmentOption,currentAmount:investor.investmentAmount,requestedAt:Date.now(),paymentConfirmed:newAmount<=investor.investmentAmount};
+function payTopUpAndSubmitSwitch(newOption,newAmount){
+  const topUp=newAmount-investor.investmentAmount;
+  try{
+    if(typeof PaystackPop==='undefined')throw new Error('Payment system not loaded, please refresh and try again.');
+    const handler=PaystackPop.setup({
+      key:getPaystackKey(),email:investor.email,amount:Math.round(topUp)*100,currency:'NGN',
+      ref:'RNM-TOPUP-'+investor._id+'-'+Date.now(),
+      metadata:{investor_id:investor._id,investor_name:investor.name,type:'investor_switch_topup'},
+      callback:function(response){submitSwitchRequest(newOption,newAmount,response.reference);},
+      onClose:function(){toast('Payment window closed, your switch request was not submitted','warn');}
+    });
+    handler.openIframe();
+  }catch(e){toast('Payment error: '+e.message,'err');}
+}
+async function submitSwitchRequest(newOption,newAmount,paymentRef){
+  const req={option:newOption,newAmount:newAmount,currentOption:investor.investmentOption,currentAmount:investor.investmentAmount,requestedAt:Date.now(),paymentConfirmed:newAmount<=investor.investmentAmount||!!paymentRef};
+  if(paymentRef)req.topUpPaymentRef=paymentRef;
   await fbU('rn_mall_investors/'+investor._id,{pendingSwitchRequest:req});
-  await fbP('rn_mall_notifications',{type:'investor_switch_request',investorName:investor.name,from:investor.investmentOption,to:newOption,topUp:newAmount>investor.investmentAmount?newAmount-investor.investmentAmount:0,date:ds(),read:false,ts:Date.now()});
+  await fbP('rn_mall_notifications',{type:'investor_switch_request',investorName:investor.name,from:investor.investmentOption,to:newOption,topUp:newAmount>investor.investmentAmount?newAmount-investor.investmentAmount:0,paidOnline:!!paymentRef,date:ds(),read:false,ts:Date.now()});
   investor.pendingSwitchRequest=req;
   sessionStorage.setItem('rnm_investor_session',JSON.stringify(investor));
-  toast('Switch request sent to admin for approval.');
+  toast(paymentRef?'Payment received, switch request sent to admin for approval.':'Switch request sent to admin for approval.');
   inav('switch');
 }
 async function renderInvestorWallet(c){
