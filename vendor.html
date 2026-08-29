@@ -68,7 +68,8 @@ button{font-family:inherit;}
 
 /* ── APP SHELL ── */
 #app{display:none;min-height:100vh;}
-.topbar{height:56px;background:var(--ink);border-bottom:1px solid #000;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;box-shadow:var(--sh-sm);}
+.topbar{min-height:56px;background:var(--ink);border-bottom:1px solid #000;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:8px 20px;position:sticky;top:0;z-index:100;box-shadow:var(--sh-sm);}
+.sb-backdrop{display:none;}
 .tb-left{display:flex;align-items:center;gap:10px;}
 .tb-logo{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:15px;color:var(--or);}
 .tb-store{font-size:11px;color:rgba(255,255,255,.55);}
@@ -122,7 +123,11 @@ button{font-family:inherit;}
 @media(max-width:768px){
   .sb{position:fixed;left:-240px;top:56px;bottom:0;z-index:300;width:220px;transition:left .2s;box-shadow:4px 0 24px rgba(0,0,0,.5);}
   .sb.open{left:0;display:flex;}
+  .sb-backdrop.open{display:block;position:fixed;inset:0;top:56px;background:rgba(0,0,0,.55);z-index:299;}
   #mob-btn{display:flex!important;}
+  .tb-store{display:none;}
+  .tb-right-group{flex-wrap:wrap;justify-content:flex-end;row-gap:6px;}
+  .curr-row{order:5;flex-basis:100%;justify-content:flex-end;}
   .stats-grid{grid-template-columns:1fr 1fr;}
   .g2{grid-template-columns:1fr;}
   .content{padding:14px;}
@@ -245,7 +250,7 @@ button{font-family:inherit;}
       <div class="tb-logo">🛒 RichNation Mall</div>
       <div class="tb-store" id="tb-store-name"></div>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;">
+    <div class="tb-right-group" style="display:flex;align-items:center;gap:10px;">
       <div class="curr-row" id="curr-row">
         <button class="curr-btn active" data-curr="NGN" onclick="setCurr('NGN')">₦</button>
         <button class="curr-btn" data-curr="USD" onclick="setCurr('USD')">$</button>
@@ -255,6 +260,7 @@ button{font-family:inherit;}
       <button class="tb-btn" onclick="vendorLogout()">Sign Out</button>
     </div>
   </div>
+  <div class="sb-backdrop" id="sb-backdrop" onclick="toggleSidebar()"></div>
   <div class="wrap">
     <div class="sb">
       <div class="sb-item active" id="nav-dashboard" onclick="vnav('dashboard')"><span class="sb-ico" id="ico-dashboard"></span>Dashboard</div>
@@ -721,13 +727,14 @@ async function refreshVendorNotifBadge(){
   if(count>0){badge.textContent=count;badge.style.display='inline-block';}
   else badge.style.display='none';
 }
-function toggleSidebar(){document.querySelector('.sb').classList.toggle('open');}
+function toggleSidebar(){document.querySelector('.sb').classList.toggle('open');document.getElementById('sb-backdrop')?.classList.toggle('open');}
 
 // ── NAVIGATION ──
 function vnav(page){
   curNav=page;
   document.querySelectorAll('.sb-item').forEach(el=>el.classList.toggle('active',el.id==='nav-'+page));
   document.querySelector('.sb').classList.remove('open');
+  document.getElementById('sb-backdrop')?.classList.remove('open');
   const c=document.getElementById('content');
   if(page==='dashboard')renderVDash(c);
   else if(page==='products')renderVProducts(c);

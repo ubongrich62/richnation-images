@@ -64,6 +64,7 @@ button{font-family:inherit;}
 .curr-btn{background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-sm);color:var(--wh);font-size:12px;font-weight:700;cursor:pointer;padding:6px 9px;min-width:32px;min-height:32px;}
 .curr-btn.active{background:var(--or);color:#fff;border-color:var(--or);}
 .wrap{display:flex;min-height:calc(100vh - 56px);}
+.sb-backdrop{display:none;}
 .sb{width:200px;min-width:200px;background:var(--card);border-right:1px solid var(--bdr);padding:16px 0;display:flex;flex-direction:column;gap:1px;}
 .sb-sec{font-size:10px;font-weight:800;color:var(--wh);text-transform:uppercase;letter-spacing:.6px;padding:16px 16px 6px;}
 .sb-sec:first-child{padding-top:4px;}
@@ -101,7 +102,9 @@ button{font-family:inherit;}
 @media(max-width:768px){
   .sb{position:fixed;left:-220px;top:56px;bottom:0;z-index:300;width:200px;transition:left .2s;box-shadow:var(--sh-lg);}
   .sb.open{left:0;display:flex;}
+  .sb-backdrop.open{display:block;position:fixed;inset:0;top:56px;background:rgba(0,0,0,.55);z-index:299;}
   #mob-btn{display:flex!important;}
+  .tb-status{display:none;}
   .stats-grid{grid-template-columns:1fr;}
   .g2{grid-template-columns:1fr;}
   .content{padding:14px;}
@@ -182,6 +185,7 @@ button{font-family:inherit;}
       <button class="tb-btn" onclick="riderLogout()">Sign Out</button>
     </div>
   </div>
+  <div class="sb-backdrop" id="sb-backdrop" onclick="toggleSidebar()"></div>
   <div class="wrap">
     <div class="sb" id="sidebar"></div>
     <div class="content" id="content"></div>
@@ -502,7 +506,7 @@ function maybeShowRiderWelcomeSetup(){
     <button class="btn btn-or btn-lg" onclick="closeInfoModal();rnav('profile');" style="width:100%;">Complete My Setup</button>
   `);
 }
-function toggleSidebar(){document.querySelector('.sb').classList.toggle('open');}
+function toggleSidebar(){document.querySelector('.sb').classList.toggle('open');document.getElementById('sb-backdrop')?.classList.toggle('open');}
 let curRNav='dashboard';
 async function manualRefreshRiderDash(btn){
   const orig=btn.innerHTML;btn.innerHTML='⏳...';btn.disabled=true;
@@ -514,6 +518,7 @@ async function rnav(page){
   curRNav=page;
   document.querySelectorAll('.sb-item').forEach(el=>el.classList.toggle('active',el.id==='nav-'+page));
   document.querySelector('.sb').classList.remove('open');
+  document.getElementById('sb-backdrop')?.classList.remove('open');
   const c=document.getElementById('content');
   const routes={dashboard:renderDashboard,deliveries:renderDeliveries,history:renderHistory,salary:renderRiderSalary,points:renderRiderPoints,reports:renderRiderReports,complaints:renderRiderComplaints,leave:renderRiderLeave,messages:renderRiderMessages,activity:renderRiderActivity,policy:renderRiderPolicy,profile:renderProfile};
   (routes[page]||renderDashboard)(c);
