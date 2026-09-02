@@ -646,28 +646,25 @@ async function fbG(p){
     return null;
   }
 }
-async function fbS(p,d){
-  try{
-    const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'PUT',body:JSON.stringify(d)});
-    if(!r||!r.ok){toast('Save failed, check your connection and try again','err');return false;}
-    return true;
-  }catch(e){
-    toast('Save failed, check your connection and try again','err');
-    console.warn('fbS failed for',p,':',e.message);
-    return false;
+// A single dropped packet or slow response used to fail the whole save
+// outright (surfacing "Save failed" on the very first hiccup), even though
+// the connection was fine a moment later. Both retry twice with a short
+// backoff before actually giving up and telling the admin it failed.
+async function fbSaveWithRetry(method,p,d){
+  for(var attempt=0;attempt<3;attempt++){
+    try{
+      const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:method,body:JSON.stringify(d)});
+      if(r&&r.ok)return true;
+    }catch(e){
+      console.warn('fb'+method+' attempt',attempt+1,'failed for',p,':',e.message);
+    }
+    if(attempt<2)await new Promise(function(res){setTimeout(res,700*(attempt+1));});
   }
+  toast('Save failed after several attempts, check your connection and try again','err');
+  return false;
 }
-async function fbU(p,d){
-  try{
-    const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'PATCH',body:JSON.stringify(d)});
-    if(!r||!r.ok){toast('Save failed, check your connection and try again','err');return false;}
-    return true;
-  }catch(e){
-    toast('Save failed, check your connection and try again','err');
-    console.warn('fbU failed for',p,':',e.message);
-    return false;
-  }
-}
+async function fbS(p,d){return fbSaveWithRetry('PUT',p,d);}
+async function fbU(p,d){return fbSaveWithRetry('PATCH',p,d);}
 async function bumpCatalogUpdate(){try{await fbU('rn_mall_settings',{lastCatalogUpdate:Date.now()});if(typeof settings!=='undefined')settings.lastCatalogUpdate=Date.now();}catch(e){}}
 async function fbP(p,d){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'POST',body:JSON.stringify(d)});return await r.json();}catch{return null;}}
 async function fbD(p){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'DELETE'},4000);return !!(r&&r.ok);}catch{return false;}}
@@ -3788,6 +3785,7 @@ async function renderCategories(c){
     ${cats.map(cat=>`<div class="data-row">
       <div class="row-av" style="font-size:20px;background:rgba(255,106,0,0.06);">${cat.icon||'&#128230;'}</div>
       <div style="flex:1;"><div class="row-name">${cat.name}</div><div class="row-meta">ID: ${cat.id} &middot; Order: ${cat.order||0}</div></div>
+      <button class="btn ${cat.visible!==false?'btn-gr':'btn-re'}" style="font-size:10px;padding:5px 10px;" onclick="toggleCatVisible('${cat.id}')">${cat.visible!==false?'Shown':'Hidden'}</button>
       <button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteCat('${cat.id}','${cat.name}',this)">Remove</button>
     </div>`).join('')}
   </div>`}`;
@@ -3814,8 +3812,17 @@ async function saveCat(){
   const name=document.getElementById('cat-name').value.trim();
   const id=document.getElementById('cat-id').value.trim().toLowerCase().replace(/\s+/g,'_');
   if(!name||!id){toast('Name and ID are required','err');return;}
-  await fbS('rn_mall_categories/'+id,{id,name,icon:document.getElementById('cat-icon').value||'*',order:parseInt(document.getElementById('cat-order').value)||99});
-  allCats[id]={id,name};toast('Category added: '+name);nav('categories',false);
+  const cat={id,name,icon:document.getElementById('cat-icon').value||'*',order:parseInt(document.getElementById('cat-order').value)||99,visible:true};
+  await fbS('rn_mall_categories/'+id,cat);
+  allCats[id]=cat;toast('Category added: '+name);nav('categories',false);
+}
+async function toggleCatVisible(id){
+  const cat=allCats[id];if(!cat)return;
+  const newVal=cat.visible===false; // was hidden, becomes shown, and vice versa
+  await fbU('rn_mall_categories/'+id,{visible:newVal});
+  allCats[id]=Object.assign({},cat,{visible:newVal});
+  toast(cat.name+(newVal?' is now shown on the mall':' is now hidden from the mall'));
+  nav('categories',false);
 }
 async function deleteCat(id,name){
   if(!confirm('Remove category "'+name+'"?'))return;
@@ -4959,7 +4966,7 @@ async function migrateProductImagesToGithub(){
     }
     toast('Migrating… '+migrated+' moved so far ('+(pi+1)+'/'+pids.length+' products checked)');
   }
-  toast('Done, moved '+migrated+' of '+totalImgs+' image(s) to Storage'+(failed?' ('+failed+' failed, left as-is)':''));
+  toast(totalImgs===0?'Nothing to move, all your product photos are already hosted in Storage or as external URLs, none were saved as raw data in the database.':'Done, moved '+migrated+' of '+totalImgs+' image(s) to Storage'+(failed?' ('+failed+' failed, left as-is)':''));
   nav('products',false);
 }
 
@@ -5026,7 +5033,7 @@ async function migrateEverythingElseToGithub(){
     if(dirty)await fbU('rn_mall_vendors/'+vid,updates);
   }
 
-  toast('Done, moved '+totalMoved+' image(s)/document(s) to Storage'+(totalFailed?' ('+totalFailed+' failed, left as-is)':''));
+  toast(totalMoved===0&&totalFailed===0?'Nothing to move, none of these photos/documents are saved as raw data in the database.':'Done, moved '+totalMoved+' image(s)/document(s) to Storage'+(totalFailed?' ('+totalFailed+' failed, left as-is)':''));
 }
 
 // Orders freeze a snapshot of each item's image at the moment of checkout, migrating
@@ -5067,7 +5074,7 @@ async function migrateOrderImagesToGithub(){
     if(dirty)await fbU('rn_mall_orders/'+oid,{items:newItems});
     if((oi+1)%20===0)toast('Migrating… '+migrated+' moved so far ('+(oi+1)+'/'+oids.length+' orders checked)');
   }
-  toast('Done, moved '+migrated+' of '+totalImgs+' order image(s) to Storage'+(failed?' ('+failed+' failed, left as-is)':'')+(ordersFailed?' ('+ordersFailed+' order(s) couldn\'t be read, try running this again)':''));
+  toast(totalImgs===0&&!ordersFailed?'Nothing to move, no order photos are saved as raw data in the database.':'Done, moved '+migrated+' of '+totalImgs+' order image(s) to Storage'+(failed?' ('+failed+' failed, left as-is)':'')+(ordersFailed?' ('+ordersFailed+' order(s) couldn\'t be read, try running this again)':''));
 }
 
 // The settings record (hero banner, payment icons) loads on nearly every single page
@@ -5116,7 +5123,7 @@ async function migrateSettingsImagesToGithub(){
   }
 
   if(Object.keys(updates).length)await fbU('rn_mall_settings',updates);
-  toast('Done, moved '+migrated+' of '+totalImgs+' site image(s) to Storage'+(failed?' ('+failed+' failed, left as-is)':''));
+  toast(totalImgs===0?'Nothing to move, no site images are saved as raw data in the database.':'Done, moved '+migrated+' of '+totalImgs+' site image(s) to Storage'+(failed?' ('+failed+' failed, left as-is)':''));
 }
 
 async function uploadProductVideo(){
@@ -5648,7 +5655,14 @@ async function saveProd(id){
     updatedAt:new Date().toISOString()
   };
 
-  await fbS('rn_mall_products/'+pid,prod);
+  const saved=await fbS('rn_mall_products/'+pid,prod);
+  if(!saved){
+    // fbS already toasted why, restore the Save button rather than pretending
+    // this succeeded, the admin was previously told "Updated"/"Added" here
+    // even when the write never actually reached the database.
+    if(btn){btn.textContent=(id?'Update':'Save')+' Product';btn.disabled=false;}
+    return;
+  }
   allProds[pid]=prod;
   bumpCatalogUpdate();
   toast((id?'Updated: ':'Added: ')+name);

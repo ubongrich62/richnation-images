@@ -1615,7 +1615,7 @@ async function init(){
   if(settings.theme)applyTheme(settings.theme);
   // Only replace what we already have if the fresh fetch actually returned something.
   // a failed/timed-out fetch must never wipe out good cached data with an empty state.
-  if(cats)allCategories=Object.values(cats).sort((a,b)=>(a.order||99)-(b.order||99));
+  if(cats)allCategories=Object.values(cats).filter(c=>c.visible!==false).sort((a,b)=>(a.order||99)-(b.order||99));
   else if(!hadCache)allCategories=[];
   if(prods)allProducts=Object.values(prods).filter(p=>p.visible!==false);
   else if(!hadCache)allProducts=[];
@@ -1674,7 +1674,7 @@ async function init(){
     const sc=document.getElementById('stat-count');if(sc)sc.textContent=allProducts.length;
   });
   watchFirebaseCollection('rn_mall_categories',function(cats){
-    allCategories=Object.values(cats||{}).sort((a,b)=>(a.order||99)-(b.order||99));
+    allCategories=Object.values(cats||{}).filter(c=>c.visible!==false).sort((a,b)=>(a.order||99)-(b.order||99));
     try{localStorage.setItem('rnm_cache_categories',JSON.stringify(allCategories));}catch(e){}
     renderCatNav();renderCategories();
     const fc2=document.getElementById('footer-cats');if(fc2)fc2.innerHTML=allCategories.slice(0,6).map(c=>`<div class="footer-link" onclick="filterCat('${c.id}')">${c.name}</div>`).join('');
@@ -3845,7 +3845,7 @@ async function manualRefreshProducts(btn){
   try{
     const [freshProds,freshCats,freshSettings]=await Promise.all([fbG('rn_mall_products'),fbG('rn_mall_categories'),fbG('rn_mall_settings')]);
     if(freshProds)allProducts=Object.values(freshProds).filter(p=>p.visible!==false);
-    if(freshCats)allCategories=Object.values(freshCats);
+    if(freshCats)allCategories=Object.values(freshCats).filter(c=>c.visible!==false);
     if(freshSettings){settings=freshSettings;exchangeRate=settings.exchangeRate||1600;}
     renderCatNav();renderCategories();renderFeatured();renderRecommended();renderNew();renderFlash();renderPreOrder();
     const searchVal=document.getElementById('search-inp')?.value||'';
