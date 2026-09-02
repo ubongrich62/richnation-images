@@ -1732,8 +1732,10 @@ async function deleteStaff(id,name,btnEl){
   // the result right away instead of a "Loading..." flash for every delete.
   btnEl?.closest('.data-row')?.remove();
   toast(name+' deleted');
+  const record=await fbG('rn_mall_staff/'+id); // grab it once more so we know what photo to clean up in Storage
   const ok=await fbDeleteWithRetry('rn_mall_staff/'+id);
   if(!ok){toast('That delete may not have completed, please refresh and check','err');return;}
+  if(record&&record.photo)deleteStorageFile(record.photo);
   logActivity('Deleted staff',name);
 }
 async function renderActivityLog(c){
@@ -2191,8 +2193,10 @@ async function deleteInvestor(id,name,btnEl){
   if(!confirm('Permanently delete '+name+'\'s investor account?'))return;
   btnEl?.closest('.data-row')?.remove();
   toast('Deleted');
+  const record=await fbG('rn_mall_investors/'+id);
   const ok=await fbDeleteWithRetry('rn_mall_investors/'+id);
-  if(!ok)toast('That delete may not have completed, please refresh and check','err');
+  if(!ok){toast('That delete may not have completed, please refresh and check','err');return;}
+  if(record&&record.photo)deleteStorageFile(record.photo);
 }
 async function openInvestorChat(id,name){
   const c=document.getElementById('content-inner')||document.getElementById('content');
@@ -2537,8 +2541,10 @@ async function deleteRider(id,name,btnEl){
   if(!confirm('Permanently delete '+name+'\'s rider account?'))return;
   btnEl?.closest('.data-row')?.remove();
   toast('Deleted');
+  const record=await fbG('rn_mall_riders/'+id);
   const ok=await fbDeleteWithRetry('rn_mall_riders/'+id);
-  if(!ok)toast('That delete may not have completed, please refresh and check','err');
+  if(!ok){toast('That delete may not have completed, please refresh and check','err');return;}
+  if(record&&record.photo)deleteStorageFile(record.photo);
 }
 async function renderActiveDeliveries(c){
   c.innerHTML='<div style="color:var(--wh);font-weight:700;">Loading...</div>';
@@ -2774,8 +2780,17 @@ async function deleteVendor(id,name,btnEl){
   if(!confirm('Permanently delete '+name+'\'s vendor account? This cannot be undone. Their products will remain but will show no vendor.'))return;
   btnEl?.closest('.data-row')?.remove();
   toast(name+' deleted');
+  const record=await fbG('rn_mall_vendors/'+id);
   const ok=await fbDeleteWithRetry('rn_mall_vendors/'+id);
-  if(!ok)toast('That delete may not have completed, please refresh and check','err');
+  if(!ok){toast('That delete may not have completed, please refresh and check','err');return;}
+  if(record){
+    deleteStorageFile(record.photo);
+    var docs=record.documents||{};
+    deleteStorageFile(docs.idDocument);
+    deleteStorageFile(docs.businessRegDocument);
+    deleteStorageFile(docs.licenseDocument);
+    deleteStorageFiles((docs.otherDocuments||[]).map(function(d){return d.data;}));
+  }
 }
 async function approveVendor(id,name){
   await fbU('rn_mall_vendors/'+id,{status:'approved'});
@@ -3100,6 +3115,8 @@ async function delProd(id,name){
     return;
   }
   fbDeleteWithRetry('rn_mall_reviews/'+id); // best-effort cleanup of this product's reviews, don't block on it
+  deleteStorageFiles(prodSnapshot.images); // best-effort cleanup of this product's Storage-hosted photos
+  if(prodSnapshot.videos&&prodSnapshot.videos.length)deleteStorageFiles(prodSnapshot.videos);
   // Log the deletion in the background too, the product record itself is now
   // permanently gone, so this log is the only way to track "products deleted"
   // over time in Analytics, but the admin doesn't need to wait on it.
@@ -4816,24 +4833,40 @@ async function uploadDataUrlToStorage(dataUrl,folder){
     return null;
   }
 }
+// Deleting a record (a product, a vendor, etc.) used to only remove its
+// database entry, any photo/video actually hosted in Storage was silently
+// left behind forever, quietly costing storage space. Safe to call on any
+// value, it no-ops on inline base64 data and non-Storage URLs.
+async function deleteStorageFile(url){
+  if(!url||typeof url!=='string'||url.indexOf('firebasestorage.googleapis.com')===-1)return;
+  try{
+    var m=url.match(/\/o\/([^?]+)/);
+    if(!m)return;
+    var encodedPath=m[1];
+    await fbFetchTimeout('https://firebasestorage.googleapis.com/v0/b/'+FIREBASE_STORAGE_BUCKET+'/o/'+encodedPath,{method:'DELETE'},8000);
+  }catch(e){console.warn('Storage file delete failed:',e);}
+}
+function deleteStorageFiles(urls){
+  (urls||[]).forEach(function(u){deleteStorageFile(u);});
+}
 async function uploadProductImages(){
   var inp=document.getElementById('pf-img-upload');
   if(!inp||!inp.files||!inp.files.length)return[];
-  var results=[];
-  for(var i=0;i<Math.min(inp.files.length,15);i++){
+  var files=Array.prototype.slice.call(inp.files,0,15);
+  // Compress+upload every selected photo in parallel instead of one at a time,
+  // uploading several new product photos used to mean waiting through each
+  // one's round-trip in sequence, this is the same total network work done
+  // all at once instead of queued up.
+  var results=await Promise.all(files.map(async function(file){
     try{
-      // Compress client-side first to control final resolution and file size, then
-      // upload the RESULT somewhere that isn't Firebase, the database only ever
-      // stores a short URL either way.
-      var b64=await compressImage(inp.files[i],1280,0.8);
-      if(!b64)continue;
+      var b64=await compressImage(file,1280,0.8);
+      if(!b64)return null;
       var url=isGithubConfigured()?await uploadDataUrlToGithub(b64,'products'):null;
       if(!url)url=await uploadDataUrlToStorage(b64,'products');
-      if(url)results.push(url);
-      else results.push(b64); // fall back to inline storage rather than losing the image entirely
-    }catch(e){console.warn('Image upload failed:',e);}
-  }
-  return results;
+      return url||b64; // fall back to inline storage rather than losing the image entirely
+    }catch(e){console.warn('Image upload failed:',e);return null;}
+  }));
+  return results.filter(Boolean);
 }
 
 // Re-compress a base64 image already saved in the database (same resize/quality
@@ -5090,8 +5123,12 @@ async function uploadProductVideo(){
   var inp=document.getElementById('pf-vid-upload');
   if(!inp||!inp.files||!inp.files.length)return null;
   try{
+    // Upload to Storage rather than saving inline: a video inlined as base64
+    // directly into the product record made that single database write (and
+    // every later page load of that product) carry the video's full weight.
     var b64=await imgToBase64(inp.files[0]);
-    return b64;
+    var url=await uploadDataUrlToStorage(b64,'products');
+    return url||b64; // fall back to inline only if the upload itself fails
   }catch(e){return null;}
 }
 
@@ -5136,6 +5173,9 @@ function videoPreviewHTML(url){
 var _videoRemoved=false;
 function deleteProdVideo(){
   if(!confirm('Remove this video from the product?'))return;
+  var pid=window._currentEditProdId;
+  var prevVid=pid&&allProds[pid]&&allProds[pid].videos&&allProds[pid].videos[0];
+  if(prevVid)deleteStorageFile(prevVid);
   _videoRemoved=true;
   var wrap=document.getElementById('pf-existing-vid');if(wrap)wrap.innerHTML='';
   var urlInp=document.getElementById('pf-video-url');if(urlInp)urlInp.value='';
@@ -5246,6 +5286,7 @@ function genProdCode(){return 'RNM-'+Math.random().toString(36).slice(2,7).toUpp
 function openProdForm(id){
   navStack.push(curNav);updateBackBtn();pushAdminNavState();
   _videoRemoved=false;
+  window._currentEditProdId=id||null;
   var p=id?allProds[id]:{};
   var cats=Object.values(allCats).length?Object.values(allCats):[
     {id:'electronics',name:'Electronics'},{id:'mens_clothing',name:"Men's Clothing"},{id:'fashion',name:'Fashion'}
@@ -5458,7 +5499,8 @@ function refreshExistImgs(){
   if(wrap)wrap.innerHTML=renderExistImgsHTML();
 }
 function removeExistImg(idx){
-  _currentImages.splice(idx,1);
+  var removed=_currentImages.splice(idx,1)[0];
+  deleteStorageFile(removed);
   refreshExistImgs();
 }
 function moveExistImg(idx,dir){
