@@ -1439,7 +1439,7 @@ function staffRow(s,tasks){
     +'<div class="row-actions" style="margin-top:6px;">'
     +'<button class="btn" style="font-size:10px;padding:5px 10px;" onclick="openStaffForm(\''+s._id+'\')">Edit</button>'
     +'<button class="btn '+(suspended?'btn-gr':'btn-or')+'" style="font-size:10px;padding:5px 10px;" onclick="toggleSuspendStaff(\''+s._id+'\',\''+s.name.replace(/'/g,"\\'")+'\','+suspended+')">'+(suspended?'Reactivate':'Suspend')+'</button>'
-    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteStaff(\''+s._id+'\',\''+s.name.replace(/'/g,"\\'")+'\')">Delete</button>'
+    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteStaff(\''+s._id+'\',\''+s.name.replace(/'/g,"\\'")+'\',this)">Delete</button>'
     +'</div></div>';
 }
 async function openStaffForm(id){
@@ -1725,12 +1725,16 @@ async function toggleSuspendStaff(id,name,wasSuspended){
   toast(name+' '+(wasSuspended?'reactivated':'suspended'));
   nav('staff',false);
 }
-async function deleteStaff(id,name){
+async function deleteStaff(id,name,btnEl){
   if(!confirm('Permanently delete '+name+'\'s staff account? This cannot be undone.'))return;
-  await fbD('rn_mall_staff/'+id);
-  logActivity('Deleted staff',name);
+  // Remove the row from the screen immediately rather than re-fetching and
+  // re-rendering the whole list after the delete completes, the admin sees
+  // the result right away instead of a "Loading..." flash for every delete.
+  btnEl?.closest('.data-row')?.remove();
   toast(name+' deleted');
-  nav('staff',false);
+  const ok=await fbDeleteWithRetry('rn_mall_staff/'+id);
+  if(!ok){toast('That delete may not have completed, please refresh and check','err');return;}
+  logActivity('Deleted staff',name);
 }
 async function renderActivityLog(c){
   c.innerHTML='<div style="color:var(--wh);font-weight:700;">Loading...</div>';
@@ -1817,11 +1821,16 @@ async function renderInvestors(c){
 async function renderInvestorWithdrawalsAdmin(c){
   c.innerHTML='<div style="color:var(--wh);font-weight:700;">Loading...</div>';
   const investorsAll=await fbG('rn_mall_investors')||{};
+  const invIds=Object.keys(investorsAll);
+  // Fetch every investor's withdrawals in parallel instead of one at a time,
+  // a sequential loop here meant this page's load time grew with every new
+  // investor, one waiting network round-trip after another.
+  const withdrawalsByInv=await Promise.all(invIds.map(function(invId){return fbG('rn_mall_investor_withdrawals/'+invId);}));
   let allWithdrawals=[];
-  for(const invId in investorsAll){
-    const w=await fbG('rn_mall_investor_withdrawals/'+invId)||{};
+  invIds.forEach(function(invId,i){
+    const w=withdrawalsByInv[i]||{};
     Object.entries(w).forEach(function(e){allWithdrawals.push(Object.assign({_key:e[0],investorId:invId,investorName:investorsAll[invId].name},e[1]));});
-  }
+  });
   allWithdrawals.sort(function(a,b){return (b.ts||0)-(a.ts||0);});
   const pending=allWithdrawals.filter(function(w){return w.status==='pending';});
   var html='';
@@ -1994,7 +2003,7 @@ function investorRow(v,target){
     +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="openInvestorChat(\''+v._id+'\',\''+v.name.replace(/'/g,"\\'")+'\')">'+iconBadge('chat',12)+' Chat</button>'
     +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="openInvestorForm(\''+v._id+'\')">Edit</button>'
     +'<button class="btn '+(v.status==='suspended'?'btn-gr':'btn-or')+'" style="font-size:10px;padding:5px 10px;" onclick="toggleSuspendInvestor(\''+v._id+'\','+(v.status==='suspended')+')">'+(v.status==='suspended'?'Reactivate':'Suspend')+'</button>'
-    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteInvestor(\''+v._id+'\',\''+v.name.replace(/'/g,"\\'")+'\')">Delete</button>'
+    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteInvestor(\''+v._id+'\',\''+v.name.replace(/'/g,"\\'")+'\',this)">Delete</button>'
     +'</div></div>';
 }
 async function openInvestorForm(id){
@@ -2178,11 +2187,12 @@ async function toggleSuspendInvestor(id,wasSuspended){
   toast('Updated');
   nav('investors',false);
 }
-async function deleteInvestor(id,name){
+async function deleteInvestor(id,name,btnEl){
   if(!confirm('Permanently delete '+name+'\'s investor account?'))return;
-  await fbD('rn_mall_investors/'+id);
+  btnEl?.closest('.data-row')?.remove();
   toast('Deleted');
-  nav('investors',false);
+  const ok=await fbDeleteWithRetry('rn_mall_investors/'+id);
+  if(!ok)toast('That delete may not have completed, please refresh and check','err');
 }
 async function openInvestorChat(id,name){
   const c=document.getElementById('content-inner')||document.getElementById('content');
@@ -2443,7 +2453,7 @@ function riderRow(r){
     +'</div>'
     +'<div class="row-actions" style="margin-top:6px;">'
     +'<button class="btn '+(suspended?'btn-gr':'btn-or')+'" style="font-size:10px;padding:5px 10px;" onclick="toggleSuspendRider(\''+r._id+'\','+suspended+')">'+(suspended?'Reactivate':'Suspend')+'</button>'
-    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteRider(\''+r._id+'\',\''+r.name.replace(/'/g,"\\'")+'\')">Delete</button>'
+    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteRider(\''+r._id+'\',\''+r.name.replace(/'/g,"\\'")+'\',this)">Delete</button>'
     +'</div></div>';
 }
 async function addRiderStrike(id,name){
@@ -2523,11 +2533,12 @@ async function toggleSuspendRider(id,wasSuspended){
   toast('Updated');
   nav('riders',false);
 }
-async function deleteRider(id,name){
+async function deleteRider(id,name,btnEl){
   if(!confirm('Permanently delete '+name+'\'s rider account?'))return;
-  await fbD('rn_mall_riders/'+id);
+  btnEl?.closest('.data-row')?.remove();
   toast('Deleted');
-  nav('riders',false);
+  const ok=await fbDeleteWithRetry('rn_mall_riders/'+id);
+  if(!ok)toast('That delete may not have completed, please refresh and check','err');
 }
 async function renderActiveDeliveries(c){
   c.innerHTML='<div style="color:var(--wh);font-weight:700;">Loading...</div>';
@@ -2702,7 +2713,7 @@ function vendorRow(v){
     +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="resetVendorPassword(\''+v._id+'\',\''+v.storeName.replace(/'/g,"\\'")+'\')">🔑 Reset Password</button>'
     +(v.status==='approved'?'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="suspendVendor(\''+v._id+'\',\''+v.storeName.replace(/'/g,"\\'")+'\')">Suspend</button>':'')
     +(v.status==='suspended'?'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="approveVendor(\''+v._id+'\',\''+v.storeName.replace(/'/g,"\\'")+'\')">Reactivate</button>':'')
-    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteVendor(\''+v._id+'\',\''+v.storeName.replace(/'/g,"\\'")+'\')">Delete</button>'
+    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteVendor(\''+v._id+'\',\''+v.storeName.replace(/'/g,"\\'")+'\',this)">Delete</button>'
     +'</div></div>';
 }
 async function openVendorForm(id){
@@ -2759,11 +2770,12 @@ async function resetVendorPassword(id,name){
   toast('Password reset, details shown above');
   nav('vendors',false);
 }
-async function deleteVendor(id,name){
+async function deleteVendor(id,name,btnEl){
   if(!confirm('Permanently delete '+name+'\'s vendor account? This cannot be undone. Their products will remain but will show no vendor.'))return;
-  await fbD('rn_mall_vendors/'+id);
+  btnEl?.closest('.data-row')?.remove();
   toast(name+' deleted');
-  nav('vendors',false);
+  const ok=await fbDeleteWithRetry('rn_mall_vendors/'+id);
+  if(!ok)toast('That delete may not have completed, please refresh and check','err');
 }
 async function approveVendor(id,name){
   await fbU('rn_mall_vendors/'+id,{status:'approved'});
@@ -3070,24 +3082,29 @@ async function fbDeleteWithRetry(path,attempts){
 }
 async function delProd(id,name){
   if(!confirm('Permanently delete "'+name+'"? This removes it completely and cannot be undone.'))return;
-  toast('Deleting…');
+  // Optimistic delete: update the screen immediately instead of making the admin
+  // stare at an unchanged row through a delete request, a verification re-fetch,
+  // and an audit-log write, all done in sequence before anything visibly happened.
+  // The actual network work still runs (and still retries), just in the
+  // background, restoring the product and explaining why if it genuinely fails.
+  const prodSnapshot=allProds[id]||{};
   const path='rn_mall_products/'+id;
-  const prodSnapshot=allProds[id]||await fbG(path)||{};
+  delete allProds[id];
+  toast(name+' deleted');
+  nav('products',false);
   const ok=await fbDeleteWithRetry(path);
-  if(!ok){toast('Delete failed after several attempts, check your connection and try again','err');return;}
-  const stillThere=await fbG(path); // verify it's actually gone, not just that the request looked successful
-  if(stillThere){
-    toast('Delete did not fully complete, retrying…','err');
-    const ok2=await fbDeleteWithRetry(path);
-    const stillThere2=ok2?await fbG(path):true;
-    if(stillThere2){toast('Could not permanently delete this product, please try again','err');return;}
+  if(!ok){
+    allProds[id]=prodSnapshot;
+    if(curNav==='products')nav('products',false);
+    toast('Delete failed after several attempts, check your connection and try again','err');
+    return;
   }
   fbDeleteWithRetry('rn_mall_reviews/'+id); // best-effort cleanup of this product's reviews, don't block on it
-  // Log the deletion, the product record itself is now permanently gone, so this log
-  // is the only way to track "products deleted" over time in Analytics.
-  await fbP('rn_mall_deleted_products_log',{productId:id,name:prodSnapshot.name||name,category:prodSnapshot.category||'',price:prodSnapshot.price||0,date:ds(),ts:Date.now()});
+  // Log the deletion in the background too, the product record itself is now
+  // permanently gone, so this log is the only way to track "products deleted"
+  // over time in Analytics, but the admin doesn't need to wait on it.
+  fbP('rn_mall_deleted_products_log',{productId:id,name:prodSnapshot.name||name,category:prodSnapshot.category||'',price:prodSnapshot.price||0,date:ds(),ts:Date.now()});
   bumpCatalogUpdate();
-  delete allProds[id];toast(name+' permanently deleted');nav('products',false);
 }
 
 // ── ORDERS ──
@@ -3693,7 +3710,7 @@ async function renderCoupons(c){
       </div>
       <div class="row-actions">
         <span class="bdg ${cp.active?'bdg-gr':'bdg-re'}">${cp.active?'Active':'Inactive'}</span>
-        <button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteCoupon('${cp.id}','${cp.code}')">Delete</button>
+        <button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteCoupon('${cp.id}','${cp.code}',this)">Delete</button>
       </div>
     </div>`).join('')}
   </div>`}`;
@@ -3730,9 +3747,12 @@ async function saveCoupon(){
   await fbS('rn_mall_coupons/'+id,{id,code,type:document.getElementById('cp-type').value,value:val,minOrder:parseFloat(document.getElementById('cp-min').value)||null,expires:document.getElementById('cp-exp').value||null,active:true,createdAt:ds()});
   toast('Coupon '+code+' created!');nav('coupons',false);
 }
-async function deleteCoupon(id,code){
+async function deleteCoupon(id,code,btnEl){
   if(!confirm('Delete coupon "'+code+'"?'))return;
-  await fbD('rn_mall_coupons/'+id);toast('Coupon deleted');nav('coupons',false);
+  btnEl?.closest('.data-row')?.remove();
+  toast('Coupon deleted');
+  const ok=await fbDeleteWithRetry('rn_mall_coupons/'+id);
+  if(!ok)toast('That delete may not have completed, please refresh and check','err');
 }
 
 // ── CATEGORIES ──
@@ -3751,7 +3771,7 @@ async function renderCategories(c){
     ${cats.map(cat=>`<div class="data-row">
       <div class="row-av" style="font-size:20px;background:rgba(255,106,0,0.06);">${cat.icon||'&#128230;'}</div>
       <div style="flex:1;"><div class="row-name">${cat.name}</div><div class="row-meta">ID: ${cat.id} &middot; Order: ${cat.order||0}</div></div>
-      <button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteCat('${cat.id}','${cat.name}')">Remove</button>
+      <button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteCat('${cat.id}','${cat.name}',this)">Remove</button>
     </div>`).join('')}
   </div>`}`;
 }
@@ -5525,11 +5545,15 @@ async function saveProd(id){
 // ── DELETE CUSTOMER ORDER ──
 async function deleteOrder(tracking,customerName){
   if(!confirm('DELETE order '+tracking+' for '+customerName+'?\n\nThe order will be marked as Deleted and hidden from active lists, but customers can still see this status when they track it.\nThis cannot be undone.'))return;
-  var order=await fbG('rn_mall_orders/'+tracking);if(!order)return;
+  // allOrders is already kept live-synced in the background (watchFirebaseCollection),
+  // so re-fetching this one order fresh here was a wholly redundant round-trip.
+  var order=allOrders[tracking]||await fbG('rn_mall_orders/'+tracking);if(!order)return;
   var tl=(order.timeline||[]).concat([{status:'Order Deleted',time:new Date().toISOString(),note:'This order was deleted by an administrator.'}]);
-  await fbS('rn_mall_orders/'+tracking,Object.assign({},order,{status:'deleted',timeline:tl}));
+  var updated=Object.assign({},order,{status:'deleted',timeline:tl});
+  await fbS('rn_mall_orders/'+tracking,updated);
+  allOrders[tracking]=updated;
   if(order.customer&&order.customer.id){
-    await fbPNotify('rn_mall_customer_notifications/'+order.customer.id,{type:'order_deleted',orderId:tracking,message:'Your order '+tracking+' has been deleted by our team. Contact support if you have questions.',date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
+    fbPNotify('rn_mall_customer_notifications/'+order.customer.id,{type:'order_deleted',orderId:tracking,message:'Your order '+tracking+' has been deleted by our team. Contact support if you have questions.',date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
   }
   toast('Order '+tracking+' marked as deleted');
   nav('orders',false);
