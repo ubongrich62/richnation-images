@@ -586,6 +586,20 @@ let allProds={};let allOrders={};let allCats={};let allCusts={};let settings={};
 let currency=localStorage.getItem('rnm_currency')||'NGN';
 document.querySelectorAll('.curr-btn').forEach(el=>el.classList.toggle('active',el.dataset.curr===currency));
 
+// Any name/title/code inlined into an onclick="..." handler has to survive
+// two layers: the outer HTML attribute (double-quoted) and the JS string
+// literal inside it (single-quoted). A raw " breaks the attribute itself
+// (e.g. a product called 55" Smart TV), a raw ' breaks the JS string (e.g.
+// "Men's Shoes"), either one silently corrupts the button with no visible
+// error, it just stops responding to clicks. This handles both at once.
+function escAttr(s){
+  return String(s==null?'':s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/\\/g,'\\\\')
+    .replace(/'/g,"\\'")
+    .replace(/"/g,'&quot;');
+}
 function fbFetchTimeout(url,opts,ms=15000){
   const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('timed out after '+ms+'ms')),ms));
   return Promise.race([fetch(url,opts),timeout]);
@@ -930,7 +944,7 @@ async function renderPromos(c){
         +'<div style="flex:1;min-width:180px;"><div class="row-name">'+p.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;'+(isLive?'background:rgba(34,197,94,0.12);color:var(--su);':'background:rgba(153,153,153,0.12);color:var(--wh);')+'">'+(isLive?'LIVE NOW':(p.active===false?'PAUSED':'SCHEDULED'))+'</span></div>'
         +'<div class="row-meta">'+p.startDate+' to '+p.endDate+' &middot; '+p.discountPct+'% off sitewide</div></div>'
         +'<button class="btn" onclick="openPromoForm(\''+p._id+'\')">Edit</button>'
-        +'<button class="btn btn-re" onclick="delPromo(\''+p._id+'\',\''+p.name.replace(/'/g,"\\'")+'\')">Delete</button>'
+        +'<button class="btn btn-re" onclick="delPromo(\''+p._id+'\',\''+escAttr(p.name)+'\')">Delete</button>'
         +'</div>';
     }).join('');
   }
@@ -997,7 +1011,7 @@ async function renderBundles(c){
         +'<div style="flex:1;min-width:180px;"><div class="row-name">'+b.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;'+(b.active!==false?'background:rgba(34,197,94,0.12);color:var(--su);':'background:rgba(153,153,153,0.12);color:var(--wh);')+'">'+(b.active!==false?'ACTIVE':'PAUSED')+'</span></div>'
         +'<div class="row-meta">'+(b.productIds||[]).length+' products &middot; '+b.discountPct+'% off when bought together</div></div>'
         +'<button class="btn" onclick="openBundleForm(\''+b._id+'\')">Edit</button>'
-        +'<button class="btn btn-re" onclick="delBundle(\''+b._id+'\',\''+b.name.replace(/'/g,"\\'")+'\')">Delete</button>'
+        +'<button class="btn btn-re" onclick="delBundle(\''+b._id+'\',\''+escAttr(b.name)+'\')">Delete</button>'
         +'</div>';
     }).join('');
   }
@@ -1321,8 +1335,8 @@ function pendingApplicationRow(s){
     +(s.note?'<br>📝 "'+s.note+'"':'')
     +'</div>'
     +'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'
-    +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="approveStaffApplication(\''+s._id+'\',\''+s.name.replace(/'/g,"\\'")+'\')">Approve</button>'
-    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="rejectStaffApplication(\''+s._id+'\',\''+s.name.replace(/'/g,"\\'")+'\')">Reject</button>'
+    +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="approveStaffApplication(\''+s._id+'\',\''+escAttr(s.name)+'\')">Approve</button>'
+    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="rejectStaffApplication(\''+s._id+'\',\''+escAttr(s.name)+'\')">Reject</button>'
     +'</div></div>';
 }
 async function approveStaffApplication(id,name){
@@ -1345,7 +1359,7 @@ async function approveStaffApplication(id,name){
     <div class="fg"><label class="lbl">Starting Monthly Salary (₦), optional, can set later</label><input class="inp" type="number" id="ap-confirm-salary" placeholder="0"/></div>
     <div class="fg"><label class="lbl">Set Their Password</label><input class="inp" id="ap-confirm-pass" value="${suggestedPass}"/><div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:4px;">A suggestion is pre-filled, change it to whatever you want, or keep it.</div></div>
     <div style="display:flex;gap:10px;">
-      <button class="btn btn-or btn-lg" onclick="finalizeApproveStaff('${id}','${name.replace(/'/g,"\\'")}','${s.email}')">✅ Approve Staff</button>
+      <button class="btn btn-or btn-lg" onclick="finalizeApproveStaff('${id}','${escAttr(name)}','${s.email}')">✅ Approve Staff</button>
       <button class="btn btn-lg" onclick="staffNav('list')">Cancel</button>
     </div>
   </div>`;
@@ -1408,7 +1422,7 @@ function staffRow(s,tasks){
     +'<div><div class="row-name">'+s.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(255,106,0,0.12);color:var(--or);">'+role.label+'</span>'+(suspended?' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(244,63,94,0.12);color:var(--re);">SUSPENDED</span>':'')+(strikes>0?' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(244,63,94,0.12);color:var(--re);">⚠ '+strikes+'/3 STRIKES</span>':'')+'</div>'
     +'<div class="row-meta">'+s.email+(s.staffNumber?' &middot; '+s.staffNumber:'')+'</div>'
     +(extraPerms.length?'<div class="row-meta">🔓 Extra access: <strong style="color:var(--su);">'+extraPerms.join(', ')+'</strong></div>':'')
-    +'<div class="row-meta">Password: <span id="pw-'+s._id+'" style="font-family:monospace;letter-spacing:1px;">••••••••</span> <span onclick="togglePwView(\''+s._id+'\',\''+(s.password||'').replace(/'/g,"\\'")+'\')" style="color:var(--or);cursor:pointer;font-weight:700;">show</span></div>'
+    +'<div class="row-meta">Password: <span id="pw-'+s._id+'" style="font-family:monospace;letter-spacing:1px;">••••••••</span> <span onclick="togglePwView(\''+s._id+'\',\''+escAttr((s.password||''))+'\')" style="color:var(--or);cursor:pointer;font-weight:700;">show</span></div>'
     +'<div class="row-meta">💰 Salary: <strong style="color:var(--wh);">'+fmt(s.salary||0)+'</strong>/mo, <span style="color:'+(s.salaryStatus==='paid'?'var(--su)':'var(--or)')+';">'+(s.salaryStatus||'pending')+'</span> &middot; ⭐ StaffPoints: <strong style="color:var(--or);">'+(s.points||0)+'</strong></div>'
     +(s.workingHours?'<div class="row-meta">🕒 Hours: <strong style="color:var(--wh);">'+s.workingHours+'</strong></div>':'')
     +(s.role==='ceo'?'<div class="row-meta">🖥️ Admin Panel Access: <strong style="color:'+(s.adminPanelAccess?'var(--su)':'var(--wh)')+';">'+(s.adminPanelAccess?'Granted':'Not granted')+'</strong></div>':'')
@@ -1417,26 +1431,26 @@ function staffRow(s,tasks){
     +'</div>'
     +'<div class="row-actions">'
     +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="openStaffAccessForm(\''+s._id+'\')">🔓 Manage Access</button>'
-    +(s.role==='ceo'?'<button class="btn '+(s.adminPanelAccess?'btn-re':'btn-gr')+'" style="font-size:10px;padding:5px 10px;" onclick="toggleCeoAdminAccess(\''+s._id+'\',\''+s.name.replace(/'/g,"\\'")+'\','+(!s.adminPanelAccess)+')">'+(s.adminPanelAccess?'🚫 Revoke Admin Panel Access':'🔑 Grant Admin Panel Access')+'</button>':'')
-    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="adjustStaffSalary(\''+s._id+'\',\''+s.name.replace(/'/g,"\\'")+'\',\''+(s.salary||0)+'\')">Set Salary</button>'
-    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="setStaffHours(\''+s._id+'\',\''+s.name.replace(/'/g,"\\'")+'\',\''+(s.workingHours||'').replace(/'/g,"\\'")+'\')">🕒 Set Hours</button>'
-    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="markSalaryPaid(\''+s._id+'\',\''+s.name.replace(/'/g,"\\'")+'\')">Mark Salary Paid</button>'
-    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="awardStaffPoints(\''+s._id+'\',\''+s.name.replace(/'/g,"\\'")+'\')">Award Points</button>'
-    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="openSalaryRecords(\''+s._id+'\',\''+s.name.replace(/'/g,"\\'")+'\')">📋 Salary Records</button>'
+    +(s.role==='ceo'?'<button class="btn '+(s.adminPanelAccess?'btn-re':'btn-gr')+'" style="font-size:10px;padding:5px 10px;" onclick="toggleCeoAdminAccess(\''+s._id+'\',\''+escAttr(s.name)+'\','+(!s.adminPanelAccess)+')">'+(s.adminPanelAccess?'🚫 Revoke Admin Panel Access':'🔑 Grant Admin Panel Access')+'</button>':'')
+    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="adjustStaffSalary(\''+s._id+'\',\''+escAttr(s.name)+'\',\''+(s.salary||0)+'\')">Set Salary</button>'
+    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="setStaffHours(\''+s._id+'\',\''+escAttr(s.name)+'\',\''+escAttr((s.workingHours||''))+'\')">🕒 Set Hours</button>'
+    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="markSalaryPaid(\''+s._id+'\',\''+escAttr(s.name)+'\')">Mark Salary Paid</button>'
+    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="awardStaffPoints(\''+s._id+'\',\''+escAttr(s.name)+'\')">Award Points</button>'
+    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="openSalaryRecords(\''+s._id+'\',\''+escAttr(s.name)+'\')">📋 Salary Records</button>'
     +'</div>'
     +'<div class="row-actions" style="margin-top:6px;">'
-    +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="assignStaffTask(\''+s._id+'\',\''+s.name.replace(/'/g,"\\'")+'\')">📋 Assign Task</button>'
-    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="viewStaffTasks(\''+s._id+'\',\''+s.name.replace(/'/g,"\\'")+'\')">View Tasks</button>'
+    +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="assignStaffTask(\''+s._id+'\',\''+escAttr(s.name)+'\')">📋 Assign Task</button>'
+    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="viewStaffTasks(\''+s._id+'\',\''+escAttr(s.name)+'\')">View Tasks</button>'
     +'</div>'
     +'<div class="row-actions" style="margin-top:6px;">'
-    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="addStaffStrike(\''+s._id+'\',\''+s.name.replace(/'/g,"\\'")+'\')">⚠ Add Strike</button>'
-    +(strikes>0?'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="removeStaffStrike(\''+s._id+'\',\''+s.name.replace(/'/g,"\\'")+'\')">Remove Strike</button>':'')
-    +(s.bankAcctNo&&!s.bankVerified?'<button class="btn btn-gr" style="font-size:10px;padding:5px 10px;" onclick="verifyStaffBank(\''+s._id+'\',\''+s.name.replace(/'/g,"\\'")+'\')">✔ Verify Bank</button>':'')
+    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="addStaffStrike(\''+s._id+'\',\''+escAttr(s.name)+'\')">⚠ Add Strike</button>'
+    +(strikes>0?'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="removeStaffStrike(\''+s._id+'\',\''+escAttr(s.name)+'\')">Remove Strike</button>':'')
+    +(s.bankAcctNo&&!s.bankVerified?'<button class="btn btn-gr" style="font-size:10px;padding:5px 10px;" onclick="verifyStaffBank(\''+s._id+'\',\''+escAttr(s.name)+'\')">✔ Verify Bank</button>':'')
     +'</div>'
     +'<div class="row-actions" style="margin-top:6px;">'
     +'<button class="btn" style="font-size:10px;padding:5px 10px;" onclick="openStaffForm(\''+s._id+'\')">Edit</button>'
-    +'<button class="btn '+(suspended?'btn-gr':'btn-or')+'" style="font-size:10px;padding:5px 10px;" onclick="toggleSuspendStaff(\''+s._id+'\',\''+s.name.replace(/'/g,"\\'")+'\','+suspended+')">'+(suspended?'Reactivate':'Suspend')+'</button>'
-    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteStaff(\''+s._id+'\',\''+s.name.replace(/'/g,"\\'")+'\',this)">Delete</button>'
+    +'<button class="btn '+(suspended?'btn-gr':'btn-or')+'" style="font-size:10px;padding:5px 10px;" onclick="toggleSuspendStaff(\''+s._id+'\',\''+escAttr(s.name)+'\','+suspended+')">'+(suspended?'Reactivate':'Suspend')+'</button>'
+    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteStaff(\''+s._id+'\',\''+escAttr(s.name)+'\',this)">Delete</button>'
     +'</div></div>';
 }
 async function openStaffForm(id){
@@ -1522,7 +1536,7 @@ async function markSalaryPaid(id,name){
     <div class="fg"><label class="lbl">Expected Arrival Date</label><input class="inp" type="date" id="sp-date"/></div>
     <div class="fg"><label class="lbl">Message to Staff</label><textarea class="ta" id="sp-msg" rows="3">${defaultMsg}</textarea><div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:4px;">This becomes your default message for next time too, edit it here whenever you want to change the wording.</div></div>
     <div style="display:flex;gap:10px;">
-      <button class="btn btn-or btn-lg" onclick="finalizeSalaryPaid('${id}','${name.replace(/'/g,"\\'")}')">💰 Mark Paid &amp; Notify</button>
+      <button class="btn btn-or btn-lg" onclick="finalizeSalaryPaid('${id}','${escAttr(name)}')">💰 Mark Paid &amp; Notify</button>
       <button class="btn btn-lg" onclick="nav('staff',false)">Cancel</button>
     </div>
   </div>`;
@@ -1571,7 +1585,7 @@ async function openStaffAccessForm(id){
   <div class="page-hdr"><div class="page-hdr-title">Manage Access, ${s.name}</div><div class="page-hdr-sub">Their role (${(STAFF_ROLES.find(function(r){return r.id===s.role;})||{}).label||s.role}) already grants some access, turn any of these ON to give them extra access beyond their role, regardless of title. Turn OFF anytime.</div></div>
   <div class="card">
     ${EXTRA_PERMISSIONS.map(function(p){return '<label style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--bdr);cursor:pointer;"><span style="font-size:13px;color:var(--wh);font-weight:700;">'+p.label+'</span><input type="checkbox" id="perm-'+p.id+'" '+(perms[p.id]?'checked':'')+' style="width:20px;height:20px;accent-color:var(--or);"/></label>';}).join('')}
-    <button class="btn btn-or btn-lg" style="margin-top:16px;" onclick="saveStaffAccess('${id}','${s.name.replace(/'/g,"\\'")}')">💾 Save Access</button>
+    <button class="btn btn-or btn-lg" style="margin-top:16px;" onclick="saveStaffAccess('${id}','${escAttr(s.name)}')">💾 Save Access</button>
     <button class="btn btn-lg" style="margin-top:16px;margin-left:8px;" onclick="staffNav('list')">Cancel</button>
   </div>`;
 }
@@ -1602,7 +1616,7 @@ async function viewStaffTasks(id,name){
         +(t.completionLink?'<div style="margin-top:6px;"><a href="javascript:void(0)" data-uri="'+t.completionLink+'" onclick="openDataDoc(this.dataset.uri)" style="color:var(--or);font-size:11px;">View Link</a></div>':'')
         +(t.completionFile?'<div style="margin-top:6px;"><a href="javascript:void(0)" data-uri="'+t.completionFile+'" onclick="openDataDoc(this.dataset.uri)" style="color:var(--or);font-size:11px;">View Document</a></div>':'')
         +'</div>':'')
-      +(t.status==='submitted'?'<button class="btn btn-or" style="font-size:11px;padding:6px 14px;margin-top:10px;" onclick="approveStaffTask(\''+id+'\',\''+k+'\',\''+name.replace(/'/g,"\\'")+'\')">✔ Approve</button>':'')
+      +(t.status==='submitted'?'<button class="btn btn-or" style="font-size:11px;padding:6px 14px;margin-top:10px;" onclick="approveStaffTask(\''+id+'\',\''+k+'\',\''+escAttr(name)+'\')">✔ Approve</button>':'')
       +'</div>';
   }).join(''):'<div class="card" style="text-align:center;padding:30px;color:var(--wh);font-weight:700;">No tasks assigned yet.</div>';
   html+='<button class="btn" style="margin-top:10px;" onclick="nav(\'staff\',false)">← Back</button>';
@@ -1672,7 +1686,7 @@ async function openSalaryRecords(id,name){
       +'<div><div style="font-weight:800;">'+(h.month||h.date)+'</div>'+(h.description||h.note?'<div style="font-size:12px;color:var(--wh);font-weight:700;">'+(h.description||h.note)+'</div>':'')+'</div>'
       +'<div style="display:flex;align-items:center;gap:10px;">'
       +'<div style="text-align:right;"><div style="font-weight:800;color:'+(h.status==='paid'?'#fff':'var(--or)')+';">'+fmt(h.amount)+'</div><span style="font-size:9px;font-weight:800;padding:2px 8px;border-radius:99px;background:'+(h.status==='paid'?'rgba(255,255,255,0.15)':'rgba(255,106,0,0.15)')+';color:'+(h.status==='paid'?'#fff':'var(--or)')+';">'+(h.status||'pending').toUpperCase()+'</span></div>'
-      +'<button class="btn" style="font-size:10px;padding:5px 10px;" onclick="editSalaryRecord(\''+id+'\',\''+h._key+'\',\''+name.replace(/'/g,"\\'")+'\')">Edit</button>'
+      +'<button class="btn" style="font-size:10px;padding:5px 10px;" onclick="editSalaryRecord(\''+id+'\',\''+h._key+'\',\''+escAttr(name)+'\')">Edit</button>'
       +'</div></div>';
   }).join(''):'<div style="color:var(--wh);font-weight:700;font-size:12px;">No salary records yet.</div>';
   html+='</div>';
@@ -1680,7 +1694,7 @@ async function openSalaryRecords(id,name){
   html+='<div class="card-title">Add Salary Record</div>';
   html+='<div class="g2" style="margin-top:10px;"><div class="fg"><label class="lbl">Month</label><input class="inp" id="sr-month" placeholder="e.g. July 2026"/></div><div class="fg"><label class="lbl">Amount (₦)</label><input class="inp" type="number" id="sr-amount" placeholder="0"/></div></div>';
   html+='<div class="fg"><label class="lbl">Note</label><input class="inp" id="sr-note" placeholder="e.g. First month - onboarding rate"/></div>';
-  html+='<button class="btn btn-or btn-lg" onclick="addSalaryRecord(\''+id+'\',\''+name.replace(/'/g,"\\'")+'\')">Add Record</button>';
+  html+='<button class="btn btn-or btn-lg" onclick="addSalaryRecord(\''+id+'\',\''+escAttr(name)+'\')">Add Record</button>';
   html+='<button class="btn btn-lg" style="margin-left:8px;" onclick="nav(\'staff\',false)">← Back</button>';
   html+='</div>';
   c.innerHTML=html;
@@ -1888,8 +1902,8 @@ async function renderInvestorList(c){
         +'</div>'
         +'<div class="row-actions" style="margin-top:8px;">'
         +(topUp>0&&!r.paymentConfirmed?'<button class="btn btn-gr" style="font-size:10px;padding:5px 10px;" onclick="confirmSwitchPayment(\''+v._id+'\')">✔ Confirm Payment Received</button>':'')
-        +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="approveSwitchRequest(\''+v._id+'\',\''+v.name.replace(/'/g,"\\'")+'\',true)">Approve</button>'
-        +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="approveSwitchRequest(\''+v._id+'\',\''+v.name.replace(/'/g,"\\'")+'\',false)">Deny</button>'
+        +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="approveSwitchRequest(\''+v._id+'\',\''+escAttr(v.name)+'\',true)">Approve</button>'
+        +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="approveSwitchRequest(\''+v._id+'\',\''+escAttr(v.name)+'\',false)">Deny</button>'
         +'</div></div>';
     }).join('');
   }
@@ -1938,8 +1952,8 @@ function pendingInvestorRow(v){
     +(v.note?'<br>'+iconBadge('note',14)+' "'+v.note+'"':'')
     +'</div>'
     +'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'
-    +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="approveInvestor(\''+v._id+'\',\''+v.name.replace(/'/g,"\\'")+'\')">Approve</button>'
-    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="rejectInvestor(\''+v._id+'\',\''+v.name.replace(/'/g,"\\'")+'\')">Reject</button>'
+    +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="approveInvestor(\''+v._id+'\',\''+escAttr(v.name)+'\')">Approve</button>'
+    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="rejectInvestor(\''+v._id+'\',\''+escAttr(v.name)+'\')">Reject</button>'
     +'</div></div>';
 }
 async function approveInvestor(id,name){
@@ -1992,17 +2006,17 @@ function investorRow(v,target){
     +(equityPct!=null?'<div class="row-meta">Equity stake: <strong style="color:var(--or);">'+equityPct.toFixed(2)+'%</strong> of '+fmt(target||3000000)+' total capital = <strong style="color:var(--wh);">'+fmt(v.investmentAmount)+'</strong> invested</div>':'')
     +'<div class="row-meta">'+iconBadge('money',14)+' Total Paid Out: <strong style="color:var(--su);">'+fmt(v.totalPaid||0)+'</strong> &middot; '+iconBadge('cart',14)+' Wallet: <strong style="color:var(--su);">'+fmt(v.walletBalance||0)+'</strong>'+(v.investorNumber?' &middot; '+v.investorNumber:'')+'</div>'
     +(v.bankAcctNo?'<div class="row-meta">🏦 '+v.bankName+', '+v.bankAcctNo+' ('+v.bankAcctName+') '+(v.bankVerified?'<strong style="color:var(--su);">✔ Verified</strong>':'<strong style="color:var(--or);">Awaiting Verification</strong>')+'</div>':'')
-    +'<div class="row-meta">Password: <span id="pw-'+v._id+'" style="font-family:monospace;letter-spacing:1px;">••••••••</span> <span onclick="togglePwView(\''+v._id+'\',\''+(v.password||'').replace(/'/g,"\\'")+'\')" style="color:var(--or);cursor:pointer;font-weight:700;">show</span></div>'
+    +'<div class="row-meta">Password: <span id="pw-'+v._id+'" style="font-family:monospace;letter-spacing:1px;">••••••••</span> <span onclick="togglePwView(\''+v._id+'\',\''+escAttr((v.password||''))+'\')" style="color:var(--or);cursor:pointer;font-weight:700;">show</span></div>'
     +'</div></div></div>'
     +'<div class="row-actions" style="margin-top:6px;">'
     +'<input type="file" id="agree-file-'+v._id+'" accept="application/pdf,image/*" style="display:none;" onchange="uploadInvestorAgreement(\''+v._id+'\',this)">'
-    +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="recordInvestorPayout(\''+v._id+'\',\''+v.name.replace(/'/g,"\\'")+'\')">💰 Record Payout</button>'
-    +(v.bankAcctNo&&!v.bankVerified?'<button class="btn btn-gr" style="font-size:10px;padding:5px 10px;" onclick="verifyInvestorBank(\''+v._id+'\',\''+v.name.replace(/'/g,"\\'")+'\')">✔ Verify Bank</button>':'')
+    +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="recordInvestorPayout(\''+v._id+'\',\''+escAttr(v.name)+'\')">💰 Record Payout</button>'
+    +(v.bankAcctNo&&!v.bankVerified?'<button class="btn btn-gr" style="font-size:10px;padding:5px 10px;" onclick="verifyInvestorBank(\''+v._id+'\',\''+escAttr(v.name)+'\')">✔ Verify Bank</button>':'')
     +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="document.getElementById(\'agree-file-'+v._id+'\').click()">📄 '+(v.agreementDoc?'Replace':'Upload')+' Agreement (optional)</button>'
-    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="openInvestorChat(\''+v._id+'\',\''+v.name.replace(/'/g,"\\'")+'\')">'+iconBadge('chat',12)+' Chat</button>'
+    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="openInvestorChat(\''+v._id+'\',\''+escAttr(v.name)+'\')">'+iconBadge('chat',12)+' Chat</button>'
     +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="openInvestorForm(\''+v._id+'\')">Edit</button>'
     +'<button class="btn '+(v.status==='suspended'?'btn-gr':'btn-or')+'" style="font-size:10px;padding:5px 10px;" onclick="toggleSuspendInvestor(\''+v._id+'\','+(v.status==='suspended')+')">'+(v.status==='suspended'?'Reactivate':'Suspend')+'</button>'
-    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteInvestor(\''+v._id+'\',\''+v.name.replace(/'/g,"\\'")+'\',this)">Delete</button>'
+    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteInvestor(\''+v._id+'\',\''+escAttr(v.name)+'\',this)">Delete</button>'
     +'</div></div>';
 }
 async function openInvestorForm(id){
@@ -2122,7 +2136,7 @@ async function recordVendorPayout(id,name){
     <div class="fg"><label class="lbl">Amount (₦)</label><input class="inp" type="number" id="vpo-amount" placeholder="0"/></div>
     <div class="fg"><label class="lbl">Description</label><input class="inp" id="vpo-desc" placeholder="e.g. October sales payout"/></div>
     <div style="display:flex;gap:10px;">
-      <button class="btn btn-or btn-lg" onclick="finalizeVendorPayout('${id}','${name.replace(/'/g,"\\'")}')">Record &amp; Notify</button>
+      <button class="btn btn-or btn-lg" onclick="finalizeVendorPayout('${id}','${escAttr(name)}')">Record &amp; Notify</button>
       <button class="btn btn-lg" onclick="nav('vendors',false)">Cancel</button>
     </div>
   </div>`;
@@ -2159,7 +2173,7 @@ async function recordInvestorPayout(id,name){
     <div class="fg"><label class="lbl">Expected Arrival Date</label><input class="inp" type="date" id="po-date"/></div>
     <div class="fg"><label class="lbl">Message to Investor</label><textarea class="ta" id="po-msg" rows="3">${defaultMsg}</textarea><div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:4px;">This becomes your default message for next time too, edit it here whenever you want to change the wording.</div></div>
     <div style="display:flex;gap:10px;">
-      <button class="btn btn-or btn-lg" onclick="finalizeInvestorPayout('${id}','${name.replace(/'/g,"\\'")}')">💰 Record &amp; Notify</button>
+      <button class="btn btn-or btn-lg" onclick="finalizeInvestorPayout('${id}','${escAttr(name)}')">💰 Record &amp; Notify</button>
       <button class="btn btn-lg" onclick="nav('investors',false)">Cancel</button>
     </div>
   </div>`;
@@ -2332,7 +2346,7 @@ async function renderRiderMessagesList(c){
     }
   }
   threads.sort(function(a,b){return (b.lastMsg.ts||0)-(a.lastMsg.ts||0);});
-  c.innerHTML=threads.length?threads.map(function(t){return '<div class="data-row" style="cursor:pointer;" onclick="openRiderMessageThread(\''+t.riderId+'\',\''+t.riderName.replace(/'/g,"\\'")+'\')"><div class="row-av">'+ini(t.riderName)+'</div><div style="flex:1;"><div class="row-name">'+t.riderName+'</div><div class="row-meta">'+t.count+' message(s) &middot; "'+t.lastMsg.text.slice(0,50)+'"</div></div></div>';}).join(''):'<div class="card" style="text-align:center;padding:30px;color:var(--wh);font-weight:700;">No rider messages yet.</div>';
+  c.innerHTML=threads.length?threads.map(function(t){return '<div class="data-row" style="cursor:pointer;" onclick="openRiderMessageThread(\''+t.riderId+'\',\''+escAttr(t.riderName)+'\')"><div class="row-av">'+ini(t.riderName)+'</div><div style="flex:1;"><div class="row-name">'+t.riderName+'</div><div class="row-meta">'+t.count+' message(s) &middot; "'+t.lastMsg.text.slice(0,50)+'"</div></div></div>';}).join(''):'<div class="card" style="text-align:center;padding:30px;color:var(--wh);font-weight:700;">No rider messages yet.</div>';
 }
 async function openRiderMessageThread(riderId,riderName){
   const c=document.getElementById('rider-view-body');
@@ -2390,8 +2404,8 @@ function pendingRiderRow(r){
     +(r.note?'<br>📝 "'+r.note+'"':'')
     +'</div>'
     +'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'
-    +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="approveRider(\''+r._id+'\',\''+r.name.replace(/'/g,"\\'")+'\')">Approve</button>'
-    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="rejectRider(\''+r._id+'\',\''+r.name.replace(/'/g,"\\'")+'\')">Reject</button>'
+    +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="approveRider(\''+r._id+'\',\''+escAttr(r.name)+'\')">Approve</button>'
+    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="rejectRider(\''+r._id+'\',\''+escAttr(r.name)+'\')">Reject</button>'
     +'</div></div>';
 }
 async function approveRider(id,name){
@@ -2443,18 +2457,18 @@ function riderRow(r){
     +'<div class="row-meta">'+r.email+' &middot; '+r.phone+(r.riderNumber?' &middot; '+r.riderNumber:'')+' &middot; Pays: '+(r.payFrequency||'weekly')+'</div>'
     +'<div class="row-meta">💰 Total Paid Out: <strong style="color:var(--su);">'+fmt(r.totalPaid||0)+'</strong>'+(avgRating?' &middot; ⭐ Rating: <strong style="color:var(--or);">'+avgRating+'/5</strong> ('+ratings.length+')':'')+'</div>'
     +(r.bankAcctNo?'<div class="row-meta">🏦 '+r.bankName+', '+r.bankAcctNo+' ('+r.bankAcctName+') '+(r.bankVerified?'<strong style="color:var(--su);">✔ Verified</strong>':'<strong style="color:var(--or);">Awaiting Verification</strong>')+'</div>':'')
-    +'<div class="row-meta">Password: <span id="pw-'+r._id+'" style="font-family:monospace;letter-spacing:1px;">••••••••</span> <span onclick="togglePwView(\''+r._id+'\',\''+(r.password||'').replace(/'/g,"\\'")+'\')" style="color:var(--or);cursor:pointer;font-weight:700;">show</span></div>'
+    +'<div class="row-meta">Password: <span id="pw-'+r._id+'" style="font-family:monospace;letter-spacing:1px;">••••••••</span> <span onclick="togglePwView(\''+r._id+'\',\''+escAttr((r.password||''))+'\')" style="color:var(--or);cursor:pointer;font-weight:700;">show</span></div>'
     +'</div></div>'
     +'<div class="row-actions" style="margin-top:6px;">'
-    +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="recordRiderPayout(\''+r._id+'\',\''+r.name.replace(/'/g,"\\'")+'\')">💰 Record Payout</button>'
-    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="awardRiderPoints(\''+r._id+'\',\''+r.name.replace(/'/g,"\\'")+'\')">⭐ Award Points</button>'
-    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="addRiderStrike(\''+r._id+'\',\''+r.name.replace(/'/g,"\\'")+'\')">⚠ Add Strike</button>'
-    +(strikes>0?'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="removeRiderStrike(\''+r._id+'\',\''+r.name.replace(/'/g,"\\'")+'\')">Remove Strike</button>':'')
-    +(r.bankAcctNo&&!r.bankVerified?'<button class="btn btn-gr" style="font-size:10px;padding:5px 10px;" onclick="verifyRiderBank(\''+r._id+'\',\''+r.name.replace(/'/g,"\\'")+'\')">✔ Verify Bank</button>':'')
+    +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="recordRiderPayout(\''+r._id+'\',\''+escAttr(r.name)+'\')">💰 Record Payout</button>'
+    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="awardRiderPoints(\''+r._id+'\',\''+escAttr(r.name)+'\')">⭐ Award Points</button>'
+    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="addRiderStrike(\''+r._id+'\',\''+escAttr(r.name)+'\')">⚠ Add Strike</button>'
+    +(strikes>0?'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="removeRiderStrike(\''+r._id+'\',\''+escAttr(r.name)+'\')">Remove Strike</button>':'')
+    +(r.bankAcctNo&&!r.bankVerified?'<button class="btn btn-gr" style="font-size:10px;padding:5px 10px;" onclick="verifyRiderBank(\''+r._id+'\',\''+escAttr(r.name)+'\')">✔ Verify Bank</button>':'')
     +'</div>'
     +'<div class="row-actions" style="margin-top:6px;">'
     +'<button class="btn '+(suspended?'btn-gr':'btn-or')+'" style="font-size:10px;padding:5px 10px;" onclick="toggleSuspendRider(\''+r._id+'\','+suspended+')">'+(suspended?'Reactivate':'Suspend')+'</button>'
-    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteRider(\''+r._id+'\',\''+r.name.replace(/'/g,"\\'")+'\',this)">Delete</button>'
+    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteRider(\''+r._id+'\',\''+escAttr(r.name)+'\',this)">Delete</button>'
     +'</div></div>';
 }
 async function addRiderStrike(id,name){
@@ -2509,7 +2523,7 @@ async function recordRiderPayout(id,name){
     <div class="fg"><label class="lbl">Expected Arrival Date</label><input class="inp" type="date" id="rp-date"/></div>
     <div class="fg"><label class="lbl">Message to Rider</label><textarea class="ta" id="rp-msg" rows="3">${defaultMsg}</textarea></div>
     <div style="display:flex;gap:10px;">
-      <button class="btn btn-or btn-lg" onclick="finalizeRiderPayout('${id}','${name.replace(/'/g,"\\'")}')">💰 Record &amp; Notify</button>
+      <button class="btn btn-or btn-lg" onclick="finalizeRiderPayout('${id}','${escAttr(name)}')">💰 Record &amp; Notify</button>
       <button class="btn btn-lg" onclick="nav('riders',false)">Cancel</button>
     </div>
   </div>`;
@@ -2697,7 +2711,7 @@ function vendorRow(v){
     +'<div class="row-meta">'+v.ownerName+' &middot; '+v.email+' &middot; '+(v.phone||'No phone')+'</div>'
     +'<div class="row-meta">Applied '+(v.joinDate||'N/A')+'</div>'
     +'<div class="row-meta">Delivery: <strong style="color:var(--or);">'+(v.logisticsOption==='richnation'?'RichNation Mall delivers':'Vendor delivers themselves')+'</strong></div>'
-    +'<div class="row-meta">Password: <span id="pw-'+v._id+'" style="font-family:monospace;letter-spacing:1px;">••••••••</span> <span onclick="togglePwView(\''+v._id+'\',\''+(v.password||'').replace(/'/g,"\\'")+'\')" style="color:var(--or);cursor:pointer;font-weight:700;">show</span></div>'
+    +'<div class="row-meta">Password: <span id="pw-'+v._id+'" style="font-family:monospace;letter-spacing:1px;">••••••••</span> <span onclick="togglePwView(\''+v._id+'\',\''+escAttr((v.password||''))+'\')" style="color:var(--or);cursor:pointer;font-weight:700;">show</span></div>'
     +(v.status==='approved'?'<div class="row-meta">Available Balance: <strong style="color:var(--su);">Calculated live in Payouts tab</strong>'+(v.bankAcctNo?' &middot; '+v.bankName+', '+v.bankAcctNo+' ('+v.bankAcctName+') '+(v.bankVerified?'<strong style="color:var(--su);">Verified</strong>':'<strong style="color:var(--or);">Awaiting Verification</strong>'):'')+'</div>':'')
     +'<div style="margin-top:10px;background:var(--card2);border-radius:9px;padding:10px;"><div style="font-size:11px;font-weight:700;color:var(--wh);margin-bottom:8px;">Submitted Documents</div>'
       +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
@@ -2709,14 +2723,14 @@ function vendorRow(v){
     +'</div>'
     +'<div class="row-actions">'
     +(v.phone?'<a href="https://wa.me/'+(v.phone||'').replace(/\D/g,'')+'" target="_blank" style="text-decoration:none;"><button class="btn btn-gr" style="font-size:10px;padding:5px 10px;">WhatsApp</button></a>':'')
-    +(v.status==='pending'?'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="approveVendor(\''+v._id+'\',\''+v.storeName.replace(/'/g,"\\'")+'\')">Approve</button><button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="rejectVendor(\''+v._id+'\',\''+v.storeName.replace(/'/g,"\\'")+'\')">Reject</button>':'')
-    +(v.status==='approved'?'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="recordVendorPayout(\''+v._id+'\',\''+v.storeName.replace(/'/g,"\\'")+'\')">Record Payout</button>':'')
-    +(v.status==='approved'&&v.bankAcctNo&&!v.bankVerified?'<button class="btn btn-gr" style="font-size:10px;padding:5px 10px;" onclick="verifyVendorBank(\''+v._id+'\',\''+v.storeName.replace(/'/g,"\\'")+'\')">Verify Bank</button>':'')
+    +(v.status==='pending'?'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="approveVendor(\''+v._id+'\',\''+escAttr(v.storeName)+'\')">Approve</button><button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="rejectVendor(\''+v._id+'\',\''+escAttr(v.storeName)+'\')">Reject</button>':'')
+    +(v.status==='approved'?'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="recordVendorPayout(\''+v._id+'\',\''+escAttr(v.storeName)+'\')">Record Payout</button>':'')
+    +(v.status==='approved'&&v.bankAcctNo&&!v.bankVerified?'<button class="btn btn-gr" style="font-size:10px;padding:5px 10px;" onclick="verifyVendorBank(\''+v._id+'\',\''+escAttr(v.storeName)+'\')">Verify Bank</button>':'')
     +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="openVendorForm(\''+v._id+'\')">Edit</button>'
-    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="resetVendorPassword(\''+v._id+'\',\''+v.storeName.replace(/'/g,"\\'")+'\')">🔑 Reset Password</button>'
-    +(v.status==='approved'?'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="suspendVendor(\''+v._id+'\',\''+v.storeName.replace(/'/g,"\\'")+'\')">Suspend</button>':'')
-    +(v.status==='suspended'?'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="approveVendor(\''+v._id+'\',\''+v.storeName.replace(/'/g,"\\'")+'\')">Reactivate</button>':'')
-    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteVendor(\''+v._id+'\',\''+v.storeName.replace(/'/g,"\\'")+'\',this)">Delete</button>'
+    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="resetVendorPassword(\''+v._id+'\',\''+escAttr(v.storeName)+'\')">🔑 Reset Password</button>'
+    +(v.status==='approved'?'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="suspendVendor(\''+v._id+'\',\''+escAttr(v.storeName)+'\')">Suspend</button>':'')
+    +(v.status==='suspended'?'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="approveVendor(\''+v._id+'\',\''+escAttr(v.storeName)+'\')">Reactivate</button>':'')
+    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteVendor(\''+v._id+'\',\''+escAttr(v.storeName)+'\',this)">Delete</button>'
     +'</div></div>';
 }
 async function openVendorForm(id){
@@ -3015,7 +3029,7 @@ function renderProducts(c){
     <div class="card-title" style="color:var(--or);">Pending Vendor Approvals (${pendingVendorProds.length})</div>
     ${pendingVendorProds.map(function(e){
       const id=e[0],p=e[1];
-      return '<div class="data-row"><div class="row-thumb">'+(p.images&&p.images[0]?'<img src="'+p.images[0]+'" style="width:100%;height:100%;object-fit:cover;"/>':'')+'</div><div style="flex:1;"><div class="row-name">'+p.name+'</div><div class="row-meta">'+fmt(p.price)+' &middot; by '+(p.vendorName||'Vendor')+'</div></div><button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="openProdForm(\''+id+'\')">Preview</button><button class="btn btn-gr" style="font-size:10px;padding:5px 10px;" onclick="approveVendorProduct(\''+id+'\')">Approve</button><button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="rejectVendorProduct(\''+id+'\',\''+p.name.replace(/'/g,"\\'")+'\')">Reject</button></div>';
+      return '<div class="data-row"><div class="row-thumb">'+(p.images&&p.images[0]?'<img src="'+p.images[0]+'" style="width:100%;height:100%;object-fit:cover;"/>':'')+'</div><div style="flex:1;"><div class="row-name">'+p.name+'</div><div class="row-meta">'+fmt(p.price)+' &middot; by '+(p.vendorName||'Vendor')+'</div></div><button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="openProdForm(\''+id+'\')">Preview</button><button class="btn btn-gr" style="font-size:10px;padding:5px 10px;" onclick="approveVendorProduct(\''+id+'\')">Approve</button><button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="rejectVendorProduct(\''+id+'\',\''+escAttr(p.name)+'\')">Reject</button></div>';
     }).join('')}
   </div>`:''}
   ${prods.length===0?`<div class="card fade-in"><div class="empty">
@@ -3048,7 +3062,7 @@ function renderProducts(c){
           </div>
           <button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="openProdForm('${p.id}')">Edit</button>
           ${p.vendorId?(p.approvalStatus!=='approved'&&p.approvalStatus!=='pending'?`<button class="btn btn-gr" style="font-size:10px;padding:5px 10px;" onclick="approveVendorProduct('${p.id}')">Approve</button>`:''):`<button class="btn ${p.visible!==false?'btn-gr':'btn-re'}" style="font-size:10px;padding:5px 10px;" onclick="toggleVisible('${p.id}')">${p.visible!==false?'Shown':'Hidden'}</button>`}
-          <button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="delProd('${p.id}','${p.name.replace(/'/g,"\\'")}')">Delete</button>
+          <button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="delProd('${p.id}','${escAttr(p.name)}')">Delete</button>
         </div>
       </div>`;
     }).join('')}
@@ -3289,7 +3303,7 @@ async function openOrder(tracking){
   <div class="page-hdr slide-up">
     <div><div class="page-hdr-title">Order ${o.tracking}</div>
     <div class="page-hdr-sub">${o.date} &middot; ${o.payMethod==='pod'?'Pay on Delivery':'Paystack'}${o.payRef?' &middot; Reference: '+o.payRef:''}${o.deliveryMethod==='pickup'?' &middot; <span style="color:var(--or);">PICK UP IN PERSON</span>':''}</div></div>
-    <div class="page-hdr-actions"><button class="btn btn-dk" style="font-size:11px;" onclick="cancelOrder('${tracking}','${((o.customer||{}).name||tracking).replace(/'/g,"\\'")}')">Cancel Order</button><button class="btn btn-re" style="font-size:11px;" onclick="deleteOrder('${tracking}','${((o.customer||{}).name||tracking).replace(/'/g,"\\'")}')">Delete Order</button></div>
+    <div class="page-hdr-actions"><button class="btn btn-dk" style="font-size:11px;" onclick="cancelOrder('${tracking}','${escAttr(((o.customer||{}).name||tracking))}')">Cancel Order</button><button class="btn btn-re" style="font-size:11px;" onclick="deleteOrder('${tracking}','${escAttr(((o.customer||{}).name||tracking))}')">Delete Order</button></div>
   </div>
   <div class="g2" style="align-items:start;">
     <!-- LEFT COLUMN -->
@@ -3636,19 +3650,19 @@ async function renderCustomers(c){
       <div style="flex:1;min-width:180px;">
         <div class="row-name">${cu.fname} ${cu.lname} ${cu.accountStatus==='suspended'||cu.accountStatus==='blocked'?'<span style="color:var(--re);font-size:10px;font-weight:800;">('+(cu.suspendReason==='failed_attempts'?'AUTO-LOCKED: 3 FAILED LOGINS':'SUSPENDED')+')</span>':''}</div>
         <div class="row-meta">${cu.email} &middot; ${cu.phone||'No phone'} &middot; Joined ${cu.joinDate||'N/A'}</div>
-        <div class="row-meta" style="margin-top:3px;">Password: <span id="pw-${cu.id}" style="font-family:monospace;letter-spacing:1px;">••••••••</span> <span onclick="togglePwView('${cu.id}','${(cu.password||'').replace(/'/g,"\\'")}')" style="color:var(--or);cursor:pointer;font-weight:700;">show</span></div>
+        <div class="row-meta" style="margin-top:3px;">Password: <span id="pw-${cu.id}" style="font-family:monospace;letter-spacing:1px;">••••••••</span> <span onclick="togglePwView('${cu.id}','${escAttr((cu.password||''))}')" style="color:var(--or);cursor:pointer;font-weight:700;">show</span></div>
         <div class="row-meta" style="margin-top:3px;">⭐ RichPoints: <strong style="color:var(--or);">${(cu.points||0).toLocaleString()}</strong> &middot; 👛 Wallet: <strong style="color:var(--su);">₦${(cu.walletBalance||0).toLocaleString()}</strong>${cu.wholesaleStatus?' &middot; Wholesale: <strong style="color:'+(cu.wholesaleStatus==='approved'?'var(--su)':'var(--or)')+';">'+cu.wholesaleStatus+'</strong>'+(cu.wholesaleBusiness?' ('+cu.wholesaleBusiness+')':''):''}</div>
       </div>
       <div class="row-actions">
         ${cu.phone?`<a href="https://wa.me/${(cu.phone||'').replace(/\D/g,'')}" target="_blank" style="text-decoration:none;"><button class="btn btn-gr" style="font-size:10px;padding:5px 10px;">WhatsApp</button></a>`:''}
-        <button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="adjustPoints('${cu.id}','${cu.fname.replace(/'/g,"\\'")}',${cu.points||0})">Adjust Points</button>
-        <button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="adjustWallet('${cu.id}','${cu.fname.replace(/'/g,"\\'")}',${cu.walletBalance||0})">Adjust Wallet</button>
-        ${cu.wholesaleStatus==='pending'?`<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="approveWholesale('${cu.id}','${cu.fname.replace(/'/g,"\\'")}')">Approve Wholesale</button>`:''}
-        ${cu.wholesaleStatus==='approved'?`<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="revokeWholesale('${cu.id}','${cu.fname.replace(/'/g,"\\'")}')">Revoke Wholesale</button>`:''}
-        <button class="btn ${(cu.accountStatus==='suspended'||cu.accountStatus==='blocked')?'btn-gr':'btn-or'}" style="font-size:10px;padding:5px 10px;" onclick="blockCustomer('${cu.id}','${cu.fname.replace(/'/g,"\\'")}',${cu.accountStatus==='suspended'||cu.accountStatus==='blocked'})">
+        <button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="adjustPoints('${cu.id}','${escAttr(cu.fname)}',${cu.points||0})">Adjust Points</button>
+        <button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="adjustWallet('${cu.id}','${escAttr(cu.fname)}',${cu.walletBalance||0})">Adjust Wallet</button>
+        ${cu.wholesaleStatus==='pending'?`<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="approveWholesale('${cu.id}','${escAttr(cu.fname)}')">Approve Wholesale</button>`:''}
+        ${cu.wholesaleStatus==='approved'?`<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="revokeWholesale('${cu.id}','${escAttr(cu.fname)}')">Revoke Wholesale</button>`:''}
+        <button class="btn ${(cu.accountStatus==='suspended'||cu.accountStatus==='blocked')?'btn-gr':'btn-or'}" style="font-size:10px;padding:5px 10px;" onclick="blockCustomer('${cu.id}','${escAttr(cu.fname)}',${cu.accountStatus==='suspended'||cu.accountStatus==='blocked'})">
           ${(cu.accountStatus==='suspended'||cu.accountStatus==='blocked')?'Reactivate':'Suspend'}
         </button>
-        <button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteCustomer('${cu.id}','${cu.fname.replace(/'/g,"\\'")}')">Delete</button>
+        <button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteCustomer('${cu.id}','${escAttr(cu.fname)}')">Delete</button>
       </div>
     </div>`).join('')}
   </div>`}`;
@@ -3724,7 +3738,7 @@ async function renderCoupons(c){
       </div>
       <div class="row-actions">
         <span class="bdg ${cp.active?'bdg-gr':'bdg-re'}">${cp.active?'Active':'Inactive'}</span>
-        <button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteCoupon('${cp.id}','${cp.code.replace(/'/g,"\\'")}',this)">Delete</button>
+        <button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteCoupon('${cp.id}','${escAttr(cp.code)}',this)">Delete</button>
       </div>
     </div>`).join('')}
   </div>`}`;
@@ -3783,11 +3797,11 @@ async function renderCategories(c){
   ${cats.length===0?'':
   `<div class="stagger">
     ${cats.map(cat=>{
-      // Category IDs/names can contain apostrophes (baby's_clothes, Men's Shoes),
-      // an unescaped one here breaks out of the onclick's string literal, so the
-      // button silently does nothing when clicked, escape both before inlining.
-      var safeId=String(cat.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-      var safeName=String(cat.name).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      // Category IDs/names can contain a ' or a " (baby's_clothes, a 12" Pot
+      // category), either one unescaped breaks the onclick right in the
+      // generated HTML, so the button silently does nothing when clicked.
+      var safeId=escAttr(cat.id);
+      var safeName=escAttr(cat.name);
       return `<div class="data-row">
       <div class="row-av" style="font-size:20px;background:rgba(255,106,0,0.06);">${cat.icon||'&#128230;'}</div>
       <div style="flex:1;"><div class="row-name">${cat.name}</div><div class="row-meta">ID: ${cat.id} &middot; Order: ${cat.order||0}</div></div>
@@ -3897,7 +3911,7 @@ async function renderChat(c){
   </div>
   ${threads.length===0?`<div class="card fade-in"><div class="empty"><div class="empty-icon">&#9998;</div><div class="empty-title">No messages yet</div><div class="empty-sub">Chat threads appear here when customers place orders or send any message via the chat widget.</div></div></div>`:
   `<div class="stagger">
-    ${threads.map(t=>`<div class="data-row clickable" onclick="${t.type==='order'?`openOrder('${t.key}')`:`openGeneralChat('${t.key}','${t.name.replace(/'/g,"\\'")}')`}" style="${t.unread?'border-color:rgba(255,106,0,0.5);background:rgba(255,106,0,0.04);':''}">
+    ${threads.map(t=>`<div class="data-row clickable" onclick="${t.type==='order'?`openOrder('${t.key}')`:`openGeneralChat('${t.key}','${escAttr(t.name)}')`}" style="${t.unread?'border-color:rgba(255,106,0,0.5);background:rgba(255,106,0,0.04);':''}">
       <div class="row-av">${ini(t.name)}</div>
       <div style="flex:1;"><div class="row-name">${t.name}${t.type!=='order'?' <span style="font-size:9px;background:rgba(91,155,245,0.15);color:var(--bl);padding:2px 6px;border-radius:4px;font-weight:700;">'+(t.type==='anon'?'GENERAL':'INQUIRY')+'</span>':''}${t.unread?' <span style="font-size:9px;background:var(--or);color:#000;padding:2px 8px;border-radius:99px;font-weight:800;">UNREAD</span>':''}</div>
       <div class="row-meta">${t.meta} &middot; ${t.msgCount} message${t.msgCount!==1?'s':''}${t.lastMsg?' &middot; "'+t.lastMsg.text.slice(0,40)+'"':''}</div></div>
@@ -4702,7 +4716,7 @@ async function renderPODApproval(c){
   var pods=Object.values(orders).filter(function(o){return o.payMethod==='pod'&&o.status==='pending_pod';});
   var html='<div class="page-hdr"><div><div class="page-hdr-title">Pay on Delivery Approval Queue</div><div class="page-hdr-sub">'+pods.length+' pending</div></div></div>';
   if(!pods.length){html+='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:36px;">✅</div><div class="card-title" style="margin-top:12px;">No pending Pay on Delivery orders</div></div>';c.innerHTML=html;return;}
-  html+=pods.map(function(o){var custName=((o.customer||{}).name||o.tracking).replace(/'/g,"\\'");return '<div class="card" style="margin-bottom:10px;"><div style="font-weight:700;color:var(--or);">'+o.tracking+'</div><div style="font-size:12px;color:var(--wh);font-weight:700;">'+(o.date||'')+' · '+((o.customer||{}).name||'')+' · '+((o.customer||{}).phone||'')+'</div>'+((o.items||[]).map(function(i){return '<div style="font-size:12px;">'+i.name+' x'+i.qty+'</div>';}).join(''))+'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;"><button class="btn btn-gr" onclick="approvePOD(\''+o.tracking+'\')">✅ Approve</button><button class="btn btn-re" onclick="declinePOD(\''+o.tracking+'\')">❌ Decline</button><button class="btn btn-dk" onclick="cancelOrder(\''+o.tracking+'\',\''+custName+'\')">🚫 Cancel</button><button class="btn btn-re" style="background:#7a1414;" onclick="deleteOrder(\''+o.tracking+'\',\''+custName+'\')">🗑 Delete</button></div></div>';}).join('');
+  html+=pods.map(function(o){var custName=escAttr((o.customer||{}).name||o.tracking);return '<div class="card" style="margin-bottom:10px;"><div style="font-weight:700;color:var(--or);">'+o.tracking+'</div><div style="font-size:12px;color:var(--wh);font-weight:700;">'+(o.date||'')+' · '+((o.customer||{}).name||'')+' · '+((o.customer||{}).phone||'')+'</div>'+((o.items||[]).map(function(i){return '<div style="font-size:12px;">'+i.name+' x'+i.qty+'</div>';}).join(''))+'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;"><button class="btn btn-gr" onclick="approvePOD(\''+o.tracking+'\')">✅ Approve</button><button class="btn btn-re" onclick="declinePOD(\''+o.tracking+'\')">❌ Decline</button><button class="btn btn-dk" onclick="cancelOrder(\''+o.tracking+'\',\''+custName+'\')">🚫 Cancel</button><button class="btn btn-re" style="background:#7a1414;" onclick="deleteOrder(\''+o.tracking+'\',\''+custName+'\')">🗑 Delete</button></div></div>';}).join('');
   c.innerHTML=html;
 }
 async function approvePOD(id){
@@ -5465,7 +5479,7 @@ function openProdForm(id){
         if(map[8].some(function(k){return nm.includes(k);})){sugs.push(cats2[7]);}
         if(map[9].some(function(k){return nm.includes(k);})){sugs.push(cats2[8]);}
         sugBox.innerHTML=sugs.length?sugs.map(function(s){
-          return '<button onclick="document.getElementById(\'pf-cat\').value=\''+s.id.replace(/'/g,"\\'")+'\';this.style.background=\'var(--or)\';this.style.color=\'#000\';" style="background:rgba(255,106,0,0.1);border:1px solid rgba(255,106,0,0.3);border-radius:6px;padding:5px 12px;color:var(--or);font-size:12px;font-weight:700;cursor:pointer;">'+s.name+'</button>';
+          return '<button onclick="document.getElementById(\'pf-cat\').value=\''+escAttr(s.id)+'\';this.style.background=\'var(--or)\';this.style.color=\'#000\';" style="background:rgba(255,106,0,0.1);border:1px solid rgba(255,106,0,0.3);border-radius:6px;padding:5px 12px;color:var(--or);font-size:12px;font-weight:700;cursor:pointer;">'+s.name+'</button>';
         }).join(''):'<span style="font-size:12px;color:var(--wh);font-weight:700;">Type a product name to see suggestions</span>';
       }
       nameInp.addEventListener('input',genSuggestions);
