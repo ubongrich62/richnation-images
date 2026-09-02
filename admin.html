@@ -3782,12 +3782,18 @@ async function renderCategories(c){
   <div class="info-box fade-in"><b>Built-in defaults:</b> Electronics, Men's Clothing, Fashion are always available on the mall even without adding them here. Categories you add below will appear in addition to these.</div>
   ${cats.length===0?'':
   `<div class="stagger">
-    ${cats.map(cat=>`<div class="data-row">
+    ${cats.map(cat=>{
+      // Category IDs/names can contain apostrophes (baby's_clothes, Men's Shoes),
+      // an unescaped one here breaks out of the onclick's string literal, so the
+      // button silently does nothing when clicked, escape both before inlining.
+      var safeId=String(cat.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      var safeName=String(cat.name).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      return `<div class="data-row">
       <div class="row-av" style="font-size:20px;background:rgba(255,106,0,0.06);">${cat.icon||'&#128230;'}</div>
       <div style="flex:1;"><div class="row-name">${cat.name}</div><div class="row-meta">ID: ${cat.id} &middot; Order: ${cat.order||0}</div></div>
-      <button class="btn ${cat.visible!==false?'btn-gr':'btn-re'}" style="font-size:10px;padding:5px 10px;" onclick="toggleCatVisible('${cat.id}')">${cat.visible!==false?'Shown':'Hidden'}</button>
-      <button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteCat('${cat.id}','${cat.name}',this)">Remove</button>
-    </div>`).join('')}
+      <button class="btn ${cat.visible!==false?'btn-gr':'btn-re'}" style="font-size:10px;padding:5px 10px;" onclick="toggleCatVisible('${safeId}')">${cat.visible!==false?'Shown':'Hidden'}</button>
+      <button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteCat('${safeId}','${safeName}',this)">Remove</button>
+    </div>`;}).join('')}
   </div>`}`;
 }
 function showCatForm(){

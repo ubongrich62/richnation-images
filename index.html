@@ -1656,7 +1656,7 @@ async function init(){
       });
     }
   }
-  const fc=document.getElementById('footer-cats');if(fc)fc.innerHTML=allCategories.slice(0,6).map(c=>`<div class="footer-link" onclick="filterCat('${c.id}')">${c.name}</div>`).join('');
+  const fc=document.getElementById('footer-cats');if(fc)fc.innerHTML=allCategories.slice(0,6).map(c=>`<div class="footer-link" onclick="filterCat('${escJs(c.id)}')">${c.name}</div>`).join('');
   setLang(currentLang);
   checkResetLink();
   try{
@@ -1677,7 +1677,7 @@ async function init(){
     allCategories=Object.values(cats||{}).filter(c=>c.visible!==false).sort((a,b)=>(a.order||99)-(b.order||99));
     try{localStorage.setItem('rnm_cache_categories',JSON.stringify(allCategories));}catch(e){}
     renderCatNav();renderCategories();
-    const fc2=document.getElementById('footer-cats');if(fc2)fc2.innerHTML=allCategories.slice(0,6).map(c=>`<div class="footer-link" onclick="filterCat('${c.id}')">${c.name}</div>`).join('');
+    const fc2=document.getElementById('footer-cats');if(fc2)fc2.innerHTML=allCategories.slice(0,6).map(c=>`<div class="footer-link" onclick="filterCat('${escJs(c.id)}')">${c.name}</div>`).join('');
   });
   watchFirebaseCollection('rn_mall_settings',function(sett){
     if(!sett)return;
@@ -1739,14 +1739,18 @@ async function submitPasswordReset(custId){
   openAuth('login');
 }
 
-function renderCatNav(){const nav=document.getElementById('cat-nav');if(!nav)return;nav.innerHTML=`<div class="cat-nav-item active" onclick="filterCat('',this)">${t('allCats')}</div>`+allCategories.map(c=>`<div class="cat-nav-item" onclick="filterCat('${c.id}',this)">${c.name}</div>`).join('');}
+function renderCatNav(){const nav=document.getElementById('cat-nav');if(!nav)return;nav.innerHTML=`<div class="cat-nav-item active" onclick="filterCat('',this)">${t('allCats')}</div>`+allCategories.map(c=>`<div class="cat-nav-item" onclick="filterCat('${escJs(c.id)}',this)">${c.name}</div>`).join('');}
 function brandLoaderHTML(sub){
   return `<div style="grid-column:1/-1;text-align:center;padding:40px 20px;">
     <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:20px;background:linear-gradient(90deg,var(--or),var(--gold),var(--or));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmerText 1.6s linear infinite;">RichNation Mall</div>
     <div style="font-size:12px;color:var(--wh);font-weight:700;margin-top:6px;">${sub||'Loading...'}</div>
   </div>`;
 }
-function renderCategories(){const g=document.getElementById('cats-grid');if(!g)return;if(!allCategories.length){g.innerHTML=window._mallDataReady?'<div style="color:var(--wh);font-weight:700;font-size:12px;grid-column:1/-1;">No categories yet.</div>':brandLoaderHTML('Fetching categories...');return;}g.innerHTML=allCategories.map(c=>{const cnt=allProducts.filter(p=>p.category===c.id).length;return `<div class="cat-card" onclick="filterCat('${c.id}')"><div class="cat-ico" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:16px;color:var(--or);">${c.icon||c.name.slice(0,2).toUpperCase()}</div><div class="cat-name">${c.name}</div><div class="cat-count">${cnt} item${cnt!==1?'s':''}</div></div>`;}).join('');}
+function renderCategories(){const g=document.getElementById('cats-grid');if(!g)return;if(!allCategories.length){g.innerHTML=window._mallDataReady?'<div style="color:var(--wh);font-weight:700;font-size:12px;grid-column:1/-1;">No categories yet.</div>':brandLoaderHTML('Fetching categories...');return;}g.innerHTML=allCategories.map(c=>{const cnt=allProducts.filter(p=>p.category===c.id).length;return `<div class="cat-card" onclick="filterCat('${escJs(c.id)}')"><div class="cat-ico" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:16px;color:var(--or);">${c.icon||c.name.slice(0,2).toUpperCase()}</div><div class="cat-name">${c.name}</div><div class="cat-count">${cnt} item${cnt!==1?'s':''}</div></div>`;}).join('');}
+// A category id/name containing an apostrophe (baby's_clothes, Men's Shoes)
+// used to break right out of the onclick's string literal when inlined raw,
+// so tapping that category silently did nothing.
+function escJs(s){return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
 function catName(id){return allCategories.find(c=>c.id===id)?.name||id||'';}
 function catIcon(id){return allCategories.find(c=>c.id===id)?.icon||id?.slice(0,2).toUpperCase()||'P';}
 
