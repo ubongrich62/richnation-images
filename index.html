@@ -357,6 +357,17 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .footer-link{font-size:12.5px;color:rgba(255,255,255,.6);cursor:pointer;padding:4px 0;display:block;}
 .footer-link:hover{color:var(--or);}
 .footer-copy{max-width:var(--container);margin:0 auto;border-top:1px solid rgba(255,255,255,.12);padding-top:18px;font-size:11px;color:rgba(255,255,255,.4);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+/* COOKIE BANNER */
+.cookie-banner{position:fixed;left:0;right:0;bottom:0;z-index:850;background:var(--card,#111113);border-top:1px solid var(--bdr,#242428);padding:16px 20px;display:none;box-shadow:0 -4px 20px rgba(0,0,0,0.35);}
+.cookie-banner.open{display:block;}
+.cookie-banner-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.cookie-banner-text{flex:1 1 280px;font-size:12.5px;color:var(--w2,#e0e0e0);font-weight:600;line-height:1.6;}
+.cookie-banner-text a{color:var(--or);font-weight:700;text-decoration:underline;cursor:pointer;}
+.cookie-banner-btns{display:flex;gap:10px;flex-shrink:0;}
+.cookie-btn{border-radius:8px;padding:10px 18px;font-size:12.5px;font-weight:800;cursor:pointer;border:none;white-space:nowrap;}
+.cookie-btn-accept{background:var(--or);color:#000;}
+.cookie-btn-essential{background:transparent;border:1px solid var(--bdr,#242428);color:var(--wh,#fff);}
+@media(max-width:520px){.cookie-banner-btns{width:100%;}.cookie-btn{flex:1;}}
 /* NEWSLETTER */
 .newsletter{background:var(--or);border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);padding:44px 20px;}
 .newsletter-inner{max-width:640px;margin:0 auto;text-align:center;}
@@ -818,6 +829,17 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
       <button class="auth-btn" onclick="closeAccPrompt();openAuth('register')">Create Free Account</button>
       <div style="margin-top:10px;font-size:11px;color:var(--wh);font-weight:700;cursor:pointer;" onclick="closeAccPrompt();openAuth('login')">Already have an account? Sign In</div>
       <div style="margin-top:8px;font-size:11px;color:var(--wh);font-weight:700;cursor:pointer;" onclick="closeAccPrompt()">Continue Browsing</div>
+    </div>
+  </div>
+</div>
+
+<!-- COOKIE CONSENT -->
+<div class="cookie-banner" id="cookie-banner">
+  <div class="cookie-banner-inner">
+    <div class="cookie-banner-text">We use cookies and similar technologies (like local storage) to keep you signed in, remember your cart and preferences, and improve your experience on RichNation Mall. <a onclick="showPolicyPage('privacy')">Learn more</a></div>
+    <div class="cookie-banner-btns">
+      <button class="cookie-btn cookie-btn-essential" onclick="setCookieConsent('essential')">Essential Only</button>
+      <button class="cookie-btn cookie-btn-accept" onclick="setCookieConsent('all')">Accept All</button>
     </div>
   </div>
 </div>
@@ -1642,6 +1664,7 @@ async function init(){
     if(lastPage&&lastPage!=='home'&&['home','account','wishlist','track','search'].includes(lastPage))showPage(lastPage,true);
   }catch(e){}
   setTimeout(()=>{if(!currUser&&!sessionStorage.getItem('rnm_prompt_shown'))showAccPrompt();},9000);
+  maybeShowCookieBanner();
   // From here on the page stays live, an admin editing a product, category, or
   // homepage setting shows up here within about a second, no reload needed.
   watchFirebaseCollection('rn_mall_products',function(prods){
@@ -1674,6 +1697,19 @@ function checkResetLink(){
   const params=new URLSearchParams(window.location.search);
   const rid=params.get('reset');
   if(rid)openResetPasswordPrompt(rid);
+}
+// ── COOKIE CONSENT ──
+function maybeShowCookieBanner(){
+  try{
+    if(localStorage.getItem('rnm_cookie_consent'))return;
+  }catch(e){return;}
+  const b=document.getElementById('cookie-banner');
+  if(b)b.classList.add('open');
+}
+function setCookieConsent(level){
+  try{localStorage.setItem('rnm_cookie_consent',level);localStorage.setItem('rnm_cookie_consent_date',new Date().toISOString());}catch(e){}
+  const b=document.getElementById('cookie-banner');
+  if(b)b.classList.remove('open');
 }
 async function openResetPasswordPrompt(custId){
   const cust=await fbG('rn_mall_customers/'+custId);
@@ -2962,6 +2998,9 @@ function showPolicyPage(type){
       +'<div style="font-size:13px;color:var(--w2);line-height:2.2;">'+iconBadge('close',13)+' Sell your personal data to any third party<br>'+iconBadge('close',13)+' Store your card number, PIN, or banking credentials<br>'+iconBadge('close',13)+' Share your information without your consent</div></div>'
       +card(orange('Your Data Security')
         +'<div style="font-size:13px;color:var(--w2);line-height:1.9;">Your personal information is protected using industry-standard security protocols and encryption. Access to customer data is strictly limited to authorised RichNation personnel on a need-to-know basis. We conduct regular security reviews to ensure your data remains safe at all times.</div>')
+      +card(orange('Cookies &amp; Local Storage')
+        +'<div style="font-size:13px;color:var(--w2);line-height:2.2;">We use cookies and similar technologies (such as your browser\'s local storage) to keep you signed in, remember what\'s in your cart, remember your currency and language choice, and speed up page loads by caching product data on your device. These are essential to how the site works, we don\'t use them to track you across other websites or sell them to advertisers.</div>'
+        +'<button class="btn" style="margin-top:10px;font-size:11px;padding:7px 14px;background:var(--card2);border:1px solid var(--bdr);color:var(--wh);border-radius:7px;cursor:pointer;" onclick="localStorage.removeItem(\'rnm_cookie_consent\');document.getElementById(\'cookie-banner\').classList.add(\'open\');goBack();">Manage Cookie Preferences</button>')
       +card(orange('Your Rights')
         +'<div style="font-size:13px;color:var(--w2);line-height:2.2;">• Request a copy of the data we hold about you<br>• Request correction of any inaccurate information<br>• Request deletion of your account and all data<br>• Withdraw consent for marketing at any time</div>')
       +'<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:14px;font-size:12px;color:var(--wh);font-weight:700;">To exercise your rights: '+iconBadge('envelope',12)+' rnm.office@richnationmall.com &middot; '+iconBadge('phone',12)+' +234 916 467 8560</div>';
