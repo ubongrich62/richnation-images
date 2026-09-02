@@ -5535,13 +5535,38 @@ function setCoverImg(idx){
   function clearHighlight(){
     document.querySelectorAll('.pfimg-item.pfimg-drop-target').forEach(function(el){el.classList.remove('pfimg-drop-target');el.style.outline='';});
   }
+  // Releasing pointer capture and clearing every inline style this drag ever
+  // set is done through one function, called from every exit path (drop,
+  // cancel, and the safety nets below), so a drag interrupted mid-gesture
+  // (released outside the window, a dialog popping up, navigating away)
+  // can never leave a thumbnail stuck holding pointer capture, which would
+  // otherwise silently swallow clicks everywhere else on the page, sidebar
+  // included, until the page is reloaded.
+  function endDrag(pointerId){
+    if(!drag)return;
+    var d=drag;drag=null;
+    clearHighlight();
+    if(d.item){
+      d.item.style.transform='';d.item.style.zIndex='';d.item.style.opacity='';d.item.style.pointerEvents='';
+      var thumb=d.item.querySelector('.pfimg-thumb');
+      if(thumb){
+        thumb.style.cursor='';
+        try{if(pointerId!=null&&thumb.hasPointerCapture&&thumb.hasPointerCapture(pointerId))thumb.releasePointerCapture(pointerId);}catch(e){}
+      }
+    }
+    return d;
+  }
   document.addEventListener('pointerdown',function(e){
+    // A previous drag never cleanly finished (this shouldn't happen given the
+    // handling below, but if it ever does, don't let it block this new
+    // interaction too), always start from a clean slate.
+    if(drag)endDrag(drag.pointerId);
     var thumb=findThumb(e.target);
     if(!thumb)return;
     var item=findItem(thumb);
     var container=document.getElementById('pf-existing-imgs');
     if(!item||!container||!container.contains(item))return;
-    drag={idx:parseInt(item.dataset.idx,10),item:item,startX:e.clientX,startY:e.clientY,moved:false};
+    drag={idx:parseInt(item.dataset.idx,10),item:item,startX:e.clientX,startY:e.clientY,moved:false,pointerId:e.pointerId};
     try{thumb.setPointerCapture(e.pointerId);}catch(e2){}
   });
   document.addEventListener('pointermove',function(e){
@@ -5566,23 +5591,21 @@ function setCoverImg(idx){
       drag.overIdx=null;
     }
   });
-  document.addEventListener('pointerup',function(){
+  document.addEventListener('pointerup',function(e){
     if(!drag)return;
-    var d=drag;drag=null;
-    clearHighlight();
-    if(d.item){d.item.style.transform='';d.item.style.zIndex='';d.item.style.opacity='';d.item.style.pointerEvents='';}
-    if(d.moved&&d.overIdx!=null&&d.overIdx!==d.idx&&_currentImages[d.idx]!=null){
+    var d=endDrag(e.pointerId);
+    if(d&&d.moved&&d.overIdx!=null&&d.overIdx!==d.idx&&_currentImages[d.idx]!=null){
       var moved=_currentImages.splice(d.idx,1)[0];
       _currentImages.splice(d.overIdx,0,moved);
       refreshExistImgs();
     }
   });
-  document.addEventListener('pointercancel',function(){
-    if(!drag)return;
-    if(drag.item){drag.item.style.transform='';drag.item.style.zIndex='';drag.item.style.opacity='';drag.item.style.pointerEvents='';}
-    clearHighlight();
-    drag=null;
-  });
+  document.addEventListener('pointercancel',function(e){endDrag(e.pointerId);});
+  // Extra safety nets: if focus leaves the window/tab or the mouse button
+  // is released outside it entirely, the browser may never fire pointerup
+  // at all, without this a switched-away drag would stay stuck forever.
+  window.addEventListener('blur',function(){endDrag(drag&&drag.pointerId);});
+  document.addEventListener('visibilitychange',function(){if(document.hidden)endDrag(drag&&drag.pointerId);});
 })();
 
 // Override saveProd to handle uploads
