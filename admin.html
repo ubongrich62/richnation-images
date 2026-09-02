@@ -3048,7 +3048,7 @@ function renderProducts(c){
           </div>
           <button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="openProdForm('${p.id}')">Edit</button>
           ${p.vendorId?(p.approvalStatus!=='approved'&&p.approvalStatus!=='pending'?`<button class="btn btn-gr" style="font-size:10px;padding:5px 10px;" onclick="approveVendorProduct('${p.id}')">Approve</button>`:''):`<button class="btn ${p.visible!==false?'btn-gr':'btn-re'}" style="font-size:10px;padding:5px 10px;" onclick="toggleVisible('${p.id}')">${p.visible!==false?'Shown':'Hidden'}</button>`}
-          <button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="delProd('${p.id}','${p.name}')">Delete</button>
+          <button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="delProd('${p.id}','${p.name.replace(/'/g,"\\'")}')">Delete</button>
         </div>
       </div>`;
     }).join('')}
@@ -3641,14 +3641,14 @@ async function renderCustomers(c){
       </div>
       <div class="row-actions">
         ${cu.phone?`<a href="https://wa.me/${(cu.phone||'').replace(/\D/g,'')}" target="_blank" style="text-decoration:none;"><button class="btn btn-gr" style="font-size:10px;padding:5px 10px;">WhatsApp</button></a>`:''}
-        <button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="adjustPoints('${cu.id}','${cu.fname}',${cu.points||0})">Adjust Points</button>
-        <button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="adjustWallet('${cu.id}','${cu.fname}',${cu.walletBalance||0})">Adjust Wallet</button>
-        ${cu.wholesaleStatus==='pending'?`<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="approveWholesale('${cu.id}','${cu.fname}')">Approve Wholesale</button>`:''}
-        ${cu.wholesaleStatus==='approved'?`<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="revokeWholesale('${cu.id}','${cu.fname}')">Revoke Wholesale</button>`:''}
-        <button class="btn ${(cu.accountStatus==='suspended'||cu.accountStatus==='blocked')?'btn-gr':'btn-or'}" style="font-size:10px;padding:5px 10px;" onclick="blockCustomer('${cu.id}','${cu.fname}',${cu.accountStatus==='suspended'||cu.accountStatus==='blocked'})">
+        <button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="adjustPoints('${cu.id}','${cu.fname.replace(/'/g,"\\'")}',${cu.points||0})">Adjust Points</button>
+        <button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="adjustWallet('${cu.id}','${cu.fname.replace(/'/g,"\\'")}',${cu.walletBalance||0})">Adjust Wallet</button>
+        ${cu.wholesaleStatus==='pending'?`<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="approveWholesale('${cu.id}','${cu.fname.replace(/'/g,"\\'")}')">Approve Wholesale</button>`:''}
+        ${cu.wholesaleStatus==='approved'?`<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="revokeWholesale('${cu.id}','${cu.fname.replace(/'/g,"\\'")}')">Revoke Wholesale</button>`:''}
+        <button class="btn ${(cu.accountStatus==='suspended'||cu.accountStatus==='blocked')?'btn-gr':'btn-or'}" style="font-size:10px;padding:5px 10px;" onclick="blockCustomer('${cu.id}','${cu.fname.replace(/'/g,"\\'")}',${cu.accountStatus==='suspended'||cu.accountStatus==='blocked'})">
           ${(cu.accountStatus==='suspended'||cu.accountStatus==='blocked')?'Reactivate':'Suspend'}
         </button>
-        <button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteCustomer('${cu.id}','${cu.fname}')">Delete</button>
+        <button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteCustomer('${cu.id}','${cu.fname.replace(/'/g,"\\'")}')">Delete</button>
       </div>
     </div>`).join('')}
   </div>`}`;
@@ -3724,7 +3724,7 @@ async function renderCoupons(c){
       </div>
       <div class="row-actions">
         <span class="bdg ${cp.active?'bdg-gr':'bdg-re'}">${cp.active?'Active':'Inactive'}</span>
-        <button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteCoupon('${cp.id}','${cp.code}',this)">Delete</button>
+        <button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteCoupon('${cp.id}','${cp.code.replace(/'/g,"\\'")}',this)">Delete</button>
       </div>
     </div>`).join('')}
   </div>`}`;
@@ -4702,7 +4702,7 @@ async function renderPODApproval(c){
   var pods=Object.values(orders).filter(function(o){return o.payMethod==='pod'&&o.status==='pending_pod';});
   var html='<div class="page-hdr"><div><div class="page-hdr-title">Pay on Delivery Approval Queue</div><div class="page-hdr-sub">'+pods.length+' pending</div></div></div>';
   if(!pods.length){html+='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:36px;">✅</div><div class="card-title" style="margin-top:12px;">No pending Pay on Delivery orders</div></div>';c.innerHTML=html;return;}
-  html+=pods.map(function(o){return '<div class="card" style="margin-bottom:10px;"><div style="font-weight:700;color:var(--or);">'+o.tracking+'</div><div style="font-size:12px;color:var(--wh);font-weight:700;">'+(o.date||'')+' · '+((o.customer||{}).name||'')+' · '+((o.customer||{}).phone||'')+'</div>'+((o.items||[]).map(function(i){return '<div style="font-size:12px;">'+i.name+' x'+i.qty+'</div>';}).join(''))+'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;"><button class="btn btn-gr" onclick="approvePOD(\''+o.tracking+'\')">✅ Approve</button><button class="btn btn-re" onclick="declinePOD(\''+o.tracking+'\')">❌ Decline</button><button class="btn btn-dk" onclick="cancelOrder(\''+o.tracking+'\',\''+((o.customer||{}).name||o.tracking)+'\')">🚫 Cancel</button><button class="btn btn-re" style="background:#7a1414;" onclick="deleteOrder(\''+o.tracking+'\',\''+((o.customer||{}).name||o.tracking)+'\')">🗑 Delete</button></div></div>';}).join('');
+  html+=pods.map(function(o){var custName=((o.customer||{}).name||o.tracking).replace(/'/g,"\\'");return '<div class="card" style="margin-bottom:10px;"><div style="font-weight:700;color:var(--or);">'+o.tracking+'</div><div style="font-size:12px;color:var(--wh);font-weight:700;">'+(o.date||'')+' · '+((o.customer||{}).name||'')+' · '+((o.customer||{}).phone||'')+'</div>'+((o.items||[]).map(function(i){return '<div style="font-size:12px;">'+i.name+' x'+i.qty+'</div>';}).join(''))+'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;"><button class="btn btn-gr" onclick="approvePOD(\''+o.tracking+'\')">✅ Approve</button><button class="btn btn-re" onclick="declinePOD(\''+o.tracking+'\')">❌ Decline</button><button class="btn btn-dk" onclick="cancelOrder(\''+o.tracking+'\',\''+custName+'\')">🚫 Cancel</button><button class="btn btn-re" style="background:#7a1414;" onclick="deleteOrder(\''+o.tracking+'\',\''+custName+'\')">🗑 Delete</button></div></div>';}).join('');
   c.innerHTML=html;
 }
 async function approvePOD(id){
@@ -5465,7 +5465,7 @@ function openProdForm(id){
         if(map[8].some(function(k){return nm.includes(k);})){sugs.push(cats2[7]);}
         if(map[9].some(function(k){return nm.includes(k);})){sugs.push(cats2[8]);}
         sugBox.innerHTML=sugs.length?sugs.map(function(s){
-          return '<button onclick="document.getElementById(\'pf-cat\').value=\''+s.id+'\';this.style.background=\'var(--or)\';this.style.color=\'#000\';" style="background:rgba(255,106,0,0.1);border:1px solid rgba(255,106,0,0.3);border-radius:6px;padding:5px 12px;color:var(--or);font-size:12px;font-weight:700;cursor:pointer;">'+s.name+'</button>';
+          return '<button onclick="document.getElementById(\'pf-cat\').value=\''+s.id.replace(/'/g,"\\'")+'\';this.style.background=\'var(--or)\';this.style.color=\'#000\';" style="background:rgba(255,106,0,0.1);border:1px solid rgba(255,106,0,0.3);border-radius:6px;padding:5px 12px;color:var(--or);font-size:12px;font-weight:700;cursor:pointer;">'+s.name+'</button>';
         }).join(''):'<span style="font-size:12px;color:var(--wh);font-weight:700;">Type a product name to see suggestions</span>';
       }
       nameInp.addEventListener('input',genSuggestions);
