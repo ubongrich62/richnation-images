@@ -665,16 +665,33 @@ async function fbG(p){
 // the connection was fine a moment later. Both retry twice with a short
 // backoff before actually giving up and telling the admin it failed.
 async function fbSaveWithRetry(method,p,d){
+  var lastReason=null;
   for(var attempt=0;attempt<3;attempt++){
     try{
       const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:method,body:JSON.stringify(d)});
       if(r&&r.ok)return true;
+      // Got an actual response, so this isn't a dropped connection, Firebase
+      // is explicitly refusing the write (permission denied by the security
+      // rules, or the record fails a .validate check). Retrying the exact
+      // same request will fail again every time, that's not what "check
+      // your connection" should ever be blamed for, surface the real reason
+      // and stop immediately instead of wasting two more attempts on it.
+      if(r){
+        var reasonText='';
+        try{var body=await r.json();reasonText=(body&&body.error)||'';}catch(parseErr){}
+        lastReason=(r.status===401||r.status===403||reasonText.toLowerCase().indexOf('permission')>-1)
+          ?'Save blocked by Firebase permissions, not a connection issue, check your database security rules'
+          :'Save rejected by the server ('+r.status+(reasonText?': '+reasonText:'')+')';
+        console.warn('fb'+method+' rejected for',p,':',r.status,reasonText);
+        break;
+      }
     }catch(e){
+      lastReason='Save failed, check your connection and try again';
       console.warn('fb'+method+' attempt',attempt+1,'failed for',p,':',e.message);
     }
     if(attempt<2)await new Promise(function(res){setTimeout(res,700*(attempt+1));});
   }
-  toast('Save failed after several attempts, check your connection and try again','err');
+  toast(lastReason||'Save failed after several attempts, check your connection and try again','err');
   return false;
 }
 async function fbS(p,d){return fbSaveWithRetry('PUT',p,d);}
