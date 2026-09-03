@@ -5575,6 +5575,13 @@ function setCoverImg(idx){
     // handling below, but if it ever does, don't let it block this new
     // interaction too), always start from a clean slate.
     if(drag)endDrag(drag.pointerId);
+    // The × remove button is positioned on top of the thumbnail (for the
+    // overlay look), so it's technically inside .pfimg-thumb too. Starting
+    // a drag capture there redirects the click away before its own onclick
+    // ever fires, silently breaking Remove, let a press that starts on the
+    // button itself (or anything else with its own onclick) through as a
+    // normal click instead of hijacking it into a drag.
+    if(e.target.closest('button'))return;
     var thumb=findThumb(e.target);
     if(!thumb)return;
     var item=findItem(thumb);
