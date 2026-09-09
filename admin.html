@@ -748,7 +748,8 @@ function svgIconPaths(name){
     home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
     cake:'<path d="M4 21h16v-8H4z"/><path d="M4 13a3 3 0 013-3h10a3 3 0 013 3"/><path d="M9 10V6M12 10V4M15 10V6"/>',
     briefcase:'<path d="M3 7h18v13H3z"/><path d="M8 7V4h8v3"/>',
-    note:'<path d="M4 3h16v18l-4-3H4z"/><path d="M8 8h8M8 12h5"/>'
+    note:'<path d="M4 3h16v18l-4-3H4z"/><path d="M8 8h8M8 12h5"/>',
+    warning:'<path d="M12 2L2 20h20L12 2z"/><path d="M12 9v5M12 17h.01"/>'
   };
   return icons[name]||icons.star;
 }
@@ -4313,6 +4314,20 @@ function renderSiteCustomiser(c){
   var ems=settings.mallEmojis||{trust_secure:'🔒',trust_returns:'↩️',trust_delivery:'🚚',trust_chat:'💬',trust_guarantee:'✅',trust_price:'🔄',why_price:'💰',why_range:'📦',why_security:'🔒',why_verified:'✅',why_fast:'🚀',why_support:'💬',guarantee_order:'✅',guarantee_delivery:'🚚',guarantee_returns:'↩️',guarantee_price:'💲',guarantee_payment:'🔐',guarantee_privacy:'🛡️',account_orders:'📦',account_pay:'💳',account_ship:'🚚',account_receive:'📬',account_refunds:'↩️',account_vouchers:'🎟️',account_addresses:'📍',account_profile:'👤'};
   function eb(key,lbl){return '<div onclick="editEmoji(\''+key+'\')" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(255,106,0,0.12),rgba(255,167,51,0.06));border:1px solid rgba(255,106,0,0.35);border-radius:8px;padding:6px 12px;cursor:pointer;margin:3px;transition:border-color .15s;" onmouseover="this.style.borderColor=\'var(--or)\'" onmouseout="this.style.borderColor=\'rgba(255,106,0,0.35)\'"><span id="em-'+key+'" style="font-size:20px;">'+(ems[key]||'•')+'</span><span style="font-size:10px;color:var(--wh);font-weight:700;">'+lbl+'</span></div>';}
   var html = '<div class="page-hdr"><div><div class="page-hdr-title">Site Customiser</div><div class="page-hdr-sub">Full control over the customer mall</div></div><div class="page-hdr-actions"><button class="btn btn-dk" onclick="refreshData()">↻ Refresh</button></div></div>';
+  html += '<div class="cs-section" style="border-color:'+(settings.maintenanceMode?'rgba(244,63,94,0.5)':'rgba(255,106,0,0.35)')+';background:'+(settings.maintenanceMode?'rgba(244,63,94,0.06)':'transparent')+';">';
+  html += '<div class="cs-section-title">'+iconBadge('warning',14)+' Before You Launch</div>';
+  html += '<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:14px;line-height:1.6;">Use these while getting ready to go live, or anytime you need to take the mall offline briefly. Both apply to every visitor immediately, no need to refresh or redeploy anything.</div>';
+  html += '<div style="background:var(--card2);border:1px solid var(--bdr);border-radius:10px;padding:14px;margin-bottom:12px;">';
+  html += '<label style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:800;color:var(--wh);cursor:pointer;margin-bottom:10px;"><input type="checkbox" id="cs-maint" '+(settings.maintenanceMode?'checked':'')+' style="accent-color:var(--re);width:18px;height:18px;"/> Under Maintenance, replace the entire site with a message</label>';
+  html += '<div class="fg"><label class="lbl">Page Title</label><input class="inp" id="cs-maint-title" value="'+(settings.maintenanceTitle||'Under Maintenance').replace(/"/g,'&quot;')+'" placeholder="Under Maintenance"/></div>';
+  html += '<div class="fg" style="margin-bottom:0;"><label class="lbl">Message shown to every visitor</label><textarea class="ta" id="cs-maint-msg" rows="3" placeholder="We\'re making a few improvements. Please check back shortly.">'+(settings.maintenanceMessage||'')+'</textarea></div>';
+  html += '</div>';
+  html += '<div style="background:var(--card2);border:1px solid var(--bdr);border-radius:10px;padding:14px;">';
+  html += '<label style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:800;color:var(--wh);cursor:pointer;margin-bottom:10px;"><input type="checkbox" id="cs-comingsoon" '+(settings.comingSoonMode?'checked':'')+' style="accent-color:var(--or);width:18px;height:18px;"/> Coming Soon Mode, customers can browse products but not see prices or buy yet</label>';
+  html += '<div class="fg" style="margin-bottom:0;"><label class="lbl">Text shown instead of the price and Add to Cart button</label><input class="inp" id="cs-comingsoon-text" value="'+(settings.comingSoonText||'Coming Soon').replace(/"/g,'&quot;')+'" placeholder="Coming Soon"/></div>';
+  html += '</div>';
+  html += '<button class="btn btn-or btn-lg" style="margin-top:14px;" onclick="saveLaunchControls()">Save</button>';
+  html += '</div>';
   html += '<div class="cs-section"><div class="cs-section-title">'+iconBadge('palette',14)+' Colour Theme, Full Control</div>';
   html += '<div class="g2"><div class="fg"><label class="lbl">Primary / Accent Colour</label>';
   html += '<div style="display:flex;gap:8px;align-items:center;">';
@@ -4589,6 +4604,22 @@ async function saveBusinessHours(){
 async function saveStoreSettings(){
   var u={freeShippingAll:!!(document.getElementById('cs-fs')||{}).checked,podEnabled:!!(document.getElementById('cs-pod')||{}).checked,reviewsEnabled:!!(document.getElementById('cs-rev')||{}).checked,chatEnabled:!!(document.getElementById('cs-chat')||{}).checked,showVendorCta:!!(document.getElementById('cs-vendor-cta')||{}).checked};
   Object.assign(settings,u);await fbU('rn_mall_settings',u);toast('Settings saved!');
+}
+async function saveLaunchControls(){
+  var maint=!!(document.getElementById('cs-maint')||{}).checked;
+  var comingSoon=!!(document.getElementById('cs-comingsoon')||{}).checked;
+  var u={
+    maintenanceMode:maint,
+    maintenanceTitle:(document.getElementById('cs-maint-title')||{}).value||'Under Maintenance',
+    maintenanceMessage:(document.getElementById('cs-maint-msg')||{}).value||'',
+    comingSoonMode:comingSoon,
+    comingSoonText:(document.getElementById('cs-comingsoon-text')||{}).value||'Coming Soon'
+  };
+  Object.assign(settings,u);
+  var ok=await fbU('rn_mall_settings',u);
+  if(!ok)return;
+  toast(maint?'Maintenance mode is now ON, the live site is showing your message to every visitor':'Saved!');
+  nav('customiser',false);
 }
 async function editEmoji(key){
   if(!settings.mallEmojis)settings.mallEmojis={};

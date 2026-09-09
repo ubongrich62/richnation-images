@@ -523,6 +523,20 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .live-dot.on{background:var(--su);animation:liveDotPulse 1.6s ease-in-out infinite;}
 @keyframes liveDotPulse{0%,100%{box-shadow:0 0 0 0 rgba(225,94,0,.45);}50%{box-shadow:0 0 0 5px rgba(225,94,0,0);}}
 @keyframes mapPulse{0%,100%{opacity:.5;}50%{opacity:1;}}
+/* MAINTENANCE MODE: checked synchronously from cached settings before the
+   rest of the page has painted, so a visitor never sees the real site
+   flash on screen for an instant before this hides it, hiding happens
+   before the browser has anything to paint yet, not after. */
+html.rnm-maint body>*:not(#maintenance-screen){display:none!important;}
+#maintenance-screen{display:none;position:fixed;inset:0;z-index:99999;background:#0A0A0B;color:#fff;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;font-family:'Segoe UI',Arial,sans-serif;}
+html.rnm-maint #maintenance-screen{display:flex;}
+#maintenance-screen img{height:56px;margin-bottom:24px;}
+#maintenance-screen h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:26px;margin-bottom:12px;}
+#maintenance-screen p{font-size:14px;color:#c7c7cd;font-weight:600;max-width:440px;line-height:1.7;white-space:pre-line;}
+/* Admin-controlled homepage sections default to hidden and are only
+   revealed once cached/fetched settings confirm they should show, so a
+   section the admin turned off never flashes visible first either. */
+#vendor-cta-sec{display:none;}
 </style>
 <link rel="preconnect" href="https://richnation-portal-default-rtdb.firebaseio.com"/>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin/>
@@ -531,6 +545,30 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 <link rel="dns-prefetch" href="https://js.paystack.co"/>
 </head>
 <body>
+<div id="maintenance-screen">
+  <img src="images/branding/richnation-logo-v2.png" alt="RichNation Mall">
+  <h1 id="maintenance-title">Under Maintenance</h1>
+  <p id="maintenance-text">We're making a few improvements. Please check back shortly.</p>
+</div>
+<script>
+// Runs before anything else in the body, synchronously, off the cached
+// settings copy from the last visit, so a maintenance mode the admin turned
+// on never flashes the real storefront on screen first.
+(function(){
+  try{
+    var cached=localStorage.getItem('rnm_cache_settings');
+    if(cached){
+      var s=JSON.parse(cached);
+      if(s.maintenanceMode){
+        var t=document.getElementById('maintenance-title'),p=document.getElementById('maintenance-text');
+        if(s.maintenanceTitle&&t)t.textContent=s.maintenanceTitle;
+        if(s.maintenanceMessage&&p)p.textContent=s.maintenanceMessage;
+        document.documentElement.classList.add('rnm-maint');
+      }
+    }
+  }catch(e){}
+})();
+</script>
 <!-- ANNOUNCE BAR -->
 <div id="announce-bar" class="announce-bar" style="text-align:center;padding:8px 40px;font-size:12px;font-weight:700;position:relative;">
   <span id="announce-text"></span>
@@ -1613,6 +1651,7 @@ async function init(){
   exchangeRate=settings.exchangeRate||1600;
   if(settings.paystackKey)PAYSTACK_KEY=settings.paystackKey;
   if(settings.theme)applyTheme(settings.theme);
+  applyMaintenanceMode(settings);
   // Only replace what we already have if the fresh fetch actually returned something.
   // a failed/timed-out fetch must never wipe out good cached data with an empty state.
   if(cats)allCategories=Object.values(cats).filter(c=>c.visible!==false).sort((a,b)=>(a.order||99)-(b.order||99));
@@ -1638,7 +1677,7 @@ async function init(){
   document.querySelectorAll('.curr-btn').forEach(el=>el.classList.toggle('active',el.dataset.curr===currency));
   updateAuthUI();updateCartBadge();updateWishBadge();
   if(settings.flashSaleEnd)startFlashTimer(settings.flashSaleEnd);
-  const vcSec=document.getElementById('vendor-cta-sec');if(vcSec)vcSec.style.display=settings.showVendorCta===false?'none':'';
+  const vcSec=document.getElementById('vendor-cta-sec');if(vcSec)vcSec.style.display=settings.showVendorCta===false?'none':'block';
   const sc=document.getElementById('stat-count');if(sc)sc.textContent=allProducts.length;
   const so=document.getElementById('stat-orders');
   if(so){
@@ -1690,8 +1729,27 @@ async function init(){
     const ab2=document.getElementById('announce-bar');
     if(ab2)ab2.style.display=settings.announcement&&!activePromo?'block':(ab2.style.display==='block'&&!settings.announcement?'none':ab2.style.display);
     if(ab2&&settings.announcement&&!activePromo)ab2.textContent=settings.announcement;
-    const vcSec2=document.getElementById('vendor-cta-sec');if(vcSec2)vcSec2.style.display=settings.showVendorCta===false?'none':'';
+    const vcSec2=document.getElementById('vendor-cta-sec');if(vcSec2)vcSec2.style.display=settings.showVendorCta===false?'none':'block';
+    applyMaintenanceMode(sett);
   });
+}
+// The synchronous inline script at the top of <body> already handled this
+// instantly from cached settings for a repeat visitor, this runs again once
+// real settings arrive (a first-time visitor with no cache yet, or the
+// admin having changed it since this browser's last visit) and corrects
+// either direction, turning it on if the cache was stale/missing, or
+// turning it back off if the cache said on but it's since been switched off.
+function applyMaintenanceMode(s){
+  if(!s)return;
+  const root=document.documentElement;
+  const t=document.getElementById('maintenance-title'),p=document.getElementById('maintenance-text');
+  if(s.maintenanceMode){
+    if(s.maintenanceTitle&&t)t.textContent=s.maintenanceTitle;
+    if(s.maintenanceMessage&&p)p.textContent=s.maintenanceMessage;
+    root.classList.add('rnm-maint');
+  }else{
+    root.classList.remove('rnm-maint');
+  }
 }
 function checkResetLink(){
   const params=new URLSearchParams(window.location.search);
@@ -1751,6 +1809,7 @@ function renderCategories(){const g=document.getElementById('cats-grid');if(!g)r
 // used to break right out of the onclick's string literal when inlined raw,
 // so tapping that category silently did nothing.
 function escJs(s){return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+function escHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function catName(id){return allCategories.find(c=>c.id===id)?.name||id||'';}
 function catIcon(id){return allCategories.find(c=>c.id===id)?.icon||id?.slice(0,2).toUpperCase()||'P';}
 
@@ -1758,6 +1817,7 @@ function productCard(p){
   const price=p.salePrice&&p.salePrice<p.price?p.salePrice:p.price;
   const wished=wishlist.includes(p.id);const oos=p.stock!==null&&p.stock!==undefined&&p.stock<=0;
   const preorder=p.preOrder;const isFree=price===0;const disabled=p.disabled;
+  const comingSoon=!!settings.comingSoonMode;
   const sold=p.sold||0;const stars='★'.repeat(Math.round(p.rating||4))+'☆'.repeat(5-Math.round(p.rating||4));
   let badges='';
   if(disabled)badges='<span class="prod-badge" style="background:var(--ink);color:#fff;">PAUSED</span>';
@@ -1778,16 +1838,16 @@ function productCard(p){
       <div class="prod-name">${p.name}</div>
       ${p.vendorId&&p.vendorName?`<div style="font-size:9px;color:var(--wh);font-weight:700;margin-bottom:3px;">Sold by ${p.vendorName}</div>`:''}
       <div class="prod-price-row">
-        <div class="prod-price">${disabled?'<span style="color:var(--wh);font-weight:700;">Unavailable</span>':isFree?'<span style="color:var(--su);font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:900;">FREE</span>':fmt(price)}</div>
-        ${p.salePrice&&p.salePrice<p.price&&!disabled?`<div class="prod-old">${fmt(p.price)}</div>`:''}
+        <div class="prod-price">${comingSoon?`<span style="color:var(--or);font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;">${escHtml(settings.comingSoonText||'Coming Soon')}</span>`:disabled?'<span style="color:var(--wh);font-weight:700;">Unavailable</span>':isFree?'<span style="color:var(--su);font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:900;">FREE</span>':fmt(price)}</div>
+        ${p.salePrice&&p.salePrice<p.price&&!disabled&&!comingSoon?`<div class="prod-old">${fmt(p.price)}</div>`:''}
       </div>
       <div class="prod-stars">${stars} <span>(${p.reviews||0})</span></div>
-      ${sold>0?`<div style="font-size:9px;color:var(--wh);font-weight:700;margin-bottom:4px;font-weight:700;">${sold} sold${p.stock!==null&&p.stock!==undefined?' · '+p.stock+' left':''}</div>`:''}
-      <button class="prod-add-btn${preorder&&!disabled?' preorder':''}"
+      ${sold>0&&!comingSoon?`<div style="font-size:9px;color:var(--wh);font-weight:700;margin-bottom:4px;font-weight:700;">${sold} sold${p.stock!==null&&p.stock!==undefined?' · '+p.stock+' left':''}</div>`:''}
+      ${comingSoon?`<button class="prod-add-btn" disabled style="opacity:0.6;cursor:default;">${escHtml(settings.comingSoonText||'Coming Soon')}</button>`:`<button class="prod-add-btn${preorder&&!disabled?' preorder':''}"
         ${(oos&&!preorder)||disabled?'disabled':''}
         onclick="event.stopPropagation();${disabled||oos&&!preorder?'':preorder?`openProduct('${p.id}')`:isFree?`addFreeProduct('${p.id}')`:(`quickAdd('${p.id}')`)}">
         ${disabled?'Not Available':preorder?t('preorder'):(oos&&!preorder)?t('outstock'):isFree?t('getfree'):t('addCart')}
-      </button>
+      </button>`}
     </div>
   </div>`;
 }
@@ -1866,11 +1926,12 @@ async function openProduct(id){
       ${stockBadge}
       ${(p.freeShipping||settings.freeShippingAll)?'<div style="font-size:11px;color:var(--su);font-weight:700;margin-bottom:8px;">FREE SHIPPING on this item</div>':''}
       <div class="modal-price-row">
-        <div class="modal-price">${isFree?'<span style="color:var(--su);font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:900;">FREE</span>':fmt(price)}</div>
-        ${p.salePrice&&p.salePrice<p.price?`<div class="modal-old">${fmt(p.price)}</div><span style="font-size:11px;color:var(--re);">${Math.round((p.price-p.salePrice)/p.price*100)}% off</span>`:''}
+        <div class="modal-price">${settings.comingSoonMode?`<span style="color:var(--or);font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;">${escHtml(settings.comingSoonText||'Coming Soon')}</span>`:isFree?'<span style="color:var(--su);font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:900;">FREE</span>':fmt(price)}</div>
+        ${p.salePrice&&p.salePrice<p.price&&!settings.comingSoonMode?`<div class="modal-old">${fmt(p.price)}</div><span style="font-size:11px;color:var(--re);">${Math.round((p.price-p.salePrice)/p.price*100)}% off</span>`:''}
       </div>
-      ${!isFree&&currency==='NGN'?`<div style="font-size:11px;color:var(--wh);font-weight:700;margin-bottom:10px;">≈ $${(price/exchangeRate).toFixed(0)} USD</div>`:''}
+      ${!isFree&&!settings.comingSoonMode&&currency==='NGN'?`<div style="font-size:11px;color:var(--wh);font-weight:700;margin-bottom:10px;">≈ $${(price/exchangeRate).toFixed(0)} USD</div>`:''}
       <div class="modal-desc">${formatDescription(p.description)}</div>
+      ${settings.comingSoonMode?`<div class="modal-btns"><button class="modal-btn modal-btn-dk" disabled style="opacity:0.6;cursor:default;width:100%;">${escHtml(settings.comingSoonText||'Coming Soon')}</button></div>`:`
       ${preorder?`<div class="pre-order-box"><strong style="color:var(--or);">PRE-ORDER</strong><br>${p.preOrderNote||'Reserve now, we contact you when ready.'}</div>`:''}
       ${p.colors&&p.colors.length?renderColorGrid(p):(p.variants&&p.variants.length?`<div class="var-title">${p.variantLabel||'Select Option'}</div><div class="var-opts">${p.variants.map(v=>{
         const isColor=/colou?r/i.test(p.variantLabel||'');
@@ -1887,7 +1948,7 @@ async function openProduct(id){
           ${preorder?t('preorder'):oos?t('outstock'):isFree?t('getfree'):t('addCart')}
         </button>
         ${!oos&&!preorder&&!isFree?`<button class="modal-btn modal-btn-dk" onclick="buyNow()">${t('buyNow')}</button>`:''}
-      </div>
+      </div>`}
       <button onclick="shareProduct('${p.id}','${(p.name||'').replace(/'/g,"\\'")}')" style="width:100%;margin-top:8px;background:var(--card2);border:1px solid var(--bdr);border-radius:8px;padding:10px;color:var(--w2);font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>Share &amp; Earn RichPoints</button>
       ${window._mBundle?`<div style="margin-top:14px;background:rgba(255,140,0,0.06);border:1px solid rgba(255,140,0,0.25);border-radius:10px;padding:14px;">
         <div style="font-weight:800;font-size:13px;color:var(--or);margin-bottom:6px;">${iconBadge('gift',18)} ${window._mBundle.name}, Save ${window._mBundle.discountPct}%</div>
