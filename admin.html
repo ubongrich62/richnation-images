@@ -4399,13 +4399,22 @@ function renderSiteCustomiser(c){
   html += '<div id="pf-payicons-list"></div>';
   html += '<button class="btn btn-or" onclick="savePayIcons()" style="margin-top:10px;">Save Payment Icons</button></div>';
   html += '<div class="cs-section"><div class="cs-section-title">🏦 Wallet Bank Transfer Details</div>';
-  html += '<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">These account details are shown to customers on the "Top Up via Bank Transfer" screen so they know exactly where to send money.</div>';
-  var bd=settings.bankDetails||{};
-  html += '<div class="g2">';
-  html += '<div class="fg"><label class="lbl">Bank Name</label><input class="inp" id="bd-bank" value="'+(bd.bank||'')+'" placeholder="e.g. GTBank"/></div>';
-  html += '<div class="fg"><label class="lbl">Account Number</label><input class="inp" id="bd-acctno" value="'+(bd.acctNo||'')+'" placeholder="0123456789"/></div>';
-  html += '</div>';
-  html += '<div class="fg"><label class="lbl">Account Name</label><input class="inp" id="bd-acctname" value="'+(bd.acctName||'')+'" placeholder="RichNation Global Ltd"/></div>';
+  html += '<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">Up to 3 accounts, all shown to customers on the "Top Up via Bank Transfer" screen so they can pick whichever is easiest for them to send to. Leave an account\'s fields blank to not show it.</div>';
+  // Older sites only ever had one account, saved as settings.bankDetails. Read
+  // it as slot 1 if the newer bankAccounts array hasn't been saved yet, so
+  // nothing already configured gets silently dropped.
+  var accts=settings.bankAccounts||(settings.bankDetails&&settings.bankDetails.acctNo?[settings.bankDetails]:[]);
+  for(var bi=0;bi<3;bi++){
+    var ba=accts[bi]||{};
+    html += '<div style="background:var(--card2);border:1px solid var(--bdr);border-radius:10px;padding:14px;margin-bottom:10px;">';
+    html += '<div style="font-size:11px;font-weight:800;color:var(--or);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Account '+(bi+1)+'</div>';
+    html += '<div class="g2">';
+    html += '<div class="fg"><label class="lbl">Bank Name</label><input class="inp" id="bd-bank-'+bi+'" value="'+(ba.bank||'').replace(/"/g,'&quot;')+'" placeholder="e.g. GTBank"/></div>';
+    html += '<div class="fg"><label class="lbl">Account Number</label><input class="inp" id="bd-acctno-'+bi+'" value="'+(ba.acctNo||'').replace(/"/g,'&quot;')+'" placeholder="0123456789"/></div>';
+    html += '</div>';
+    html += '<div class="fg" style="margin-bottom:0;"><label class="lbl">Account Name</label><input class="inp" id="bd-acctname-'+bi+'" value="'+(ba.acctName||'').replace(/"/g,'&quot;')+'" placeholder="RichNation Global Ltd"/></div>';
+    html += '</div>';
+  }
   html += '<button class="btn btn-or" onclick="saveBankDetails()">Save Bank Details</button></div>';
   html += '<div class="cs-section"><div class="cs-section-title">⭐ RichPoints Loyalty Programme</div>';
   html += '<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">Control how many points customers earn for each action, and how much a point is worth when redeemed.</div>';
@@ -5347,10 +5356,18 @@ async function saveRichPoints(){
   toast('RichPoints settings saved!');
 }
 async function saveBankDetails(){
-  var bd={bank:(document.getElementById('bd-bank')||{}).value||'',acctNo:(document.getElementById('bd-acctno')||{}).value||'',acctName:(document.getElementById('bd-acctname')||{}).value||''};
-  settings.bankDetails=bd;
-  await fbU('rn_mall_settings',{bankDetails:bd});
+  var accts=[];
+  for(var bi=0;bi<3;bi++){
+    var bank=(document.getElementById('bd-bank-'+bi)||{}).value||'';
+    var acctNo=(document.getElementById('bd-acctno-'+bi)||{}).value||'';
+    var acctName=(document.getElementById('bd-acctname-'+bi)||{}).value||'';
+    if(bank||acctNo||acctName)accts.push({bank:bank,acctNo:acctNo,acctName:acctName});
+  }
+  settings.bankAccounts=accts;
+  var ok=await fbU('rn_mall_settings',{bankAccounts:accts});
+  if(!ok)return;
   toast('Bank details saved!');
+  nav('customiser',false);
 }
 async function savePayIcons(){
   await fbU('rn_mall_settings',{paymentIcons:settings.paymentIcons||{}});
