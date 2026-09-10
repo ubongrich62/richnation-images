@@ -14,7 +14,7 @@
 // fonts, map tiles, and any other cross-origin request are passed straight
 // through, never cached, never intercepted beyond this file existing.
 
-const CACHE_NAME = 'richnation-shell-v1';
+const CACHE_NAME = 'richnation-shell-v2';
 const SHELL_ASSETS = [
   '/index.html',
   '/manifest.json',
@@ -46,8 +46,15 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET' || url.origin !== self.location.origin) return;
   if (!SHELL_ASSETS.includes(url.pathname)) return;
 
+  // cache: 'no-store' is the important part, "network-first" is only real if
+  // the network request actually reaches the origin. Without this, fetch()
+  // is free to silently satisfy the request from the browser's own HTTP
+  // cache (honouring whatever Cache-Control header GitHub Pages' CDN sent
+  // on an earlier visit), so a page edit could be live on GitHub yet still
+  // show stale here for as long as that HTTP cache entry stays fresh, the
+  // exact bug this whole service worker was meant to prevent.
   event.respondWith(
-    fetch(event.request)
+    fetch(event.request, {cache: 'no-store'})
       .then((res) => {
         const clone = res.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone)).catch(() => {});
