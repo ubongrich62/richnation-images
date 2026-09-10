@@ -1069,21 +1069,25 @@ async function fbUVerified(p,d,ms){
     return !!(r&&r.ok);
   }catch(e){return false;}
 }
-const GITHUB_CONFIG={owner:'ubongrich62',repo:'richnation-images',branch:'main',token:'YOUR_FINE_GRAINED_TOKEN'};
-function isGithubConfigured(){return GITHUB_CONFIG.owner!=='YOUR_GITHUB_USERNAME'&&GITHUB_CONFIG.token!=='YOUR_FINE_GRAINED_TOKEN';}
+// Function name kept as "Github" for historical reasons, many call sites
+// already use it, it now uploads to Firebase Storage instead (same fix
+// already applied in admin.html and vendor.html), no token to configure.
+function isGithubConfigured(){return true;}
+const FIREBASE_STORAGE_BUCKET='richnation-portal.firebasestorage.app';
 async function uploadDataUrlToGithub(dataUrl,folder){
-  if(!isGithubConfigured())return null;
   try{
-    const commaIdx=dataUrl.indexOf(',');
-    const base64Content=dataUrl.slice(commaIdx+1);
-    const mimeMatch=dataUrl.slice(0,commaIdx).match(/data:[^/]+\/([^;]+)/);
-    const ext=(mimeMatch?mimeMatch[1]:'jpg').split('+')[0];
-    const path='images/'+folder+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
-    const apiUrl='https://api.github.com/repos/'+GITHUB_CONFIG.owner+'/'+GITHUB_CONFIG.repo+'/contents/'+path;
-    const res=await fetch(apiUrl,{method:'PUT',headers:{'Authorization':'token '+GITHUB_CONFIG.token,'Content-Type':'application/json','Accept':'application/vnd.github+json'},body:JSON.stringify({message:'Upload '+path,content:base64Content,branch:GITHUB_CONFIG.branch})});
-    if(!res.ok)throw new Error('GitHub upload failed: '+res.status);
-    return 'https://raw.githubusercontent.com/'+GITHUB_CONFIG.owner+'/'+GITHUB_CONFIG.repo+'/'+GITHUB_CONFIG.branch+'/'+path;
-  }catch(e){console.warn('GitHub image upload failed:',e);return null;}
+    const res=await fetch(dataUrl);
+    const blob=await res.blob();
+    const ext=(blob.type.split('/')[1]||'jpg').split('+')[0];
+    const path=folder+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
+    const encodedPath=encodeURIComponent(path);
+    const uploadUrl='https://firebasestorage.googleapis.com/v0/b/'+FIREBASE_STORAGE_BUCKET+'/o?name='+encodedPath;
+    const uploadRes=await fetch(uploadUrl,{method:'POST',headers:{'Content-Type':blob.type||'image/jpeg'},body:blob});
+    if(!uploadRes.ok)throw new Error('Upload failed: '+uploadRes.status);
+    const data=await uploadRes.json();
+    const token=data.downloadTokens;
+    return 'https://firebasestorage.googleapis.com/v0/b/'+FIREBASE_STORAGE_BUCKET+'/o/'+encodedPath+'?alt=media'+(token?'&token='+token:'');
+  }catch(e){console.warn('Storage upload failed:',e);return null;}
 }
 async function uploadMyPhoto(inputId){
   const inp=document.getElementById(inputId||'pf-photo-upload');

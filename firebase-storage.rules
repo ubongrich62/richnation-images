@@ -10,6 +10,10 @@
 // blocks abuse, not normal use. This mirrors the same risk profile
 // already accepted for the Realtime Database rules, scoped down further
 // with folder/type/size checks rather than a fully open write.
+//
+// task-files/submissions are staff task attachments, not necessarily
+// photos (could be a PDF or doc), so they get their own rule: no content
+// type restriction, capped higher at 15MB.
 
 rules_version = '2';
 service firebase.storage {
@@ -19,10 +23,17 @@ service firebase.storage {
       allow write: if folder in [
                         'banners','products','staff','investors','riders',
                         'vendors','orders','hero-banner','payment-icons',
-                        'colors','vendor-photos','vendor-products'
+                        'colors','vendor-photos','vendor-products',
+                        'reviews','staff-photos','staff-products',
+                        'investor-photos','rider-photos'
                       ]
                    && request.resource.size < 8 * 1024 * 1024
                    && request.resource.contentType.matches('image/.*');
+    }
+    match /{folder}/{allPaths=**} {
+      allow read: if true;
+      allow write: if folder in ['task-files','submissions']
+                   && request.resource.size < 15 * 1024 * 1024;
     }
   }
 }
