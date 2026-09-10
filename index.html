@@ -3080,11 +3080,20 @@ async function trackVisit(){
     }
     var country='unknown';
     try{
-      var geoRes=await fetch('https://ipwho.is/',{cache:'no-store'});
+      // This third-party lookup has no timeout of its own, and unlike every
+      // other network call in this app it was never wrapped in one, so a
+      // slow or unreachable ipwho.is (a flaky network, a blocked host) could
+      // leave this fetch pending for a very long time, keeping the browser's
+      // tab spinner active well after the rest of the page has rendered.
+      // An AbortController cap keeps this to a few seconds no matter what.
+      var geoCtl=new AbortController();
+      var geoTimer=setTimeout(function(){geoCtl.abort();},4000);
+      var geoRes=await fetch('https://ipwho.is/',{cache:'no-store',signal:geoCtl.signal});
+      clearTimeout(geoTimer);
       if(geoRes.ok){var geo=await geoRes.json();if(geo&&geo.success!==false&&geo.country_code)country=geo.country_code;}
     }catch(geoErr){}
     patch['countries/'+country]={'.sv':{'increment':1}};
-    await fetch(FB+'/rn_mall_analytics/'+today+'.json',{method:'PATCH',body:JSON.stringify(patch)});
+    await fbFetchTimeout(FB+'/rn_mall_analytics/'+today+'.json',{method:'PATCH',body:JSON.stringify(patch)},8000);
   }catch(e){console.warn('Visit tracking failed (non-critical):',e);}
 }
 
