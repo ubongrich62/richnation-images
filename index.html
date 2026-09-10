@@ -2947,10 +2947,18 @@ function loadGoogleMapsIfNeeded(){
   window._gmapsLoadPromise=new Promise(function(resolve){
     if(window.google&&window.google.maps){resolve();return;}
     if(!GOOGLE_MAPS_API_KEY||GOOGLE_MAPS_API_KEY==='YOUR_GOOGLE_MAPS_API_KEY'){resolve();return;}
-    window._gmapsReady=function(){resolve();};
+    // script.onerror only fires for an outright network failure, a request
+    // that just never calls back (briefly common right after a Maps API key
+    // or its restrictions are changed, Google's own systems can take several
+    // minutes to catch up) would otherwise leave renderDeliveryMap awaiting
+    // this promise forever, stuck showing "Loading map..." with no visible
+    // error. This timeout guarantees it resolves either way.
+    var settled=false;
+    var timer=setTimeout(function(){if(!settled){settled=true;console.warn('[GoogleMaps] Script did not load within 10s, giving up for now.');resolve();}},10000);
+    window._gmapsReady=function(){if(!settled){settled=true;clearTimeout(timer);resolve();}};
     const script=document.createElement('script');
     script.src='https://maps.googleapis.com/maps/api/js?key='+GOOGLE_MAPS_API_KEY+'&callback=_gmapsReady&loading=async';
-    script.onerror=function(){resolve();};
+    script.onerror=function(){if(!settled){settled=true;clearTimeout(timer);resolve();}};
     document.head.appendChild(script);
   });
   return window._gmapsLoadPromise;
