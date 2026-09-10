@@ -3551,7 +3551,29 @@ async function doRegister(){
   await fbP('rn_mall_notifications',{type:'new_customer',name:fn+' '+ln,email,date:ds(),read:false,ts:Date.now()});
   currUser=customer;localStorage.setItem('rnm_user',JSON.stringify(currUser));updateAuthUI();closeAuth();toast('Welcome to RichNation Mall, '+fn+'!');
 }
-function updateAuthUI(){document.getElementById('auth-btns').style.display=currUser?'none':'flex';document.getElementById('user-menu').style.display=currUser?'block':'none';if(currUser)loadCustNotifs();else{const b=document.getElementById('cnotif-badge');if(b)b.style.display='none';}}
+function updateAuthUI(){document.getElementById('auth-btns').style.display=currUser?'none':'flex';document.getElementById('user-menu').style.display=currUser?'block':'none';if(currUser){loadCustNotifs();trackCustomerActivity();}else{const b=document.getElementById('cnotif-badge');if(b)b.style.display='none';}}
+// Lets admin see how active each customer actually is (Customers page: Last
+// Seen, days/weeks/months/years, Active Days), on top of the anonymous,
+// site-wide Visitors dashboard, this is per real account instead. Only
+// updates once per page load, and only once per calendar day counts as a
+// new "active day", so a customer who spends an hour shopping in one visit
+// doesn't get counted as ten different days.
+async function trackCustomerActivity(){
+  if(!currUser||!currUser.id)return;
+  if(window._custActivityTracked)return;
+  window._custActivityTracked=true;
+  try{
+    var today=analyticsDateKey();
+    var lastDayKey='rnm_cust_last_active_day_'+currUser.id;
+    var isNewDay=localStorage.getItem(lastDayKey)!==today;
+    var patch={lastSeen:Date.now()};
+    if(isNewDay){
+      localStorage.setItem(lastDayKey,today);
+      patch.activeDayCount={'.sv':{'increment':1}};
+    }
+    await fbFetchTimeout(FB+'/rn_mall_customers/'+currUser.id+'.json',{method:'PATCH',body:JSON.stringify(patch)},8000);
+  }catch(e){console.warn('Customer activity tracking failed (non-critical):',e);}
+}
 
 // ── CUSTOMER NOTIFICATIONS ──
 async function loadCustNotifs(){

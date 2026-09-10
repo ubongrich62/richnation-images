@@ -733,6 +733,36 @@ function setCurr(c){
   nav(curNav||'dashboard',false);
 }
 function ini(n){return(n||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
+// Turns a raw timestamp into "3 days ago"/"2 weeks ago"/etc, picking
+// whichever unit reads most naturally, used on the Customers page to show
+// each customer's last visit at a glance.
+function timeAgo(ts){
+  if(!ts)return 'Never visited';
+  var diff=Date.now()-ts;
+  if(diff<0)diff=0;
+  var mins=Math.floor(diff/60000);
+  if(mins<1)return 'Just now';
+  if(mins<60)return mins+' min'+(mins===1?'':'s')+' ago';
+  var hours=Math.floor(mins/60);
+  if(hours<24)return hours+' hour'+(hours===1?'':'s')+' ago';
+  var days=Math.floor(hours/24);
+  if(days<7)return days+' day'+(days===1?'':'s')+' ago';
+  var weeks=Math.floor(days/7);
+  if(weeks<5)return weeks+' week'+(weeks===1?'':'s')+' ago';
+  var months=Math.floor(days/30);
+  if(months<12)return months+' month'+(months===1?'':'s')+' ago';
+  var years=Math.floor(days/365);
+  return years+' year'+(years===1?'':'s')+' ago';
+}
+function custActivityBadge(lastSeen){
+  if(!lastSeen)return {label:'Never visited',color:'var(--mu)'};
+  var days=(Date.now()-lastSeen)/86400000;
+  if(days<1)return {label:'Active today',color:'var(--su)'};
+  if(days<7)return {label:'Active this week',color:'var(--su)'};
+  if(days<30)return {label:'Active this month',color:'var(--or)'};
+  if(days<365)return {label:'Dormant',color:'var(--mu)'};
+  return {label:'Inactive 1yr+',color:'var(--re)'};
+}
 function svgIconPaths(name){
   var icons={
     money:'<path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>',
@@ -3741,7 +3771,7 @@ async function saveDeliveryOpts(){
 
 // ── CUSTOMERS ──
 async function renderCustomers(c){
-  const custs=Object.values(allCusts);
+  const custs=Object.values(allCusts).sort((a,b)=>(b.lastSeen||0)-(a.lastSeen||0));
   c.innerHTML=`
   <div class="page-hdr slide-up">
     <div><div class="page-hdr-title">Customers</div>
@@ -3749,11 +3779,12 @@ async function renderCustomers(c){
   </div>
   ${custs.length===0?`<div class="card fade-in"><div class="empty"><div class="empty-icon">&#9786;</div><div class="empty-title">No customers yet</div><div class="empty-sub">Registered customers will appear here.</div></div></div>`:
   `<div class="stagger">
-    ${custs.map(cu=>`<div class="data-row" style="flex-wrap:wrap;">
+    ${custs.map(cu=>{const ab=custActivityBadge(cu.lastSeen);return `<div class="data-row" style="flex-wrap:wrap;">
       <div class="row-av">${ini(cu.fname+' '+cu.lname)}</div>
       <div style="flex:1;min-width:180px;">
-        <div class="row-name">${cu.fname} ${cu.lname} ${cu.accountStatus==='suspended'||cu.accountStatus==='blocked'?'<span style="color:var(--re);font-size:10px;font-weight:800;">('+(cu.suspendReason==='failed_attempts'?'AUTO-LOCKED: 3 FAILED LOGINS':'SUSPENDED')+')</span>':''}</div>
+        <div class="row-name">${cu.fname} ${cu.lname} ${cu.accountStatus==='suspended'||cu.accountStatus==='blocked'?'<span style="color:var(--re);font-size:10px;font-weight:800;">('+(cu.suspendReason==='failed_attempts'?'AUTO-LOCKED: 3 FAILED LOGINS':'SUSPENDED')+')</span>':''} <span style="background:${ab.color}22;color:${ab.color};font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:99px;margin-left:6px;text-transform:uppercase;letter-spacing:0.3px;">${ab.label}</span></div>
         <div class="row-meta">${cu.email} &middot; ${cu.phone||'No phone'} &middot; Joined ${cu.joinDate||'N/A'}</div>
+        <div class="row-meta" style="margin-top:3px;">Last seen: <strong style="color:var(--wh);">${timeAgo(cu.lastSeen)}</strong>${cu.activeDayCount?' &middot; Active on '+cu.activeDayCount+' day'+(cu.activeDayCount===1?'':'s'):''}</div>
         <div class="row-meta" style="margin-top:3px;">Password: <span id="pw-${cu.id}" style="font-family:monospace;letter-spacing:1px;">••••••••</span> <span onclick="togglePwView('${cu.id}','${escAttr((cu.password||''))}')" style="color:var(--or);cursor:pointer;font-weight:700;">show</span></div>
         <div class="row-meta" style="margin-top:3px;">⭐ RichPoints: <strong style="color:var(--or);">${(cu.points||0).toLocaleString()}</strong> &middot; 👛 Wallet: <strong style="color:var(--su);">₦${(cu.walletBalance||0).toLocaleString()}</strong>${cu.wholesaleStatus?' &middot; Wholesale: <strong style="color:'+(cu.wholesaleStatus==='approved'?'var(--su)':'var(--or)')+';">'+cu.wholesaleStatus+'</strong>'+(cu.wholesaleBusiness?' ('+cu.wholesaleBusiness+')':''):''}</div>
       </div>
@@ -3768,7 +3799,7 @@ async function renderCustomers(c){
         </button>
         <button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteCustomer('${cu.id}','${escAttr(cu.fname)}')">Delete</button>
       </div>
-    </div>`).join('')}
+    </div>`;}).join('')}
   </div>`}`;
 }
 function togglePwView(id,pw){const el=document.getElementById('pw-'+id);if(!el)return;if(el.textContent==='••••••••'){el.textContent=pw||'(not set)';}else{el.textContent='••••••••';}}
