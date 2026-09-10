@@ -178,6 +178,16 @@
     "rn_mall_newsletter_subscribers": {
       ".write": true,
       "$id": { ".read": true }
+    },
+
+    // Website traffic counters (Visitors page in admin). One small record
+    // per calendar day, incremented anonymously by every visit to
+    // index.html, read as a whole date-range by the admin dashboard. No
+    // per-visit log is ever written, so this never grows into something
+    // expensive to read, no matter how much traffic the site gets.
+    "rn_mall_analytics": {
+      ".read": true,
+      "$date": { ".write": true }
     }
   }
 }

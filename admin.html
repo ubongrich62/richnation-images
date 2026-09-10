@@ -435,6 +435,9 @@ html,body{color-scheme:dark;height:100%;font-family:'Inter',sans-serif;backgroun
       <div class="sb-item" id="nav-analytics" onclick="nav('analytics')">
         <span class="sb-ico">&#128200;</span>Analytics
       </div>
+      <div class="sb-item" id="nav-visitors" onclick="nav('visitors')">
+        <span class="sb-ico">&#127760;</span>Visitors
+      </div>
       <div class="sb-item" id="nav-hero" onclick="nav('hero')">
         <span class="sb-ico">&#127968;</span>Homepage Editor
       </div>
@@ -749,7 +752,9 @@ function svgIconPaths(name){
     cake:'<path d="M4 21h16v-8H4z"/><path d="M4 13a3 3 0 013-3h10a3 3 0 013 3"/><path d="M9 10V6M12 10V4M15 10V6"/>',
     briefcase:'<path d="M3 7h18v13H3z"/><path d="M8 7V4h8v3"/>',
     note:'<path d="M4 3h16v18l-4-3H4z"/><path d="M8 8h8M8 12h5"/>',
-    warning:'<path d="M12 2L2 20h20L12 2z"/><path d="M12 9v5M12 17h.01"/>'
+    warning:'<path d="M12 2L2 20h20L12 2z"/><path d="M12 9v5M12 17h.01"/>',
+    globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 4 5.5 4 9s-1.5 6.5-4 9c-2.5-2.5-4-5.5-4-9s1.5-6.5 4-9z"/>',
+    monitor:'<rect x="3" y="4" width="18" height="12" rx="1"/><path d="M8 20h8M12 16v4"/>'
   };
   return icons[name]||icons.star;
 }
@@ -2934,6 +2939,87 @@ async function renderAnalytics(c){
   c.innerHTML=html;
 }
 
+// ── VISITORS (site traffic) ──
+// Analytics above is business numbers (sales/orders/reviews) from data the
+// app already writes anyway. This is website traffic, unique visitors,
+// device/browser/location, sourced from rn_mall_analytics, a small daily
+// counter record that index.html increments (via Firebase's atomic
+// {".sv":{"increment":1}}) on every homepage visit. Kept as one small
+// counter object per day, not a growing log of every visit, so this page
+// never has to download more than 30 short records to show a month.
+var COUNTRY_NAMES={NG:'Nigeria',GH:'Ghana',KE:'Kenya',ZA:'South Africa',GB:'United Kingdom',US:'United States',CA:'Canada',DE:'Germany',FR:'France',IN:'India',AE:'UAE',CM:'Cameroon',UnitedStates:'United States',unknown:'Unknown'};
+function analyticsDateKey(d){d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+async function fbAnalyticsRange(fromKey,toKey){
+  try{
+    var url=FB+'/rn_mall_analytics.json?orderBy=%22$key%22&startAt=%22'+fromKey+'%22&endAt=%22'+toKey+'%22';
+    var r=await fbFetchTimeout(url);
+    var d=await r.json();
+    return (d&&typeof d==='object')?d:{};
+  }catch(e){return {};}
+}
+async function renderVisitors(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Visitors</div></div><div style="padding:20px;color:var(--wh);font-weight:700;">Loading...</div>';
+  var today=new Date();
+  var from=new Date(today);from.setDate(from.getDate()-29);
+  var data=await fbAnalyticsRange(analyticsDateKey(from),analyticsDateKey(today));
+  var days=[];
+  for(var i=29;i>=0;i--){var d=new Date(today);d.setDate(d.getDate()-i);days.push(analyticsDateKey(d));}
+  var rows=days.map(function(k){return {key:k,d:data[k]||{}};});
+  function sumRange(n){
+    var slice=rows.slice(rows.length-n);
+    return {total:slice.reduce(function(s,r){return s+(r.d.total||0);},0),unique:slice.reduce(function(s,r){return s+(r.d.uniqueCount||0);},0)};
+  }
+  var todayStats=rows[rows.length-1].d;
+  var weekStats=sumRange(7),monthStats=sumRange(30);
+  function mergeMaps(field){
+    var out={};
+    rows.forEach(function(r){var m=(r.d||{})[field]||{};for(var k in m){out[k]=(out[k]||0)+m[k];}});
+    return out;
+  }
+  var devices=mergeMaps('devices'),browsers=mergeMaps('browsers'),countries=mergeMaps('countries');
+  function topList(map,limit){return Object.keys(map).map(function(k){return {k:k,v:map[k]};}).sort(function(a,b){return b.v-a.v;}).slice(0,limit||8);}
+  function bar(label,value,max){
+    var pct=max>0?Math.round((value/max)*100):0;
+    return '<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--wh);margin-bottom:4px;"><span style="text-transform:capitalize;">'+label+'</span><span>'+value.toLocaleString()+'</span></div><div style="background:var(--card2);border-radius:6px;height:8px;overflow:hidden;"><div style="width:'+pct+'%;height:100%;background:var(--or);"></div></div></div>';
+  }
+  var hasAnyData=rows.some(function(r){return r.d&&r.d.total;});
+  var maxDevice=Math.max.apply(null,['mobile','desktop','tablet'].map(function(k){return devices[k]||0;}).concat([1]));
+  var deviceBars=hasAnyData?['mobile','desktop','tablet'].map(function(k){return bar(k,devices[k]||0,maxDevice);}).join(''):'<div style="font-size:12px;color:var(--wh);">No visits recorded yet.</div>';
+  var maxBrowser=Math.max.apply(null,Object.values(browsers).concat([1]));
+  var browserBars=hasAnyData?(topList(browsers,6).map(function(x){return bar(x.k,x.v,maxBrowser);}).join('')||'<div style="font-size:12px;color:var(--wh);">No visits recorded yet.</div>'):'<div style="font-size:12px;color:var(--wh);">No visits recorded yet.</div>';
+  var maxCountry=Math.max.apply(null,Object.values(countries).concat([1]));
+  var countryBars=hasAnyData?(topList(countries,8).map(function(x){return bar(COUNTRY_NAMES[x.k]||x.k,x.v,maxCountry);}).join('')||'<div style="font-size:12px;color:var(--wh);">No visits recorded yet.</div>'):'<div style="font-size:12px;color:var(--wh);">No visits recorded yet.</div>';
+
+  var maxDay=Math.max.apply(null,rows.map(function(r){return r.d.total||0;}).concat([1]));
+  var trend='<div class="card" style="margin-bottom:16px;"><div class="card-title">Visits, Last 30 Days</div>'
+    +'<div style="display:flex;align-items:flex-end;gap:3px;height:120px;margin-top:16px;overflow-x:auto;padding-bottom:4px;">'
+    +rows.map(function(r){
+      var h=Math.max(2,Math.round(((r.d.total||0)/maxDay)*90));
+      return '<div style="flex:1;min-width:12px;display:flex;flex-direction:column;align-items:center;gap:3px;" title="'+r.key+': '+(r.d.total||0)+' visits, '+(r.d.uniqueCount||0)+' unique">'
+        +'<div style="width:100%;background:linear-gradient(180deg,var(--or),var(--gold));border-radius:3px 3px 0 0;height:'+h+'px;min-height:2px;"></div>'
+        +'</div>';
+    }).join('')
+    +'</div></div>';
+
+  var avgVisitsPerVisitor=monthStats.unique?(monthStats.total/monthStats.unique).toFixed(1):'0';
+
+  var summary='<div class="stats-grid" style="margin-bottom:16px;">'
+    +'<div class="stat-card"><div class="stat-icon">'+iconBadge('user',22)+'</div><div class="stat-num">'+(todayStats.uniqueCount||0)+'</div><div class="stat-lbl">Unique Visitors Today</div><div class="stat-sub">'+(todayStats.total||0)+' total visits today</div></div>'
+    +'<div class="stat-card"><div class="stat-icon">'+iconBadge('user',22)+'</div><div class="stat-num">'+weekStats.unique+'</div><div class="stat-lbl">Unique Visitors, 7 Days</div><div class="stat-sub">'+weekStats.total+' total visits</div></div>'
+    +'<div class="stat-card"><div class="stat-icon">'+iconBadge('user',22)+'</div><div class="stat-num">'+monthStats.unique+'</div><div class="stat-lbl">Unique Visitors, 30 Days</div><div class="stat-sub">'+monthStats.total+' total visits</div></div>'
+    +'<div class="stat-card"><div class="stat-icon">'+iconBadge('clock',22)+'</div><div class="stat-num">'+avgVisitsPerVisitor+'</div><div class="stat-lbl">Avg. Visits per Visitor</div><div class="stat-sub">Last 30 days</div></div>'
+    +'</div>';
+
+  var html='<div class="page-hdr"><div><div class="page-hdr-title">Visitors</div><div class="page-hdr-sub">How many people visit your website, and how they use it</div></div><div class="page-hdr-actions"><button class="btn btn-dk" onclick="nav(\'visitors\',false)">↻ Refresh</button></div></div>';
+  html+=summary+trend;
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;">';
+  html+='<div class="card"><div class="card-title">'+iconBadge('monitor',15)+' Device</div>'+deviceBars+'</div>';
+  html+='<div class="card"><div class="card-title">'+iconBadge('globe',15)+' Browser</div>'+browserBars+'</div>';
+  html+='<div class="card"><div class="card-title">'+iconBadge('globe',15)+' Top Locations</div>'+countryBars+'</div>';
+  html+='</div>';
+  html+='<div style="font-size:11px;color:var(--wh);opacity:0.6;margin-top:16px;line-height:1.6;">Counts are approximate, based on anonymous browser storage on richnationmall.com, not signed-in accounts, so the same person on two devices, or a cleared browser, counts as more than one visitor. Location is estimated from IP address via a third-party lookup, not exact GPS.</div>';
+  c.innerHTML=html;
+}
 
 async function renderDash(c){
   const orders=Object.values(allOrders);
@@ -4260,6 +4346,7 @@ function nav(page,push){
   if(window.innerWidth<=768){document.querySelector('.sb')?.classList.remove('open');document.getElementById('sb-backdrop')?.classList.remove('open');}
   if(page==='dashboard')renderDash(ci);
   else if(page==='analytics')renderAnalytics(ci);
+  else if(page==='visitors')renderVisitors(ci);
   else if(page==='vendors')renderVendors(ci);
   else if(page==='wallet-issues')renderWalletIssues(ci);
   else if(page==='staff')renderStaff(ci);
