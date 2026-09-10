@@ -915,7 +915,7 @@ async function initAdmin(){
       localStorage.setItem('rnm_admin_cache_customers',JSON.stringify(allCusts));
       localStorage.setItem('rnm_admin_cache_settings',JSON.stringify(sett||settings));
     }catch(cacheWriteErr){/* storage full or unavailable, skip caching */}
-    settings=sett||settings||{exchangeRate:1600,podEnabled:true,paystackKey:'pk_test_REPLACE_WITH_YOUR_KEY'};
+    settings=sett||settings||{exchangeRate:1600,podEnabled:true};
     var validPages=['dashboard','analytics','vendors','wallet-issues','staff','investors','riders','bundles','promos','orders','products','categories','coupons','delivery','customers','chat','notifications','settings','customiser','hero','preorders','reviews','pod','newsletter'];
     var lastPage=sessionStorage.getItem('rnm_admin_lastpage');
     nav(validPages.includes(lastPage)?lastPage:'dashboard');
@@ -4227,6 +4227,24 @@ function renderSettings(c){
   </div>
 
   <div class="card fade-in">
+    <div class="card-title">Google Maps Integration</div>
+    <div class="card-sub">Powers the live delivery tracking map on the customer site. Get a key from console.cloud.google.com, enable the "Maps JavaScript API". Leave blank to keep using the app's built-in key.</div>
+    <div class="fg"><label class="lbl">Google Maps API Key</label>
+      <input class="inp" id="set-mapskey" value="${settings.googleMapsKey||''}" placeholder="AIza..."/>
+    </div>
+    <button class="btn btn-or" onclick="saveMapsKey()">Save Maps Key</button>
+  </div>
+
+  <div class="card fade-in">
+    <div class="card-title">Storage (Cloudflare R2)</div>
+    <div class="card-sub">Once set, every NEW product photo, review photo, and profile photo uploads to your own Cloudflare R2 bucket instead of Firebase Storage, R2 has no download/bandwidth charge. Deploy the Worker in <code>cloudflare-worker/richnation-storage-worker.js</code> first, then paste its URL here. Leave blank to keep using Firebase Storage, nothing already uploaded is affected either way.</div>
+    <div class="fg"><label class="lbl">Cloudflare Worker URL</label>
+      <input class="inp" id="set-r2url" value="${settings.r2WorkerUrl||''}" placeholder="https://richnation-storage.your-subdomain.workers.dev"/>
+    </div>
+    <button class="btn btn-or" onclick="saveR2Url()">Save Storage Settings</button>
+  </div>
+
+  <div class="card fade-in">
     <div class="card-title">Flash Sale Timer</div>
     <div class="card-sub">Set a countdown timer that shows on the mall homepage. Leave blank to disable.</div>
     <div class="fg"><label class="lbl">Flash Sale End Date and Time</label>
@@ -4264,6 +4282,20 @@ async function savePaySettings(){
   settings.paystackKey=key;settings.podEnabled=pod;settings.podApprovedStates=podStates;
   await fbU('rn_mall_settings',{paystackKey:key,podEnabled:pod,podApprovedStates:podStates});
   toast('Payment settings saved!');
+}
+async function saveMapsKey(){
+  const key=document.getElementById('set-mapskey')?.value.trim()||'';
+  settings.googleMapsKey=key;
+  var ok=await fbU('rn_mall_settings',{googleMapsKey:key||null});
+  if(!ok)return;
+  toast('Maps key saved!');
+}
+async function saveR2Url(){
+  const url=document.getElementById('set-r2url')?.value.trim().replace(/\/+$/,'')||'';
+  settings.r2WorkerUrl=url;
+  var ok=await fbU('rn_mall_settings',{r2WorkerUrl:url||null});
+  if(!ok)return;
+  toast(url?'Storage settings saved, new uploads now go to Cloudflare R2!':'Storage settings saved, back to Firebase Storage.');
 }
 async function saveFlash(){
   const v=document.getElementById('set-flash')?.value;
@@ -4964,37 +4996,32 @@ async function uploadDataUrlToGithubPrivate(dataUrl,folder){
   }
 }
 const FIREBASE_STORAGE_BUCKET='richnation-portal.firebasestorage.app';
-// Uploads a File to Firebase Storage and returns its public download URL, this replaces
-// storing images as base64 text directly inside database records, which was the real
-// driver behind the huge Realtime Database download bandwidth (every product/order fetch
-// was pulling full image data along with it, every single time).
-async function uploadFileToStorage(file,folder){
-  const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+// Storage backend switch: once a Cloudflare R2 Worker URL is saved in Site
+// Customiser (settings.r2WorkerUrl), every new upload goes there instead of
+// Firebase Storage, R2 has no per-GB download/egress charge, which is where
+// a growing storefront's Storage bill actually comes from. Nothing already
+// uploaded moves, existing Firebase Storage URLs saved on old records keep
+// working exactly as before, this only changes where NEW uploads land.
+async function uploadBlobToStorage(blob,folder,filenameExt){
+  const ext=(filenameExt||blob.type.split('/')[1]||'jpg').split('+')[0].toLowerCase();
   const path=folder+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
-  const encodedPath=encodeURIComponent(path);
-  const url='https://firebasestorage.googleapis.com/v0/b/'+FIREBASE_STORAGE_BUCKET+'/o?name='+encodedPath;
-  try{
-    const res=await fetch(url,{method:'POST',headers:{'Content-Type':file.type||'application/octet-stream'},body:file});
-    if(!res.ok)throw new Error('Upload failed: '+res.status);
-    const data=await res.json();
-    const token=data.downloadTokens;
-    return 'https://firebasestorage.googleapis.com/v0/b/'+FIREBASE_STORAGE_BUCKET+'/o/'+encodedPath+'?alt=media'+(token?'&token='+token:'');
-  }catch(e){
-    console.warn('Storage upload failed:',e);
-    return null;
+  const contentType=blob.type||'application/octet-stream';
+  if(settings.r2WorkerUrl){
+    try{
+      const base=settings.r2WorkerUrl.replace(/\/+$/,'');
+      const res=await fetch(base+'/?path='+encodeURIComponent(path),{method:'POST',headers:{'Content-Type':contentType},body:blob});
+      if(!res.ok)throw new Error('Upload failed: '+res.status);
+      const data=await res.json();
+      return data.url;
+    }catch(e){
+      console.warn('R2 upload failed:',e);
+      return null;
+    }
   }
-}
-// Same idea, but for an already-compressed base64 image (used where compression still
-// happens client-side first, e.g. to control final resolution before it ever reaches Storage).
-async function uploadDataUrlToStorage(dataUrl,folder){
   try{
-    const res=await fetch(dataUrl);
-    const blob=await res.blob();
-    const ext=(blob.type.split('/')[1]||'jpg').split('+')[0];
-    const path=folder+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
     const encodedPath=encodeURIComponent(path);
     const uploadUrl='https://firebasestorage.googleapis.com/v0/b/'+FIREBASE_STORAGE_BUCKET+'/o?name='+encodedPath;
-    const uploadRes=await fetch(uploadUrl,{method:'POST',headers:{'Content-Type':blob.type||'image/jpeg'},body:blob});
+    const uploadRes=await fetch(uploadUrl,{method:'POST',headers:{'Content-Type':contentType},body:blob});
     if(!uploadRes.ok)throw new Error('Upload failed: '+uploadRes.status);
     const data=await uploadRes.json();
     const token=data.downloadTokens;
@@ -5004,17 +5031,47 @@ async function uploadDataUrlToStorage(dataUrl,folder){
     return null;
   }
 }
+// Uploads a File, this replaces storing images as base64 text directly inside
+// database records, which was the real driver behind the huge Realtime
+// Database download bandwidth (every product/order fetch was pulling full
+// image data along with it, every single time).
+async function uploadFileToStorage(file,folder){
+  return uploadBlobToStorage(file,folder,(file.name.split('.').pop()||'jpg').toLowerCase());
+}
+// Same idea, but for an already-compressed base64 image (used where compression still
+// happens client-side first, e.g. to control final resolution before it ever reaches Storage).
+async function uploadDataUrlToStorage(dataUrl,folder){
+  try{
+    const res=await fetch(dataUrl);
+    const blob=await res.blob();
+    return uploadBlobToStorage(blob,folder);
+  }catch(e){
+    console.warn('Storage upload failed:',e);
+    return null;
+  }
+}
 // Deleting a record (a product, a vendor, etc.) used to only remove its
 // database entry, any photo/video actually hosted in Storage was silently
 // left behind forever, quietly costing storage space. Safe to call on any
-// value, it no-ops on inline base64 data and non-Storage URLs.
+// value, it no-ops on inline base64 data and any URL that isn't Firebase
+// Storage or the configured R2 Worker.
 async function deleteStorageFile(url){
-  if(!url||typeof url!=='string'||url.indexOf('firebasestorage.googleapis.com')===-1)return;
+  if(!url||typeof url!=='string')return;
   try{
-    var m=url.match(/\/o\/([^?]+)/);
-    if(!m)return;
-    var encodedPath=m[1];
-    await fbFetchTimeout('https://firebasestorage.googleapis.com/v0/b/'+FIREBASE_STORAGE_BUCKET+'/o/'+encodedPath,{method:'DELETE'},8000);
+    if(url.indexOf('firebasestorage.googleapis.com')!==-1){
+      var m=url.match(/\/o\/([^?]+)/);
+      if(!m)return;
+      await fbFetchTimeout('https://firebasestorage.googleapis.com/v0/b/'+FIREBASE_STORAGE_BUCKET+'/o/'+m[1],{method:'DELETE'},8000);
+      return;
+    }
+    if(settings.r2WorkerUrl){
+      var base=settings.r2WorkerUrl.replace(/\/+$/,'');
+      if(url.indexOf(base)===0){
+        var path=url.slice(base.length).replace(/^\//,'').split('?')[0];
+        if(!path)return;
+        await fbFetchTimeout(base+'/?path='+encodeURIComponent(path),{method:'DELETE'},8000);
+      }
+    }
   }catch(e){console.warn('Storage file delete failed:',e);}
 }
 function deleteStorageFiles(urls){

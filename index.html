@@ -1700,6 +1700,7 @@ async function init(){
       settings=cachedSett?JSON.parse(cachedSett):{exchangeRate:1600,podEnabled:true};
       exchangeRate=settings.exchangeRate||1600;
       if(settings.paystackKey)PAYSTACK_KEY=settings.paystackKey;
+      if(settings.googleMapsKey)GOOGLE_MAPS_API_KEY=settings.googleMapsKey;
       if(settings.theme)applyTheme(settings.theme);
       allCategories=cachedCats?JSON.parse(cachedCats):[];
       allProducts=JSON.parse(cachedProds);
@@ -1717,6 +1718,7 @@ async function init(){
   settings=sett||settings||{exchangeRate:1600,podEnabled:true};
   exchangeRate=settings.exchangeRate||1600;
   if(settings.paystackKey)PAYSTACK_KEY=settings.paystackKey;
+      if(settings.googleMapsKey)GOOGLE_MAPS_API_KEY=settings.googleMapsKey;
   if(settings.theme)applyTheme(settings.theme);
   applyMaintenanceMode(settings);
   // Only replace what we already have if the fresh fetch actually returned something.
@@ -1790,6 +1792,7 @@ async function init(){
     settings=sett;
     exchangeRate=settings.exchangeRate||1600;
     if(settings.paystackKey)PAYSTACK_KEY=settings.paystackKey;
+      if(settings.googleMapsKey)GOOGLE_MAPS_API_KEY=settings.googleMapsKey;
     if(settings.theme)applyTheme(settings.theme);
     applyHeroConfig(settings);
     try{localStorage.setItem('rnm_cache_settings',JSON.stringify(settings));}catch(e){}
@@ -2303,9 +2306,21 @@ async function uploadDataUrlToGithub(dataUrl,folder){
     const blob=await res.blob();
     const ext=(blob.type.split('/')[1]||'jpg').split('+')[0];
     const path=folder+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
+    const contentType=blob.type||'image/jpeg';
+    // Once an admin saves a Cloudflare R2 Worker URL in Site Customiser, new
+    // uploads go there instead, R2 has no download/bandwidth charge, that's
+    // the real cost driver as a storefront's traffic grows. Falls back to
+    // Firebase Storage exactly as before if it's never been set.
+    if(settings.r2WorkerUrl){
+      const base=settings.r2WorkerUrl.replace(/\/+$/,'');
+      const r2Res=await fetch(base+'/?path='+encodeURIComponent(path),{method:'POST',headers:{'Content-Type':contentType},body:blob});
+      if(!r2Res.ok)throw new Error('Upload failed: '+r2Res.status);
+      const r2Data=await r2Res.json();
+      return r2Data.url;
+    }
     const encodedPath=encodeURIComponent(path);
     const uploadUrl='https://firebasestorage.googleapis.com/v0/b/'+FIREBASE_STORAGE_BUCKET+'/o?name='+encodedPath;
-    const uploadRes=await fetch(uploadUrl,{method:'POST',headers:{'Content-Type':blob.type||'image/jpeg'},body:blob});
+    const uploadRes=await fetch(uploadUrl,{method:'POST',headers:{'Content-Type':contentType},body:blob});
     if(!uploadRes.ok)throw new Error('Upload failed: '+uploadRes.status);
     const data=await uploadRes.json();
     const token=data.downloadTokens;
@@ -2902,7 +2917,7 @@ async function geocodeAddress(address){
 // key below is meant to be public (restricted by HTTP referrer to this domain in the
 // Google Cloud Console), that's the standard, intended way to use it client-side,
 // unlike a GitHub token this is not a secret that needs hiding.
-const GOOGLE_MAPS_API_KEY='AIzaSyDmJPhd4eZMXht6jtKfRRc6JAkUB_rgick';
+let GOOGLE_MAPS_API_KEY='AIzaSyDmJPhd4eZMXht6jtKfRRc6JAkUB_rgick';
 const DARK_MAP_STYLE=[{elementType:'geometry',stylers:[{color:'#1a1a1d'}]},{elementType:'labels.text.stroke',stylers:[{color:'#1a1a1d'}]},{elementType:'labels.text.fill',stylers:[{color:'#8a8a8f'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#2a2a2e'}]},{featureType:'road',elementType:'geometry.stroke',stylers:[{color:'#1a1a1d'}]},{featureType:'road.highway',elementType:'geometry',stylers:[{color:'#3a3a3e'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#0e0e10'}]},{featureType:'poi',elementType:'geometry',stylers:[{color:'#212124'}]},{featureType:'poi',elementType:'labels',stylers:[{visibility:'off'}]},{featureType:'transit',stylers:[{visibility:'off'}]}];
 // Google fires this global specifically for key/config problems, invalid key,
 // API not enabled in Cloud Console, referrer restriction mismatch, or no billing,
