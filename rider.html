@@ -271,29 +271,33 @@ function loadAppCheckWhenIdle(){
 }
 if(document.readyState==='complete'){setTimeout(loadAppCheckWhenIdle,2000);}
 else window.addEventListener('load',function(){setTimeout(loadAppCheckWhenIdle,2000);});
-// Leaflet (map library) is only ever used inside showDeliveryMapModal(), when a
-// rider taps "View Map" on a delivery, never for the initial login/dashboard
-// render. It used to be a blocking <link>/<script> pair in <head>, which delays
-// first paint of the whole page (a pending stylesheet blocks script execution,
-// including inline scripts later in the document) by however long that CDN
-// request takes, on every single load. Fetch it in the background instead, it
-// costs the initial render nothing; showDeliveryMapModal() awaits this so L is
-// ready by the time a map is actually opened.
-let _leafletLoadPromise=null;
-function loadLeafletAssets(){
-  if(_leafletLoadPromise)return _leafletLoadPromise;
-  _leafletLoadPromise=new Promise(function(resolve){
-    const link=document.createElement('link');
-    link.rel='stylesheet';link.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-    document.head.appendChild(link);
-    const s=document.createElement('script');
-    s.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-    s.onload=resolve;s.onerror=resolve;
-    document.head.appendChild(s);
+// Google Maps (map library) is only ever needed inside showDeliveryMapModal(), when a
+// rider taps "View Map" on a delivery, never for the initial login/dashboard render.
+// Kicking off the script load in the background at page load costs first paint
+// nothing (it's not in <head> as a blocking tag), and means Maps is usually already
+// ready by the time a rider actually opens a delivery's map.
+let GOOGLE_MAPS_API_KEY_RIDER='AIzaSyDmJPhd4eZMXht6jtKfRRc6JAkUB_rgick';
+const DARK_MAP_STYLE_RIDER=[{elementType:'geometry',stylers:[{color:'#1a1a1d'}]},{elementType:'labels.text.stroke',stylers:[{color:'#1a1a1d'}]},{elementType:'labels.text.fill',stylers:[{color:'#8a8a8f'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#2a2a2e'}]},{featureType:'road',elementType:'geometry.stroke',stylers:[{color:'#1a1a1d'}]},{featureType:'road.highway',elementType:'geometry',stylers:[{color:'#3a3a3e'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#0e0e10'}]},{featureType:'poi',elementType:'geometry',stylers:[{color:'#212124'}]},{featureType:'poi',elementType:'labels',stylers:[{visibility:'off'}]},{featureType:'transit',stylers:[{visibility:'off'}]}];
+function loadGoogleMapsIfNeededRider(){
+  if(window._gmapsLoadPromise)return window._gmapsLoadPromise;
+  window._gmapsLoadPromise=new Promise(function(resolve){
+    if(window.google&&window.google.maps){resolve();return;}
+    if(!GOOGLE_MAPS_API_KEY_RIDER||GOOGLE_MAPS_API_KEY_RIDER==='YOUR_GOOGLE_MAPS_API_KEY'){resolve();return;}
+    var settled=false;
+    var timer=setTimeout(function(){if(!settled){settled=true;resolve();}},10000);
+    window._gmapsReady=function(){if(!settled){settled=true;clearTimeout(timer);resolve();}};
+    const script=document.createElement('script');
+    script.src='https://maps.googleapis.com/maps/api/js?key='+GOOGLE_MAPS_API_KEY_RIDER+'&callback=_gmapsReady&loading=async';
+    script.onerror=function(){if(!settled){settled=true;clearTimeout(timer);resolve();}};
+    document.head.appendChild(script);
   });
-  return _leafletLoadPromise;
+  return window._gmapsLoadPromise;
 }
-loadLeafletAssets();
+function makeMarkerIconRider(bg,size,border){
+  const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'"><circle cx="'+(size/2)+'" cy="'+(size/2)+'" r="'+(size/2-2)+'" fill="'+bg+'" stroke="'+(border||'white')+'" stroke-width="2"/></svg>';
+  return {url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg),scaledSize:new google.maps.Size(size,size),labelOrigin:new google.maps.Point(size/2,size/2)};
+}
+loadGoogleMapsIfNeededRider();
 let rider=null;
 let currency=localStorage.getItem('rnm_currency')||'NGN';let exchangeRate=1600;
 
@@ -768,6 +772,7 @@ async function saveDeliveryPinPosition(tracking,lat,lng){
   if(hint){hint.innerHTML='✔ Saved! The delivery location has been updated.';hint.style.color='var(--su)';}
   toast('Delivery location corrected!');
 }
+const VEHICLE_ICONS_RIDER_SELF={motorcycle:'🏍️',bicycle:'🚲',car:'🚗','van/truck':'🚚','on foot':'🚶'};
 async function showDeliveryMapModal(tracking){
   const order=await fbG('rn_mall_orders/'+tracking);if(!order)return;
   const overlay=document.createElement('div');
@@ -775,12 +780,14 @@ async function showDeliveryMapModal(tracking){
   overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:900;display:flex;align-items:center;justify-content:center;padding:16px;';
   overlay.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;width:100%;max-width:480px;padding:16px;">'
     +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div style="font-weight:800;">'+tracking+'</div><span onclick="document.getElementById(\'rider-map-overlay\').remove()" style="cursor:pointer;font-size:20px;color:var(--wh);font-weight:700;">&times;</span></div>'
-    +'<div id="rider-delivery-map" style="width:100%;height:280px;border-radius:9px;overflow:hidden;background:var(--card2);"></div>'
+    +'<div style="position:relative;"><div id="rider-delivery-map" style="width:100%;height:280px;border-radius:9px;overflow:hidden;background:var(--card2);"></div></div>'
     +'<div style="font-size:10px;color:var(--wh);font-weight:700;margin-top:6px;">📍 Tip: if the black pin isn\'t in the right spot, drag it to the correct location.</div>'
     +'<div id="rider-map-pin-hint" style="display:none;font-size:11px;color:var(--or);margin-top:6px;"></div>'
     +'</div>';
   document.body.appendChild(overlay);
+  const el=document.getElementById('rider-delivery-map');
   const settings=await fbG('rn_mall_settings')||{};
+  if(settings.googleMapsKey)GOOGLE_MAPS_API_KEY_RIDER=settings.googleMapsKey;
   const pickup=settings.pickupLocation||{lat:6.5244,lng:3.3792};
   let dest=order.deliveryLat!=null?{lat:order.deliveryLat,lng:order.deliveryLng}:null;
   if(!dest&&order.customer?.address){
@@ -788,43 +795,22 @@ async function showDeliveryMapModal(tracking){
     if(dest)fbU('rn_mall_orders/'+tracking,{deliveryLat:dest.lat,deliveryLng:dest.lng});
   }
   if(!dest)return;
-  await loadLeafletAssets();
-  if(typeof L==='undefined')return;
-  if(_riderMapInstance){_riderMapInstance.remove();_riderMapInstance=null;}
-  const map=L.map('rider-delivery-map',{zoomControl:false,attributionControl:true}).setView([pickup.lat,pickup.lng],12);
-  _riderMapInstance=map;
-  let riderMapViewMode=localStorage.getItem('rnm_map_view')||'street';
-  function addRiderTileLayer(){
-    if(riderMapViewMode==='satellite'){
-      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18}).addTo(map);
-      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:18}).addTo(map);
-    }else{
-      var riderPrimaryTiles=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',{maxZoom:20,maxNativeZoom:20,subdomains:'abcd',attribution:'© OpenStreetMap © CARTO'}).addTo(map);
-      var riderTileErrors=0,riderFellBack=false;
-      riderPrimaryTiles.on('tileerror',function(){
-        riderTileErrors++;
-        if(riderTileErrors>3&&!riderFellBack){
-          riderFellBack=true;
-          map.removeLayer(riderPrimaryTiles);
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,subdomains:'abc',attribution:'© OpenStreetMap contributors'}).addTo(map);
-        }
-      });
-    }
+  await loadGoogleMapsIfNeededRider();
+  if(!(window.google&&window.google.maps)||!document.getElementById('rider-map-overlay')){
+    if(el)el.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;padding:16px;text-align:center;font-size:12px;color:var(--wh);font-weight:700;">🗺️ Map couldn\'t load right now.</div>';
+    return;
   }
-  addRiderTileLayer();
-  setTimeout(function(){if(map)map.invalidateSize();},150);
-  const storeIcon=L.divIcon({html:'<div style="background:#FF6A00;width:26px;height:26px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid #fff;">🏬</div>',iconSize:[26,26],className:''});
-  const homeIcon=L.divIcon({html:'<div style="background:#15151A;width:26px;height:26px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);">📍</div>',iconSize:[26,26],className:''});
-  L.marker([pickup.lat,pickup.lng],{icon:storeIcon}).addTo(map).bindPopup('RichNation Mall');
-  const deliveryMarker=L.marker([dest.lat,dest.lng],{icon:homeIcon,draggable:true}).addTo(map).bindPopup(order.customer?.name||'Delivery Address');
+  let riderMapViewMode=localStorage.getItem('rnm_map_view')||'street';
+  const map=new google.maps.Map(el,{center:pickup,zoom:12,disableDefaultUI:true,zoomControl:true,mapTypeId:riderMapViewMode==='satellite'?'hybrid':'roadmap',styles:DARK_MAP_STYLE_RIDER});
+  _riderMapInstance=map;
+  new google.maps.Marker({position:pickup,map:map,icon:makeMarkerIconRider('#FF6A00',26),label:{text:'🏬',fontSize:'13px'},title:'RichNation Mall'});
+  const deliveryMarker=new google.maps.Marker({position:dest,map:map,icon:makeMarkerIconRider('#15151A',26),label:{text:'📍',fontSize:'13px'},title:order.customer?.name||'Delivery Address',draggable:true,zIndex:2});
   // Show the rider's own position too, prefer a fresh device reading, fall back to
   // their last-shared live location so they can always see themselves on the map.
   function placeSelfMarker(lat,lng){
     const vehicleEmoji=VEHICLE_ICONS_RIDER_SELF[(rider.vehicleType||'motorcycle').toLowerCase()]||'🏍️';
-    const selfIcon=L.divIcon({html:'<div style="background:#FF6A00;width:30px;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);">'+vehicleEmoji+'</div>',iconSize:[30,30],className:''});
-    L.marker([lat,lng],{icon:selfIcon}).addTo(map).bindPopup('You');
+    new google.maps.Marker({position:{lat:lat,lng:lng},map:map,icon:makeMarkerIconRider('#FF6A00',30),label:{text:vehicleEmoji,fontSize:'16px'},title:'You',zIndex:2});
   }
-  const VEHICLE_ICONS_RIDER_SELF={motorcycle:'🏍️',bicycle:'🚲',car:'🚗','van/truck':'🚚','on foot':'🚶'};
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(
       function(pos){placeSelfMarker(pos.coords.latitude,pos.coords.longitude);},
@@ -835,23 +821,20 @@ async function showDeliveryMapModal(tracking){
     placeSelfMarker(rider.liveLat,rider.liveLng);
   }
   const pinHint=document.getElementById('rider-map-pin-hint');
-  deliveryMarker.on('dragstart',function(){if(pinHint)pinHint.style.display='block';});
-  deliveryMarker.on('dragend',function(e){
-    const pos=e.target.getLatLng();
-    if(pinHint)pinHint.innerHTML='📍 Pin moved, <button onclick="saveDeliveryPinPosition(\''+tracking+'\','+pos.lat+','+pos.lng+')" style="background:var(--or);border:none;color:#000;font-weight:800;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;">Save New Location</button>';
+  deliveryMarker.addListener('dragstart',function(){if(pinHint)pinHint.style.display='block';});
+  deliveryMarker.addListener('dragend',function(e){
+    const pos=e.latLng;
+    if(pinHint)pinHint.innerHTML='📍 Pin moved, <button onclick="saveDeliveryPinPosition(\''+tracking+'\','+pos.lat()+','+pos.lng()+')" style="background:var(--or);border:none;color:#000;font-weight:800;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;">Save New Location</button>';
   });
-  L.polyline([[pickup.lat,pickup.lng],[dest.lat,dest.lng]],{color:'#FF6A00',weight:3,dashArray:'6,6'}).addTo(map);
-  const toggleBtn=L.control({position:'topright'});
-  toggleBtn.onAdd=function(){
-    const div=L.DomUtil.create('div');
-    div.innerHTML='<button style="background:#161616;color:#fff;border:1px solid #FF6A00;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">'+(riderMapViewMode==='satellite'?'🗺️ Street':'🛰️ Satellite')+'</button>';
-    div.onclick=function(e){e.stopPropagation();document.getElementById('rider-map-overlay').remove();riderMapViewMode=riderMapViewMode==='street'?'satellite':'street';localStorage.setItem('rnm_map_view',riderMapViewMode);showDeliveryMapModal(tracking);};
-    L.DomEvent.disableClickPropagation(div);
-    return div;
-  };
-  toggleBtn.addTo(map);
-  map.fitBounds(L.latLngBounds([[pickup.lat,pickup.lng],[dest.lat,dest.lng]]),{padding:[30,30]});
-  setTimeout(function(){if(map){map.invalidateSize();}},350);
+  new google.maps.Polyline({strokeColor:'#FF6A00',strokeOpacity:0,strokeWeight:3,icons:[{icon:{path:'M 0,-1 0,1',strokeOpacity:0.85,scale:3},offset:'0',repeat:'14px'}],path:[pickup,dest],map:map});
+  const toggleWrap=document.createElement('div');
+  toggleWrap.style.cssText='position:absolute;top:8px;right:8px;z-index:2;';
+  toggleWrap.innerHTML='<button style="background:#161616;color:#fff;border:1px solid #FF6A00;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">'+(riderMapViewMode==='satellite'?'🗺️ Street':'🛰️ Satellite')+'</button>';
+  toggleWrap.onclick=function(e){e.stopPropagation();riderMapViewMode=riderMapViewMode==='street'?'satellite':'street';localStorage.setItem('rnm_map_view',riderMapViewMode);map.setMapTypeId(riderMapViewMode==='satellite'?'hybrid':'roadmap');toggleWrap.querySelector('button').textContent=riderMapViewMode==='satellite'?'🗺️ Street':'🛰️ Satellite';};
+  if(el&&el.parentElement)el.parentElement.appendChild(toggleWrap);
+  const bounds=new google.maps.LatLngBounds();
+  bounds.extend(pickup);bounds.extend(dest);
+  map.fitBounds(bounds,40);
 }
 async function advanceStage(tracking,newStage){
   const order=await fbG('rn_mall_orders/'+tracking);if(!order)return;

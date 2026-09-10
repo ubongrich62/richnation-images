@@ -3348,7 +3348,12 @@ let _adminMapViewMode=localStorage.getItem('rnm_map_view')||'street';
 function toggleAdminMapView(order){
   _adminMapViewMode=_adminMapViewMode==='street'?'satellite':'street';
   localStorage.setItem('rnm_map_view',_adminMapViewMode);
-  renderAdminDeliveryMap(order);
+  if(_adminDeliveryMapInstance){_adminDeliveryMapInstance.setMapTypeId(_adminMapViewMode==='satellite'?'hybrid':'roadmap');refreshAdminMapToggleBtn();}
+  else renderAdminDeliveryMap(order);
+}
+function refreshAdminMapToggleBtn(){
+  const btn=document.getElementById('admin-map-toggle-btn');
+  if(btn)btn.textContent=_adminMapViewMode==='satellite'?'🗺️ Street':'🛰️ Satellite';
 }
 function loadLeafletIfNeeded(){
   if(window._leafletLoadPromise)return window._leafletLoadPromise;
@@ -3365,9 +3370,39 @@ function loadLeafletIfNeeded(){
   });
   return window._leafletLoadPromise;
 }
+// Google Maps is what real ride-hailing/delivery apps use, its tile and JS delivery
+// infrastructure is far more reliable than the free OpenStreetMap+Leaflet setup this
+// replaced. Same key/pattern as the customer-facing tracking map.
+let GOOGLE_MAPS_API_KEY_ADMIN='AIzaSyDmJPhd4eZMXht6jtKfRRc6JAkUB_rgick';
+const DARK_MAP_STYLE_ADMIN=[{elementType:'geometry',stylers:[{color:'#1a1a1d'}]},{elementType:'labels.text.stroke',stylers:[{color:'#1a1a1d'}]},{elementType:'labels.text.fill',stylers:[{color:'#8a8a8f'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#2a2a2e'}]},{featureType:'road',elementType:'geometry.stroke',stylers:[{color:'#1a1a1d'}]},{featureType:'road.highway',elementType:'geometry',stylers:[{color:'#3a3a3e'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#0e0e10'}]},{featureType:'poi',elementType:'geometry',stylers:[{color:'#212124'}]},{featureType:'poi',elementType:'labels',stylers:[{visibility:'off'}]},{featureType:'transit',stylers:[{visibility:'off'}]}];
+function loadGoogleMapsIfNeededAdmin(){
+  if(window._gmapsLoadPromise)return window._gmapsLoadPromise;
+  window._gmapsLoadPromise=new Promise(function(resolve){
+    if(window.google&&window.google.maps){resolve();return;}
+    if(settings.googleMapsKey)GOOGLE_MAPS_API_KEY_ADMIN=settings.googleMapsKey;
+    if(!GOOGLE_MAPS_API_KEY_ADMIN||GOOGLE_MAPS_API_KEY_ADMIN==='YOUR_GOOGLE_MAPS_API_KEY'){resolve();return;}
+    var settled=false;
+    var timer=setTimeout(function(){if(!settled){settled=true;resolve();}},10000);
+    window._gmapsReady=function(){if(!settled){settled=true;clearTimeout(timer);resolve();}};
+    const script=document.createElement('script');
+    script.src='https://maps.googleapis.com/maps/api/js?key='+GOOGLE_MAPS_API_KEY_ADMIN+'&callback=_gmapsReady&loading=async';
+    script.onerror=function(){if(!settled){settled=true;clearTimeout(timer);resolve();}};
+    document.head.appendChild(script);
+  });
+  return window._gmapsLoadPromise;
+}
+function makeMarkerIconAdmin(bg,size,border){
+  const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'"><circle cx="'+(size/2)+'" cy="'+(size/2)+'" r="'+(size/2-2)+'" fill="'+bg+'" stroke="'+(border||'white')+'" stroke-width="2"/></svg>';
+  return {url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg),scaledSize:new google.maps.Size(size,size),labelOrigin:new google.maps.Point(size/2,size/2)};
+}
 async function renderAdminDeliveryMap(order){
-  await loadLeafletIfNeeded();
-  const el=document.getElementById('admin-delivery-map');if(!el||typeof L==='undefined')return;
+  const el=document.getElementById('admin-delivery-map');if(!el)return;
+  await loadGoogleMapsIfNeededAdmin();
+  const statusEl=document.getElementById('admin-delivery-map-status');
+  if(!(window.google&&window.google.maps)){
+    el.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;padding:16px;text-align:center;font-size:12px;color:var(--wh);font-weight:700;">🗺️ Map couldn\'t load right now.</div>';
+    return;
+  }
   const pickup=settings.pickupLocation||{lat:6.5244,lng:3.3792};
   let dest=order.deliveryLat!=null?{lat:order.deliveryLat,lng:order.deliveryLng}:null;
   if(!dest&&order.customer?.address){
@@ -3384,45 +3419,24 @@ async function renderAdminDeliveryMap(order){
     if(riderRec&&riderRec.liveLat!=null&&riderRec.liveTs&&(Date.now()-riderRec.liveTs)<2*60*1000){riderPos={lat:riderRec.liveLat,lng:riderRec.liveLng};isLive=true;}
   }
   if(!riderPos)riderPos={lat:(pickup.lat+dest.lat)/2,lng:(pickup.lng+dest.lng)/2};
-  if(_adminDeliveryMapInstance){_adminDeliveryMapInstance.remove();_adminDeliveryMapInstance=null;}
-  const map=L.map('admin-delivery-map',{zoomControl:false,attributionControl:true}).setView([pickup.lat,pickup.lng],12);
+  el.innerHTML='';
+  el.style.cssText='width:100%;height:260px;border-radius:9px;overflow:hidden;background:var(--card2);';
+  const map=new google.maps.Map(el,{center:pickup,zoom:12,disableDefaultUI:true,zoomControl:true,mapTypeId:_adminMapViewMode==='satellite'?'hybrid':'roadmap',styles:DARK_MAP_STYLE_ADMIN});
   _adminDeliveryMapInstance=map;
-  if(_adminMapViewMode==='satellite'){
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18}).addTo(map);
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:18}).addTo(map);
-  }else{
-    var adminPrimaryTiles=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',{maxZoom:20,maxNativeZoom:20,subdomains:'abcd',attribution:'© OpenStreetMap © CARTO'}).addTo(map);
-    var adminTileErrors=0,adminFellBack=false;
-    adminPrimaryTiles.on('tileerror',function(){
-      adminTileErrors++;
-      if(adminTileErrors>3&&!adminFellBack){
-        adminFellBack=true;
-        map.removeLayer(adminPrimaryTiles);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,subdomains:'abc',attribution:'© OpenStreetMap contributors'}).addTo(map);
-      }
-    });
-  }
-  setTimeout(function(){if(map)map.invalidateSize();},150);
-  const storeIcon=L.divIcon({html:'<div style="background:#FF6A00;width:26px;height:26px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid #fff;">🏬</div>',iconSize:[26,26],className:''});
-  const homeIcon=L.divIcon({html:'<div style="background:#fff;width:26px;height:26px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid #161616;">📍</div>',iconSize:[26,26],className:''});
   const vehicleEmoji=VEHICLE_ICONS_ADMIN[(order.riderVehicleType||'motorcycle').toLowerCase()]||'🏍️';
-  const riderIcon=L.divIcon({html:'<div style="background:#161616;width:30px;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid '+(isLive?'#FF6A00':'#83838A')+';">'+vehicleEmoji+'</div>',iconSize:[30,30],className:''});
-  L.marker([pickup.lat,pickup.lng],{icon:storeIcon}).addTo(map).bindPopup('RichNation Mall');
-  L.marker([dest.lat,dest.lng],{icon:homeIcon}).addTo(map).bindPopup(order.customer?.name||'Delivery Address');
-  L.marker([riderPos.lat,riderPos.lng],{icon:riderIcon}).addTo(map).bindPopup((order.riderName||'Rider')+(isLive?', live location':', approximate position'));
-  L.polyline([[pickup.lat,pickup.lng],[dest.lat,dest.lng]],{color:'#FF6A00',weight:3,dashArray:'6,6'}).addTo(map);
-  const toggleBtn=L.control({position:'topright'});
-  toggleBtn.onAdd=function(){
-    const div=L.DomUtil.create('div');
-    div.innerHTML='<button style="background:#161616;color:#fff;border:1px solid #FF6A00;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">'+(_adminMapViewMode==='satellite'?'🗺️ Street':'🛰️ Satellite')+'</button>';
-    div.onclick=function(e){e.stopPropagation();toggleAdminMapView(order);};
-    L.DomEvent.disableClickPropagation(div);
-    return div;
-  };
-  toggleBtn.addTo(map);
-  map.fitBounds(L.latLngBounds([[pickup.lat,pickup.lng],[dest.lat,dest.lng]]),{padding:[30,30]});
-  setTimeout(function(){if(map)map.invalidateSize();},350);
-  const statusEl=document.getElementById('admin-delivery-map-status');
+  new google.maps.Marker({position:pickup,map:map,icon:makeMarkerIconAdmin('#FF6A00',26),label:{text:'🏬',fontSize:'13px'},title:'RichNation Mall'});
+  new google.maps.Marker({position:dest,map:map,icon:makeMarkerIconAdmin('#fff',26,'#161616'),label:{text:'📍',fontSize:'13px'},title:order.customer?.name||'Delivery Address'});
+  new google.maps.Marker({position:riderPos,map:map,icon:makeMarkerIconAdmin('#161616',30,isLive?'#FF6A00':'#83838A'),label:{text:vehicleEmoji,fontSize:'16px'},title:(order.riderName||'Rider')+(isLive?', live location':', approximate position')});
+  new google.maps.Polyline({strokeColor:'#FF6A00',strokeOpacity:0,strokeWeight:3,icons:[{icon:{path:'M 0,-1 0,1',strokeOpacity:0.85,scale:3},offset:'0',repeat:'14px'}],path:[pickup,dest],map:map});
+  const bounds=new google.maps.LatLngBounds();
+  bounds.extend(pickup);bounds.extend(dest);bounds.extend(riderPos);
+  map.fitBounds(bounds,40);
+  const toggleWrap=document.createElement('div');
+  toggleWrap.style.cssText='position:absolute;top:8px;right:8px;z-index:2;';
+  toggleWrap.innerHTML='<button id="admin-map-toggle-btn" style="background:#161616;color:#fff;border:1px solid #FF6A00;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">'+(_adminMapViewMode==='satellite'?'🗺️ Street':'🛰️ Satellite')+'</button>';
+  toggleWrap.onclick=function(e){e.stopPropagation();toggleAdminMapView(order);};
+  const wrap=el.parentElement;
+  if(wrap){wrap.style.position='relative';wrap.appendChild(toggleWrap);}
   const adminEta=estimateDeliveryTimeAdmin(riderPos,dest,order.riderVehicleType);
   const adminEtaText=' &middot; ~'+(adminEta.mins<1?'<1':adminEta.mins)+' min'+(adminEta.mins===1?'':'s')+' away';
   if(statusEl)statusEl.innerHTML=(isLive?'<span style="color:var(--su);">● Live</span>, rider location updating in real time':'<span style="color:var(--wh);font-weight:700;">○ Approximate</span>, waiting for rider\'s live location')+adminEtaText;
@@ -3520,7 +3534,7 @@ async function openOrder(tracking){
         <button class="btn btn-or" style="width:100%;padding:12px;" onclick="saveOrderStatus('${tracking}')">Update Order Status</button>
         ${o.status!=='delivered'&&o.status!=='delivered confirmed'&&o.status!=='cancelled'&&o.status!=='deleted'?`<button class="btn btn-dk" style="width:100%;padding:12px;margin-top:8px;" onclick="addLocationUpdate('${tracking}')">📍 Post Location Update</button>`:''}
         ${o.deliveryMethod!=='pickup'&&o.status!=='delivered'&&o.status!=='delivered confirmed'&&o.status!=='cancelled'&&o.status!=='deleted'?`<button class="btn btn-dk" style="width:100%;padding:12px;margin-top:8px;" onclick="assignRiderToOrder('${tracking}')">🏍️ ${o.riderName?'Reassign Rider (currently: '+o.riderName+')':'Assign Dispatch Rider'}</button>`:''}
-        ${o.riderId&&o.deliveryStage!=='delivered'?`<div id="admin-delivery-map" style="width:100%;height:260px;border-radius:9px;overflow:hidden;background:var(--card2);margin-top:10px;"></div><div id="admin-delivery-map-status" style="font-size:11px;color:var(--wh);font-weight:700;margin-top:6px;">Loading location…</div>`:''}
+        ${o.riderId&&o.deliveryStage!=='delivered'?`<div style="position:relative;margin-top:10px;"><div id="admin-delivery-map" style="width:100%;height:260px;border-radius:9px;overflow:hidden;background:var(--card2);"></div></div><div id="admin-delivery-map-status" style="font-size:11px;color:var(--wh);font-weight:700;margin-top:6px;">Loading location…</div>`:''}
         ${o.deliveryMethod==='pickup'&&o.status!=='ready_for_pickup'&&o.status!=='delivered'&&o.status!=='delivered confirmed'?`<button class="btn btn-or" style="width:100%;padding:12px;margin-top:8px;" onclick="markReadyForPickup('${tracking}')">📍 Mark Ready for Pickup</button>`:''}
         ${o.deliveryMethod==='pickup'&&o.status==='ready_for_pickup'?`<button class="btn btn-gr" style="width:100%;padding:12px;margin-top:8px;" onclick="markPickedUp('${tracking}')">Mark as Picked Up</button>`:''}
         ${o.deliveryConfirmation?`<button class="btn btn-dk" style="width:100%;padding:12px;margin-top:8px;" onclick="showDeliverySigAdmin('${tracking}')">View Delivery Signature</button>`:o.status==='delivered confirmed'?`<div style="margin-top:8px;font-size:11px;color:var(--su);">Delivered, customer signature confirmed.</div>`:''}

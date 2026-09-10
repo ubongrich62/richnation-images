@@ -3075,7 +3075,7 @@ async function renderDeliveryMap(order){
   if(statusEl)statusEl.innerHTML='<span class="live-dot'+(isLive?' on':'')+'"></span> '+(isLive?'<strong style="color:var(--wh);">Live</strong> rider location updating in real time':'Waiting for rider\'s live location')+(!dest?' (still pinpointing your delivery address)':'');
 }
 function setDeliveryMapType(type,btn){
-  if(_deliveryMapInstance)_deliveryMapInstance.setMapTypeId(type);
+  if(_deliveryMapInstance)_deliveryMapInstance.setMapTypeId(type==='satellite'?'hybrid':type);
   const toggle=btn&&btn.parentElement;
   if(toggle)Array.prototype.forEach.call(toggle.children,function(b){b.classList.toggle('active',b===btn);});
 }
