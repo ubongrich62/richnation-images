@@ -172,13 +172,10 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .view-all-btn{font-size:12.5px;color:var(--or);cursor:pointer;font-weight:700;background:none;border:none;}
 .view-all-btn:hover{text-decoration:underline;}
 /* CATEGORIES */
-.cats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;}
-.cat-card{padding:10px 6px;text-align:center;cursor:pointer;transition:opacity .15s,transform .15s;animation:fadeInUp .35s var(--ease) both;}
-.cat-card:active{transform:scale(.96);}
-.cat-card:hover{opacity:.8;transform:translateY(-1px);}
-.cat-ico{font-size:16px;margin-bottom:5px;}
-.cat-name{font-size:10.5px;font-weight:700;color:var(--wh);line-height:1.3;}
-.cat-count{font-size:9px;color:var(--wh);font-weight:700;margin-top:2px;}
+.cat-dropdown-wrap{position:relative;}
+.cat-dropdown{width:100%;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);padding:15px 44px 15px 16px;color:var(--wh);font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14.5px;outline:none;appearance:none;box-sizing:border-box;cursor:pointer;transition:border-color .15s;}
+.cat-dropdown:hover,.cat-dropdown:focus{border-color:var(--or);}
+.cat-dropdown-arrow{position:absolute;right:16px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--or);}
 /* PRODUCTS */
 .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;}
 .prod-card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);overflow:hidden;cursor:pointer;transition:box-shadow .15s,transform .15s,border-color .15s;animation:fadeInUp .35s var(--ease) both;}
@@ -479,7 +476,6 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
   .hero{padding:40px 16px;}
   .hero-inner{text-align:left;}
   .products-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
-  .cats-grid{grid-template-columns:repeat(auto-fill,minmax(90px,1fr));}
   .g2{grid-template-columns:1fr!important;}
   .tb-top{flex-wrap:wrap;height:auto;padding:10px 14px;gap:8px;}
   .tb-search{order:3;width:100%;max-width:100%;}
@@ -488,7 +484,6 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
   .lang-wrap{order:2;}
   .footer-grid{grid-template-columns:1fr 1fr;}
   .why-grid,.guarantee-grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));}
-  .cats-grid{grid-template-columns:repeat(auto-fill,minmax(72px,1fr));}
   .cart-drawer{max-width:100%;}
   .hero-stats{gap:20px;}
   .vendor-cta{padding:28px 22px;text-align:center;justify-content:center;}
@@ -741,7 +736,10 @@ html.rnm-maint #maintenance-screen{display:flex;}
 
   <div class="sec-wrap">
     <div class="sec-hdr2"><div class="sec-title">Shop by Category</div></div>
-    <div class="cats-grid" id="cats-grid"><div style="grid-column:1/-1;text-align:center;padding:30px 20px;"><div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:18px;background:linear-gradient(90deg,#FF6A00,#FFA733,#FF6A00);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmerText 1.6s linear infinite;">RichNation Mall</div><div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:6px;">Loading...</div></div></div>
+    <div class="cat-dropdown-wrap">
+      <select class="cat-dropdown" id="cats-grid" onchange="filterCat(this.value)"><option value="">Loading categories...</option></select>
+      <svg class="cat-dropdown-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
   </div>
 
   <div class="sec-wrap" id="featured-sec" style="display:none;">
@@ -1891,7 +1889,17 @@ function brandLoaderHTML(sub){
     <div style="font-size:12px;color:var(--wh);font-weight:700;margin-top:6px;">${sub||'Loading...'}</div>
   </div>`;
 }
-function renderCategories(){const g=document.getElementById('cats-grid');if(!g)return;if(!allCategories.length){g.innerHTML=window._mallDataReady?'<div style="color:var(--wh);font-weight:700;font-size:12px;grid-column:1/-1;">No categories yet.</div>':brandLoaderHTML('Fetching categories...');return;}g.innerHTML=allCategories.map(c=>{const cnt=allProducts.filter(p=>p.category===c.id).length;return `<div class="cat-card" onclick="filterCat('${escJs(c.id)}')"><div class="cat-ico" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:16px;color:var(--or);">${c.icon||c.name.slice(0,2).toUpperCase()}</div><div class="cat-name">${c.name}</div><div class="cat-count">${cnt} item${cnt!==1?'s':''}</div></div>`;}).join('');}
+function renderCategories(){
+  const g=document.getElementById('cats-grid');if(!g)return;
+  if(!allCategories.length){g.innerHTML=window._mallDataReady?'<option value="">No categories yet</option>':'<option value="">Fetching categories...</option>';return;}
+  const prev=g.value;
+  g.innerHTML='<option value="">All Categories</option>'+allCategories.map(c=>{
+    const cnt=allProducts.filter(p=>p.category===c.id).length;
+    const val=escHtml(c.id).replace(/"/g,'&quot;');
+    return `<option value="${val}">${c.icon?c.icon+' ':''}${escHtml(c.name)} (${cnt})</option>`;
+  }).join('');
+  if(prev&&allCategories.some(c=>c.id===prev))g.value=prev;
+}
 // A category id/name containing an apostrophe (baby's_clothes, Men's Shoes)
 // used to break right out of the onclick's string literal when inlined raw,
 // so tapping that category silently did nothing.
