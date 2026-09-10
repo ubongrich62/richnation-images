@@ -1,0 +1,20 @@
+# Config for the Cloudflare Worker connected to this repo (see
+# cloudflare-worker/richnation-storage-worker.js for what it does and why).
+#
+# This repo is otherwise a plain static site (GitHub Pages), this file
+# exists only so Cloudflare's GitHub-connected Worker build ("npx wrangler
+# deploy") knows which file is the actual Worker and which R2 bucket to
+# bind to it. It has no effect on the GitHub Pages site itself.
+#
+# IMPORTANT: the bucket_name below must exactly match the name of the R2
+# bucket created in the Cloudflare dashboard (Storage & databases -> R2).
+# If a different name was used there, change bucket_name to match before
+# this will deploy successfully.
+
+name = "richnation-storage"
+main = "cloudflare-worker/richnation-storage-worker.js"
+compatibility_date = "2026-01-01"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "richnation-storage"
