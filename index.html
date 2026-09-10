@@ -3207,18 +3207,23 @@ function showPolicyPage(type){
   }
   else if(type==='terms'){
     var clauses=[
-      ['1. Who Can Use RichNation Mall','You must be 18 years or older to register and make purchases. By creating an account, you confirm all information provided is accurate and your own.'],
-      ['2. Your Account Responsibility','You are solely responsible for your account security. Never share your password. Notify us immediately if you suspect unauthorised access.'],
-      ['3. Pricing and Orders','All prices are in Nigerian Naira (₦) by default. Prices may change without notice. The price at checkout is the final price.'],
-      ['4. Cancellations and Refunds','Orders may only be cancelled before dispatch. Once an item has shipped, it cannot be cancelled or refunded unless it qualifies under our 7-day return window.'],
-      ['5. Prohibited Activities','You must not provide false information, submit fake reviews, attempt to hack the platform, or use it for any unlawful purpose.'],
-      ['6. Intellectual Property','All content on RichNation Mall belongs to RichNation Global Ltd or its licensed suppliers. Nothing may be reproduced without prior written consent.'],
-      ['7. Limitation of Liability','RichNation Global Ltd shall not be liable for indirect or consequential loss. Total liability shall not exceed the value of the order in question.'],
-      ['8. Governing Law','These terms are governed by the laws of the Federal Republic of Nigeria. All disputes are subject to Nigerian jurisdiction.'],
-      ['9. Amendments','We reserve the right to update these terms at any time. Continued use after changes constitutes acceptance.']
+      ['1. Who Can Use RichNation Mall','You must be 18 years or older to register an account and make purchases. By creating an account, you confirm that all information you provide is accurate, current, and belongs to you. Accounts may not be created on behalf of another person without their consent.'],
+      ['2. Your Account','You are responsible for keeping your login details confidential and for all activity under your account.<br>Notify us immediately at rnm.office@richnationmall.com if you suspect unauthorised access.<br>We may suspend or close accounts that provide false information or breach these Terms.'],
+      ['3. Products, Pricing & Listings','RichNation Mall is a marketplace: some products are sold directly by RichNation, others by independent, vetted vendors trading through our platform. Each vendor is responsible for the accuracy of their own listings. Prices are shown in Nigerian Naira (₦) by default and may change without notice, the price shown at checkout is the final price for that order.'],
+      ['4. Orders & Payment','Placing an order is an offer to buy, which we or the relevant vendor may accept or decline.<br>Payments are processed securely through Paystack (card, bank transfer, USSD) or your RichNation Wallet balance.<br>Pay on Delivery, where available, requires a 50% deposit at checkout, balance collected on delivery.<br>We never store your full card details, all card payments are handled directly by Paystack.'],
+      ['5. Delivery, Cancellations & Returns','Delivery timeframes are estimates, see our Shipping & Delivery page for details. Orders can only be cancelled before dispatch. Eligible items may be returned within 7 days of confirmed delivery under our Returns & Refund Policy.'],
+      ['6. Wallet & RichPoints','Your Wallet lets you top up funds in advance to spend at checkout; balances are non-withdrawable to a bank account except where stated in our refund process. RichPoints are loyalty rewards with no cash value, redeemable for discounts or free shipping, and may be removed if earned through fraudulent activity.'],
+      ['7. Vendors Selling on RichNation Mall','Vendors approved to sell on RichNation Mall are independent sellers, not employees or agents of RichNation Global Ltd. Vendors are solely responsible for the legality, safety, and accuracy of the products they list. We may remove any vendor or listing that breaches these Terms or applicable law.'],
+      ['8. Prohibited Activities','You must not provide false information, submit fake reviews, attempt to hack or disrupt the platform, use it for any unlawful purpose, or scrape product data for a competing service.'],
+      ['9. Reviews & User Content','When you submit a review, photo, or other content, you confirm it is your genuine experience and grant RichNation Mall a licence to display it. We may remove content that is false, abusive, or violates these Terms.'],
+      ['10. Intellectual Property','All content on RichNation Mall belongs to RichNation Global Ltd or its licensed suppliers and vendors. Nothing may be reproduced or used commercially without prior written consent.'],
+      ['11. Limitation of Liability','RichNation Global Ltd shall not be liable for indirect or consequential loss. Where liability cannot be excluded by law, our total liability for any single order is limited to the value of that order.'],
+      ['12. Termination','We may suspend or terminate your access at any time if you breach these Terms, without affecting any orders already lawfully placed. You may close your account at any time by contacting us.'],
+      ['13. Governing Law','These terms are governed by the laws of the Federal Republic of Nigeria. All disputes are subject to Nigerian jurisdiction.'],
+      ['14. Amendments','We reserve the right to update these terms at any time to reflect changes to our platform or the law. Continued use after changes constitutes acceptance.']
     ];
     content='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:16px;">Effective Date: July 2026</div>'
-      +'<p style="font-size:13px;color:var(--w2);line-height:1.8;margin-bottom:16px;">By accessing or using RichNation Mall, you agree to be bound by the following terms.</p>'
+      +'<p style="font-size:13px;color:var(--w2);line-height:1.8;margin-bottom:16px;">By accessing or using RichNation Mall, you agree to be bound by the following terms. The full version of these Terms is also available anytime at <a href="terms.html" target="_blank" style="color:var(--or);">richnationmall.com/terms.html</a>.</p>'
       +clauses.map(function(c){return card(orange(c[0])+body(c[1]));}).join('');
   }
   else if(type==='contact'){
