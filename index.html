@@ -584,6 +584,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .live-dot.on{background:var(--su);animation:liveDotPulse 1.6s ease-in-out infinite;}
 @keyframes liveDotPulse{0%,100%{box-shadow:0 0 0 0 rgba(225,94,0,.45);}50%{box-shadow:0 0 0 5px rgba(225,94,0,0);}}
 @keyframes mapPulse{0%,100%{opacity:.5;}50%{opacity:1;}}
+.delivery-eta-badge{display:none;position:absolute;top:12px;left:12px;align-items:center;gap:7px;background:rgba(10,10,11,0.85);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.1);border-radius:99px;padding:7px 14px;font-size:12.5px;font-weight:800;color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.35);z-index:2;}
 /* MAINTENANCE MODE: checked synchronously from cached settings before the
    rest of the page has painted, so a visitor never sees the real site
    flash on screen for an instant before this hides it, hiding happens
@@ -2967,9 +2968,29 @@ function makeMarkerIcon(bg,size){
   const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'"><circle cx="'+(size/2)+'" cy="'+(size/2)+'" r="'+(size/2-2)+'" fill="'+bg+'" stroke="white" stroke-width="2"/></svg>';
   return {url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg),scaledSize:new google.maps.Size(size,size),labelOrigin:new google.maps.Point(size/2,size/2)};
 }
-let _deliveryMapInstance=null,_deliveryRiderMarker=null,_deliveryHomeMarker=null,_deliveryMapOrderId=null;
+// Smoothly glides a marker to its new position over `duration`ms instead of
+// snapping there instantly, this is what makes a live rider marker feel like
+// it's actually moving (Bolt/Uber-style) rather than teleporting every time
+// a new location comes in from polling.
+function animateMarkerTo(marker,newPos,duration){
+  if(!marker)return;
+  const start=marker.getPosition();
+  if(!start){marker.setPosition(newPos);return;}
+  const startLat=start.lat(),startLng=start.lng();
+  const endLat=newPos.lat,endLng=newPos.lng;
+  if(Math.abs(startLat-endLat)<1e-9&&Math.abs(startLng-endLng)<1e-9)return;
+  const t0=performance.now();
+  (function step(now){
+    const t=Math.min(1,(now-t0)/duration);
+    const ease=t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2; // ease-in-out, matches Bolt's smooth glide feel
+    marker.setPosition({lat:startLat+(endLat-startLat)*ease,lng:startLng+(endLng-startLng)*ease});
+    if(t<1)requestAnimationFrame(step);
+  })(t0);
+}
+let _deliveryMapInstance=null,_deliveryRiderMarker=null,_deliveryHomeMarker=null,_deliveryRoutePolyline=null,_deliveryMapOrderId=null,_deliveryMapEl=null;
 async function renderDeliveryMap(order){
   const el=document.getElementById('delivery-map');if(!el)return;
+  const badgeEl=document.getElementById('delivery-map-eta'),badgeTextEl=document.getElementById('delivery-map-eta-text');
   await loadGoogleMapsIfNeeded();
   const statusEl=document.getElementById('delivery-map-status');
   if(window._gmapsAuthFailed){
@@ -2998,25 +3019,52 @@ async function renderDeliveryMap(order){
   }
   const centerPos=dest||riderPos;
   const vehicleEmoji=VEHICLE_ICONS[(order.riderVehicleType||'motorcycle').toLowerCase()]||'🏍️';
-  const needsFullRebuild=!_deliveryMapInstance||_deliveryMapOrderId!==order.tracking;
+  // The tracking page's whole card, including this map's own container div,
+  // gets rebuilt from scratch on every poll (see trackOrder()), so "same
+  // order as last time" alone isn't enough to know the map is still safe to
+  // update in place, el itself might be a brand new DOM node with nothing in
+  // it yet. Comparing el to the element the map was actually built into is
+  // what catches that, without it every poll after the first silently kept
+  // animating a detached, invisible map while the fresh visible container
+  // sat frozen on "Loading map...".
+  const needsFullRebuild=!_deliveryMapInstance||_deliveryMapOrderId!==order.tracking||_deliveryMapEl!==el;
   if(needsFullRebuild){
     _deliveryMapOrderId=order.tracking;
+    _deliveryMapEl=el;
     el.innerHTML='';
-    el.style.cssText='width:100%;height:260px;border-radius:9px 9px 0 0;overflow:hidden;background:var(--card2);';
+    el.style.cssText='width:100%;height:340px;border-radius:9px 9px 0 0;overflow:hidden;background:var(--card2);';
     _deliveryMapInstance=new google.maps.Map(el,{center:centerPos,zoom:14,disableDefaultUI:true,zoomControl:true,styles:DARK_MAP_STYLE});
-    _deliveryHomeMarker=dest?new google.maps.Marker({position:dest,map:_deliveryMapInstance,icon:makeMarkerIcon('#15151A',26),label:{text:'📍',fontSize:'13px'},title:'Delivery Address (You)'}):null;
-    _deliveryRiderMarker=new google.maps.Marker({position:isLive?riderPos:centerPos,map:_deliveryMapInstance,icon:makeMarkerIcon('#FF6A00',30),label:{text:vehicleEmoji,fontSize:'15px'},opacity:isLive?1:0,title:(order.riderName||'Your rider')+', live location'});
+    _deliveryHomeMarker=dest?new google.maps.Marker({position:dest,map:_deliveryMapInstance,icon:makeMarkerIcon('#15151A',26),label:{text:'📍',fontSize:'13px'},title:'Delivery Address (You)',zIndex:1}):null;
+    _deliveryRiderMarker=new google.maps.Marker({position:isLive?riderPos:centerPos,map:_deliveryMapInstance,icon:makeMarkerIcon('#FF6A00',34),label:{text:vehicleEmoji,fontSize:'16px'},opacity:isLive?1:0,title:(order.riderName||'Your rider')+', live location',zIndex:2});
+    // A route line between rider and destination, the same "here's the path"
+    // cue Bolt/Uber show, a straight line rather than a real routed path
+    // since drawing an actual road route needs the separate, billed
+    // Directions API, this needs only what's already loaded.
+    _deliveryRoutePolyline=new google.maps.Polyline({strokeColor:'#FF6A00',strokeOpacity:0,strokeWeight:3,icons:[{icon:{path:'M 0,-1 0,1',strokeOpacity:0.85,scale:3},offset:'0',repeat:'14px'}],map:_deliveryMapInstance});
   }else{
-    if(isLive&&_deliveryRiderMarker){_deliveryRiderMarker.setPosition(riderPos);_deliveryRiderMarker.setOpacity(1);}
+    if(isLive&&_deliveryRiderMarker){animateMarkerTo(_deliveryRiderMarker,riderPos,1500);_deliveryRiderMarker.setOpacity(1);}
     else if(_deliveryRiderMarker)_deliveryRiderMarker.setOpacity(0);
+  }
+  if(_deliveryRoutePolyline){
+    // The dashed look comes entirely from the repeated icon set on this
+    // polyline at creation, strokeOpacity 0 there hides the underlying solid
+    // line while the dash icons still render along whatever path is set.
+    // An empty path here is what actually hides the line when there's
+    // nothing live to connect, not another opacity toggle.
+    _deliveryRoutePolyline.setPath((isLive&&dest)?[riderPos,dest]:[]);
   }
   if(isLive&&dest){
     const bounds=new google.maps.LatLngBounds();
     bounds.extend(riderPos);bounds.extend(dest);
-    _deliveryMapInstance.fitBounds(bounds,60);
+    _deliveryMapInstance.fitBounds(bounds,70);
   }
-  const etaText=(isLive&&dest)?' &middot; ~'+(function(){const m=estimateDeliveryTime(riderPos,dest,order.riderVehicleType).mins;return (m<1?'<1':m)+' min'+(m===1?'':'s');})()+' away':'';
-  if(statusEl)statusEl.innerHTML='<span class="live-dot'+(isLive?' on':'')+'"></span> '+(isLive?'<strong style="color:var(--wh);">Live</strong> rider location updating in real time':'Waiting for rider\'s live location')+(!dest?' (still pinpointing your delivery address)':'')+(etaText?'<strong style="color:var(--or);margin-left:auto;">'+etaText.replace(' &middot; ~','~')+'</strong>':'');
+  const etaMins=(isLive&&dest)?estimateDeliveryTime(riderPos,dest,order.riderVehicleType).mins:null;
+  const etaShort=etaMins!=null?(etaMins<1?'<1':etaMins)+' min'+(etaMins===1?'':'s')+' away':null;
+  if(badgeEl&&badgeTextEl){
+    if(etaShort){badgeTextEl.textContent=etaShort;badgeEl.style.display='flex';}
+    else badgeEl.style.display='none';
+  }
+  if(statusEl)statusEl.innerHTML='<span class="live-dot'+(isLive?' on':'')+'"></span> '+(isLive?'<strong style="color:var(--wh);">Live</strong> rider location updating in real time':'Waiting for rider\'s live location')+(!dest?' (still pinpointing your delivery address)':'');
 }
 function stopTrackPoll(){if(_trackPollTimer){clearInterval(_trackPollTimer);_trackPollTimer=null;}}
 async function trackOrder(silentNum){
@@ -3042,7 +3090,10 @@ async function trackOrder(silentNum){
       ${order.riderPhone?`<a href="tel:${order.riderPhone}" style="text-decoration:none;"><button style="background:var(--or);border:none;color:#000;font-weight:800;font-size:11px;padding:8px 14px;border-radius:7px;cursor:pointer;">${iconBadge('phone',12)} Call</button></a>`:''}
     </div>
     <div class="live-map-card" style="display:${order.riderId&&order.deliveryStage!=='delivered'&&order.status!=='cancelled'&&order.status!=='deleted'?'block':'none'};">
-      <div id="delivery-map" style="width:100%;height:260px;border-radius:9px 9px 0 0;overflow:hidden;background:var(--card2);display:flex;align-items:center;justify-content:center;"><div style="display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--wh);font-weight:700;font-size:12px;"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="var(--or)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="animation:mapPulse 1.4s ease-in-out infinite;"><path d="M9 4L3 6v14l6-2m0-14l6 2m-6-2v14m6-12l6-2v14l-6 2m0-14v14"/></svg>Loading map…</div></div>
+      <div style="position:relative;">
+        <div id="delivery-map" style="width:100%;height:340px;border-radius:9px 9px 0 0;overflow:hidden;background:var(--card2);display:flex;align-items:center;justify-content:center;"><div style="display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--wh);font-weight:700;font-size:12px;"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="var(--or)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="animation:mapPulse 1.4s ease-in-out infinite;"><path d="M9 4L3 6v14l6-2m0-14l6 2m-6-2v14m6-12l6-2v14l-6 2m0-14v14"/></svg>Loading map…</div></div>
+        <div id="delivery-map-eta" class="delivery-eta-badge"><span class="live-dot on"></span><span id="delivery-map-eta-text"></span></div>
+      </div>
       <div id="delivery-map-status" class="live-map-status"><span class="live-dot"></span> Loading location…</div>
     </div>`:''}
     ${order.status==='cancelled'?'<div style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--re);margin-bottom:14px;"><strong>ORDER CANCELLED</strong>, '+(order.cancelReason||order.timeline?.[order.timeline.length-1]?.note||'This order was cancelled.')+'</div>':''}
