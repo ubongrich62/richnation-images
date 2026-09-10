@@ -15,18 +15,20 @@
 // it's wired in.
 //
 // ── HOW TO DEPLOY (no command line needed) ──
-// 1. Cloudflare dashboard -> R2 Object Storage -> Create bucket.
-//    Name it richnation-storage (or anything, you'll reference it below).
-// 2. Cloudflare dashboard -> Workers & Pages -> Create -> Create Worker.
-//    Name it whatever you like, e.g. richnation-storage.
-// 3. Click "Edit code", delete the sample code, paste this entire file in,
-//    click "Deploy".
+// 1. Cloudflare dashboard, left sidebar -> Storage & databases -> R2 ->
+//    Overview -> Create bucket. Name it richnation-storage (or anything,
+//    you'll reference it below), pick a location, Create bucket.
+// 2. Left sidebar -> Compute -> Workers -> Create -> Create Worker.
+//    Name it whatever you like, e.g. richnation-storage, Deploy.
+// 3. On the Worker's page, click "Edit code", delete the sample code,
+//    paste this entire file in, click "Deploy" again.
 // 4. Back on the Worker's page -> Settings -> Bindings -> Add binding ->
 //    R2 Bucket. Variable name: BUCKET (must match exactly, that's the name
 //    this code refers to below). Bucket: the one you made in step 1.
 // 5. Your Worker's URL is shown at the top of its page, looks like
 //    https://richnation-storage.<your-subdomain>.workers.dev, that's the
-//    URL to paste into the app's admin Site Customiser.
+//    URL to paste into the app's admin Site Customiser -> Settings ->
+//    Storage (Cloudflare R2).
 //
 // NO SECRET KEY IS INVOLVED, ON PURPOSE. This app has no login system for
 // any of its six public pages, every write to Firebase already works the
