@@ -1508,7 +1508,7 @@ async function saveMyProfile(){
 // ── ROLE WORK VIEWS (read/scoped access to shared store data) ──
 function renderOrdersInner(c,orders){
   c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Orders</div><div class="page-hdr-sub">Most recent 50 orders, tap one to update its status</div></div>'
-    +orders.map(function(o){return '<div class="data-row" onclick="openStaffOrder(\''+o.tracking+'\')" style="cursor:pointer;"><div style="flex:1;"><div class="row-name">'+o.tracking+'</div><div class="row-meta">'+(o.customer?o.customer.name:'')+' &middot; '+o.date+' &middot; '+fmt(o.total)+'</div></div><div class="row-meta">'+(o.status||'pending')+'</div></div>';}).join('');
+    +orders.map(function(o){return '<div class="data-row" onclick="openStaffOrder(\''+o.tracking+'\')" style="cursor:pointer;"><div style="flex:1;"><div class="row-name">'+o.tracking+(o.activeIncident?' <span style="background:rgba(244,63,94,.15);color:#f43f5e;font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:0.3px;">⚠️ Issue</span>':'')+'</div><div class="row-meta">'+(o.customer?o.customer.name:'')+' &middot; '+o.date+' &middot; '+fmt(o.total)+'</div></div><div class="row-meta">'+(o.status||'pending')+'</div></div>';}).join('');
 }
 async function renderOrders(c){
   var cachedO=null;
@@ -1521,14 +1521,23 @@ async function renderOrders(c){
 }
 const STAFF_STATUSES=['pending','confirmed','packed','shipped','out for delivery','delivered','cancelled'];
 const STAFF_STATUSES_RIDER_ASSIGNED=['pending','confirmed','packed','cancelled'];
+const INCIDENT_TYPES_STAFF={
+  traffic:{emoji:'🚦',label:'Heavy Traffic'},
+  breakdown:{emoji:'🔧',label:'Vehicle Breakdown'},
+  road_closed:{emoji:'🚧',label:'Road Closed / Accident'},
+  weather:{emoji:'🌧️',label:'Bad Weather'},
+  other:{emoji:'⚠️',label:'Other Issue'}
+};
 async function openStaffOrder(tracking){
   const o=await fbG('rn_mall_orders/'+tracking);if(!o)return;
   const c=document.getElementById('content');
   const hasRider=!!(o.riderId&&o.deliveryStage!=='delivered');
   const statusList=hasRider?STAFF_STATUSES_RIDER_ASSIGNED:STAFF_STATUSES;
   const opts=statusList.map(function(s){return '<option value="'+s+'" '+(o.status===s?'selected':'')+'>'+s+'</option>';}).join('');
+  const inc=o.activeIncident,incType=inc&&(INCIDENT_TYPES_STAFF[inc.type]||INCIDENT_TYPES_STAFF.other);
   c.innerHTML=`
   <div class="page-hdr"><div class="page-hdr-title">${tracking}</div><div class="page-hdr-sub">${o.customer?o.customer.name:''} &middot; ${o.date} &middot; ${fmt(o.total)}</div></div>
+  ${incType?`<div class="card" style="background:rgba(244,63,94,.08);border-color:rgba(244,63,94,.3);"><div style="display:flex;gap:10px;"><div style="font-size:20px;">${incType.emoji}</div><div><div style="font-weight:800;color:var(--wh);font-size:13px;">${incType.label} reported by ${inc.riderName||'rider'}</div><div style="font-size:12px;color:var(--wh);font-weight:700;margin-top:2px;">${inc.note?'"'+inc.note+'"':'No additional note.'}</div><div style="font-size:10px;color:var(--wh);font-weight:700;margin-top:4px;">${new Date(inc.ts).toLocaleString('en-GB')}</div></div></div></div>`:''}
   <div class="card">
     <div class="card-title">Items</div>
     <div style="margin-top:8px;">${(o.items||[]).map(function(i){return '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--wh);font-weight:700;padding:4px 0;border-top:1px solid var(--bdr);"><span>'+i.name+(i.variant?' ('+i.variant+')':'')+' x'+i.qty+'</span><span>'+fmt(i.price*i.qty)+'</span></div>';}).join('')}</div>
@@ -1781,7 +1790,7 @@ async function staffMarkIssuePaid(id){
 
 // ── NOTIFICATIONS ──
 function notifIcon(type){
-  var map={dm:'chat',general_discussion:'note',role_community:'user',salary_paid:'money',salary_set:'money',points_awarded:'star',hours_set:'clock',strike:'alert',bank_verified:'file',withdrawal_paid:'money',withdrawal_declined:'alert',submission_approved:'star',submission_rejected:'alert',task_assigned:'note',task_approved:'star'};
+  var map={dm:'chat',general_discussion:'note',role_community:'user',salary_paid:'money',salary_set:'money',points_awarded:'star',hours_set:'clock',strike:'alert',bank_verified:'file',withdrawal_paid:'money',withdrawal_declined:'alert',submission_approved:'star',submission_rejected:'alert',task_assigned:'note',task_approved:'star',delivery_incident:'alert'};
   return iconBadge(map[type]||'bell',15);
 }
 function notifMsg(n){
@@ -1800,6 +1809,7 @@ function notifMsg(n){
   if(n.type==='submission_rejected')return '"'+n.title+'" needs changes, '+(n.note||'see feedback in My Submissions')+'.';
   if(n.type==='task_assigned')return 'New task assigned: '+n.description+(n.dueDate?', due '+n.dueDate:'')+'.';
   if(n.type==='task_approved')return 'Your task completion was approved.';
+  if(n.type==='delivery_incident')return '⚠️ '+n.riderName+' reported "'+n.incidentLabel+'" on order '+n.orderId+(n.note?': "'+n.note+'"':'')+'.';
   return n.preview||'New notification';
 }
 async function loadStaffNotifs(){

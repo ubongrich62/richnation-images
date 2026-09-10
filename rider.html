@@ -740,9 +740,18 @@ async function renderDeliveries(c){
   try{localStorage.setItem('rnm_rider_cache_orders',JSON.stringify(orders));}catch(e){}
   if(curRNav==='deliveries')renderDeliveriesInner(c,orders);
 }
+const INCIDENT_TYPES_RIDER={
+  traffic:{emoji:'🚦',label:'Heavy Traffic'},
+  breakdown:{emoji:'🔧',label:'Vehicle Breakdown'},
+  road_closed:{emoji:'🚧',label:'Road Closed / Accident'},
+  weather:{emoji:'🌧️',label:'Bad Weather'},
+  other:{emoji:'⚠️',label:'Other Issue'}
+};
 function deliveryCard(o){
   const stage=o.deliveryStage||'assigned';
   const nextStage=STAGES[STAGES.indexOf(stage)+1];
+  const inc=o.activeIncident;
+  const incType=inc&&INCIDENT_TYPES_RIDER[inc.type]||null;
   return '<div class="card" style="margin-bottom:10px;">'
     +'<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;">'
     +'<div><div style="font-weight:800;color:var(--or);">'+o.tracking+'</div><div style="font-size:12px;color:var(--wh);font-weight:700;margin-top:2px;">'+(o.customer?o.customer.name:'')+' &middot; '+(o.customer?o.customer.phone:'')+'</div></div>'
@@ -750,9 +759,56 @@ function deliveryCard(o){
     +'</div>'
     +'<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:10px;">📍 '+(o.customer?o.customer.address+', '+o.customer.city:'')+'</div>'
     +(o.payMethod==='pod'&&o.podDepositAmount!=null&&!o.podBalanceCollected?'<div style="background:rgba(255,106,0,0.08);border:1px solid rgba(255,106,0,0.3);border-radius:7px;padding:8px 10px;margin-bottom:10px;font-size:12px;color:var(--or);font-weight:700;">💵 Collect '+fmt(o.podBalanceDue)+' balance on delivery (Pay on Delivery order)</div>':'')
-    +'<button class="btn" style="margin-bottom:8px;" onclick="showDeliveryMapModal(\''+o.tracking+'\')">🗺️ View Map</button>'
+    +(incType?'<div style="background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.3);border-radius:7px;padding:8px 10px;margin-bottom:10px;font-size:12px;color:var(--wh);font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:8px;"><span>'+incType.emoji+' Reported: '+incType.label+'</span><span style="color:var(--or);cursor:pointer;font-weight:800;" onclick="clearIncident(\''+o.tracking+'\')">Clear</span></div>':'')
+    +'<div style="display:flex;gap:8px;margin-bottom:8px;">'
+    +'<button class="btn" style="flex:1;" onclick="showDeliveryMapModal(\''+o.tracking+'\')">🗺️ View Map</button>'
+    +'<button class="btn" style="flex:1;" onclick="showReportIncidentModal(\''+o.tracking+'\')">⚠️ '+(inc?'Update Issue':'Report Issue')+'</button>'
+    +'</div>'
     +(nextStage?'<button class="btn btn-or" onclick="advanceStage(\''+o.tracking+'\',\''+nextStage+'\')">Mark as '+STAGE_LABELS[nextStage]+'</button>':'<div style="color:var(--su);font-size:12px;font-weight:700;">✅ Delivered</div>')
     +'</div>';
+}
+function showReportIncidentModal(tracking){
+  const overlay=document.createElement('div');
+  overlay.id='rider-incident-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:900;display:flex;align-items:center;justify-content:center;padding:16px;';
+  overlay.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;width:100%;max-width:420px;padding:16px;">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><div style="font-weight:800;">Report an Issue</div><span onclick="document.getElementById(\'rider-incident-overlay\').remove()" style="cursor:pointer;font-size:20px;color:var(--wh);font-weight:700;">&times;</span></div>'
+    +'<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:14px;">This lets the customer, admin, and logistics know right away, so they can plan around it.</div>'
+    +'<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">'
+    +Object.keys(INCIDENT_TYPES_RIDER).map(function(k){var t=INCIDENT_TYPES_RIDER[k];return '<button class="btn" style="text-align:left;" onclick="submitIncidentReport(\''+tracking+'\',\''+k+'\')">'+t.emoji+' '+t.label+'</button>';}).join('')
+    +'</div>'
+    +'<textarea id="incident-note" class="fi" rows="2" placeholder="Optional note, e.g. how long you expect this to take..." style="width:100%;resize:vertical;"></textarea>'
+    +'</div>';
+  document.body.appendChild(overlay);
+}
+async function submitIncidentReport(tracking,type){
+  const noteEl=document.getElementById('incident-note');
+  const note=(noteEl&&noteEl.value||'').trim();
+  const order=await fbG('rn_mall_orders/'+tracking);if(!order)return;
+  const incident={type:type,note:note||null,ts:Date.now(),riderId:rider._id,riderName:rider.name};
+  await fbU('rn_mall_orders/'+tracking,{activeIncident:incident});
+  const incType=INCIDENT_TYPES_RIDER[type];
+  if(order.customer&&order.customer.id){
+    await fbP('rn_mall_customer_notifications/'+order.customer.id,{type:'delivery_incident',orderId:tracking,incidentType:type,incidentLabel:incType.label,note:note||null,message:incType.emoji+' Your rider reported: '+incType.label+' for order '+tracking+(note?', "'+note+'"':'')+'.',date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
+  }
+  await fbP('rn_mall_notifications',{type:'delivery_incident',orderId:tracking,incidentType:type,incidentLabel:incType.label,riderName:rider.name,note:note||null,date:ds(),read:false,ts:Date.now()});
+  try{
+    const allStaff=await fbG('rn_mall_staff')||{};
+    Object.entries(allStaff).forEach(function(e){
+      if(e[1].role==='logistics_manager'&&e[1].status!=='suspended'){
+        fbP('rn_mall_staff_notifications/'+e[0],{type:'delivery_incident',orderId:tracking,incidentType:type,incidentLabel:incType.label,riderName:rider.name,note:note||null,date:ds(),read:false,ts:Date.now()});
+      }
+    });
+  }catch(e){}
+  await fbP('rn_mall_rider_activity_log/'+rider._id,{action:'Reported delivery issue',detail:tracking+' → '+incType.label+(note?': '+note:''),date:ds(),ts:Date.now()});
+  const overlay=document.getElementById('rider-incident-overlay');if(overlay)overlay.remove();
+  toast('Issue reported, customer and admin have been notified.');
+  rnav('deliveries');
+}
+async function clearIncident(tracking){
+  await fbU('rn_mall_orders/'+tracking,{activeIncident:null});
+  toast('Issue cleared.');
+  rnav('deliveries');
 }
 let _riderMapInstance=null;
 async function geocodeAddress(address){

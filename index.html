@@ -2905,6 +2905,21 @@ function showTrackPage(){
 }
 let _trackPollTimer=null;
 const VEHICLE_ICONS={motorcycle:'🏍️',bicycle:'🚲',car:'🚗','van/truck':'🚚','on foot':'🚶'};
+const INCIDENT_TYPES={
+  traffic:{emoji:'🚦',label:'Heavy Traffic',msg:'Your rider is stuck in heavy traffic, delivery may take a little longer than expected.'},
+  breakdown:{emoji:'🔧',label:'Vehicle Breakdown',msg:'Your rider\'s vehicle has broken down, our team is working to get your delivery moving again.'},
+  road_closed:{emoji:'🚧',label:'Road Closed / Accident Nearby',msg:'The route to you is temporarily blocked, your rider is finding an alternative way.'},
+  weather:{emoji:'🌧️',label:'Bad Weather',msg:'Bad weather is slowing deliveries in your area, thanks for your patience.'},
+  other:{emoji:'⚠️',label:'Delivery Issue',msg:'Your rider has reported a delay with this delivery.'}
+};
+function renderIncidentBanner(inc){
+  const t=INCIDENT_TYPES[inc.type]||INCIDENT_TYPES.other;
+  return '<div style="background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.3);border-radius:9px;padding:12px 14px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start;">'
+    +'<div style="font-size:20px;line-height:1;">'+t.emoji+'</div>'
+    +'<div><div style="font-weight:800;color:var(--wh);font-size:12.5px;">'+t.label+'</div>'
+    +'<div style="font-size:12px;color:var(--w2);margin-top:2px;">'+t.msg+(inc.note?' Rider note: "'+inc.note+'"':'')+'</div></div>'
+    +'</div>';
+}
 const VEHICLE_AVG_SPEED_KMH={motorcycle:32,bicycle:15,car:26,'van/truck':22,'on foot':5};
 function estimateDeliveryTime(pickup,dest,vehicleType){
   // Straight-line (haversine) distance, a real route will run longer than this since
@@ -3107,6 +3122,7 @@ async function trackOrder(silentNum){
     ${order.status==='pod_declined'?'<div style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--re);margin-bottom:14px;"><strong>PAY ON DELIVERY DECLINED</strong>, '+(order.timeline?.[order.timeline.length-1]?.note||'Please contact support or pay online.')+'</div>':''}
     ${order.lastLocation&&order.status!=='delivered'&&order.status!=='delivered confirmed'?`<div style="background:rgba(91,155,245,0.08);border:1px solid rgba(91,155,245,0.25);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--bl);margin-bottom:14px;"><strong>${iconBadge('pin',12)} Latest Update:</strong> ${order.lastLocation}</div>`:''}
     ${order.status==='ready_for_pickup'?'<div style="background:rgba(255,106,0,0.1);border:1px solid rgba(255,106,0,0.3);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--or);margin-bottom:14px;"><strong>'+iconBadge('pin',12)+' READY FOR PICKUP</strong>, Your order has arrived! Please come collect it at your convenience.</div>':''}
+    ${order.activeIncident&&order.deliveryStage!=='delivered'&&order.status!=='cancelled'&&order.status!=='deleted'?renderIncidentBanner(order.activeIncident):''}
     ${order.riderId&&order.riderName&&order.deliveryStage!=='delivered'&&order.status!=='cancelled'&&order.status!=='deleted'?`<div style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
       <div><div style="font-size:10px;color:var(--wh);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">${iconBadge('bike',12)} Your Dispatch Rider</div><div style="font-size:13px;font-weight:800;color:var(--wh);margin-top:2px;">${order.riderName}</div>${order.riderPhone?`<div style="font-size:11px;color:var(--wh);font-weight:700;">${order.riderPhone}</div>`:''}</div>
       ${order.riderPhone?`<a href="tel:${order.riderPhone}" style="text-decoration:none;"><button style="background:var(--or);border:none;color:#000;font-weight:800;font-size:11px;padding:8px 14px;border-radius:7px;cursor:pointer;">${iconBadge('phone',12)} Call</button></a>`:''}
