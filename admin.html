@@ -603,7 +603,7 @@ function escAttr(s){
     .replace(/'/g,"\\'")
     .replace(/"/g,'&quot;');
 }
-function fbFetchTimeout(url,opts,ms=15000){
+function fbFetchTimeout(url,opts,ms=8000){
   const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('timed out after '+ms+'ms')),ms));
   return Promise.race([fetch(url,opts),timeout]);
 }
@@ -646,18 +646,18 @@ async function openDataDoc(uri){
     toast('Could not open this document','err');
   }
 }
-async function fbG(p){
+async function fbG(p,ms){
   // r.json() must be awaited HERE, inside the try, not just returned, otherwise
   // a response that arrives but fails to parse (a truncated body from a dropped
   // connection, a non-JSON error page) rejects outside this try/catch instead of
   // being caught by it, so a single bad response can crash a whole Promise.all
   // boot sequence with nothing to catch it, freezing the page mid-load forever.
-  try{const r=await fbFetchTimeout(FB+'/'+p+'.json');return await r.json();}
+  try{const r=await fbFetchTimeout(FB+'/'+p+'.json',null,ms);return await r.json();}
   catch(e){
     // Two automatic retries before giving up, a slow or unstable connection
     // shouldn't make admin content (or a correct password) vanish outright.
     for(let attempt=0;attempt<2;attempt++){
-      try{await new Promise(res=>setTimeout(res,600));const r2=await fbFetchTimeout(FB+'/'+p+'.json');return await r2.json();}
+      try{await new Promise(res=>setTimeout(res,600));const r2=await fbFetchTimeout(FB+'/'+p+'.json',null,ms);return await r2.json();}
       catch(e2){/* try next attempt */}
     }
     return null;
@@ -930,9 +930,13 @@ async function initAdmin(){
   const ci0=document.getElementById('content-inner');
   if(ci0&&!hadCache)ci0.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:100px 20px;"><div class="admin-boot-spinner"></div><div style="color:var(--wh);font-weight:700;font-size:13px;">Loading your dashboard…</div></div>';
   try{
+    // A 6s ceiling here (instead of fbG's normal 8s, compounded by its own
+    // retries) bounds how long the admin can sit on the boot spinner above if
+    // Firebase is slow or unreachable, rather than feeling stuck for up to a
+    // minute. A cached admin already has the dashboard on screen regardless.
     const[prods,orders,cats,custs,sett]=await Promise.all([
-      fbG('rn_mall_products'),fbG('rn_mall_orders'),
-      fbG('rn_mall_categories'),fbG('rn_mall_customers'),fbG('rn_mall_settings')
+      fbG('rn_mall_products',6000),fbG('rn_mall_orders',6000),
+      fbG('rn_mall_categories',6000),fbG('rn_mall_customers',6000),fbG('rn_mall_settings',6000)
     ]);
     if(prods)allProds=prods;else if(!hadCache)allProds={};
     if(orders)allOrders=orders;else if(!hadCache)allOrders={};

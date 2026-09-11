@@ -1139,7 +1139,7 @@ const LANGS={
 };
 function t(key){return LANGS[currentLang]?.[key]||LANGS.en[key]||key;}
 
-function fbFetchTimeout(url,opts,ms=15000){
+function fbFetchTimeout(url,opts,ms=8000){
   opts=opts||{};
   if(appCheckToken)opts.headers=Object.assign({},opts.headers,{'X-Firebase-AppCheck':appCheckToken});
   const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('timed out after '+ms+'ms')),ms));
@@ -1778,7 +1778,7 @@ async function init(){
     }
   }catch(cacheErr){console.warn('Cache read failed:',cacheErr.message);}
   try{
-    // A shorter timeout here specifically (vs fbG's normal 15s default) bounds how
+    // A shorter timeout here specifically (vs fbG's normal 8s default) bounds how
     // long a first-ever visit (no cache yet, so nothing above rendered anything)
     // can sit looking empty if Firebase is slow or unreachable, a repeat visitor
     // already saw the cached render above regardless of how this settles.
