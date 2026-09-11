@@ -1142,21 +1142,21 @@ function fbFetchTimeout(url,opts,ms=15000){
   const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('timed out after '+ms+'ms')),ms));
   return Promise.race([fetch(url,opts),timeout]);
 }
-async function fbG(p){
+async function fbG(p,ms){
   // r.json() must be awaited HERE, inside the try, not just returned, otherwise
   // a response that arrives but fails to parse (a truncated body from a dropped
   // connection, a non-JSON error page) rejects outside this try/catch instead of
   // being caught by it, so a single bad response can crash a whole Promise.all
   // boot sequence with nothing to catch it, freezing the page mid-load forever.
   try{
-    var r=await fbFetchTimeout(FB+'/'+p+'.json');
+    var r=await fbFetchTimeout(FB+'/'+p+'.json',null,ms);
     return r.ok?await r.json():null;
   }catch(e){
     console.warn('fbG failed for',p,', retrying:',e.message);
     for(var attempt=0;attempt<2;attempt++){
       try{
         await new Promise(function(res){setTimeout(res,600);});
-        var r2=await fbFetchTimeout(FB+'/'+p+'.json');
+        var r2=await fbFetchTimeout(FB+'/'+p+'.json',null,ms);
         return r2.ok?await r2.json():null;
       }catch(e2){
         console.warn('fbG retry',attempt+1,'also failed for',p,':',e2.message);
@@ -1768,7 +1768,11 @@ async function init(){
     }
   }catch(cacheErr){console.warn('Cache read failed:',cacheErr.message);}
   try{
-    var results=await Promise.all([fbG('rn_mall_settings'),fbG('rn_mall_categories'),fbG('rn_mall_products')]);
+    // A shorter timeout here specifically (vs fbG's normal 15s default) bounds how
+    // long a first-ever visit (no cache yet, so nothing above rendered anything)
+    // can sit looking empty if Firebase is slow or unreachable, a repeat visitor
+    // already saw the cached render above regardless of how this settles.
+    var results=await Promise.all([fbG('rn_mall_settings',6000),fbG('rn_mall_categories',6000),fbG('rn_mall_products',6000)]);
     sett=results[0];cats=results[1];prods=results[2];
   }catch(fetchErr){
     console.warn('Firebase fetch failed:',fetchErr.message);
