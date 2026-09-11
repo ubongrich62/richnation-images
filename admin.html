@@ -3006,7 +3006,7 @@ async function renderVisitors(c){
     rows.forEach(function(r){var m=(r.d||{})[field]||{};for(var k in m){out[k]=(out[k]||0)+m[k];}});
     return out;
   }
-  var devices=mergeMaps('devices'),browsers=mergeMaps('browsers'),countries=mergeMaps('countries');
+  var devices=mergeMaps('devices'),browsers=mergeMaps('browsers'),countries=mergeMaps('countries'),states=mergeMaps('states');
   function topList(map,limit){return Object.keys(map).map(function(k){return {k:k,v:map[k]};}).sort(function(a,b){return b.v-a.v;}).slice(0,limit||8);}
   function bar(label,value,max){
     var pct=max>0?Math.round((value/max)*100):0;
@@ -3019,6 +3019,8 @@ async function renderVisitors(c){
   var browserBars=hasAnyData?(topList(browsers,6).map(function(x){return bar(x.k,x.v,maxBrowser);}).join('')||'<div style="font-size:12px;color:var(--wh);">No visits recorded yet.</div>'):'<div style="font-size:12px;color:var(--wh);">No visits recorded yet.</div>';
   var maxCountry=Math.max.apply(null,Object.values(countries).concat([1]));
   var countryBars=hasAnyData?(topList(countries,8).map(function(x){return bar(COUNTRY_NAMES[x.k]||x.k,x.v,maxCountry);}).join('')||'<div style="font-size:12px;color:var(--wh);">No visits recorded yet.</div>'):'<div style="font-size:12px;color:var(--wh);">No visits recorded yet.</div>';
+  var maxState=Math.max.apply(null,Object.values(states).concat([1]));
+  var stateBars=hasAnyData?(topList(states,8).map(function(x){return bar(x.k==='unknown'?'Unknown':x.k,x.v,maxState);}).join('')||'<div style="font-size:12px;color:var(--wh);">No visits recorded yet.</div>'):'<div style="font-size:12px;color:var(--wh);">No visits recorded yet.</div>';
 
   var maxDay=Math.max.apply(null,rows.map(function(r){return r.d.total||0;}).concat([1]));
   var trend='<div class="card" style="margin-bottom:16px;"><div class="card-title">Visits, Last 30 Days</div>'
@@ -3045,7 +3047,8 @@ async function renderVisitors(c){
   html+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;">';
   html+='<div class="card"><div class="card-title">'+iconBadge('monitor',15)+' Device</div>'+deviceBars+'</div>';
   html+='<div class="card"><div class="card-title">'+iconBadge('globe',15)+' Browser</div>'+browserBars+'</div>';
-  html+='<div class="card"><div class="card-title">'+iconBadge('globe',15)+' Top Locations</div>'+countryBars+'</div>';
+  html+='<div class="card"><div class="card-title">'+iconBadge('globe',15)+' Top Countries</div>'+countryBars+'</div>';
+  html+='<div class="card"><div class="card-title">'+iconBadge('home',15)+' Top States</div>'+stateBars+'</div>';
   html+='</div>';
   html+='<div style="font-size:11px;color:var(--wh);opacity:0.6;margin-top:16px;line-height:1.6;">Counts are approximate, based on anonymous browser storage on richnationmall.com, not signed-in accounts, so the same person on two devices, or a cleared browser, counts as more than one visitor. Location is estimated from IP address via a third-party lookup, not exact GPS.</div>';
   c.innerHTML=html;
@@ -3811,19 +3814,62 @@ async function saveDeliveryOpts(){
 }
 
 // ── CUSTOMERS ──
+// Ranks customers by total spend on valid (non-cancelled/deleted) orders,
+// automatically, from order data that's already loaded, no manual admin
+// curation needed, over 3 windows: this calendar month, this calendar year,
+// and all-time.
+function computeTopCustomers(){
+  var now=new Date();
+  var monthKey=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  var yearKey=String(now.getFullYear());
+  var spend={month:{},year:{},allTime:{}},names={};
+  Object.values(allOrders).forEach(function(o){
+    if(!o.customer||!o.customer.id)return;
+    if(o.status==='cancelled'||o.status==='deleted'||o.status==='pod_declined')return;
+    var total=o.total||0,id=o.customer.id;
+    names[id]=o.customer.name||names[id]||'Customer';
+    spend.allTime[id]=(spend.allTime[id]||0)+total;
+    var d=new Date(o.createdAt||0);
+    if(!isNaN(d.getTime())){
+      if(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')===monthKey)spend.month[id]=(spend.month[id]||0)+total;
+      if(String(d.getFullYear())===yearKey)spend.year[id]=(spend.year[id]||0)+total;
+    }
+  });
+  function topN(map,n){
+    return Object.entries(map).filter(function(e){return e[1]>0;}).sort(function(a,b){return b[1]-a[1];}).slice(0,n||5).map(function(e){return {id:e[0],name:names[e[0]],total:e[1]};});
+  }
+  return {month:topN(spend.month,5),year:topN(spend.year,5),allTime:topN(spend.allTime,5)};
+}
+function renderTopCustomersCard(){
+  var top=computeTopCustomers();
+  var MEDALS=['🥇','🥈','🥉','4.','5.'];
+  function col(title,list){
+    return '<div><div style="font-size:11px;font-weight:800;color:var(--wh);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">'+title+'</div>'
+      +(list.length?list.map(function(x,i){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;'+(i<list.length-1?'border-bottom:1px solid var(--bdr);':'')+'"><div style="display:flex;align-items:center;gap:8px;min-width:0;"><span style="font-size:13px;flex-shrink:0;">'+MEDALS[i]+'</span><span style="font-size:12.5px;font-weight:700;color:var(--wh);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+x.name+'</span></div><span style="font-size:12px;font-weight:800;color:var(--or);flex-shrink:0;">'+fmt(x.total)+'</span></div>';}).join('')
+        :'<div style="font-size:12px;color:var(--wh);font-weight:700;padding:8px 0;">No orders yet.</div>');
+  }
+  return '<div class="card fade-in" style="margin-bottom:16px;">'
+    +'<div class="card-title">'+iconBadge('star',15)+' Top Customers</div>'
+    +'<div style="font-size:11px;color:var(--wh);font-weight:700;margin:6px 0 14px;">Ranked automatically by total spend on completed orders.</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:20px;">'
+    +col('This Month',top.month)+col('This Year',top.year)+col('All-Time',top.allTime)
+    +'</div></div>';
+}
 async function renderCustomers(c){
   const custs=Object.values(allCusts).sort((a,b)=>(b.lastSeen||0)-(a.lastSeen||0));
+  const topAllTimeId=(computeTopCustomers().allTime[0]||{}).id;
   c.innerHTML=`
   <div class="page-hdr slide-up">
     <div><div class="page-hdr-title">Customers</div>
     <div class="page-hdr-sub">${custs.length} registered customer${custs.length!==1?'s':''}</div></div>
   </div>
+  ${renderTopCustomersCard()}
   ${custs.length===0?`<div class="card fade-in"><div class="empty"><div class="empty-icon">&#9786;</div><div class="empty-title">No customers yet</div><div class="empty-sub">Registered customers will appear here.</div></div></div>`:
   `<div class="stagger">
     ${custs.map(cu=>{const ab=custActivityBadge(cu.lastSeen);return `<div class="data-row" style="flex-wrap:wrap;">
       <div class="row-av">${ini(cu.fname+' '+cu.lname)}</div>
       <div style="flex:1;min-width:180px;">
-        <div class="row-name">${cu.fname} ${cu.lname} ${cu.accountStatus==='suspended'||cu.accountStatus==='blocked'?'<span style="color:var(--re);font-size:10px;font-weight:800;">('+(cu.suspendReason==='failed_attempts'?'AUTO-LOCKED: 3 FAILED LOGINS':'SUSPENDED')+')</span>':''} <span style="background:${ab.color}22;color:${ab.color};font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:99px;margin-left:6px;text-transform:uppercase;letter-spacing:0.3px;">${ab.label}</span></div>
+        <div class="row-name">${cu.fname} ${cu.lname} ${cu.id===topAllTimeId?'<span title="All-time top customer">👑</span>':''} ${cu.accountStatus==='suspended'||cu.accountStatus==='blocked'?'<span style="color:var(--re);font-size:10px;font-weight:800;">('+(cu.suspendReason==='failed_attempts'?'AUTO-LOCKED: 3 FAILED LOGINS':'SUSPENDED')+')</span>':''} <span style="background:${ab.color}22;color:${ab.color};font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:99px;margin-left:6px;text-transform:uppercase;letter-spacing:0.3px;">${ab.label}</span></div>
         <div class="row-meta">${cu.email} &middot; ${cu.phone||'No phone'} &middot; Joined ${cu.joinDate||'N/A'}</div>
         <div class="row-meta" style="margin-top:3px;">Last seen: <strong style="color:var(--wh);">${timeAgo(cu.lastSeen)}</strong>${cu.activeDayCount?' &middot; Active on '+cu.activeDayCount+' day'+(cu.activeDayCount===1?'':'s'):''}</div>
         <div class="row-meta" style="margin-top:3px;">Password: <span id="pw-${cu.id}" style="font-family:monospace;letter-spacing:1px;">••••••••</span> <span onclick="togglePwView('${cu.id}','${escAttr((cu.password||''))}')" style="color:var(--or);cursor:pointer;font-weight:700;">show</span></div>
@@ -4885,20 +4931,24 @@ function renderHeroEditor(c){
 }
 function renderHeroBannerRows(){
   var wrap=document.getElementById('hero-banners-list');if(!wrap)return;
-  var imgs=((settings.heroConfig||{}).bannerImages)||[];
+  var hc=settings.heroConfig||{};
+  var imgs=hc.bannerImages||[];
+  var activeIdx=imgs[hc.activeBanner]?hc.activeBanner:imgs.findIndex(Boolean);
   var rows='';
   for(var i=0;i<3;i++){
     var img=imgs[i];
-    rows+='<div style="display:flex;gap:10px;align-items:center;margin-bottom:8px;background:var(--card2);padding:8px;border-radius:8px;">'
+    var isActive=img&&i===activeIdx;
+    rows+='<div style="display:flex;gap:10px;align-items:center;margin-bottom:8px;background:var(--card2);padding:8px;border-radius:8px;'+(isActive?'border:1.5px solid var(--or);':'')+'">'
       +'<div onclick="document.getElementById(\'hero-banner-file-'+i+'\').click()" title="Click to upload" style="width:90px;height:45px;border-radius:6px;overflow:hidden;background:var(--bg);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid var(--bdr);">'
       +(img?'<img src="'+img+'" style="width:100%;height:100%;object-fit:cover;">':'<span style="font-size:10px;color:var(--wh);font-weight:700;">Design '+(i+1)+'</span>')
       +'</div>'
       +'<input type="file" id="hero-banner-file-'+i+'" accept="image/*" style="display:none;" onchange="uploadHeroBanner('+i+',this)">'
-      +'<div style="flex:1;font-size:12px;color:var(--wh);font-weight:700;">Design '+(i+1)+(img?'':', empty')+'</div>'
+      +'<div style="flex:1;font-size:12px;color:var(--wh);font-weight:700;">Design '+(i+1)+(img?'':', empty')+(isActive?' <span style="background:rgba(255,106,0,.15);color:var(--or);font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:0.3px;">'+iconBadge('star',10)+' Live on site</span>':'')+'</div>'
+      +(img&&!isActive?'<button type="button" onclick="setActiveHeroBanner('+i+')" style="background:rgba(255,106,0,0.1);border:1px solid rgba(255,106,0,0.3);color:var(--or);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:11px;font-weight:700;white-space:nowrap;">Show This</button>':'')
       +(img?'<button type="button" onclick="removeHeroBanner('+i+')" style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);color:var(--re);border-radius:6px;padding:6px 10px;cursor:pointer;">🗑</button>':'')
       +'</div>';
   }
-  wrap.innerHTML=rows;
+  wrap.innerHTML='<div style="font-size:11px;color:var(--wh);font-weight:700;margin-bottom:10px;">Only the design marked "Live on site" shows to customers, no automatic rotating between them. Upload a new one to make it live immediately, or use "Show This" to switch back to one you kept on file.</div>'+rows;
 }
 async function uploadHeroBanner(slot,inp){
   if(!inp||!inp.files||!inp.files[0])return;
@@ -4911,9 +4961,17 @@ async function uploadHeroBanner(slot,inp){
   var imgs=(settings.heroConfig.bannerImages||[]).slice();
   imgs[slot]=b64;
   settings.heroConfig.bannerImages=imgs;
+  settings.heroConfig.activeBanner=slot; // a fresh upload goes live immediately, it doesn't just join a rotation
   delete settings.heroConfig.bannerImage; // migrate away from the old single-image field
   await fbU('rn_mall_settings',{heroConfig:settings.heroConfig});
-  toast('Design '+(slot+1)+' updated!');
+  toast('Design '+(slot+1)+' is now live on the homepage!');
+  renderHeroBannerRows();
+}
+async function setActiveHeroBanner(slot){
+  settings.heroConfig=settings.heroConfig||{};
+  settings.heroConfig.activeBanner=slot;
+  await fbU('rn_mall_settings',{heroConfig:settings.heroConfig});
+  toast('Design '+(slot+1)+' is now live on the homepage!');
   renderHeroBannerRows();
 }
 async function removeHeroBanner(slot){
@@ -4924,6 +4982,10 @@ async function removeHeroBanner(slot){
   // trim trailing empties so the array doesn't grow with nulls
   while(imgs.length&&!imgs[imgs.length-1])imgs.pop();
   settings.heroConfig.bannerImages=imgs;
+  if(settings.heroConfig.activeBanner===slot){
+    var fallback=imgs.findIndex(Boolean);
+    if(fallback>-1)settings.heroConfig.activeBanner=fallback;else delete settings.heroConfig.activeBanner;
+  }
   await fbU('rn_mall_settings',{heroConfig:settings.heroConfig});
   toast('Design removed.');
   renderHeroBannerRows();

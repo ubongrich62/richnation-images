@@ -23,7 +23,10 @@
     var cached=localStorage.getItem('rnm_cache_settings');
     if(cached){
       var hc=(JSON.parse(cached)||{}).heroConfig;
-      if(hc&&hc.bannerImages&&hc.bannerImages[0])url=hc.bannerImages[0];
+      if(hc&&hc.bannerImages){
+        var activeImg=hc.bannerImages[hc.activeBanner]||hc.bannerImages.find(Boolean);
+        if(activeImg)url=activeImg;
+      }
     }
     window.__earlyHeroImg=url;
     var pl=document.createElement('link');
@@ -1570,27 +1573,34 @@ async function submitRefundBankDetails(issueId){
   closeInfoModal();
   toast('Bank details confirmed! Your refund will be sent within 7 working days.');
   accTab('wallet',null);
-}function startHeroBannerCarousel(heroEl,imgs){
-  if(window._heroCarouselTimer)clearInterval(window._heroCarouselTimer);
+}function startHeroBannerCarousel(heroEl,imgs,activeIdx){
+  // Used to auto-rotate through every uploaded design every few seconds, like
+  // Jumia's homepage. In practice that meant a design admin just uploaded
+  // would only show for a few seconds before the carousel cycled on to
+  // whatever else was sitting in another slot, most sites just show one
+  // static banner. Now it shows exactly one image, whichever slot admin
+  // marked active in Homepage Editor (or the first uploaded one if none is
+  // marked), and stays there until admin changes it.
+  if(window._heroCarouselTimer){clearInterval(window._heroCarouselTimer);window._heroCarouselTimer=null;}
   const overlay='linear-gradient(rgba(0,0,0,0.45),rgba(0,0,0,0.45))';
-  let idx=0;
-  const apply=i=>{heroEl.style.transition='background-image 0.6s ease';heroEl.style.backgroundImage=overlay+', url("'+imgs[i]+'")';heroEl.style.backgroundSize='cover';heroEl.style.backgroundPosition='center';heroEl.style.backgroundRepeat='no-repeat';};
+  const img=imgs[activeIdx]||imgs.find(Boolean);
+  if(!img)return;
+  heroEl.style.transition='background-image 0.6s ease';
+  heroEl.style.backgroundImage=overlay+', url("'+img+'")';
+  heroEl.style.backgroundSize='cover';
+  heroEl.style.backgroundPosition='center';
+  heroEl.style.backgroundRepeat='no-repeat';
   // A CSS background-image is fetched at browser-assigned "Low" priority by
   // default, well behind fonts, scripts, and other images already in the
   // queue, that's a big part of why the plain gradient hero sits visible
   // for a beat before the real banner image appears, especially on a first
-  // visit with nothing cached yet. A high-priority preload hint for the
-  // very first banner image gets it fetched sooner without changing
-  // anything about how it's displayed.
-  if(imgs[0]&&!window._heroPreloaded){
-    window._heroPreloaded=true;
+  // visit with nothing cached yet. A high-priority preload hint gets it
+  // fetched sooner without changing anything about how it's displayed.
+  if(img!==window._heroPreloadedUrl){
+    window._heroPreloadedUrl=img;
     var pl=document.createElement('link');
-    pl.rel='preload';pl.as='image';pl.href=imgs[0];pl.fetchPriority='high';
+    pl.rel='preload';pl.as='image';pl.href=img;pl.fetchPriority='high';
     document.head.appendChild(pl);
-  }
-  apply(0);
-  if(imgs.length>1){
-    window._heroCarouselTimer=setInterval(()=>{idx=(idx+1)%imgs.length;apply(idx);},4500);
   }
 }
 function fmtBoth(n){return '₦'+parseInt(n).toLocaleString()+' <span style="color:var(--wh);font-weight:700;font-size:10px;">($'+(n/exchangeRate).toFixed(0)+')</span>';}
@@ -1731,9 +1741,9 @@ function applyHeroConfig(sett){
   Object.entries(ids).forEach(([k,id])=>{const el=document.getElementById(id);if(el&&hc[k])el.textContent=hc[k];});
   const heroEl=document.getElementById('hero-banner');
   if(heroEl){
-    const imgs=(hc.bannerImages||[]).filter(Boolean);
-    if(imgs.length){
-      startHeroBannerCarousel(heroEl,imgs);
+    const imgs=hc.bannerImages||[];
+    if(imgs.some(Boolean)){
+      startHeroBannerCarousel(heroEl,imgs,hc.activeBanner);
     }else if(hc.color1||hc.color2){
       heroEl.style.background='linear-gradient(135deg,'+(hc.color1||'#FF6A00')+','+(hc.color2||'#FFA733')+')';
     }
@@ -3252,7 +3262,7 @@ async function trackVisit(){
       patch['uniqueCount']={'.sv':{'increment':1}};
       patch['uniqueVisitors/'+visitorId]=true;
     }
-    var country='unknown';
+    var country='unknown',state='unknown';
     try{
       // This third-party lookup has no timeout of its own, and unlike every
       // other network call in this app it was never wrapped in one, so a
@@ -3264,9 +3274,19 @@ async function trackVisit(){
       var geoTimer=setTimeout(function(){geoCtl.abort();},4000);
       var geoRes=await fetch('https://ipwho.is/',{cache:'no-store',signal:geoCtl.signal});
       clearTimeout(geoTimer);
-      if(geoRes.ok){var geo=await geoRes.json();if(geo&&geo.success!==false&&geo.country_code)country=geo.country_code;}
+      if(geoRes.ok){
+        var geo=await geoRes.json();
+        if(geo&&geo.success!==false){
+          if(geo.country_code)country=geo.country_code;
+          if(geo.region)state=geo.region;
+        }
+      }
     }catch(geoErr){}
     patch['countries/'+country]={'.sv':{'increment':1}};
+    // Firebase keys can't contain ".", "#", "$", "[", "]", "/", a state/region
+    // name from a free-text geo lookup (e.g. "Federal Capital Territory") could
+    // in theory carry one, sanitize before using it as a path segment.
+    patch['states/'+state.replace(/[.#$\[\]\/]/g,'_')]={'.sv':{'increment':1}};
     await fbFetchTimeout(FB+'/rn_mall_analytics/'+today+'.json',{method:'PATCH',body:JSON.stringify(patch)},8000);
   }catch(e){console.warn('Visit tracking failed (non-critical):',e);}
 }
