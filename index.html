@@ -11,7 +11,27 @@
 <title>RichNation Mall — Experience The Billionaire Lifestyle</title>
 <meta name="description" content="Experience &quot;The Billionaire Lifestyle.&quot; Luxury. Quality. Elegance. Delivered to your door. RichNation Mall is Nigeria's trusted online shopping destination, affordable prices, verified products, secure Paystack payment, and nationwide delivery.">
 <link rel="canonical" href="https://richnationmall.com/">
-<link rel="preload" as="image" href="images/hero-banner/1787041657282_xxz5w2.jpeg" fetchpriority="high">
+<script>
+// Preloads the RIGHT hero photo as early as physically possible, before the
+// parser has even reached the hero element. On a repeat visit this is the
+// admin's actual configured banner (from last time's cached settings), not
+// the generic placeholder photo below, so returning visitors never see a
+// stand-in image, this preload is already fetching their real one.
+(function(){
+  try{
+    var url='images/hero-banner/1787041657282_xxz5w2.jpeg';
+    var cached=localStorage.getItem('rnm_cache_settings');
+    if(cached){
+      var hc=(JSON.parse(cached)||{}).heroConfig;
+      if(hc&&hc.bannerImages&&hc.bannerImages[0])url=hc.bannerImages[0];
+    }
+    window.__earlyHeroImg=url;
+    var pl=document.createElement('link');
+    pl.rel='preload';pl.as='image';pl.href=url;pl.fetchPriority='high';
+    document.head.appendChild(pl);
+  }catch(e){}
+})();
+</script>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="RichNation Mall">
 <meta property="og:title" content="RichNation Mall — Experience The Billionaire Lifestyle">
@@ -80,7 +100,14 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+<!-- Loaded as a non-blocking preload instead of a plain stylesheet link: a
+     regular <link rel=stylesheet> here would hold up first paint of the
+     entire page until this request returns, just to apply a font, when the
+     text is already readable in the fallback sans-serif stack below in the
+     meantime (font-display=swap). The onload swap turns it into a normal
+     stylesheet once it arrives; the <noscript> keeps it working with JS off. -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" onload="this.onload=null;this.rel='stylesheet';">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet"></noscript>
 <style>
 :root{
   /* structural, ink2 gives dark surfaces a slight warm depth instead of flat black.
@@ -705,6 +732,22 @@ html.rnm-maint #maintenance-screen{display:flex;}
     </div>
    </div>
   </div>
+  <script>
+  // Swaps in the real cached banner photo (if a repeat visit has one)
+  // immediately, before the browser paints this element for the first time,
+  // so returning visitors see their actual Site Customiser photo from frame
+  // one instead of the generic placeholder set above. window.__earlyHeroImg
+  // was already resolved (and its preload kicked off) at the top of <head>.
+  (function(){
+    try{
+      var heroEl=document.getElementById('hero-banner');
+      var url=window.__earlyHeroImg;
+      if(heroEl&&url&&url.indexOf('1787041657282_xxz5w2.jpeg')===-1){
+        heroEl.style.backgroundImage='linear-gradient(rgba(0,0,0,0.45),rgba(0,0,0,0.45)), url("'+url+'")';
+      }
+    }catch(e){}
+  })();
+  </script>
 
   <div class="trust-strip">
    <div class="trust-track">
