@@ -792,6 +792,7 @@ async function renderDashboard(c){
     <div style="font-size:12px;color:var(--wh);font-weight:700;margin-top:6px;line-height:1.7;">This Staff Portal only shows a limited view. For the full company-wide experience, same as Admin sees, ask Admin to grant you Admin Panel Access from Staff & Roles.</div>
   </div>`):''}
   ${accessFor(staff.role)==='exec'?`<div class="card-title" style="margin:16px 0 10px;">🏢 Company Overview</div><div class="stats-grid" id="ceo-overview-grid"><div style="color:var(--wh);font-weight:700;font-size:12px;">Loading...</div></div>`:''}
+  ${(accessFor(staff.role)==='exec'&&!(staff.permissions&&staff.permissions.viewRevenue))?`<div style="font-size:11px;color:var(--wh);font-weight:700;margin:-10px 0 16px;">🔒 Revenue figures are hidden. Ask Admin to grant "View Revenue Figures" access.</div>`:''}
   <div class="stats-grid">
     <div class="stat-card"><div class="stat-num" style="color:var(--su);">${fmt(staff.salary||0)}</div><div class="stat-lbl">Monthly Salary</div><div class="stat-sub">Status: ${staff.salaryStatus||'pending'}</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--or);">${staff.points||0} pts</div><div class="stat-lbl">StaffPoints</div><div class="stat-sub">Bonus points from admin</div></div>
@@ -824,7 +825,8 @@ async function renderDashboard(c){
       const revenue=orders.reduce(function(s,o){return s+(o.total||0);},0);
       const today=ds();
       const ordersToday=orders.filter(function(o){return o.date===today;}).length;
-      grid.innerHTML='<div class="stat-card"><div class="stat-num" style="color:var(--su);">'+fmt(revenue)+'</div><div class="stat-lbl">Total Revenue</div><div class="stat-sub">'+orders.length+' orders</div></div>'
+      const canViewRevenue=!!(staff.permissions&&staff.permissions.viewRevenue);
+      grid.innerHTML=(canViewRevenue?'<div class="stat-card"><div class="stat-num" style="color:var(--su);">'+fmt(revenue)+'</div><div class="stat-lbl">Total Revenue</div><div class="stat-sub">'+orders.length+' orders</div></div>':'')
         +'<div class="stat-card"><div class="stat-num" style="color:var(--or);">'+ordersToday+'</div><div class="stat-lbl">Orders Today</div></div>'
         +'<div class="stat-card"><div class="stat-num">'+Object.keys(res[1]||{}).length+'</div><div class="stat-lbl">Products</div><div class="stat-sub">'+Object.keys(res[2]||{}).length+' customers</div></div>';
     });
@@ -1710,17 +1712,17 @@ async function staffToggleSuspendCustomer(id,wasSuspended){
 }
 async function renderAnalyticsView(c){
   c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Analytics</div></div><div style="color:var(--wh);font-weight:700;">Loading...</div>';
-  const orders=Object.values(await fbG('rn_mall_orders')||{}).filter(function(o){return o.status!=='cancelled'&&o.status!=='deleted';});
+  const [ordersRaw,custs,prods]=await Promise.all([fbG('rn_mall_orders',6000),fbG('rn_mall_customers',6000),fbG('rn_mall_products',6000)]);
+  const orders=Object.values(ordersRaw||{}).filter(function(o){return o.status!=='cancelled'&&o.status!=='deleted';});
   const today=ds();
   const todayOrds=orders.filter(function(o){return o.date===today;});
   const totalRev=orders.reduce(function(s,o){return s+(o.total||0);},0);
-  const custs=await fbG('rn_mall_customers')||{};
-  const prods=await fbG('rn_mall_products')||{};
+  const canViewRevenue=!!(staff.permissions&&staff.permissions.viewRevenue);
   c.innerHTML=`<div class="page-hdr"><div class="page-hdr-title">Analytics</div></div>
   <div class="stats-grid">
-    <div class="stat-card"><div class="stat-num" style="color:var(--su);">${fmt(totalRev)}</div><div class="stat-lbl">Total Revenue</div><div class="stat-sub">${orders.length} orders</div></div>
+    ${canViewRevenue?`<div class="stat-card"><div class="stat-num" style="color:var(--su);">${fmt(totalRev)}</div><div class="stat-lbl">Total Revenue</div><div class="stat-sub">${orders.length} orders</div></div>`:`<div class="stat-card"><div class="stat-num" style="font-size:15px;">🔒 Hidden</div><div class="stat-lbl">Total Revenue</div><div class="stat-sub">Ask Admin for access</div></div>`}
     <div class="stat-card"><div class="stat-num">${todayOrds.length}</div><div class="stat-lbl">Orders Today</div></div>
-    <div class="stat-card"><div class="stat-num">${Object.keys(prods).length}</div><div class="stat-lbl">Products</div><div class="stat-sub">${Object.keys(custs).length} customers</div></div>
+    <div class="stat-card"><div class="stat-num">${Object.keys(prods||{}).length}</div><div class="stat-lbl">Products</div><div class="stat-sub">${Object.keys(custs||{}).length} customers</div></div>
   </div>`;
 }
 async function renderCustomerChatList(c){
