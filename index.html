@@ -1840,7 +1840,13 @@ function renderPromoAdTile(ad){
   const media=(ad.type==='video'&&ad.videoUrl)
     ?'<video src="'+ad.videoUrl+'" autoplay muted loop playsinline></video>'
     :'<img src="'+(ad.image||'')+'" alt="'+escHtml(ad.caption||'Promo')+'" loading="lazy" decoding="async" onerror="this.closest(\'.promo-ad-tile\').style.display=\'none\'"/>';
-  return '<div class="promo-ad-tile"'+onclick+'>'+media+(ad.caption?'<div class="promo-ad-caption">'+escHtml(ad.caption)+'</div>':'')+'</div>';
+  // 'auto' (the default) leaves the tile filling its grid cell, matching the
+  // hero's height, as before. Any explicit ratio admin picks (to match a
+  // vertical Reels-style video, a square photo, etc.) overrides that so the
+  // content isn't force-cropped into a shape it was never made for.
+  const ratio=ad.aspectRatio&&ad.aspectRatio!=='auto'?ad.aspectRatio.replace(':','/'):null;
+  const style=ratio?' style="aspect-ratio:'+ratio+';height:auto;"':'';
+  return '<div class="promo-ad-tile"'+style+onclick+'>'+media+(ad.caption?'<div class="promo-ad-caption">'+escHtml(ad.caption)+'</div>':'')+'</div>';
 }
 function goPromoAdLink(link){
   if(!link)return;

@@ -5180,6 +5180,13 @@ async function removeHeroBanner(slot){
 }
 
 // ── PROMO ADS (Konga-style image/video ad tiles below the hero) ──
+const PROMO_AD_RATIOS=[
+  ['auto','Auto, fill the tile height (default)'],
+  ['1:1','Square 1:1, good for regular photos'],
+  ['16:9','Widescreen 16:9, good for banner-style photos/video'],
+  ['9:16','Vertical 9:16, good for Reels/TikTok-style video'],
+  ['4:3','Classic 4:3 photo']
+];
 function renderPromoAdRows(){
   var wrap=document.getElementById('promo-ads-list');if(!wrap)return;
   var ads=settings.promoAds||[];
@@ -5208,6 +5215,10 @@ function renderPromoAdRows(){
       +'<input class="inp" id="promo-ad-link-'+i+'" value="'+(ad.link||'')+'" placeholder="Link when tapped (URL or category name), optional">'
       +'<input class="inp" id="promo-ad-caption-'+i+'" value="'+(ad.caption||'')+'" placeholder="Caption shown on the tile, optional">'
       +'</div>'
+      +'<div class="fg" style="margin:8px 0 0;"><label class="lbl">Aspect Ratio, match your photo/video\'s shape so it isn\'t cropped badly</label>'
+      +'<select class="inp" id="promo-ad-ratio-'+i+'">'
+      +PROMO_AD_RATIOS.map(function(r){return '<option value="'+r[0]+'"'+((ad.aspectRatio||'auto')===r[0]?' selected':'')+'>'+r[1]+'</option>';}).join('')
+      +'</select></div>'
       +'</div></div>'
       +'<button type="button" class="btn btn-or" style="font-size:11px;padding:6px 12px;" onclick="savePromoAdMeta('+i+')">💾 Save Tile '+(i+1)+'</button>'
       +'</div>';
@@ -5252,11 +5263,13 @@ async function savePromoAdMeta(slot){
   var videoInp=document.getElementById('promo-ad-video-'+slot);
   var linkInp=document.getElementById('promo-ad-link-'+slot);
   var capInp=document.getElementById('promo-ad-caption-'+slot);
+  var ratioInp=document.getElementById('promo-ad-ratio-'+slot);
   if(isVideo&&!((videoInp&&videoInp.value||'').trim())){toast('Paste a video link first','err');return;}
   settings.promoAds[slot]=Object.assign({},existing,{
     videoUrl:isVideo?(videoInp.value||'').trim():existing.videoUrl,
     link:(linkInp&&linkInp.value||'').trim(),
-    caption:(capInp&&capInp.value||'').trim()
+    caption:(capInp&&capInp.value||'').trim(),
+    aspectRatio:(ratioInp&&ratioInp.value)||'auto'
   });
   await fbU('rn_mall_settings',{promoAds:settings.promoAds});
   toast('Promo Ad '+(slot+1)+' saved!');
