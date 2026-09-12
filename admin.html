@@ -3392,21 +3392,6 @@ function refreshAdminMapToggleBtn(){
   const btn=document.getElementById('admin-map-toggle-btn');
   if(btn)btn.textContent=_adminMapViewMode==='satellite'?'🗺️ Street':'🛰️ Satellite';
 }
-function loadLeafletIfNeeded(){
-  if(window._leafletLoadPromise)return window._leafletLoadPromise;
-  window._leafletLoadPromise=new Promise(function(resolve){
-    if(typeof L!=='undefined'){resolve();return;}
-    const cssLink=document.createElement('link');
-    cssLink.rel='stylesheet';cssLink.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-    document.head.appendChild(cssLink);
-    const script=document.createElement('script');
-    script.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-    script.onload=function(){resolve();};
-    script.onerror=function(){resolve();};
-    document.head.appendChild(script);
-  });
-  return window._leafletLoadPromise;
-}
 // Google Maps is what real ride-hailing/delivery apps use, its tile and JS delivery
 // infrastructure is far more reliable than the free OpenStreetMap+Leaflet setup this
 // replaced. Same key/pattern as the customer-facing tracking map.
@@ -4213,7 +4198,7 @@ async function renderNotifs(c){
       fbU('rn_mall_notifications/'+k,{read:true});
       if(n2.type==='password_reset_request'){
         const resetPageUrl=settings.resetPageUrl||'';
-        const resetLink=resetPageUrl?resetPageUrl.replace(/\/?$/,'')+'?id='+(n2.customerId||''):'[Set your Password Reset Page URL in Site Customiser → Store Information first]';
+        const resetLink=resetPageUrl?resetPageUrl.replace(/\/?$/,'')+'?reset='+(n2.customerId||''):'[Set your Password Reset Page URL in Site Customiser → Store Information first]';
         const emailMsg='Hi,\\n\\nWe received a request to reset your RichNation Mall password.\\n\\nClick the link below to set a new password:\\n'+resetLink+'\\n\\nIf you did not request this, you can safely ignore this email or contact our support team.\\n\\nRichNation Mall Support';
         return `<div style="padding:12px 0;border-bottom:1px solid var(--bdr);">
           <div style="display:flex;gap:12px;align-items:flex-start;">
@@ -4620,7 +4605,7 @@ function renderSiteCustomiser(c){
   html += '<div class="g2"><div class="fg"><label class="lbl">Contact Email</label><input class="inp" id="cs-em" value="'+(settings.contactEmail||'rnm.office@richnationmall.com')+'"/></div>';
   html += '<div class="fg"><label class="lbl">WhatsApp</label><input class="inp" id="cs-wa" value="'+(settings.waNum||'2349164678560')+'"/></div></div>';
   html += '<div class="fg"><label class="lbl">Live Website URL</label><input class="inp" id="cs-site-url" value="'+(settings.siteUrl||'')+'" placeholder="https://richnationwbpt.com/mall/"/><div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:4px;">The exact URL customers use to reach the Mall. Used to build referral and share links correctly, without this, links can break for customers opening the app directly from a downloaded file instead of a real web address.</div></div>';
-  html += '<div class="fg"><label class="lbl">Password Reset Page URL</label><input class="inp" id="cs-reset-url" value="'+(settings.resetPageUrl||'')+'" placeholder="https://yourdomain.com/reset-password.html"/><div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:4px;">Upload the standalone reset-password.html file anywhere (your domain, Netlify, etc.) and paste its exact URL here. This is what customers land on when resetting their password.</div></div>';
+  html += '<div class="fg"><label class="lbl">Password Reset Page URL</label><input class="inp" id="cs-reset-url" value="'+(settings.resetPageUrl||'')+'" placeholder="https://richnationmall.com/"/><div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:4px;">Just your main site URL, e.g. https://richnationmall.com/, no separate file needed, the reset form is already built into the site itself. Opening this URL with ?reset=&lt;their ID&gt; on the end (added automatically) shows them the "Set New Password" screen directly.</div></div>';
   html += '<button class="btn btn-or" style="margin-bottom:16px;" onclick="saveStoreInfo()">Save Store Information</button>';
   html += '<div class="fg"><label class="lbl">Pickup Location</label><div style="font-size:11px;color:var(--wh);font-weight:700;margin-bottom:8px;">Drag the pin to your exact store/warehouse location, this is what the delivery map uses for every order.</div>';
   html += '<div id="cs-pickup-map" style="width:100%;height:260px;border-radius:9px;overflow:hidden;background:var(--card2);margin-bottom:8px;"></div>';
@@ -4752,43 +4737,43 @@ async function saveStoreInfo(){
   var u={storeName:(document.getElementById('cs-sn')||{}).value||'RichNation Mall',tagline:(document.getElementById('cs-tl')||{}).value||'',contactEmail:(document.getElementById('cs-em')||{}).value||'',waNum:(document.getElementById('cs-wa')||{}).value||'',resetPageUrl:(document.getElementById('cs-reset-url')||{}).value||'',siteUrl:(document.getElementById('cs-site-url')||{}).value||''};
   Object.assign(settings,u);await fbU('rn_mall_settings',u);toast('Store info saved!');
 }
-let _pickupMapInstance=null,_pickupMapMarker=null;
+let _pickupMapInstance=null,_pickupMapMarker=null,_pickupMapViewMode=localStorage.getItem('rnm_map_view')||'street';
 async function initPickupLocationMap(){
   const el=document.getElementById('cs-pickup-map');
   if(!el)return;
-  await loadLeafletIfNeeded();
-  if(typeof L==='undefined'){
+  await loadGoogleMapsIfNeededAdmin();
+  if(!(window.google&&window.google.maps)){
     el.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;padding:16px;text-align:center;font-size:12px;color:var(--wh);font-weight:700;">🗺️ Map couldn\'t load. Try refreshing the page, or check your connection.</div>';
     return;
   }
   const saved=settings.pickupLocation;
   const start=saved&&saved.lat!=null?{lat:saved.lat,lng:saved.lng}:{lat:6.5244,lng:3.3792};
-  if(_pickupMapInstance){_pickupMapInstance.remove();_pickupMapInstance=null;}
-  const map=L.map('cs-pickup-map',{zoomControl:true,attributionControl:true}).setView([start.lat,start.lng],saved&&saved.lat!=null?15:6);
+  el.innerHTML='';
+  el.style.cssText='width:100%;height:260px;border-radius:9px;overflow:hidden;background:var(--card2);margin-bottom:8px;position:relative;';
+  const map=new google.maps.Map(el,{center:start,zoom:saved&&saved.lat!=null?15:6,disableDefaultUI:true,zoomControl:true,mapTypeId:_pickupMapViewMode==='satellite'?'hybrid':'roadmap',styles:DARK_MAP_STYLE_ADMIN});
   _pickupMapInstance=map;
-  var pickupPrimaryTiles=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',{maxZoom:20,maxNativeZoom:20,subdomains:'abcd',attribution:'© OpenStreetMap © CARTO'}).addTo(map);
-  var pickupTileErrors=0,pickupFellBack=false;
-  pickupPrimaryTiles.on('tileerror',function(){
-    pickupTileErrors++;
-    if(pickupTileErrors>3&&!pickupFellBack){
-      pickupFellBack=true;
-      map.removeLayer(pickupPrimaryTiles);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,subdomains:'abc',attribution:'© OpenStreetMap contributors'}).addTo(map);
-    }
-  });
-  setTimeout(function(){if(map)map.invalidateSize();},150);
-  setTimeout(function(){if(map)map.invalidateSize();},500);
-  const pinIcon=L.divIcon({html:'<div style="background:#FF6A00;width:30px;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:15px;border:2px solid #fff;">🏬</div>',iconSize:[30,30],className:''});
-  _pickupMapMarker=L.marker([start.lat,start.lng],{icon:pinIcon,draggable:true}).addTo(map);
-  _pickupMapMarker.on('dragend',function(){
+  _pickupMapMarker=new google.maps.Marker({position:start,map:map,icon:makeMarkerIconAdmin('#FF6A00',30),label:{text:'🏬',fontSize:'15px'},draggable:true});
+  _pickupMapMarker.addListener('dragend',function(){
     const statusEl=document.getElementById('cs-pickup-status');
     if(statusEl){statusEl.textContent='📍 Pin moved, click Save to confirm this as your pickup location.';statusEl.style.color='var(--or)';}
   });
-  map.on('click',function(e){
-    _pickupMapMarker.setLatLng(e.latlng);
+  map.addListener('click',function(e){
+    _pickupMapMarker.setPosition(e.latLng);
     const statusEl=document.getElementById('cs-pickup-status');
     if(statusEl){statusEl.textContent='📍 Pin moved, click Save to confirm this as your pickup location.';statusEl.style.color='var(--or)';}
   });
+  const toggleWrap=document.createElement('div');
+  toggleWrap.style.cssText='position:absolute;top:8px;right:8px;z-index:2;';
+  toggleWrap.innerHTML='<button id="pickup-map-toggle-btn" style="background:#161616;color:#fff;border:1px solid #FF6A00;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">'+(_pickupMapViewMode==='satellite'?'🗺️ Street':'🛰️ Satellite')+'</button>';
+  toggleWrap.onclick=function(e){e.stopPropagation();togglePickupMapView();};
+  el.appendChild(toggleWrap);
+}
+function togglePickupMapView(){
+  _pickupMapViewMode=_pickupMapViewMode==='street'?'satellite':'street';
+  localStorage.setItem('rnm_map_view',_pickupMapViewMode);
+  if(_pickupMapInstance)_pickupMapInstance.setMapTypeId(_pickupMapViewMode==='satellite'?'hybrid':'roadmap');
+  const btn=document.getElementById('pickup-map-toggle-btn');
+  if(btn)btn.textContent=_pickupMapViewMode==='satellite'?'🗺️ Street':'🛰️ Satellite';
 }
 function useMyCurrentLocationForPickup(){
   const statusEl=document.getElementById('cs-pickup-status');
@@ -4798,8 +4783,9 @@ function useMyCurrentLocationForPickup(){
     function(pos){
       const lat=pos.coords.latitude,lng=pos.coords.longitude;
       if(_pickupMapInstance&&_pickupMapMarker){
-        _pickupMapMarker.setLatLng([lat,lng]);
-        _pickupMapInstance.setView([lat,lng],16);
+        _pickupMapMarker.setPosition({lat,lng});
+        _pickupMapInstance.setCenter({lat,lng});
+        _pickupMapInstance.setZoom(16);
       }
       if(statusEl){statusEl.textContent='📍 Pin moved to your current location, click Save to confirm.';statusEl.style.color='var(--or)';}
     },
@@ -4819,7 +4805,7 @@ async function searchPickupAddress(){
     const data=await res.json();
     if(data&&data[0]){
       const lat=parseFloat(data[0].lat),lng=parseFloat(data[0].lon);
-      if(_pickupMapInstance&&_pickupMapMarker){_pickupMapMarker.setLatLng([lat,lng]);_pickupMapInstance.setView([lat,lng],16);}
+      if(_pickupMapInstance&&_pickupMapMarker){_pickupMapMarker.setPosition({lat,lng});_pickupMapInstance.setCenter({lat,lng});_pickupMapInstance.setZoom(16);}
       if(statusEl){statusEl.textContent='📍 Found it, click Save to confirm this as your pickup location.';statusEl.style.color='var(--or)';}
     }else{
       if(statusEl){statusEl.textContent='⚠ Could not find that address, try a different search, or drag the pin manually.';statusEl.style.color='var(--re)';}
@@ -4831,7 +4817,8 @@ async function searchPickupAddress(){
 async function savePickupPinPosition(){
   const statusEl=document.getElementById('cs-pickup-status');
   if(!_pickupMapMarker){if(statusEl){statusEl.textContent='Map not ready yet, try again in a moment.';statusEl.style.color='var(--re)';}return;}
-  const pos=_pickupMapMarker.getLatLng();
+  const posLL=_pickupMapMarker.getPosition();
+  const pos={lat:posLL.lat(),lng:posLL.lng()};
   const pickupLocation={lat:pos.lat,lng:pos.lng,address:'',city:'',state:''};
   // Save the coordinates immediately, this is the source of truth the delivery map
   // actually uses, so it never depends on reverse-geocoding succeeding.
