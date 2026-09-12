@@ -5023,7 +5023,15 @@ async function uploadHeroBanner(slot,inp){
   var b64=await compressImage(inp.files[0],1920,0.9);
   if(!b64){toast('Upload failed, try a different image','err');return;}
   var url=isGithubConfigured()?await uploadDataUrlToGithub(b64,'banners'):null;
-  if(url)b64=url;
+  // A hero photo is large even compressed, if the Storage/R2 upload fails,
+  // falling back to embedding it as base64 directly in Realtime Database is
+  // exactly the bloat that migrating to Storage was meant to end, every app's
+  // rn_mall_settings fetch (every page load, all 6 apps) would carry that
+  // multi-hundred-KB blob from then on. Refuse the save instead, so a broken
+  // Storage/R2 pipeline surfaces immediately rather than silently degrading
+  // load times site-wide.
+  if(!url){toast('Storage upload failed, the design was NOT saved (this would otherwise bloat the database), check your Storage/R2 configuration and try again','err');return;}
+  b64=url;
   settings.heroConfig=settings.heroConfig||{};
   var imgs=(settings.heroConfig.bannerImages||[]).slice();
   imgs[slot]=b64;
