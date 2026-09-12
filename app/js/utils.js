@@ -51,3 +51,28 @@ function fieldSelect(val, opts, cb) {
 function field(labelText, control) {
   return div({ class: 'field' }, fieldLabel(labelText), control);
 }
+
+// Password/coupon generation — charset excludes ambiguous chars (I,O,l,0,1).
+const PW_CHARSET = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#';
+function randomChars(len) {
+  let out = '';
+  for (let i = 0; i < len; i++) out += PW_CHARSET[Math.floor(Math.random() * PW_CHARSET.length)];
+  return out;
+}
+function genPassword(prefix, len) { return (prefix || 'RNA@') + randomChars(len || 8); }
+
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => toast('Copied to clipboard.')).catch(() => toast('Could not copy.', true));
+}
+function waLink(phone, message) {
+  const digits = String(phone || '').replace(/[^\d]/g, '');
+  return 'https://wa.me/' + digits + (message ? '?text=' + encodeURIComponent(message) : '');
+}
+
+// Renders a label/value row, or null if the value is empty/placeholder-ish —
+// used across admin detail panels to keep sparse records readable.
+function detailRow(label, value) {
+  const v = value == null ? '' : String(value).trim();
+  if (!v || ['n0', 'n', 'undefined', 'null'].includes(v.toLowerCase())) return null;
+  return div({ class: 'detail-row' }, span({ class: 'detail-row-label' }, label), span({ class: 'detail-row-value' }, v));
+}

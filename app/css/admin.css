@@ -1,0 +1,57 @@
+/* =========================================================
+   RichNation Academy — Admin panel
+   ========================================================= */
+.admin-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+.admin-title{font-family:var(--font-display);font-weight:800;font-size:19px;color:var(--text-1);}
+
+.notif-bell-wrap{position:relative;}
+.notif-bell{position:relative;}
+.notif-bell.is-flash{border-color:var(--brand);background:var(--brand-dim);}
+.notif-count{
+  position:absolute;top:-6px;right:-6px;background:var(--red);color:#fff;
+  font-size:9.5px;font-weight:800;border-radius:99px;padding:1px 6px;min-width:16px;text-align:center;
+}
+.notif-popup{
+  position:fixed;top:70px;right:14px;width:320px;max-height:420px;overflow-y:auto;
+  background:var(--surf-2);border:1px solid var(--line-2);border-radius:var(--radius-md);
+  box-shadow:var(--shadow-3);z-index:600;padding:12px;
+}
+.notif-popup-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.notif-row{padding:9px 10px;border-radius:var(--radius-sm);margin-bottom:4px;font-size:12px;}
+.notif-row.is-unread{background:var(--brand-faint);}
+.notif-row-name{font-weight:700;color:var(--text-1);}
+.notif-row-meta{color:var(--text-3);font-size:10.5px;margin-top:2px;}
+
+/* Tab bar */
+.tab-bar{display:flex;gap:6px;overflow-x:auto;margin-bottom:18px;padding-bottom:2px;}
+.tab-bar::-webkit-scrollbar{display:none;}
+.tab-btn{
+  padding:8px 15px;border-radius:var(--radius-sm);font-size:12.5px;font-weight:600;
+  background:var(--surf-2);color:var(--text-3);border:1px solid var(--line);white-space:nowrap;
+}
+.tab-btn.is-active{background:var(--brand);color:#160c02;border-color:var(--brand);}
+
+.subtab-bar{display:flex;gap:18px;border-bottom:1px solid var(--line);margin-bottom:16px;}
+.subtab-btn{padding:8px 2px;font-size:12.5px;font-weight:600;color:var(--text-3);border-bottom:2px solid transparent;margin-bottom:-1px;}
+.subtab-btn.is-active{color:var(--brand);border-color:var(--brand);}
+
+/* Collapsible rows / cards */
+.collapse-card{background:var(--surf-1);border:1px solid var(--line);border-radius:var(--radius-md);margin-bottom:10px;overflow:hidden;}
+.collapse-card.is-flagged{border-color:var(--red-line);}
+.collapse-head{padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.collapse-body{padding:0 16px 16px;border-top:1px solid var(--line);}
+.collapse-section{margin-top:12px;}
+.collapse-section-label{font-size:10px;color:var(--text-4);text-transform:uppercase;letter-spacing:0.8px;font-weight:700;margin-bottom:6px;}
+.detail-row{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:12.5px;border-bottom:1px solid var(--line);}
+.detail-row:last-child{border-bottom:none;}
+.detail-row-label{color:var(--text-3);}
+.detail-row-value{color:var(--text-1);font-weight:600;text-align:right;}
+
+.data-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);flex-wrap:wrap;}
+.data-row:last-child{border-bottom:none;}
+
+.mono{font-family:'Courier New',monospace;letter-spacing:0.5px;}
+
+.stat-tile{background:var(--surf-1);border:1px solid var(--line);border-radius:var(--radius-md);padding:16px;}
+.stat-tile-value{font-family:var(--font-display);font-weight:800;font-size:22px;color:var(--text-1);}
+.stat-tile-label{font-size:11px;color:var(--text-3);margin-top:4px;}
