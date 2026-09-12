@@ -221,6 +221,20 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .promo-ad-tile img,.promo-ad-tile video,.promo-ad-tile iframe{width:100%;height:100%;object-fit:cover;display:block;border:0;transition:transform .4s ease;}
 .promo-ad-tile:hover img,.promo-ad-tile:hover video{transform:scale(1.05);}
 .promo-ad-caption{position:absolute;left:0;right:0;bottom:0;padding:14px 16px 12px;background:linear-gradient(transparent,rgba(0,0,0,0.75));color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14px;pointer-events:none;}
+.custom-banner-block{max-width:var(--container);margin:24px auto 0;padding:0 20px;}
+.custom-banner-block img{width:100%;border-radius:var(--r-md);display:block;}
+.custom-banner-caption{margin-top:8px;text-align:center;font-size:12px;color:var(--w2);font-weight:700;}
+.video-gallery-block{max-width:var(--container);margin:24px auto 0;padding:0 20px;}
+.video-gallery-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:19px;color:var(--wh);text-align:center;margin-bottom:16px;}
+.video-gallery-row{display:flex;gap:14px;overflow-x:auto;padding-bottom:10px;scroll-snap-type:x mandatory;}
+.video-gallery-item{flex:0 0 220px;scroll-snap-align:start;cursor:pointer;border-radius:var(--r-md);overflow:hidden;background:var(--card2);transition:transform .2s ease;}
+.video-gallery-item:hover{transform:translateY(-3px);}
+.video-gallery-thumb{position:relative;aspect-ratio:16/9;background:#000;}
+.video-gallery-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.video-gallery-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.video-gallery-play svg{width:44px;height:44px;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.5));}
+.video-gallery-item-title{padding:8px 10px;font-size:12px;font-weight:700;color:var(--wh);}
+@media(max-width:520px){.video-gallery-item{flex-basis:170px;}}
 @media(prefers-reduced-motion:reduce){.promo-ad-tile,.promo-ad-tile img,.promo-ad-tile video{transition:none;}.promo-ad-tile:hover{transform:none;}.promo-ad-tile:hover img,.promo-ad-tile:hover video{transform:none;}}
 .sec-hdr2{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
 .sec-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:19px;color:var(--wh);border-left:4px solid var(--or);padding-left:12px;}
@@ -766,6 +780,7 @@ html.rnm-maint #maintenance-screen{display:flex;}
    </div>
    <div class="promo-ads-grid" id="promo-ads-grid" style="display:none;"></div>
   </div>
+  <div id="content-slot-after-hero"></div>
   <script>
   // Swaps in the real cached banner photo (if a repeat visit has one)
   // immediately, before the browser paints this element for the first time,
@@ -819,6 +834,7 @@ html.rnm-maint #maintenance-screen{display:flex;}
       <svg class="cat-dropdown-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
     </div>
   </div>
+  <div id="content-slot-after-categories"></div>
 
   <div class="sec-wrap" id="featured-sec" style="display:none;">
     <div class="sec-hdr2">
@@ -851,6 +867,7 @@ html.rnm-maint #maintenance-screen{display:flex;}
       <button class="tb-btn tb-btn-dk" onclick="loadMore()">Load More</button>
     </div>
   </div>
+  <div id="content-slot-after-products"></div>
 
   <div class="sec-wrap" id="vendor-cta-sec">
     <div class="vendor-cta">
@@ -874,6 +891,7 @@ html.rnm-maint #maintenance-screen{display:flex;}
       <div class="why-card"><div class="why-icon" id="e-why-support">💬</div><div class="why-title">Real Support</div><div class="why-desc">Real people on WhatsApp and live chat, not just bots.</div></div>
     </div>
   </div>
+  <div id="content-slot-after-why-choose"></div>
 
   <div class="sec-wrap" style="padding-bottom:40px;">
     <div class="sec-hdr2"><div class="sec-title">Our Guarantees</div></div>
@@ -892,6 +910,7 @@ html.rnm-maint #maintenance-screen{display:flex;}
     <div style="font-size:12.5px;color:var(--w2);margin:-10px 0 14px;line-height:1.7;">Everything you need to know about shopping with RichNation Mall, Nigeria's trusted online shopping destination.</div>
     <div class="faq-list" id="home-faq-list"></div>
   </div>
+  <div id="content-slot-before-footer"></div>
 
   <div class="newsletter">
     <div class="newsletter-inner">
@@ -1830,6 +1849,47 @@ function goPromoAdLink(link){
   if(cat){filterCat(cat.id);return;}
   window.location.href=link;
 }
+function renderCustomBannerBlock(sett){
+  document.querySelectorAll('[data-content-block="banner"]').forEach(e=>e.remove());
+  const cb=sett&&sett.customBanner;
+  if(!cb||!cb.image)return;
+  const slot=document.getElementById('content-slot-'+(cb.position||'after-why-choose'));
+  if(!slot)return;
+  const onclick=cb.link?' onclick="goPromoAdLink(\''+escJs(cb.link)+'\')" style="cursor:pointer;"':'';
+  const wrap=document.createElement('div');
+  wrap.dataset.contentBlock='banner';
+  wrap.innerHTML='<div class="custom-banner-block"><img src="'+cb.image+'" alt="'+escHtml(cb.caption||'')+'"'+onclick+' loading="lazy" decoding="async"/>'
+    +(cb.caption?'<div class="custom-banner-caption">'+escHtml(cb.caption)+'</div>':'')+'</div>';
+  slot.appendChild(wrap);
+}
+function playGalleryVideo(url,title){
+  const yt=ytVideoId(url);
+  const media=yt
+    ?'<iframe src="https://www.youtube.com/embed/'+yt+'?autoplay=1" style="width:100%;aspect-ratio:16/9;border:0;" allow="autoplay;encrypted-media" allowfullscreen></iframe>'
+    :'<video src="'+url+'" controls autoplay style="width:100%;aspect-ratio:16/9;"></video>';
+  showInfoModal(escHtml(title||'Video'),media);
+}
+function renderVideoGalleryBlock(sett){
+  document.querySelectorAll('[data-content-block="gallery"]').forEach(e=>e.remove());
+  const vg=sett&&sett.videoGallery;
+  const videos=(vg&&vg.videos||[]).filter(v=>v&&v.url);
+  if(!videos.length)return;
+  const slot=document.getElementById('content-slot-'+(vg.position||'before-footer'));
+  if(!slot)return;
+  const items=videos.map(v=>{
+    const yt=ytVideoId(v.url);
+    const thumb=yt?'https://img.youtube.com/vi/'+yt+'/hqdefault.jpg':'';
+    return '<div class="video-gallery-item" onclick="playGalleryVideo(\''+escJs(v.url)+'\',\''+escJs(v.title||'')+'\')">'
+      +'<div class="video-gallery-thumb">'+(thumb?'<img src="'+thumb+'" loading="lazy" decoding="async" alt=""/>':'')
+      +'<div class="video-gallery-play"><svg viewBox="0 0 68 48"><path d="M66.5 7.7c-.8-2.9-2.9-5.2-5.8-6C55.8 0 34 0 34 0S12.2 0 7.3 1.7c-2.9.8-5 3.1-5.8 6C0 12.6 0 24 0 24s0 11.4 1.5 16.3c.8 2.9 2.9 5.2 5.8 6C12.2 48 34 48 34 48s21.8 0 26.7-1.7c2.9-.8 5-3.1 5.8-6C68 35.4 68 24 68 24s0-11.4-1.5-16.3z" fill="#FF0000"/><path d="M45 24 27 14v20z" fill="#fff"/></svg></div></div>'
+      +(v.title?'<div class="video-gallery-item-title">'+escHtml(v.title)+'</div>':'')
+      +'</div>';
+  }).join('');
+  const wrap=document.createElement('div');
+  wrap.dataset.contentBlock='gallery';
+  wrap.innerHTML='<div class="video-gallery-block"><div class="video-gallery-title">'+escHtml(vg.title||'Brand Gallery')+'</div><div class="video-gallery-row">'+items+'</div></div>';
+  slot.appendChild(wrap);
+}
 function renderPromoAds(sett){
   const wrap=document.getElementById('promo-ads-grid');
   if(!wrap)return;
@@ -1862,7 +1922,7 @@ async function init(){
       if(settings.theme)applyTheme(settings.theme);
       allCategories=cachedCats?JSON.parse(cachedCats):[];
       allProducts=JSON.parse(cachedProds);
-      applyHeroConfig(settings);renderPromoAds(settings);
+      applyHeroConfig(settings);renderPromoAds(settings);renderCustomBannerBlock(settings);renderVideoGalleryBlock(settings);
       renderCatNav();renderCategories();renderFeatured();renderRecommended();renderNew();renderFlash();renderPreOrder();renderAllProducts();
     }
   }catch(cacheErr){console.warn('Cache read failed:',cacheErr.message);}
@@ -1896,7 +1956,7 @@ async function init(){
       localStorage.setItem('rnm_cache_settings',JSON.stringify(settings));
     }
   }catch(cacheWriteErr){/* storage full or unavailable, skip caching */}
-  applyHeroConfig(settings);renderPromoAds(settings);
+  applyHeroConfig(settings);renderPromoAds(settings);renderCustomBannerBlock(settings);renderVideoGalleryBlock(settings);
   if(settings.announcement){const ab=document.getElementById('announce-bar');if(ab){ab.textContent=settings.announcement;ab.style.display='block';}}
   computeActivePromo().then(function(){
     if(activePromo&&activePromo.bannerText){const ab=document.getElementById('announce-bar');if(ab){ab.textContent=activePromo.bannerText;ab.style.display='block';}}
@@ -1958,7 +2018,7 @@ async function init(){
     if(settings.paystackKey)PAYSTACK_KEY=settings.paystackKey;
       if(settings.googleMapsKey)GOOGLE_MAPS_API_KEY=settings.googleMapsKey;
     if(settings.theme)applyTheme(settings.theme);
-    applyHeroConfig(settings);renderPromoAds(settings);
+    applyHeroConfig(settings);renderPromoAds(settings);renderCustomBannerBlock(settings);renderVideoGalleryBlock(settings);
     try{localStorage.setItem('rnm_cache_settings',JSON.stringify(settings));}catch(e){}
     const ab2=document.getElementById('announce-bar');
     if(ab2)ab2.style.display=settings.announcement&&!activePromo?'block':(ab2.style.display==='block'&&!settings.announcement?'none':ab2.style.display);

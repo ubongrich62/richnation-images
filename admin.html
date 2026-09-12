@@ -4995,12 +4995,119 @@ function renderHeroEditor(c){
   html+='<div class="cs-section"><div class="cs-section-title">'+iconBadge('chat',14)+' Promo Ads (Photos &amp; Videos), optional</div>';
   html+='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">Up to 7 promo ad tiles, shown as a grid beside the hero banner, like Konga\'s homepage ads. Each can be a photo or a video, plays natively in the tile (autoplay, muted, no YouTube branding), paste a direct video link or upload a short clip, with an optional link (a URL, or a category name to jump to) and a short caption shown over it.</div>';
   html+='<div id="promo-ads-list"></div>';
+  html+='<div class="cs-section"><div class="cs-section-title">🖼️ Custom Banner, optional</div>';
+  html+='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">One full-width banner image (like an awards/certifications strip), placed wherever you choose on the homepage below.</div>';
+  html+='<div id="custom-banner-editor"></div>';
+  html+='<div class="cs-section"><div class="cs-section-title">🎬 Video Gallery, optional</div>';
+  html+='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">A scrollable row of brand/product videos (paste YouTube links), shown with a title you choose, placed wherever you choose on the homepage.</div>';
+  html+='<div id="video-gallery-editor"></div>';
   html+='<div class="cs-section"><div class="cs-section-title">📢 Announcement Bar</div>';
   html+='<div class="fg"><input class="inp" id="he-ann" value="'+(settings.announcement||'')+'" placeholder="e.g. FREE delivery this week!"/></div>';
   html+='<button class="btn btn-or" onclick="saveAnnEditor()">Save</button></div>';
   c.innerHTML=html;
   renderHeroBannerRows();
   renderPromoAdRows();
+  renderCustomBannerEditor();
+  renderVideoGalleryEditor();
+}
+const CONTENT_SLOT_OPTIONS=[
+  ['after-hero','Right below the hero banner'],
+  ['after-categories','Below Shop by Category'],
+  ['after-products','Below All Products'],
+  ['after-why-choose','Below Why Choose RichNation'],
+  ['before-footer','Near the bottom, before the footer']
+];
+function contentSlotSelect(id,current){
+  return '<select class="inp" id="'+id+'">'+CONTENT_SLOT_OPTIONS.map(function(o){return '<option value="'+o[0]+'"'+(current===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>';
+}
+function renderCustomBannerEditor(){
+  var wrap=document.getElementById('custom-banner-editor');if(!wrap)return;
+  var cb=settings.customBanner||{};
+  wrap.innerHTML=''
+    +'<div style="width:100%;max-width:320px;height:80px;border-radius:6px;overflow:hidden;background:var(--bg);margin-bottom:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid var(--bdr);" onclick="document.getElementById(\'cb-file\').click()">'
+    +(cb.image?'<img src="'+cb.image+'" style="width:100%;height:100%;object-fit:cover;">':'<span style="font-size:10px;color:var(--wh);font-weight:700;">Click to upload banner image</span>')
+    +'</div>'
+    +'<input type="file" id="cb-file" accept="image/*" style="display:none;" onchange="uploadCustomBannerImage(this)">'
+    +'<div class="g2">'
+    +'<input class="inp" id="cb-link" value="'+(cb.link||'')+'" placeholder="Link when tapped, optional">'
+    +'<input class="inp" id="cb-caption" value="'+(cb.caption||'')+'" placeholder="Caption text, optional">'
+    +'</div>'
+    +'<div class="fg"><label class="lbl">Position on homepage</label>'+contentSlotSelect('cb-position',cb.position||'after-why-choose')+'</div>'
+    +'<div style="display:flex;gap:8px;">'
+    +'<button type="button" class="btn btn-or" onclick="saveCustomBanner()">💾 Save Banner</button>'
+    +(cb.image?'<button type="button" class="btn btn-re" onclick="removeCustomBanner()">🗑 Remove</button>':'')
+    +'</div>';
+}
+async function uploadCustomBannerImage(inp){
+  if(!inp||!inp.files||!inp.files[0])return;
+  toast('Uploading banner…');
+  var b64=await compressImage(inp.files[0],1600,0.85);
+  if(!b64){toast('Upload failed, try a different image','err');return;}
+  var url=isGithubConfigured()?await uploadDataUrlToGithub(b64,'banners'):null;
+  if(!url){toast('Banner NOT saved, '+(window._lastStorageError||'Storage upload failed'),'err');return;}
+  settings.customBanner=Object.assign({},settings.customBanner||{},{image:url});
+  await fbU('rn_mall_settings',{customBanner:settings.customBanner});
+  toast('Banner image saved!');
+  renderCustomBannerEditor();
+}
+async function saveCustomBanner(){
+  var link=(document.getElementById('cb-link')||{}).value||'';
+  var caption=(document.getElementById('cb-caption')||{}).value||'';
+  var position=(document.getElementById('cb-position')||{}).value||'after-why-choose';
+  settings.customBanner=Object.assign({},settings.customBanner||{},{link:link.trim(),caption:caption.trim(),position:position});
+  await fbU('rn_mall_settings',{customBanner:settings.customBanner});
+  toast('Banner saved!');
+}
+async function removeCustomBanner(){
+  if(!confirm('Remove the custom banner?'))return;
+  settings.customBanner=null;
+  await fbD('rn_mall_settings/customBanner');
+  toast('Banner removed.');
+  renderCustomBannerEditor();
+}
+function renderVideoGalleryEditor(){
+  var wrap=document.getElementById('video-gallery-editor');if(!wrap)return;
+  var vg=settings.videoGallery||{};
+  var vids=vg.videos||[];
+  var rows=vids.map(function(v,i){
+    return '<div class="g2" style="margin-bottom:8px;align-items:end;">'
+      +'<div class="fg" style="margin-bottom:0;"><label class="lbl">Video '+(i+1)+' Link</label><input class="inp" id="vg-url-'+i+'" value="'+(v.url||'')+'" placeholder="YouTube link"></div>'
+      +'<div class="fg" style="margin-bottom:0;display:flex;gap:6px;align-items:end;"><div style="flex:1;"><label class="lbl">Title, optional</label><input class="inp" id="vg-title-'+i+'" value="'+(v.title||'')+'" placeholder="Video title"></div><button type="button" class="btn btn-re" style="padding:10px 12px;" onclick="removeVideoGalleryItem('+i+')">🗑</button></div>'
+      +'</div>';
+  }).join('')||'<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:8px;">No videos added yet.</div>';
+  wrap.innerHTML=rows
+    +(vids.length<6?'<button type="button" class="btn btn-dk" onclick="addVideoGalleryItem()">+ Add Video</button>':'')
+    +'<div class="fg" style="margin-top:12px;"><label class="lbl">Gallery Title</label><input class="inp" id="vg-title-header" value="'+(vg.title||'Brand Gallery')+'"></div>'
+    +'<div class="fg"><label class="lbl">Position on homepage</label>'+contentSlotSelect('vg-position',vg.position||'before-footer')+'</div>'
+    +'<button type="button" class="btn btn-or" onclick="saveVideoGallery()">💾 Save Video Gallery</button>';
+}
+function addVideoGalleryItem(){
+  settings.videoGallery=settings.videoGallery||{};
+  settings.videoGallery.videos=(settings.videoGallery.videos||[]).concat([{url:'',title:''}]);
+  renderVideoGalleryEditor();
+}
+function removeVideoGalleryItem(i){
+  settings.videoGallery=settings.videoGallery||{};
+  var vids=(settings.videoGallery.videos||[]).slice();
+  vids.splice(i,1);
+  settings.videoGallery.videos=vids;
+  renderVideoGalleryEditor();
+}
+async function saveVideoGallery(){
+  var vids=[];
+  var i=0;
+  while(document.getElementById('vg-url-'+i)){
+    var url=(document.getElementById('vg-url-'+i).value||'').trim();
+    var title=(document.getElementById('vg-title-'+i).value||'').trim();
+    if(url)vids.push({url:url,title:title});
+    i++;
+  }
+  var title=(document.getElementById('vg-title-header')||{}).value||'Brand Gallery';
+  var position=(document.getElementById('vg-position')||{}).value||'before-footer';
+  settings.videoGallery={videos:vids,title:title.trim()||'Brand Gallery',position:position};
+  await fbU('rn_mall_settings',{videoGallery:settings.videoGallery});
+  toast('Video Gallery saved!');
+  renderVideoGalleryEditor();
 }
 function renderHeroBannerRows(){
   var wrap=document.getElementById('hero-banners-list');if(!wrap)return;
