@@ -1803,15 +1803,11 @@ function applyHeroConfig(sett){
 }
 function renderPromoAdTile(ad){
   const onclick=ad.link?' onclick="goPromoAdLink(\''+escJs(ad.link)+'\')"':'';
-  let media;
-  if(ad.type==='video'&&ad.videoUrl){
-    const yt=ytVideoId(ad.videoUrl);
-    media=yt
-      ?'<iframe src="https://www.youtube.com/embed/'+yt+'?autoplay=1&mute=1&loop=1&playlist='+yt+'&controls=0&modestbranding=1&playsinline=1&rel=0" allow="autoplay;encrypted-media" loading="lazy" title="'+escHtml(ad.caption||'Promo video')+'"></iframe>'
-      :'<video src="'+ad.videoUrl+'" autoplay muted loop playsinline></video>';
-  }else{
-    media='<img src="'+(ad.image||'')+'" alt="'+escHtml(ad.caption||'Promo')+'" loading="lazy" decoding="async" onerror="this.closest(\'.promo-ad-tile\').style.display=\'none\'"/>';
-  }
+  // Always a native <video>, never a YouTube iframe, an ad tile showing YouTube's
+  // own player chrome/branding looks like a broken embed, not a store promo.
+  const media=(ad.type==='video'&&ad.videoUrl)
+    ?'<video src="'+ad.videoUrl+'" autoplay muted loop playsinline></video>'
+    :'<img src="'+(ad.image||'')+'" alt="'+escHtml(ad.caption||'Promo')+'" loading="lazy" decoding="async" onerror="this.closest(\'.promo-ad-tile\').style.display=\'none\'"/>';
   return '<div class="promo-ad-tile"'+onclick+'>'+media+(ad.caption?'<div class="promo-ad-caption">'+escHtml(ad.caption)+'</div>':'')+'</div>';
 }
 function goPromoAdLink(link){

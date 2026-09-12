@@ -4991,7 +4991,7 @@ function renderHeroEditor(c){
   html+='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">Upload up to 3 seasonal banners (Happy New Year, Christmas, Black Friday, Valentine, etc.), whichever one is marked "Live on site" is the only one shown, no automatic rotating. Recommended: a wide image (1600×600px or similar).</div>';
   html+='<div id="hero-banners-list"></div>';
   html+='<div class="cs-section"><div class="cs-section-title">'+iconBadge('chat',14)+' Promo Ads (Photos &amp; Videos), optional</div>';
-  html+='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">Up to 4 promo ad tiles, shown as a grid right below the hero banner, like Konga\'s homepage ads. Each can be a photo or a video (paste a YouTube/hosted video link, autoplays muted in the grid), with an optional link (a URL, or a category name to jump to) and a short caption shown over it.</div>';
+  html+='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">Up to 4 promo ad tiles, shown as a grid beside the hero banner, like Konga\'s homepage ads. Each can be a photo or a video, plays natively in the tile (autoplay, muted, no YouTube branding), paste a direct video link or upload a short clip, with an optional link (a URL, or a category name to jump to) and a short caption shown over it.</div>';
   html+='<div id="promo-ads-list"></div>';
   html+='<div class="cs-section"><div class="cs-section-title">📢 Announcement Bar</div>';
   html+='<div class="fg"><input class="inp" id="he-ann" value="'+(settings.announcement||'')+'" placeholder="e.g. FREE delivery this week!"/></div>';
@@ -5091,7 +5091,10 @@ function renderPromoAdRows(){
       +'<button type="button" class="btn '+(isVideo?'btn-or':'btn-dk')+'" style="font-size:10px;padding:5px 10px;" onclick="setPromoAdType('+i+',\'video\')">🎬 Video</button>'
       +(hasMedia?'<button type="button" class="btn btn-re" style="font-size:10px;padding:5px 10px;margin-left:auto;" onclick="removePromoAd('+i+')">🗑 Remove</button>':'')
       +'</div>'
-      +(isVideo?'<input class="inp" id="promo-ad-video-'+i+'" value="'+(ad.videoUrl||'')+'" placeholder="YouTube link or direct .mp4 link" style="margin-bottom:8px;">':'')
+      +(isVideo?'<input class="inp" id="promo-ad-video-'+i+'" value="'+(ad.videoUrl||'')+'" placeholder="Direct video link (.mp4 or hosted video URL), plays natively, no YouTube branding" style="margin-bottom:8px;">'
+        +'<input type="file" id="promo-ad-vidfile-'+i+'" accept="video/*" style="display:none;" onchange="uploadPromoAdVideo('+i+',this)">'
+        +'<button type="button" class="btn btn-dk" style="font-size:10px;padding:5px 10px;margin-bottom:8px;" onclick="document.getElementById(\'promo-ad-vidfile-'+i+'\').click()">📁 Or Upload a Video File (max 15MB)</button>'
+        :'')
       +'<div class="g2" style="margin-bottom:0;">'
       +'<input class="inp" id="promo-ad-link-'+i+'" value="'+(ad.link||'')+'" placeholder="Link when tapped (URL or category name), optional">'
       +'<input class="inp" id="promo-ad-caption-'+i+'" value="'+(ad.caption||'')+'" placeholder="Caption shown on the tile, optional">'
@@ -5116,6 +5119,19 @@ async function uploadPromoAdImage(slot,inp){
   if(!url){toast('Ad NOT saved, '+(window._lastStorageError||'Storage upload failed'),'err');return;}
   settings.promoAds=settings.promoAds||[];
   settings.promoAds[slot]=Object.assign({},settings.promoAds[slot]||{},{type:'image',image:url});
+  await fbU('rn_mall_settings',{promoAds:settings.promoAds});
+  toast('Promo Ad '+(slot+1)+' saved!');
+  renderPromoAdRows();
+}
+async function uploadPromoAdVideo(slot,inp){
+  if(!inp||!inp.files||!inp.files[0])return;
+  var file=inp.files[0];
+  if(file.size>15*1024*1024){toast('That video is over 15MB, use a shorter clip or paste a hosted video link instead','err');return;}
+  toast('Uploading video…');
+  var url=await uploadFileToStorage(file,'promo-ad-videos');
+  if(!url){toast('Ad NOT saved, '+(window._lastStorageError||'Storage upload failed'),'err');return;}
+  settings.promoAds=settings.promoAds||[];
+  settings.promoAds[slot]=Object.assign({},settings.promoAds[slot]||{},{type:'video',videoUrl:url});
   await fbU('rn_mall_settings',{promoAds:settings.promoAds});
   toast('Promo Ad '+(slot+1)+' saved!');
   renderPromoAdRows();

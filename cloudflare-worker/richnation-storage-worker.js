@@ -57,9 +57,10 @@ const MAX_FILE_BYTES = 15 * 1024 * 1024;   // 15MB, for non-image task/submissio
 const IMAGE_FOLDERS = new Set([
   'banners','products','staff','investors','riders','vendors','orders',
   'hero-banner','payment-icons','colors','vendor-photos','vendor-products',
-  'reviews','staff-photos','staff-products','investor-photos','rider-photos'
+  'reviews','staff-photos','staff-products','investor-photos','rider-photos',
+  'promo-ads'
 ]);
-const ANY_FILE_FOLDERS = new Set(['task-files','submissions']);
+const ANY_FILE_FOLDERS = new Set(['task-files','submissions','promo-ad-videos']);
 
 function corsHeaders(){
   return {
