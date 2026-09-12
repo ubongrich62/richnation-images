@@ -806,12 +806,17 @@ async function doLogin(){
   const e=document.getElementById('li-e').value.trim().toLowerCase();
   const p=document.getElementById('li-p').value.trim();
   const err=document.getElementById('li-err');
+  if(!p){err.textContent='Enter your password.';err.style.display='block';return;}
   // Checked in Firebase first, not just localStorage, so a changed password works
   // from any device/browser, not only the one it was changed on. Two passwords are
   // supported (either one signs in), stored as an array, editable anytime in
   // Settings without needing to know the other one.
-  const s=await fbG('rn_mall_settings')||{};
-  let validList=Array.isArray(s.adminPasswords)&&s.adminPasswords.length?s.adminPasswords:null;
+  // Both reads fired together, not one after the other, the staff lookup is
+  // only a fallback path (CEO login) but there's no reason to make every
+  // Owner login wait through it sequentially when it doesn't depend on the
+  // settings fetch at all, that used to double the real-world wait here.
+  const [s,allStaffMaybe]=await Promise.all([fbG('rn_mall_settings'),e?fbG('rn_mall_staff'):Promise.resolve(null)]);
+  let validList=Array.isArray((s||{}).adminPasswords)&&s.adminPasswords.length?s.adminPasswords:null;
   if(!validList){
     const local=JSON.parse(localStorage.getItem('rnm_admin_passwords')||'null');
     validList=Array.isArray(local)&&local.length?local:null;
@@ -821,7 +826,6 @@ async function doLogin(){
   // ever required the single password string below with no second factor at all.
   // Require it to actually match an authorised address now.
   const emailOk=ADMIN_EMAILS.includes(e);
-  if(!p){err.textContent='Enter your password.';err.style.display='block';return;}
   if(validList.includes(p)&&emailOk){
     sessionStorage.setItem('rnm_admin_session','1');
     sessionStorage.removeItem('rnm_admin_is_ceo');
@@ -835,7 +839,7 @@ async function doLogin(){
   // Not the Owner password, check if this is a CEO staff member who has been
   // explicitly granted admin panel access. Without that grant, this path does nothing.
   if(e){
-    const allStaff=await fbG('rn_mall_staff')||{};
+    const allStaff=allStaffMaybe||{};
     const match=Object.values(allStaff).find(s=>s.email===e&&s.password===p&&s.role==='ceo'&&s.status==='active');
     if(match&&match.adminPanelAccess){
       sessionStorage.setItem('rnm_admin_session','1');
