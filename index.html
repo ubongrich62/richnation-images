@@ -269,6 +269,13 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .prod-img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s ease;}
 .prod-card:hover .prod-img{transform:scale(1.08);}
 @media(prefers-reduced-motion:reduce){.prod-img{transition:none;}.prod-card:hover .prod-img{transform:none;}}
+.prod-img-loading{position:absolute;inset:0;z-index:1;display:flex;align-items:center;justify-content:center;transition:opacity .4s ease;}
+.prod-img-loading.hide{opacity:0;pointer-events:none;}
+.prod-img-loading::before{content:'';position:absolute;width:56px;height:56px;border-radius:50%;background:conic-gradient(from 0deg,var(--or),var(--gold),transparent 75%);animation:prodLoaderSpin 1.3s linear infinite;-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 3px));}
+.prod-img-loading img{position:relative;width:32px;height:auto;animation:prodLoaderPulse 1.3s ease-in-out infinite;filter:drop-shadow(0 0 10px rgba(255,106,0,0.65));}
+@keyframes prodLoaderSpin{to{transform:rotate(360deg);}}
+@keyframes prodLoaderPulse{0%,100%{transform:scale(1);opacity:.85;}50%{transform:scale(1.18);opacity:1;}}
+@media(prefers-reduced-motion:reduce){.prod-img-loading::before{animation:none;}.prod-img-loading img{animation:none;}}
 .prod-img-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:40px;color:var(--wh);font-weight:700;}
 .prod-badges{position:absolute;top:8px;left:8px;display:flex;flex-direction:column;gap:4px;}
 .prod-badge{font-size:9px;font-weight:800;padding:3px 7px;border-radius:var(--r-sm);letter-spacing:.3px;}
@@ -2221,7 +2228,7 @@ function productCard(p){
   if((p.freeShipping||settings.freeShippingAll)&&!disabled)badges+='<span class="prod-badge" style="background:rgba(34,197,94,0.15);color:var(--su);">FREE SHIP</span>';
   return `<div class="prod-card${disabled?' prod-disabled':''}" onclick="${disabled?'':'openProduct(\''+p.id+'\')'}">
     <div class="prod-img-wrap">
-      ${p.images&&p.images[0]?`<img class="prod-img" src="${p.images[0]}" alt="${p.name}" loading="lazy" decoding="async" onerror="this.style.display='none';this.nextSibling.style.display='flex'"/><div class="prod-img-ph" style="display:none;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;color:var(--or);">${catIcon(p.category)}</div>`:`<div class="prod-img-ph" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;color:var(--or);">${catIcon(p.category)}</div>`}
+      ${p.images&&p.images[0]?`<div class="prod-img-loading"><img src="images/branding/richnation-logo-v3.png" alt=""/></div><img class="prod-img" src="${p.images[0]}" alt="${p.name}" loading="lazy" decoding="async" onload="this.previousElementSibling.classList.add('hide')" onerror="this.style.display='none';this.nextSibling.style.display='flex';this.previousElementSibling.classList.add('hide')"/><div class="prod-img-ph" style="display:none;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;color:var(--or);">${catIcon(p.category)}</div>`:`<div class="prod-img-ph" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;color:var(--or);">${catIcon(p.category)}</div>`}
       <div style="position:absolute;top:8px;left:8px;display:flex;flex-direction:column;gap:3px;">${badges}</div>
       ${!disabled?`<button class="prod-wish${wished?' wished':''}" onclick="event.stopPropagation();toggleWish('${p.id}',this)" style="color:${wished?'var(--re)':'var(--or)'};">${wished?'&#9829;':'&#9825;'}</button>`:''}
     </div>
