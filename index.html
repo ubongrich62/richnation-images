@@ -3939,8 +3939,10 @@ async function signInWithGoogle(){
   }catch(e){
     if(e.code==='auth/popup-closed-by-user'||e.code==='auth/cancelled-popup-request')return;
     if(e.code==='auth/unauthorized-domain'){toast('This domain isn\'t authorized for Google Sign-In yet, add it under Firebase Console → Authentication → Settings → Authorized domains','err');return;}
+    if(e.code==='auth/operation-not-allowed'){toast('Google Sign-In isn\'t turned on yet in Firebase, enable it under Firebase Console → Authentication → Sign-in method → Google','err');return;}
+    if(e.code==='auth/popup-blocked'){toast('Your browser blocked the Google Sign-In popup, allow popups for this site and try again','err');return;}
     console.warn('Google sign-in failed:',e);
-    toast('Google Sign-In failed, please try again or use email/password','err');
+    toast('Google Sign-In failed ('+(e.code||e.message||'unknown error')+'), please try again or use email/password','err');
   }
 }
 function updateAuthUI(){document.getElementById('auth-btns').style.display=currUser?'none':'flex';document.getElementById('user-menu').style.display=currUser?'block':'none';if(currUser){loadCustNotifs();trackCustomerActivity();}else{const b=document.getElementById('cnotif-badge');if(b)b.style.display='none';}}
