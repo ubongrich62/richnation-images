@@ -1,0 +1,88 @@
+/* =========================================================
+   RichNation Academy — App shell layout
+   ========================================================= */
+.app{display:flex;flex-direction:column;min-height:100vh;}
+
+/* Topbar */
+.topbar{
+  position:sticky;top:0;z-index:100;height:var(--topbar-h);
+  background:rgba(7,8,13,0.94);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--line);
+  display:flex;align-items:center;padding:0 18px;gap:14px;flex-shrink:0;
+}
+.brand-logo{display:flex;align-items:center;gap:10px;}
+.brand-mark{
+  width:38px;height:38px;border-radius:11px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--brand),#e0620a);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-weight:800;font-size:12px;color:#160c02;
+  box-shadow:0 4px 14px rgba(249,115,22,0.35);
+}
+.brand-text-lg{font-family:var(--font-display);font-weight:800;font-size:14.5px;line-height:1.2;color:var(--text-1);}
+.brand-text-sm{font-size:9px;color:var(--text-3);letter-spacing:1.2px;text-transform:uppercase;}
+.topbar-spacer{flex:1;}
+
+/* Body split */
+.app-body{display:flex;flex:1;overflow:hidden;}
+
+/* Sidebar */
+.sidebar{
+  width:var(--sidebar-w);flex-shrink:0;background:var(--surf-0);
+  border-right:1px solid var(--line);display:flex;flex-direction:column;
+  overflow-y:auto;position:sticky;top:var(--topbar-h);height:calc(100vh - var(--topbar-h));
+}
+.sidebar-head{padding:18px 16px 12px;border-bottom:1px solid var(--line);}
+.sidebar-rooms{flex:1;padding:12px 10px;}
+.sidebar-section-label{
+  font-size:9.5px;color:var(--text-4);letter-spacing:1.4px;text-transform:uppercase;
+  font-weight:700;padding:10px 8px 6px;
+}
+.sidebar-footer{padding:14px 16px;border-top:1px solid var(--line);}
+
+.room-btn{
+  display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:var(--radius-sm);
+  color:var(--text-2);font-size:12.5px;font-weight:500;border:none;background:transparent;
+  width:100%;text-align:left;transition:all var(--fast) var(--ease);cursor:pointer;position:relative;
+}
+.room-btn:hover{background:var(--surf-2);color:var(--text-1);}
+.room-btn.is-active{background:var(--brand-dim);color:var(--brand);font-weight:700;}
+.room-btn.is-locked{opacity:0.4;cursor:not-allowed;}
+.room-icon{font-size:15px;flex-shrink:0;width:18px;text-align:center;}
+.room-badge{margin-left:auto;background:var(--brand);color:#160c02;font-size:8px;font-weight:800;padding:2px 6px;border-radius:99px;}
+
+/* Main content */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
+.section-head{padding:18px 20px;border-bottom:1px solid var(--line);flex-shrink:0;}
+.section-title{font-family:var(--font-display);font-size:17px;font-weight:800;color:var(--text-1);margin-bottom:3px;}
+.section-sub{font-size:12px;color:var(--text-3);}
+.content-pad{padding:20px;}
+
+/* Mobile bottom nav */
+.mobile-nav{
+  display:none;position:fixed;bottom:0;left:0;right:0;z-index:100;
+  background:rgba(9,10,17,0.97);border-top:1px solid var(--line);
+  padding:6px 6px env(safe-area-inset-bottom);overflow-x:auto;
+}
+.mobile-nav::-webkit-scrollbar{display:none;}
+.mobile-nav-items{display:flex;gap:2px;min-width:max-content;}
+.mobile-nav-btn{
+  display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 10px;
+  border-radius:9px;border:none;background:transparent;color:var(--text-2);
+  font-size:8.5px;font-weight:700;letter-spacing:0.3px;text-transform:uppercase;min-width:54px;
+}
+.mobile-nav-btn.is-active{background:var(--brand-dim);color:var(--brand);}
+.mobile-nav-icon{font-size:15px;}
+
+@media (max-width:768px){
+  .sidebar{display:none;}
+  .mobile-nav{display:block;}
+  .main{padding-bottom:calc(var(--mobnav-h) + 12px);}
+  .section-head{padding:14px 16px;}
+  .section-title{font-size:15px;}
+  .content-pad{padding:14px;}
+  .card{padding:14px;}
+  .topbar{height:52px;padding:0 14px;gap:10px;}
+  .brand-text-sm{display:none;}
+  .brand-mark{width:32px;height:32px;font-size:10px;}
+}
+@media (min-width:769px){.mobile-nav{display:none;}}

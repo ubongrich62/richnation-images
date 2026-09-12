@@ -1,0 +1,66 @@
+/* =========================================================
+   RichNation Academy — Base reset & primitives
+   ========================================================= */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  background:var(--bg);
+  color:var(--text-1);
+  font-family:var(--font-ui);
+  font-size:14px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+img{max-width:100%;display:block;}
+button,input,textarea,select{font-family:inherit;font-size:13px;color:inherit;}
+textarea{resize:none;}
+button{cursor:pointer;background:none;}
+a{color:inherit;text-decoration:none;}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:99px;}
+::-webkit-scrollbar-track{background:transparent;}
+::selection{background:var(--brand-line);color:var(--text-1);}
+
+[hidden]{display:none!important;}
+
+.h-display{font-family:var(--font-display);font-weight:800;color:var(--text-1);}
+.h-sub{color:var(--text-3);}
+.u-flex{display:flex;}
+.u-flex-1{flex:1;}
+.u-gap-xs{gap:6px;} .u-gap-sm{gap:10px;} .u-gap-md{gap:14px;} .u-gap-lg{gap:20px;}
+.u-center{align-items:center;}
+.u-between{justify-content:space-between;}
+.u-col{flex-direction:column;}
+.u-wrap{flex-wrap:wrap;}
+.u-mt-sm{margin-top:8px;} .u-mt-md{margin-top:16px;} .u-mt-lg{margin-top:24px;}
+.u-muted{color:var(--text-3);}
+.u-small{font-size:12px;}
+.u-nowrap{white-space:nowrap;}
+.u-scroll-y{overflow-y:auto;}
+.u-relative{position:relative;}
+.u-full{width:100%;}
+
+/* focus ring, keyboard-accessible */
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,[tabindex]:focus-visible{
+  outline:2px solid var(--brand);
+  outline-offset:2px;
+  border-radius:6px;
+}
+
+/* Grids */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+@media (max-width:640px){
+  .grid-2{grid-template-columns:1fr;}
+  .grid-3{grid-template-columns:1fr 1fr;}
+}
+
+/* Animations */
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.35;}}
+.anim-fade-up{animation:fadeUp var(--med) var(--ease);}
+.anim-fade-in{animation:fadeIn var(--med) var(--ease);}
