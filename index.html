@@ -2048,7 +2048,54 @@ function applyMaintenanceMode(s){
 function checkResetLink(){
   const params=new URLSearchParams(window.location.search);
   const rid=params.get('reset');
-  if(rid)openResetPasswordPrompt(rid);
+  if(rid){openResetPasswordPrompt(rid);return;}
+  // Firebase's own "Forgot password" email (sent automatically for any
+  // account already migrated to real Firebase Auth, which is most accounts
+  // by now) links back here with ?mode=resetPassword&oobCode=..., not our
+  // own ?reset= scheme, that only ever covered accounts still on the legacy
+  // plaintext-password path. Handle both, so the reset link customers
+  // actually receive by email works, not just the manual admin-forwarded one.
+  if(params.get('mode')==='resetPassword'&&params.get('oobCode'))openFirebaseResetPrompt(params.get('oobCode'));
+}
+async function openFirebaseResetPrompt(oobCode){
+  const ready=await ensureFirebaseAuthReady();
+  if(!ready){toast('Could not load the password reset form, please try again','err');return;}
+  let email;
+  try{
+    email=await firebase.auth().verifyPasswordResetCode(oobCode);
+  }catch(e){
+    toast('This reset link is invalid or has expired, request a new one','err');
+    const url=new URL(window.location);url.searchParams.delete('mode');url.searchParams.delete('oobCode');window.history.replaceState({},'',url);
+    return;
+  }
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:900;display:flex;align-items:center;justify-content:center;padding:16px;';
+  overlay.innerHTML=`<div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;width:100%;max-width:380px;padding:22px;">
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:16px;color:var(--wh);margin-bottom:6px;">Reset Your Password</div>
+    <div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:16px;">Choose a new password for ${email}.</div>
+    <div class="pw-wrap"><input class="fi" id="fbreset-pw1" type="password" placeholder="New password (min 6 chars)" style="margin-bottom:0;"/></div>
+    <div class="pw-wrap" style="margin-top:10px;"><input class="fi" id="fbreset-pw2" type="password" placeholder="Confirm new password" style="margin-bottom:0;"/></div>
+    <div class="auth-err" id="fbreset-err" style="margin-top:8px;"></div>
+    <button class="auth-btn" style="margin-top:14px;" onclick="submitFirebasePasswordReset('${oobCode}')">Set New Password</button>
+    <div style="text-align:center;font-size:11px;color:var(--wh);font-weight:700;margin-top:12px;cursor:pointer;" onclick="this.closest('div[style*=fixed]').remove()">Cancel</div>
+  </div>`;
+  document.body.appendChild(overlay);
+}
+async function submitFirebasePasswordReset(oobCode){
+  const p1=document.getElementById('fbreset-pw1')?.value.trim();const p2=document.getElementById('fbreset-pw2')?.value.trim();
+  const err=document.getElementById('fbreset-err');
+  if(!p1||p1.length<6){if(err){err.textContent='Password must be at least 6 characters.';err.style.display='block';}return;}
+  if(p1!==p2){if(err){err.textContent='Passwords do not match.';err.style.display='block';}return;}
+  try{
+    await firebase.auth().confirmPasswordReset(oobCode,p1);
+  }catch(e){
+    if(err){err.textContent='This reset link is invalid or has expired, request a new one.';err.style.display='block';}
+    return;
+  }
+  document.querySelectorAll('div[style*="z-index:900"]').forEach(el=>el.remove());
+  toast('Password reset! You can now sign in.');
+  const url=new URL(window.location);url.searchParams.delete('mode');url.searchParams.delete('oobCode');window.history.replaceState({},'',url);
+  openAuth('login');
 }
 // ── COOKIE CONSENT ──
 function maybeShowCookieBanner(){
