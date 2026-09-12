@@ -177,7 +177,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .hero-promo-row{max-width:var(--container);margin:0 auto;display:flex;gap:12px;align-items:stretch;padding:20px 20px 0;}
 .hero{flex:1 1 66%;min-width:0;border-radius:var(--r-md);background:linear-gradient(160deg,var(--ink),var(--ink2) 150%);padding:64px 24px 48px;position:relative;overflow:hidden;}
 .hero::after{content:'';position:absolute;right:-8%;top:-30%;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(255,106,0,.16),transparent 68%);pointer-events:none;}
-.promo-ads-grid{flex:1 1 34%;min-width:0;display:none;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:10px;}
+.promo-ads-grid{flex:1 1 34%;min-width:0;display:none;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:10px;}
 @media(max-width:860px){
   .hero-promo-row{flex-direction:column;padding:16px 16px 0;}
   .promo-ads-grid{grid-template-rows:none;}
@@ -895,6 +895,7 @@ html.rnm-maint #maintenance-screen{display:flex;}
     <div class="newsletter-inner">
       <div class="newsletter-title">Stay Ahead of What's Next</div>
       <div class="newsletter-sub">New arrivals, exclusive offers, restocks and more, delivered straight to your inbox.</div>
+      <div id="newsletter-bonus-line" style="font-weight:800;color:var(--or);margin:-6px 0 14px;font-size:13px;">🎁 Subscribe now and earn <span id="newsletter-bonus-amt">400</span> RichPoints!</div>
       <form class="newsletter-form" onsubmit="event.preventDefault();subscribeNewsletter(this)">
         <input type="text" name="name" placeholder="Your name" required>
         <input type="email" name="email" placeholder="Your email address" required>
@@ -1238,7 +1239,15 @@ async function subscribeNewsletter(form){
     await fbP('rn_mall_newsletter_subscribers',{name,email,date:ds(),ts:Date.now()});
     already.push(email.toLowerCase());
     localStorage.setItem('rnm_newsletter_subs',JSON.stringify(already));
-    toast('Subscribed! Watch your inbox for offers.');
+    if(currUser&&!currUser.newsletterBonusAwarded){
+      const bonus=rpRates().newsletter;
+      await fbU('rn_mall_customers/'+currUser.id,{newsletterBonusAwarded:true});
+      currUser.newsletterBonusAwarded=true;localStorage.setItem('rnm_user',JSON.stringify(currUser));
+      awardPoints(currUser.id,bonus,'subscribing to the newsletter');
+      toast('Subscribed! You earned '+bonus+' RichPoints.');
+    }else{
+      toast('Subscribed! Watch your inbox for offers.');
+    }
     form.reset();
   }catch(e){
     toast('Something went wrong, please try again','err');
@@ -1421,6 +1430,8 @@ function rpRates(){
     profile:r.profile!=null?r.profile:30,
     share:r.share!=null?r.share:10,
     coupon:r.coupon!=null?r.coupon:10,
+    register:r.register!=null?r.register:500,
+    newsletter:r.newsletter!=null?r.newsletter:400,
     redeemRate:r.redeemRate||1,    // ₦ per point when redeeming (1 point = ₦1 by default, tune via admin)
     shippingCost:r.shippingCost||200 // points to redeem for free shipping
   };
@@ -1897,6 +1908,7 @@ async function init(){
   if(settings.flashSaleEnd)startFlashTimer(settings.flashSaleEnd);
   const vcSec=document.getElementById('vendor-cta-sec');if(vcSec)vcSec.style.display=settings.showVendorCta===false?'none':'block';
   setupScrollReveal();
+  const nba=document.getElementById('newsletter-bonus-amt');if(nba)nba.textContent=rpRates().newsletter;
   const sc=document.getElementById('stat-count');if(sc)sc.textContent=allProducts.length;
   const so=document.getElementById('stat-orders');
   if(so){
@@ -3568,6 +3580,7 @@ function switchAuth(tab){
     <div style="text-align:center;font-size:12px;color:#000;font-weight:700;margin-top:12px;">Remembered it? <span style="color:#000;text-decoration:underline;cursor:pointer;font-weight:700;" onclick="switchAuth('login')">Sign In</span></div>
     <div style="text-align:center;font-size:11px;color:#000;font-weight:700;margin-top:14px;line-height:1.7;">Prefer to talk to someone? <span style="color:#000;text-decoration:underline;cursor:pointer;font-weight:700;" onclick="closeAuth();toggleChat();">Contact Support</span></div>`;}
   else{body.innerHTML=`<div class="auth-sub">Create your free account, required to shop</div>
+    <div style="background:#000;border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px;font-weight:800;color:var(--or);text-align:center;">🎁 Register and get ${rpRates().register} RichPoints Bonus!</div>
     <div class="g2"><input class="fi" id="reg-fn" placeholder="First name" autocomplete="off"/><input class="fi" id="reg-ln" placeholder="Last name" autocomplete="off"/></div>
     <input class="fi" id="reg-email" type="email" placeholder="Email address" autocomplete="off"/>
     <input class="fi" id="reg-phone" placeholder="Phone number" autocomplete="off"/>
@@ -3712,7 +3725,8 @@ async function doRegister(){
   // signup entirely, this account can still be upgraded transparently on its next login.
   if(!id)id=secureId('cust');
   const referralCode=(fn.slice(0,4)+Math.random().toString(36).slice(2,6)).toUpperCase();
-  const customer={id,fname:fn,lname:ln,name:fn+' '+ln,email,phone,joinDate:ds(),accountStatus:'active',points:0,referralCode};
+  const registerBonus=rpRates().register;
+  const customer={id,fname:fn,lname:ln,name:fn+' '+ln,email,phone,joinDate:ds(),accountStatus:'active',points:registerBonus,referralCode};
   if(authUid)customer.authUid=authUid;else customer.password=pass;
   if(refInput){
     const referrer=Object.values(all).find(c=>(c.referralCode||'').toUpperCase()===refInput);
@@ -3720,7 +3734,7 @@ async function doRegister(){
   }
   await fbS('rn_mall_customers/'+id,customer);
   await fbP('rn_mall_notifications',{type:'new_customer',name:fn+' '+ln,email,date:ds(),read:false,ts:Date.now()});
-  currUser=customer;localStorage.setItem('rnm_user',JSON.stringify(currUser));updateAuthUI();closeAuth();toast('Welcome to RichNation Mall, '+fn+'!');
+  currUser=customer;localStorage.setItem('rnm_user',JSON.stringify(currUser));updateAuthUI();closeAuth();toast('Welcome to RichNation Mall, '+fn+'! You just earned '+registerBonus+' RichPoints.');
 }
 function updateAuthUI(){document.getElementById('auth-btns').style.display=currUser?'none':'flex';document.getElementById('user-menu').style.display=currUser?'block':'none';if(currUser){loadCustNotifs();trackCustomerActivity();}else{const b=document.getElementById('cnotif-badge');if(b)b.style.display='none';}}
 // Lets admin see how active each customer actually is (Customers page: Last

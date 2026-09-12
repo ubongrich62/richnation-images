@@ -4731,6 +4731,8 @@ function renderSiteCustomiser(c){
   html += '<div class="fg"><label class="lbl">Points per product share</label><input class="inp" type="number" id="rp-share" value="'+(rp.share!=null?rp.share:10)+'" placeholder="10"/></div>';
   html += '<div class="fg"><label class="lbl">Points per coupon use</label><input class="inp" type="number" id="rp-coupon" value="'+(rp.coupon!=null?rp.coupon:10)+'" placeholder="10"/></div>';
   html += '<div class="fg"><label class="lbl">Points for free shipping</label><input class="inp" type="number" id="rp-shippingCost" value="'+(rp.shippingCost||200)+'" placeholder="200"/></div>';
+  html += '<div class="fg"><label class="lbl">Bonus points on registration</label><input class="inp" type="number" id="rp-register" value="'+(rp.register!=null?rp.register:500)+'" placeholder="500"/></div>';
+  html += '<div class="fg"><label class="lbl">Bonus points for newsletter signup</label><input class="inp" type="number" id="rp-newsletter" value="'+(rp.newsletter!=null?rp.newsletter:400)+'" placeholder="400"/></div>';
   html += '</div><button class="btn btn-or" onclick="saveRichPoints()">Save RichPoints Settings</button></div>';
   html += '<div class="cs-section"><div class="cs-section-title">🏆 Loyalty Tiers</div>';
   html += '<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">Permanent percentage discounts customers unlock based on their lifetime spend, the more they spend over time, the less they pay per order, automatically at checkout.</div>';
@@ -4991,7 +4993,7 @@ function renderHeroEditor(c){
   html+='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">Upload up to 3 seasonal banners (Happy New Year, Christmas, Black Friday, Valentine, etc.), whichever one is marked "Live on site" is the only one shown, no automatic rotating. Recommended: a wide image (1600×600px or similar).</div>';
   html+='<div id="hero-banners-list"></div>';
   html+='<div class="cs-section"><div class="cs-section-title">'+iconBadge('chat',14)+' Promo Ads (Photos &amp; Videos), optional</div>';
-  html+='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">Up to 4 promo ad tiles, shown as a grid beside the hero banner, like Konga\'s homepage ads. Each can be a photo or a video, plays natively in the tile (autoplay, muted, no YouTube branding), paste a direct video link or upload a short clip, with an optional link (a URL, or a category name to jump to) and a short caption shown over it.</div>';
+  html+='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">Up to 7 promo ad tiles, shown as a grid beside the hero banner, like Konga\'s homepage ads. Each can be a photo or a video, plays natively in the tile (autoplay, muted, no YouTube branding), paste a direct video link or upload a short clip, with an optional link (a URL, or a category name to jump to) and a short caption shown over it.</div>';
   html+='<div id="promo-ads-list"></div>';
   html+='<div class="cs-section"><div class="cs-section-title">📢 Announcement Bar</div>';
   html+='<div class="fg"><input class="inp" id="he-ann" value="'+(settings.announcement||'')+'" placeholder="e.g. FREE delivery this week!"/></div>';
@@ -5075,7 +5077,7 @@ function renderPromoAdRows(){
   var wrap=document.getElementById('promo-ads-list');if(!wrap)return;
   var ads=settings.promoAds||[];
   var rows='';
-  for(var i=0;i<4;i++){
+  for(var i=0;i<7;i++){
     var ad=ads[i]||{};
     var isVideo=ad.type==='video';
     var hasMedia=!!(isVideo?ad.videoUrl:ad.image);
@@ -5822,7 +5824,7 @@ async function saveLoyaltyTiers(){
 }
 async function saveRichPoints(){
   var g=function(id){var el=document.getElementById(id);return el?parseFloat(el.value)||0:0;};
-  var rp={perNaira:g('rp-perNaira')||100,redeemRate:g('rp-redeemRate')||1,review:g('rp-review'),referral:g('rp-referral'),profile:g('rp-profile'),share:g('rp-share'),coupon:g('rp-coupon'),shippingCost:g('rp-shippingCost')||200};
+  var rp={perNaira:g('rp-perNaira')||100,redeemRate:g('rp-redeemRate')||1,review:g('rp-review'),referral:g('rp-referral'),profile:g('rp-profile'),share:g('rp-share'),coupon:g('rp-coupon'),shippingCost:g('rp-shippingCost')||200,register:g('rp-register')||500,newsletter:g('rp-newsletter')||400};
   settings.richPoints=rp;
   await fbU('rn_mall_settings',{richPoints:rp});
   toast('RichPoints settings saved!');
