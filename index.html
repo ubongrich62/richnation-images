@@ -263,10 +263,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 @keyframes fadeInUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 .prod-card:hover{border-color:rgba(255,255,255,.35);box-shadow:var(--sh-md);transform:translateY(-2px);}
 .prod-card.prod-disabled{opacity:.55;cursor:default;}
-.prod-card::before{content:'';position:absolute;inset:0;z-index:3;pointer-events:none;padding:2.5px;box-sizing:border-box;border-radius:inherit;background:conic-gradient(from 0deg,#FF6A00,#000 25%,#FFB05A 50%,#000 75%,#FF6A00 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:prodRingSpin 5s linear infinite;}
 .prod-img-wrap{position:relative;aspect-ratio:1;max-height:280px;overflow:hidden;background:linear-gradient(135deg,#050505,#1a0f00 55%,#2b1600);}
-@keyframes prodRingSpin{to{transform:rotate(360deg);}}
-@media(prefers-reduced-motion:reduce){.prod-card::before{animation:none;}}
 .prod-img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s ease;}
 .prod-card:hover .prod-img{transform:scale(1.08);}
 @media(prefers-reduced-motion:reduce){.prod-img{transition:none;}.prod-card:hover .prod-img{transform:none;}}
