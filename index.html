@@ -263,9 +263,12 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 @keyframes fadeInUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 .prod-card:hover{border-color:rgba(255,255,255,.35);box-shadow:var(--sh-md);transform:translateY(-2px);}
 .prod-card.prod-disabled{opacity:.55;cursor:default;}
-.prod-img-wrap{position:relative;aspect-ratio:1;max-height:280px;overflow:hidden;background:linear-gradient(135deg,#050505,#1a0f00 55%,#2b1600);animation:prodEdgeGlow 3s ease-in-out infinite;}
-@keyframes prodEdgeGlow{0%,100%{box-shadow:inset 0 0 0 1px rgba(255,106,0,0.25),0 0 10px rgba(255,106,0,0.12);}50%{box-shadow:inset 0 0 0 1px rgba(255,106,0,0.55),0 0 18px rgba(255,106,0,0.32);}}
-@media(prefers-reduced-motion:reduce){.prod-img-wrap{animation:none;box-shadow:inset 0 0 0 1px rgba(255,106,0,0.3);}}
+.prod-img-wrap{position:relative;aspect-ratio:1;max-height:280px;overflow:hidden;background:linear-gradient(135deg,#050505,#1a0f00 55%,#2b1600);}
+.prod-img-wrap::before{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;padding:3px;box-sizing:border-box;background:conic-gradient(from 0deg,#FF6A00,#000 25%,#FFB05A 50%,#000 75%,#FF6A00 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:prodRingSpin 5s linear infinite;}
+.prod-img-wrap::after{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(115deg,transparent 30%,rgba(255,176,90,0.45) 46%,rgba(255,255,255,0.6) 50%,rgba(255,176,90,0.45) 54%,transparent 70%);background-size:260% 260%;mix-blend-mode:overlay;animation:prodShineSweep 4.5s ease-in-out infinite;}
+@keyframes prodRingSpin{to{transform:rotate(360deg);}}
+@keyframes prodShineSweep{0%{background-position:220% 0%;}100%{background-position:-60% 0%;}}
+@media(prefers-reduced-motion:reduce){.prod-img-wrap::before,.prod-img-wrap::after{animation:none;}.prod-img-wrap::after{display:none;}}
 .prod-img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s ease;}
 .prod-card:hover .prod-img{transform:scale(1.08);}
 @media(prefers-reduced-motion:reduce){.prod-img{transition:none;}.prod-card:hover .prod-img{transform:none;}}
