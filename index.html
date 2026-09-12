@@ -225,16 +225,27 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .custom-banner-block img{width:100%;border-radius:var(--r-md);display:block;}
 .custom-banner-caption{margin-top:8px;text-align:center;font-size:12px;color:var(--w2);font-weight:700;}
 .video-gallery-block{max-width:var(--container);margin:24px auto 0;padding:0 20px;}
-.video-gallery-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:19px;color:var(--wh);text-align:center;margin-bottom:16px;}
-.video-gallery-row{display:flex;gap:14px;overflow-x:auto;padding-bottom:10px;scroll-snap-type:x mandatory;}
-.video-gallery-item{flex:0 0 220px;scroll-snap-align:start;cursor:pointer;border-radius:var(--r-md);overflow:hidden;background:var(--card2);transition:transform .2s ease;}
-.video-gallery-item:hover{transform:translateY(-3px);}
-.video-gallery-thumb{position:relative;aspect-ratio:16/9;background:#000;}
-.video-gallery-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.video-gallery-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:19px;text-align:center;margin-bottom:16px;background:linear-gradient(90deg,var(--or),var(--gold),var(--or));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmerText 3.5s linear infinite;}
+.video-gallery-row{display:flex;gap:14px;overflow-x:auto;padding:6px 6px 14px;scroll-snap-type:x mandatory;}
+.video-gallery-item{flex:0 0 220px;scroll-snap-align:start;cursor:pointer;border-radius:var(--r-md);overflow:hidden;background:var(--card2);transition:transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .3s ease,opacity .5s ease;opacity:0;transform:translateY(28px) scale(.94);}
+.video-gallery-item.item-in{opacity:1;transform:translateY(0) scale(1);}
+.video-gallery-item:hover{transform:translateY(-8px) scale(1.04) rotate(-.5deg);box-shadow:0 14px 32px rgba(255,106,0,0.3);}
+.video-gallery-thumb{position:relative;aspect-ratio:16/9;background:#000;overflow:hidden;}
+.video-gallery-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease,filter .3s ease;}
+.video-gallery-item:hover .video-gallery-thumb img{transform:scale(1.15);filter:brightness(.65) saturate(1.2);}
 .video-gallery-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
-.video-gallery-play svg{width:44px;height:44px;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.5));}
+.video-gallery-play svg{width:44px;height:44px;animation:galleryPlayPulse 2.2s ease-in-out infinite;}
+.video-gallery-item:hover .video-gallery-play svg{animation-duration:.9s;}
+@keyframes galleryPlayPulse{0%,100%{transform:scale(1);filter:drop-shadow(0 2px 6px rgba(0,0,0,.5));}50%{transform:scale(1.14);filter:drop-shadow(0 4px 16px rgba(255,20,20,.7));}}
 .video-gallery-item-title{padding:8px 10px;font-size:12px;font-weight:700;color:var(--wh);}
 @media(max-width:520px){.video-gallery-item{flex-basis:170px;}}
+@media(prefers-reduced-motion:reduce){
+  .video-gallery-title{animation:none;-webkit-background-clip:unset;background-clip:unset;color:var(--wh);}
+  .video-gallery-item{opacity:1;transform:none;transition:none;}
+  .video-gallery-item:hover{transform:none;}
+  .video-gallery-play svg{animation:none;}
+  .video-gallery-item:hover .video-gallery-thumb img{transform:none;}
+}
 @media(prefers-reduced-motion:reduce){.promo-ad-tile,.promo-ad-tile img,.promo-ad-tile video{transition:none;}.promo-ad-tile:hover{transform:none;}.promo-ad-tile:hover img,.promo-ad-tile:hover video{transform:none;}}
 .sec-hdr2{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
 .sec-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:19px;color:var(--wh);border-left:4px solid var(--or);padding-left:12px;}
@@ -916,7 +927,7 @@ html.rnm-maint #maintenance-screen{display:flex;}
     <div class="newsletter-inner">
       <div class="newsletter-title">Stay Ahead of What's Next</div>
       <div class="newsletter-sub">New arrivals, exclusive offers, restocks and more, delivered straight to your inbox.</div>
-      <div id="newsletter-bonus-line" style="font-weight:800;color:var(--or);margin:-6px 0 14px;font-size:13px;">🎁 Subscribe now and earn <span id="newsletter-bonus-amt">400</span> RichPoints!</div>
+      <div id="newsletter-bonus-line" style="font-weight:800;color:#000;margin:-6px 0 14px;font-size:13px;">🎁 Subscribe now and earn <span id="newsletter-bonus-amt">400</span> RichPoints!</div>
       <form class="newsletter-form" onsubmit="event.preventDefault();subscribeNewsletter(this)">
         <input type="text" name="name" placeholder="Your name" required>
         <input type="email" name="email" placeholder="Your email address" required>
@@ -1895,6 +1906,24 @@ function renderVideoGalleryBlock(sett){
   wrap.dataset.contentBlock='gallery';
   wrap.innerHTML='<div class="video-gallery-block"><div class="video-gallery-title">'+escHtml(vg.title||'Brand Gallery')+'</div><div class="video-gallery-row">'+items+'</div></div>';
   slot.appendChild(wrap);
+  setupVideoGalleryReveal(wrap);
+}
+function setupVideoGalleryReveal(wrap){
+  const tiles=wrap.querySelectorAll('.video-gallery-item');
+  if(!tiles.length)return;
+  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    tiles.forEach(t=>t.classList.add('item-in'));return;
+  }
+  tiles.forEach((t,i)=>{t.style.transitionDelay=(i*90)+'ms';});
+  if(!('IntersectionObserver' in window)){
+    tiles.forEach(t=>t.classList.add('item-in'));return;
+  }
+  const io=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){e.target.classList.add('item-in');io.unobserve(e.target);}
+    });
+  },{threshold:0.15,rootMargin:'0px 0px -30px 0px'});
+  tiles.forEach(t=>io.observe(t));
 }
 function renderPromoAds(sett){
   const wrap=document.getElementById('promo-ads-grid');
