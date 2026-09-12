@@ -174,8 +174,20 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .cat-nav-item{padding:11px 14px;font-size:12.5px;font-weight:600;color:var(--w2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;transition:color .15s,border-color .15s;}
 .cat-nav-item:hover,.cat-nav-item.active{color:var(--or);border-bottom-color:var(--or);}
 /* HERO */
-.hero{background:linear-gradient(160deg,var(--ink),var(--ink2) 150%);padding:64px 24px 48px;position:relative;overflow:hidden;}
+.hero-promo-row{max-width:var(--container);margin:0 auto;display:flex;gap:12px;align-items:stretch;padding:20px 20px 0;}
+.hero{flex:1 1 66%;min-width:0;border-radius:var(--r-md);background:linear-gradient(160deg,var(--ink),var(--ink2) 150%);padding:64px 24px 48px;position:relative;overflow:hidden;}
 .hero::after{content:'';position:absolute;right:-8%;top:-30%;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(255,106,0,.16),transparent 68%);pointer-events:none;}
+.promo-ads-grid{flex:1 1 34%;min-width:0;display:none;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:10px;}
+@media(max-width:860px){
+  .hero-promo-row{flex-direction:column;padding:16px 16px 0;}
+  .promo-ads-grid{grid-template-rows:none;}
+  .promo-ad-tile{aspect-ratio:16/9;}
+}
+@media(max-width:520px){
+  .hero-promo-row{padding:0;}
+  .hero{border-radius:0;}
+  .promo-ads-grid{grid-template-columns:1fr 1fr;padding:16px;gap:10px;}
+}
 .hero-inner{max-width:var(--container);margin:0 auto;position:relative;text-align:left;}
 .hero-eyebrow{font-size:11px;font-weight:700;letter-spacing:3px;color:var(--or);text-transform:uppercase;margin-bottom:16px;}
 .hero-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:44px;line-height:1.12;margin-bottom:16px;color:#fff;max-width:640px;}
@@ -204,8 +216,7 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .sec-wrap.reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease;}
 .sec-wrap.reveal.reveal-in{opacity:1;transform:translateY(0);}
 @media(prefers-reduced-motion:reduce){.sec-wrap.reveal{opacity:1;transform:none;transition:none;}}
-.promo-ads-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;}
-.promo-ad-tile{position:relative;border-radius:var(--r-md);overflow:hidden;aspect-ratio:16/9;background:var(--card2);cursor:pointer;transition:transform .25s ease,box-shadow .25s ease;}
+.promo-ad-tile{position:relative;border-radius:var(--r-md);overflow:hidden;background:var(--card2);cursor:pointer;transition:transform .25s ease,box-shadow .25s ease;}
 .promo-ad-tile:hover{transform:translateY(-3px);box-shadow:var(--sh-md);}
 .promo-ad-tile img,.promo-ad-tile video,.promo-ad-tile iframe{width:100%;height:100%;object-fit:cover;display:block;border:0;transition:transform .4s ease;}
 .promo-ad-tile:hover img,.promo-ad-tile:hover video{transform:scale(1.05);}
@@ -735,20 +746,23 @@ html.rnm-maint #maintenance-screen{display:flex;}
 
 <!-- HOME PAGE -->
 <div id="home-page">
-  <div class="hero" id="hero-banner" style="background-image:linear-gradient(rgba(0,0,0,0.45),rgba(0,0,0,0.45)), url('images/hero-banner/1787041657282_xxz5w2.jpeg');background-size:cover;background-position:center;background-repeat:no-repeat;">
-   <div class="hero-inner">
-    <div class="hero-eyebrow" id="hero-eyebrow">Delivering Across Nigeria and The World</div>
-    <h1 class="hero-title"><span id="hero-t1">Experience The</span><br><span id="hero-t2">Billionaire <span id="hero-highlight" style="color:var(--or);">Lifestyle.</span></span></h1>
-    <p class="hero-sub" id="hero-sub">Luxury. Quality. Elegance. Delivered to your door.</p>
-    <div class="hero-btns">
-      <button class="hero-btn hero-btn-or" id="hero-btn1" onclick="scrollToProds()">Shop Now</button>
-      <button class="hero-btn hero-btn-dk" id="hero-btn2" onclick="showPage('track')">Track My Order</button>
-    </div>
-    <div class="hero-stats">
-      <div class="hero-stat"><div class="hero-stat-num">36</div><div class="hero-stat-lbl">States</div></div>
-      <div class="hero-stat"><div class="hero-stat-num">INT'L</div><div class="hero-stat-lbl">Worldwide</div></div>
+  <div class="hero-promo-row">
+   <div class="hero" id="hero-banner" style="background-image:linear-gradient(rgba(0,0,0,0.45),rgba(0,0,0,0.45)), url('images/hero-banner/1787041657282_xxz5w2.jpeg');background-size:cover;background-position:center;background-repeat:no-repeat;">
+    <div class="hero-inner">
+     <div class="hero-eyebrow" id="hero-eyebrow">Delivering Across Nigeria and The World</div>
+     <h1 class="hero-title"><span id="hero-t1">Experience The</span><br><span id="hero-t2">Billionaire <span id="hero-highlight" style="color:var(--or);">Lifestyle.</span></span></h1>
+     <p class="hero-sub" id="hero-sub">Luxury. Quality. Elegance. Delivered to your door.</p>
+     <div class="hero-btns">
+       <button class="hero-btn hero-btn-or" id="hero-btn1" onclick="scrollToProds()">Shop Now</button>
+       <button class="hero-btn hero-btn-dk" id="hero-btn2" onclick="showPage('track')">Track My Order</button>
+     </div>
+     <div class="hero-stats">
+       <div class="hero-stat"><div class="hero-stat-num">36</div><div class="hero-stat-lbl">States</div></div>
+       <div class="hero-stat"><div class="hero-stat-num">INT'L</div><div class="hero-stat-lbl">Worldwide</div></div>
+     </div>
     </div>
    </div>
+   <div class="promo-ads-grid" id="promo-ads-grid" style="display:none;"></div>
   </div>
   <script>
   // Swaps in the real cached banner photo (if a repeat visit has one)
@@ -782,10 +796,6 @@ html.rnm-maint #maintenance-screen{display:flex;}
     <div class="trust-item"><span id="e-trust-guarantee-2">✅</span><span class="trust-text">Order Guarantee</span></div>
     <div class="trust-item"><span id="e-trust-price-2">🔄</span><span class="trust-text">Affordable Prices</span></div>
    </div>
-  </div>
-
-  <div class="sec-wrap" id="promo-ads-sec" style="display:none;">
-    <div class="promo-ads-grid" id="promo-ads-grid"></div>
   </div>
 
   <div class="sec-wrap" id="flash-sec" style="display:none;">
@@ -1813,12 +1823,11 @@ function goPromoAdLink(link){
 }
 function renderPromoAds(sett){
   const wrap=document.getElementById('promo-ads-grid');
-  const sec=document.getElementById('promo-ads-sec');
-  if(!wrap||!sec)return;
+  if(!wrap)return;
   const ads=(sett&&sett.promoAds)||[];
   const active=ads.filter(a=>a&&(a.type==='video'?a.videoUrl:a.image));
-  if(!active.length){sec.style.display='none';wrap.innerHTML='';return;}
-  sec.style.display='block';
+  if(!active.length){wrap.style.display='none';wrap.innerHTML='';return;}
+  wrap.style.display='grid';
   wrap.innerHTML=active.map(renderPromoAdTile).join('');
 }
 async function init(){
