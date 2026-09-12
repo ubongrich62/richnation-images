@@ -4988,13 +4988,17 @@ function renderHeroEditor(c){
   html+='<div class="fg"><label class="lbl">Button 2</label><input class="inp" id="he-b2" value="'+(hc.btn2||'Track My Order')+'"/></div></div>';
   html+='<button class="btn btn-or" onclick="saveHeroEditor()">Save Hero</button></div>';
   html+='<div class="cs-section"><div class="cs-section-title">'+iconBadge('palette',14)+' Hero Banner Designs, optional</div>';
-  html+='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">Upload up to 3 seasonal banners (Happy New Year, Christmas, Black Friday, Valentine, etc.), if you upload more than one, they automatically rotate behind your hero text every few seconds, just like Jumia\'s homepage banners. Recommended: a wide image (1600×600px or similar).</div>';
+  html+='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">Upload up to 3 seasonal banners (Happy New Year, Christmas, Black Friday, Valentine, etc.), whichever one is marked "Live on site" is the only one shown, no automatic rotating. Recommended: a wide image (1600×600px or similar).</div>';
   html+='<div id="hero-banners-list"></div>';
+  html+='<div class="cs-section"><div class="cs-section-title">'+iconBadge('chat',14)+' Promo Ads (Photos &amp; Videos), optional</div>';
+  html+='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">Up to 4 promo ad tiles, shown as a grid right below the hero banner, like Konga\'s homepage ads. Each can be a photo or a video (paste a YouTube/hosted video link, autoplays muted in the grid), with an optional link (a URL, or a category name to jump to) and a short caption shown over it.</div>';
+  html+='<div id="promo-ads-list"></div>';
   html+='<div class="cs-section"><div class="cs-section-title">📢 Announcement Bar</div>';
   html+='<div class="fg"><input class="inp" id="he-ann" value="'+(settings.announcement||'')+'" placeholder="e.g. FREE delivery this week!"/></div>';
   html+='<button class="btn btn-or" onclick="saveAnnEditor()">Save</button></div>';
   c.innerHTML=html;
   renderHeroBannerRows();
+  renderPromoAdRows();
 }
 function renderHeroBannerRows(){
   var wrap=document.getElementById('hero-banners-list');if(!wrap)return;
@@ -5064,6 +5068,83 @@ async function removeHeroBanner(slot){
   await fbU('rn_mall_settings',{heroConfig:settings.heroConfig});
   toast('Design removed.');
   renderHeroBannerRows();
+}
+
+// ── PROMO ADS (Konga-style image/video ad tiles below the hero) ──
+function renderPromoAdRows(){
+  var wrap=document.getElementById('promo-ads-list');if(!wrap)return;
+  var ads=settings.promoAds||[];
+  var rows='';
+  for(var i=0;i<4;i++){
+    var ad=ads[i]||{};
+    var isVideo=ad.type==='video';
+    var hasMedia=!!(isVideo?ad.videoUrl:ad.image);
+    rows+='<div style="background:var(--card2);padding:12px;border-radius:8px;margin-bottom:10px;">'
+      +'<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;">'
+      +'<div onclick="'+(isVideo?'':'document.getElementById(\'promo-ad-file-'+i+'\').click()')+'" title="'+(isVideo?'Video preview':'Click to upload photo')+'" style="width:100px;height:60px;border-radius:6px;overflow:hidden;background:var(--bg);flex-shrink:0;cursor:'+(isVideo?'default':'pointer')+';display:flex;align-items:center;justify-content:center;border:1px solid var(--bdr);">'
+      +(isVideo?(ad.videoUrl?'<span style="font-size:20px;">🎬</span>':'<span style="font-size:9px;color:var(--wh);font-weight:700;">Video '+(i+1)+'</span>'):(ad.image?'<img src="'+ad.image+'" style="width:100%;height:100%;object-fit:cover;">':'<span style="font-size:9px;color:var(--wh);font-weight:700;">Ad '+(i+1)+'</span>'))
+      +'</div>'
+      +'<input type="file" id="promo-ad-file-'+i+'" accept="image/*" style="display:none;" onchange="uploadPromoAdImage('+i+',this)">'
+      +'<div style="flex:1;">'
+      +'<div style="display:flex;gap:6px;margin-bottom:8px;">'
+      +'<button type="button" class="btn '+(!isVideo?'btn-or':'btn-dk')+'" style="font-size:10px;padding:5px 10px;" onclick="setPromoAdType('+i+',\'image\')">📷 Photo</button>'
+      +'<button type="button" class="btn '+(isVideo?'btn-or':'btn-dk')+'" style="font-size:10px;padding:5px 10px;" onclick="setPromoAdType('+i+',\'video\')">🎬 Video</button>'
+      +(hasMedia?'<button type="button" class="btn btn-re" style="font-size:10px;padding:5px 10px;margin-left:auto;" onclick="removePromoAd('+i+')">🗑 Remove</button>':'')
+      +'</div>'
+      +(isVideo?'<input class="inp" id="promo-ad-video-'+i+'" value="'+(ad.videoUrl||'')+'" placeholder="YouTube link or direct .mp4 link" style="margin-bottom:8px;">':'')
+      +'<div class="g2" style="margin-bottom:0;">'
+      +'<input class="inp" id="promo-ad-link-'+i+'" value="'+(ad.link||'')+'" placeholder="Link when tapped (URL or category name), optional">'
+      +'<input class="inp" id="promo-ad-caption-'+i+'" value="'+(ad.caption||'')+'" placeholder="Caption shown on the tile, optional">'
+      +'</div>'
+      +'</div></div>'
+      +'<button type="button" class="btn btn-or" style="font-size:11px;padding:6px 12px;" onclick="savePromoAdMeta('+i+')">💾 Save Tile '+(i+1)+'</button>'
+      +'</div>';
+  }
+  wrap.innerHTML=rows;
+}
+function setPromoAdType(slot,type){
+  settings.promoAds=settings.promoAds||[];
+  settings.promoAds[slot]=Object.assign({},settings.promoAds[slot]||{},{type:type});
+  renderPromoAdRows();
+}
+async function uploadPromoAdImage(slot,inp){
+  if(!inp||!inp.files||!inp.files[0])return;
+  toast('Uploading ad photo…');
+  var b64=await compressImage(inp.files[0],1000,0.85);
+  if(!b64){toast('Upload failed, try a different image','err');return;}
+  var url=isGithubConfigured()?await uploadDataUrlToGithub(b64,'promo-ads'):null;
+  if(!url){toast('Storage upload failed, the ad was NOT saved, check your Storage/R2 configuration and try again','err');return;}
+  settings.promoAds=settings.promoAds||[];
+  settings.promoAds[slot]=Object.assign({},settings.promoAds[slot]||{},{type:'image',image:url});
+  await fbU('rn_mall_settings',{promoAds:settings.promoAds});
+  toast('Promo Ad '+(slot+1)+' saved!');
+  renderPromoAdRows();
+}
+async function savePromoAdMeta(slot){
+  settings.promoAds=settings.promoAds||[];
+  var existing=settings.promoAds[slot]||{};
+  var isVideo=existing.type==='video';
+  var videoInp=document.getElementById('promo-ad-video-'+slot);
+  var linkInp=document.getElementById('promo-ad-link-'+slot);
+  var capInp=document.getElementById('promo-ad-caption-'+slot);
+  if(isVideo&&!((videoInp&&videoInp.value||'').trim())){toast('Paste a video link first','err');return;}
+  settings.promoAds[slot]=Object.assign({},existing,{
+    videoUrl:isVideo?(videoInp.value||'').trim():existing.videoUrl,
+    link:(linkInp&&linkInp.value||'').trim(),
+    caption:(capInp&&capInp.value||'').trim()
+  });
+  await fbU('rn_mall_settings',{promoAds:settings.promoAds});
+  toast('Promo Ad '+(slot+1)+' saved!');
+  renderPromoAdRows();
+}
+async function removePromoAd(slot){
+  if(!confirm('Remove Promo Ad '+(slot+1)+'?'))return;
+  settings.promoAds=settings.promoAds||[];
+  settings.promoAds[slot]=null;
+  while(settings.promoAds.length&&!settings.promoAds[settings.promoAds.length-1])settings.promoAds.pop();
+  await fbU('rn_mall_settings',{promoAds:settings.promoAds});
+  toast('Promo Ad removed.');
+  renderPromoAdRows();
 }
 async function saveHeroEditor(){var cfg=Object.assign({},settings.heroConfig||{},{eyebrow:(document.getElementById('he-ey')||{}).value,title1:(document.getElementById('he-t1')||{}).value,title2:(document.getElementById('he-t2')||{}).value,subtitle:(document.getElementById('he-sub')||{}).value,btn1:(document.getElementById('he-b1')||{}).value,btn2:(document.getElementById('he-b2')||{}).value,bannerImages:(settings.heroConfig||{}).bannerImages||[]});settings.heroConfig=cfg;await fbU('rn_mall_settings',{heroConfig:cfg});toast('Saved!');}
 async function saveAnnEditor(){var v=((document.getElementById('he-ann')||{}).value||'').trim();settings.announcement=v;await fbU('rn_mall_settings',{announcement:v});toast(v.length>=4?'Live!':'Cleared.');}

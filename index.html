@@ -204,6 +204,13 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .sec-wrap.reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease;}
 .sec-wrap.reveal.reveal-in{opacity:1;transform:translateY(0);}
 @media(prefers-reduced-motion:reduce){.sec-wrap.reveal{opacity:1;transform:none;transition:none;}}
+.promo-ads-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;}
+.promo-ad-tile{position:relative;border-radius:var(--r-md);overflow:hidden;aspect-ratio:16/9;background:var(--card2);cursor:pointer;transition:transform .25s ease,box-shadow .25s ease;}
+.promo-ad-tile:hover{transform:translateY(-3px);box-shadow:var(--sh-md);}
+.promo-ad-tile img,.promo-ad-tile video,.promo-ad-tile iframe{width:100%;height:100%;object-fit:cover;display:block;border:0;transition:transform .4s ease;}
+.promo-ad-tile:hover img,.promo-ad-tile:hover video{transform:scale(1.05);}
+.promo-ad-caption{position:absolute;left:0;right:0;bottom:0;padding:14px 16px 12px;background:linear-gradient(transparent,rgba(0,0,0,0.75));color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14px;pointer-events:none;}
+@media(prefers-reduced-motion:reduce){.promo-ad-tile,.promo-ad-tile img,.promo-ad-tile video{transition:none;}.promo-ad-tile:hover{transform:none;}.promo-ad-tile:hover img,.promo-ad-tile:hover video{transform:none;}}
 .sec-hdr2{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
 .sec-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:19px;color:var(--wh);border-left:4px solid var(--or);padding-left:12px;}
 .view-all-btn{font-size:12.5px;color:var(--or);cursor:pointer;font-weight:700;background:none;border:none;}
@@ -775,6 +782,10 @@ html.rnm-maint #maintenance-screen{display:flex;}
     <div class="trust-item"><span id="e-trust-guarantee-2">✅</span><span class="trust-text">Order Guarantee</span></div>
     <div class="trust-item"><span id="e-trust-price-2">🔄</span><span class="trust-text">Affordable Prices</span></div>
    </div>
+  </div>
+
+  <div class="sec-wrap" id="promo-ads-sec" style="display:none;">
+    <div class="promo-ads-grid" id="promo-ads-grid"></div>
   </div>
 
   <div class="sec-wrap" id="flash-sec" style="display:none;">
@@ -1780,6 +1791,36 @@ function applyHeroConfig(sett){
   }
   const hlEl=document.getElementById('hero-highlight');if(hlEl&&hc.highlightColor)hlEl.style.color=hc.highlightColor;
 }
+function renderPromoAdTile(ad){
+  const onclick=ad.link?' onclick="goPromoAdLink(\''+escJs(ad.link)+'\')"':'';
+  let media;
+  if(ad.type==='video'&&ad.videoUrl){
+    const yt=ytVideoId(ad.videoUrl);
+    media=yt
+      ?'<iframe src="https://www.youtube.com/embed/'+yt+'?autoplay=1&mute=1&loop=1&playlist='+yt+'&controls=0&modestbranding=1&playsinline=1&rel=0" allow="autoplay;encrypted-media" loading="lazy" title="'+escHtml(ad.caption||'Promo video')+'"></iframe>'
+      :'<video src="'+ad.videoUrl+'" autoplay muted loop playsinline></video>';
+  }else{
+    media='<img src="'+(ad.image||'')+'" alt="'+escHtml(ad.caption||'Promo')+'" loading="lazy" decoding="async" onerror="this.closest(\'.promo-ad-tile\').style.display=\'none\'"/>';
+  }
+  return '<div class="promo-ad-tile"'+onclick+'>'+media+(ad.caption?'<div class="promo-ad-caption">'+escHtml(ad.caption)+'</div>':'')+'</div>';
+}
+function goPromoAdLink(link){
+  if(!link)return;
+  if(/^https?:\/\//i.test(link)){window.open(link,'_blank','noopener');return;}
+  const cat=allCategories.find(c=>c.id===link||c.name.toLowerCase()===link.toLowerCase());
+  if(cat){filterCat(cat.id);return;}
+  window.location.href=link;
+}
+function renderPromoAds(sett){
+  const wrap=document.getElementById('promo-ads-grid');
+  const sec=document.getElementById('promo-ads-sec');
+  if(!wrap||!sec)return;
+  const ads=(sett&&sett.promoAds)||[];
+  const active=ads.filter(a=>a&&(a.type==='video'?a.videoUrl:a.image));
+  if(!active.length){sec.style.display='none';wrap.innerHTML='';return;}
+  sec.style.display='block';
+  wrap.innerHTML=active.map(renderPromoAdTile).join('');
+}
 async function init(){
   // These icons never depend on fetched data, draw them immediately so the raw
   // emoji fallback baked into the HTML is never visible, not even briefly while
@@ -1803,7 +1844,7 @@ async function init(){
       if(settings.theme)applyTheme(settings.theme);
       allCategories=cachedCats?JSON.parse(cachedCats):[];
       allProducts=JSON.parse(cachedProds);
-      applyHeroConfig(settings);
+      applyHeroConfig(settings);renderPromoAds(settings);
       renderCatNav();renderCategories();renderFeatured();renderRecommended();renderNew();renderFlash();renderPreOrder();renderAllProducts();
     }
   }catch(cacheErr){console.warn('Cache read failed:',cacheErr.message);}
@@ -1837,7 +1878,7 @@ async function init(){
       localStorage.setItem('rnm_cache_settings',JSON.stringify(settings));
     }
   }catch(cacheWriteErr){/* storage full or unavailable, skip caching */}
-  applyHeroConfig(settings);
+  applyHeroConfig(settings);renderPromoAds(settings);
   if(settings.announcement){const ab=document.getElementById('announce-bar');if(ab){ab.textContent=settings.announcement;ab.style.display='block';}}
   computeActivePromo().then(function(){
     if(activePromo&&activePromo.bannerText){const ab=document.getElementById('announce-bar');if(ab){ab.textContent=activePromo.bannerText;ab.style.display='block';}}
@@ -1898,7 +1939,7 @@ async function init(){
     if(settings.paystackKey)PAYSTACK_KEY=settings.paystackKey;
       if(settings.googleMapsKey)GOOGLE_MAPS_API_KEY=settings.googleMapsKey;
     if(settings.theme)applyTheme(settings.theme);
-    applyHeroConfig(settings);
+    applyHeroConfig(settings);renderPromoAds(settings);
     try{localStorage.setItem('rnm_cache_settings',JSON.stringify(settings));}catch(e){}
     const ab2=document.getElementById('announce-bar');
     if(ab2)ab2.style.display=settings.announcement&&!activePromo?'block':(ab2.style.display==='block'&&!settings.announcement?'none':ab2.style.display);
