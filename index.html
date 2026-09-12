@@ -150,6 +150,9 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .icon-btn{background:none;border:none;cursor:pointer;position:relative;font-size:18px;padding:6px 8px;color:#fff;border-radius:var(--r-sm);transition:background .15s;}
 .icon-btn:hover{background:rgba(255,255,255,.08);}
 .icon-badge{position:absolute;top:-2px;right:-2px;background:var(--or);color:#000;border-radius:var(--r-pill);min-width:16px;height:16px;font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;}
+.icon-badge.badge-pop{animation:badgePop .4s var(--ease);}
+@keyframes badgePop{0%{transform:scale(1);}35%{transform:scale(1.5);}65%{transform:scale(.9);}100%{transform:scale(1);}}
+@media(prefers-reduced-motion:reduce){.icon-badge.badge-pop{animation:none;}}
 .curr-row{display:flex;gap:3px;}
 .curr-btn{background:none;border:1px solid rgba(255,255,255,.25);border-radius:var(--r-sm);color:rgba(255,255,255,.75);font-size:11px;font-weight:700;cursor:pointer;padding:5px 8px;}
 .curr-btn.active{background:var(--or);color:#000;border-color:var(--or);}
@@ -198,6 +201,9 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .trust-text{font-size:11.5px;color:var(--w2);font-weight:600;}
 /* SECTIONS */
 .sec-wrap{max-width:var(--container);margin:0 auto;padding:40px 20px 0;}
+.sec-wrap.reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease;}
+.sec-wrap.reveal.reveal-in{opacity:1;transform:translateY(0);}
+@media(prefers-reduced-motion:reduce){.sec-wrap.reveal{opacity:1;transform:none;transition:none;}}
 .sec-hdr2{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
 .sec-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:19px;color:var(--wh);border-left:4px solid var(--or);padding-left:12px;}
 .view-all-btn{font-size:12.5px;color:var(--or);cursor:pointer;font-weight:700;background:none;border:none;}
@@ -215,7 +221,9 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .prod-card:hover{border-color:rgba(255,255,255,.35);box-shadow:var(--sh-md);transform:translateY(-2px);}
 .prod-card.prod-disabled{opacity:.55;cursor:default;}
 .prod-img-wrap{position:relative;aspect-ratio:1;max-height:280px;overflow:hidden;background:var(--card2);}
-.prod-img{width:100%;height:100%;object-fit:cover;display:block;}
+.prod-img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s ease;}
+.prod-card:hover .prod-img{transform:scale(1.08);}
+@media(prefers-reduced-motion:reduce){.prod-img{transition:none;}.prod-card:hover .prod-img{transform:none;}}
 .prod-img-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:40px;color:var(--wh);font-weight:700;}
 .prod-badges{position:absolute;top:8px;left:8px;display:flex;flex-direction:column;gap:4px;}
 .prod-badge{font-size:9px;font-weight:800;padding:3px 7px;border-radius:var(--r-sm);letter-spacing:.3px;}
@@ -1607,6 +1615,24 @@ async function submitRefundBankDetails(issueId){
   };
   probe.src=img;
 }
+function setupScrollReveal(){
+  if(window._scrollRevealSetup)return;
+  window._scrollRevealSetup=true;
+  if(!('IntersectionObserver' in window))return;
+  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){e.target.classList.add('reveal-in');io.unobserve(e.target);}
+    });
+  },{threshold:0.08,rootMargin:'0px 0px -40px 0px'});
+  var vh=window.innerHeight||document.documentElement.clientHeight;
+  document.querySelectorAll('.sec-wrap').forEach(function(el){
+    // Only animate sections not already visible on load, anything already on
+    // screen (or above it) should just be there, not blink out and back in.
+    var rect=el.getBoundingClientRect();
+    if(rect.top>=vh){el.classList.add('reveal');io.observe(el);}
+  });
+}
 function fmtBoth(n){return '₦'+parseInt(n).toLocaleString()+' <span style="color:var(--wh);font-weight:700;font-size:10px;">($'+(n/exchangeRate).toFixed(0)+')</span>';}
 function ini(n){return(n||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
 function ds(){return new Date().toLocaleDateString('en-GB');}
@@ -1824,6 +1850,7 @@ async function init(){
   updateAuthUI();updateCartBadge();updateWishBadge();
   if(settings.flashSaleEnd)startFlashTimer(settings.flashSaleEnd);
   const vcSec=document.getElementById('vendor-cta-sec');if(vcSec)vcSec.style.display=settings.showVendorCta===false?'none':'block';
+  setupScrollReveal();
   const sc=document.getElementById('stat-count');if(sc)sc.textContent=allProducts.length;
   const so=document.getElementById('stat-orders');
   if(so){
@@ -2452,7 +2479,7 @@ function addToCart(p,qty,variant){
   const price=getEffectivePrice(basePrice,p.wholesalePrice,p.wholesaleMinQty,newQty);
   if(existing){existing.qty=newQty;existing.price=price;}
   else cart.push({key,id:p.id,name:p.name,price,basePrice,wholesalePrice:p.wholesalePrice||null,wholesaleMinQty:p.wholesaleMinQty||null,image:p.images?.[0]||'',variant,qty,category:p.category,preOrder:false,freeShipping:p.freeShipping||settings.freeShippingAll||false,free:price===0,pickupAvailable:!!p.pickupAvailable,vendorId:p.vendorId||null,vendorName:p.vendorName||null});
-  saveCart();toast(p.name+(price<basePrice?' added at wholesale price!':' added'));updateCartBadge();
+  saveCart();toast(p.name+(price<basePrice?' added at wholesale price!':' added'));updateCartBadge(true);
 }
 function removeFromCart(key){cart=cart.filter(i=>i.key!==key);saveCart();updateCartUI();}
 function changeCartQty(key,d){
@@ -2465,7 +2492,7 @@ function saveCart(){localStorage.setItem('rnm_cart',JSON.stringify(cart));}
 function cartTotal(){return cart.reduce((s,i)=>s+(i.price*i.qty),0);}
 function cartCount(){return cart.reduce((s,i)=>s+i.qty,0);}
 function toggleCart(){const d=document.getElementById('cart-drawer'),ov=document.getElementById('cart-overlay');const open=!d.classList.contains('open');d.classList.toggle('open',open);ov.classList.toggle('open',open);document.body.style.overflow=open?'hidden':'';if(open){updateCartUI();pushNavState({modal:'cart'});}}
-function updateCartBadge(){const cnt=cartCount();const b=document.getElementById('cart-badge');if(b){b.textContent=cnt;b.style.display=cnt>0?'flex':'none';}const cc=document.getElementById('cart-count');if(cc)cc.textContent=cnt;}
+function updateCartBadge(animate){const cnt=cartCount();const b=document.getElementById('cart-badge');if(b){b.textContent=cnt;b.style.display=cnt>0?'flex':'none';if(animate){b.classList.remove('badge-pop');void b.offsetWidth;b.classList.add('badge-pop');}}const cc=document.getElementById('cart-count');if(cc)cc.textContent=cnt;}
 function updateCartUI(){
   updateCartBadge();const list=document.getElementById('cart-items-list');if(!list)return;
   const footWrap=document.getElementById('cart-footer-wrap');
@@ -2658,6 +2685,8 @@ function renderCheckout(isPreorder=false){
           <div><span style="color:var(--or);font-weight:700;margin-right:6px;">7D</span>7-day no-questions returns</div>
           <div><span style="color:var(--or);font-weight:700;margin-right:6px;">ADJ</span>Price adjustment 30 days</div>
           <div><span style="color:var(--or);font-weight:700;margin-right:6px;">DEL</span>Late delivery compensated</div>
+          <div><span style="color:var(--or);font-weight:700;margin-right:6px;">PU</span>Pickup timeline, ready within 1-3 business days</div>
+          <div><span style="color:var(--or);font-weight:700;margin-right:6px;">RTN</span>Returns, free 3-day returns</div>
         </div>
         <button class="place-btn" ${isPreorder?'data-preorder="1"':''} onclick="placeOrder(${isPreorder})">${isPreorder?'Submit Pre-Order':'Place Order'}</button>
       </div>
