@@ -5034,7 +5034,7 @@ async function uploadHeroBanner(slot,inp){
   // multi-hundred-KB blob from then on. Refuse the save instead, so a broken
   // Storage/R2 pipeline surfaces immediately rather than silently degrading
   // load times site-wide.
-  if(!url){toast('Storage upload failed, the design was NOT saved (this would otherwise bloat the database), check your Storage/R2 configuration and try again','err');return;}
+  if(!url){toast('Design NOT saved, '+(window._lastStorageError||'Storage upload failed')+' (saving anyway would bloat the database)','err');return;}
   b64=url;
   settings.heroConfig=settings.heroConfig||{};
   var imgs=(settings.heroConfig.bannerImages||[]).slice();
@@ -5113,7 +5113,7 @@ async function uploadPromoAdImage(slot,inp){
   var b64=await compressImage(inp.files[0],1000,0.85);
   if(!b64){toast('Upload failed, try a different image','err');return;}
   var url=isGithubConfigured()?await uploadDataUrlToGithub(b64,'promo-ads'):null;
-  if(!url){toast('Storage upload failed, the ad was NOT saved, check your Storage/R2 configuration and try again','err');return;}
+  if(!url){toast('Ad NOT saved, '+(window._lastStorageError||'Storage upload failed'),'err');return;}
   settings.promoAds=settings.promoAds||[];
   settings.promoAds[slot]=Object.assign({},settings.promoAds[slot]||{},{type:'image',image:url});
   await fbU('rn_mall_settings',{promoAds:settings.promoAds});
@@ -5293,7 +5293,14 @@ const FIREBASE_STORAGE_BUCKET='richnation-portal.firebasestorage.app';
 // a growing storefront's Storage bill actually comes from. Nothing already
 // uploaded moves, existing Firebase Storage URLs saved on old records keep
 // working exactly as before, this only changes where NEW uploads land.
+// On failure, sets window._lastStorageError to a specific, user-facing reason
+// (network/CORS, or the exact HTTP status + response body) instead of leaving
+// callers with nothing but a null and a console.warn, this is what a caller
+// shows to admin so a broken Storage/R2 pipeline is actually diagnosable
+// instead of just "upload failed".
+window._lastStorageError=null;
 async function uploadBlobToStorage(blob,folder,filenameExt){
+  window._lastStorageError=null;
   const ext=(filenameExt||blob.type.split('/')[1]||'jpg').split('+')[0].toLowerCase();
   const path=folder+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
   const contentType=blob.type||'application/octet-stream';
@@ -5301,10 +5308,17 @@ async function uploadBlobToStorage(blob,folder,filenameExt){
     try{
       const base=settings.r2WorkerUrl.replace(/\/+$/,'');
       const res=await fetch(base+'/?path='+encodeURIComponent(path),{method:'POST',headers:{'Content-Type':contentType},body:blob});
-      if(!res.ok)throw new Error('Upload failed: '+res.status);
+      if(!res.ok){
+        let bodyText='';try{bodyText=(await res.text()).slice(0,200);}catch(readErr){}
+        throw new Error('R2 Worker rejected the upload ('+res.status+')'+(bodyText?': '+bodyText:''));
+      }
       const data=await res.json();
+      if(!data||!data.url)throw new Error('R2 Worker responded without a url field, check the Worker script\'s response shape');
       return data.url;
     }catch(e){
+      window._lastStorageError=(e instanceof TypeError)
+        ?'Could not reach the R2 Worker URL at all (network/CORS/DNS), check the URL in Site Customiser is correct and the Worker allows requests from this domain'
+        :e.message;
       console.warn('R2 upload failed:',e);
       return null;
     }
@@ -5313,11 +5327,17 @@ async function uploadBlobToStorage(blob,folder,filenameExt){
     const encodedPath=encodeURIComponent(path);
     const uploadUrl='https://firebasestorage.googleapis.com/v0/b/'+FIREBASE_STORAGE_BUCKET+'/o?name='+encodedPath;
     const uploadRes=await fetch(uploadUrl,{method:'POST',headers:{'Content-Type':contentType},body:blob});
-    if(!uploadRes.ok)throw new Error('Upload failed: '+uploadRes.status);
+    if(!uploadRes.ok){
+      let bodyText='';try{bodyText=(await uploadRes.text()).slice(0,200);}catch(readErr){}
+      throw new Error('Firebase Storage rejected the upload ('+uploadRes.status+')'+(bodyText?': '+bodyText:''));
+    }
     const data=await uploadRes.json();
     const token=data.downloadTokens;
     return 'https://firebasestorage.googleapis.com/v0/b/'+FIREBASE_STORAGE_BUCKET+'/o/'+encodedPath+'?alt=media'+(token?'&token='+token:'');
   }catch(e){
+    window._lastStorageError=(e instanceof TypeError)
+      ?'Could not reach Firebase Storage at all (network/CORS), Storage may not be enabled for this Firebase project yet'
+      :e.message;
     console.warn('Storage upload failed:',e);
     return null;
   }
@@ -5337,6 +5357,7 @@ async function uploadDataUrlToStorage(dataUrl,folder){
     const blob=await res.blob();
     return uploadBlobToStorage(blob,folder);
   }catch(e){
+    window._lastStorageError=e.message;
     console.warn('Storage upload failed:',e);
     return null;
   }
