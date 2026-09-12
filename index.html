@@ -3668,22 +3668,33 @@ async function trackCustomerActivity(){
 }
 
 // ── CUSTOMER NOTIFICATIONS ──
+let _loadCustNotifsInFlight=false;
 async function loadCustNotifs(){
   if(!currUser)return;
-  const data=await fbG('rn_mall_customer_notifications/'+currUser.id)||{};
-  const list=Object.entries(data).map(([k,v])=>({...v,_key:k})).sort((a,b)=>b.ts-a.ts);
-  const unread=list.filter(n=>!n.read).length;
-  const badge=document.getElementById('cnotif-badge');
-  if(badge){badge.style.display=unread>0?'flex':'none';badge.textContent=unread;}
-  const box=document.getElementById('cnotif-list');if(!box)return;
-  if(!list.length){box.innerHTML='<div style="padding:20px;text-align:center;color:var(--wh);font-weight:700;font-size:12px;">No notifications yet.</div>';return;}
-  box.innerHTML=list.slice(0,25).map(n=>{
-    const ico=n.type==='status_update'?'package':n.type==='pod_approved'?'check':n.type==='pod_cancelled'?'close':n.type==='pickup_ready'?'pin':n.type==='pw_reset'?'key':n.type==='review_prompt'?'star':n.type==='chat_reply'?'chat':n.type==='vendor_reply'?'chat':'bell';
-    return `<div onclick="openCustNotif('${n._key}','${n.orderId||''}','${n.type||''}','${n.chatKey||''}')" style="display:flex;gap:10px;padding:10px;border-radius:8px;cursor:pointer;background:${n.read?'transparent':'rgba(255,106,0,0.06)'};margin-bottom:2px;" onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background='${n.read?'transparent':'rgba(255,106,0,0.06)'}'">
-      <div style="flex-shrink:0;">${iconBadge(ico,18)}</div>
-      <div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:${n.read?'600':'800'};color:var(--wh);line-height:1.4;">${n.message||n.title||'Update'}</div><div style="font-size:10px;color:var(--wh);font-weight:700;margin-top:3px;">${n.date||''}</div></div>
-    </div>`;
-  }).join('');
+  // Guards against a runaway pile-up: this runs on an 8s setInterval that
+  // doesn't wait for the previous call to finish. If Firebase is ever slow
+  // enough that one call takes longer than 8s, without this guard every
+  // subsequent tick fires its OWN independent fetch to the exact same path
+  // on top of the still-pending one, compounding every 8 seconds forever,
+  // with no way to recover on its own even after Firebase speeds back up.
+  if(_loadCustNotifsInFlight)return;
+  _loadCustNotifsInFlight=true;
+  try{
+    const data=await fbG('rn_mall_customer_notifications/'+currUser.id)||{};
+    const list=Object.entries(data).map(([k,v])=>({...v,_key:k})).sort((a,b)=>b.ts-a.ts);
+    const unread=list.filter(n=>!n.read).length;
+    const badge=document.getElementById('cnotif-badge');
+    if(badge){badge.style.display=unread>0?'flex':'none';badge.textContent=unread;}
+    const box=document.getElementById('cnotif-list');if(!box)return;
+    if(!list.length){box.innerHTML='<div style="padding:20px;text-align:center;color:var(--wh);font-weight:700;font-size:12px;">No notifications yet.</div>';return;}
+    box.innerHTML=list.slice(0,25).map(n=>{
+      const ico=n.type==='status_update'?'package':n.type==='pod_approved'?'check':n.type==='pod_cancelled'?'close':n.type==='pickup_ready'?'pin':n.type==='pw_reset'?'key':n.type==='review_prompt'?'star':n.type==='chat_reply'?'chat':n.type==='vendor_reply'?'chat':'bell';
+      return `<div onclick="openCustNotif('${n._key}','${n.orderId||''}','${n.type||''}','${n.chatKey||''}')" style="display:flex;gap:10px;padding:10px;border-radius:8px;cursor:pointer;background:${n.read?'transparent':'rgba(255,106,0,0.06)'};margin-bottom:2px;" onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background='${n.read?'transparent':'rgba(255,106,0,0.06)'}'">
+        <div style="flex-shrink:0;">${iconBadge(ico,18)}</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:${n.read?'600':'800'};color:var(--wh);line-height:1.4;">${n.message||n.title||'Update'}</div><div style="font-size:10px;color:var(--wh);font-weight:700;margin-top:3px;">${n.date||''}</div></div>
+      </div>`;
+    }).join('');
+  }finally{_loadCustNotifsInFlight=false;}
 }
 async function toggleCustNotifPanel(){
   if(!currUser){toast('Please sign in to view notifications','warn');openAuth('login');return;}
@@ -4291,7 +4302,14 @@ async function manualRefreshProducts(btn){
   }catch(e){toast('Refresh failed, check your connection','err');}
   btn.innerHTML=orig;btn.disabled=false;
 }
+let _syncLiveDataInFlight=false;
 async function syncLiveData(){
+  // Same overlap guard as loadCustNotifs, and for the same reason: this runs
+  // on a 20s setInterval that doesn't wait for the previous call, so one slow
+  // response would otherwise let every later tick stack another fetch to the
+  // same customer record on top, forever, instead of recovering on its own.
+  if(_syncLiveDataInFlight)return;
+  _syncLiveDataInFlight=true;
   try{
     if(currUser){
       const freshCust=await fbG('rn_mall_customers/'+currUser.id);
@@ -4308,6 +4326,7 @@ async function syncLiveData(){
       }
     }
   }catch(e){console.warn('Live sync failed:',e.message);}
+  finally{_syncLiveDataInFlight=false;}
 }
 setInterval(syncLiveData,20000);
 setInterval(()=>{if(currUser)loadCustNotifs();},8000);

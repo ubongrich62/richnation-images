@@ -749,12 +749,21 @@ function populateSidebarIcons(){
     if(el)el.innerHTML=iconBadge(map[k],16);
   });
 }
+let _refreshVendorNotifBadgeInFlight=false;
 async function refreshVendorNotifBadge(){
-  const count=await unreadVendorNotifCount();
-  const badge=document.getElementById('vendor-notif-badge');
-  if(!badge)return;
-  if(count>0){badge.textContent=count;badge.style.display='inline-block';}
-  else badge.style.display='none';
+  // Guards against a runaway pile-up: this runs on a 20s setInterval that
+  // doesn't wait for the previous call, so one slow response would otherwise
+  // let every later tick stack another fetch on top, forever, instead of
+  // recovering once things speed back up.
+  if(_refreshVendorNotifBadgeInFlight)return;
+  _refreshVendorNotifBadgeInFlight=true;
+  try{
+    const count=await unreadVendorNotifCount();
+    const badge=document.getElementById('vendor-notif-badge');
+    if(!badge)return;
+    if(count>0){badge.textContent=count;badge.style.display='inline-block';}
+    else badge.style.display='none';
+  }finally{_refreshVendorNotifBadgeInFlight=false;}
 }
 function toggleSidebar(){document.querySelector('.sb').classList.toggle('open');document.getElementById('sb-backdrop')?.classList.toggle('open');}
 const CHAT_WALLPAPERS=[

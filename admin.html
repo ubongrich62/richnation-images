@@ -3676,7 +3676,14 @@ async function saveOrderStatus(tracking){
   if(o.riderId&&status==='cancelled')nav('orders',false);
 }
 
+let _loadOrderChatInFlight=false;
 async function loadOrderChat(tracking){
+  // Guards against a runaway pile-up: polled on a 4s setInterval that doesn't
+  // wait for the previous call, so one slow response would otherwise let
+  // every later tick stack another fetch on top, forever.
+  if(_loadOrderChatInFlight)return;
+  _loadOrderChatInFlight=true;
+  try{
   const msgs=await fbG('rn_mall_chat/'+tracking);
   const el=document.getElementById('chat-msgs-'+tracking);if(!el)return;
   if(!msgs){el.innerHTML='<div style="text-align:center;font-size:11px;color:var(--wh);font-weight:700;padding:16px;">No messages yet. Send the first message!</div>';return;}
@@ -3693,6 +3700,7 @@ async function loadOrderChat(tracking){
     if(!mine&&!m.readByAdmin)fbU('rn_mall_chat/'+tracking+'/'+key,{readByAdmin:true});
   });
   if(atBottom)el.scrollTop=el.scrollHeight;
+  }finally{_loadOrderChatInFlight=false;}
 }
 async function fbPNotify(path,data){
   for(var i=0;i<3;i++){
@@ -4227,10 +4235,18 @@ async function renderNotifs(c){
   </div></div>`}`;
 }
 
+let _pollNotifsOnceInFlight=false;
 async function pollNotifsOnce(){
+  // Guards against a runaway pile-up: this fires 8 concurrent Firebase reads
+  // on an 8s setInterval that doesn't wait for the previous cycle to finish,
+  // so one slow round would otherwise let every later tick stack another 8
+  // requests on top, forever, instead of recovering once things speed up.
+  if(_pollNotifsOnceInFlight)return;
+  _pollNotifsOnceInFlight=true;
+  try{
   const [n,orders,vendors,wIssues,staffAll,investorsAll,ridersAll,activityLog]=await Promise.all([
-    fbG('rn_mall_notifications'),fbG('rn_mall_orders'),fbG('rn_mall_vendors'),
-    fbG('rn_mall_wallet_issues'),fbG('rn_mall_staff'),fbG('rn_mall_investors'),fbG('rn_mall_riders'),fbG('rn_mall_activity_log')
+    fbG('rn_mall_notifications',6000),fbG('rn_mall_orders',6000),fbG('rn_mall_vendors',6000),
+    fbG('rn_mall_wallet_issues',6000),fbG('rn_mall_staff',6000),fbG('rn_mall_investors',6000),fbG('rn_mall_riders',6000),fbG('rn_mall_activity_log',6000)
   ]);
   allOrders=orders||{};
   const unread=Object.values(n||{}).filter(x=>!x.read).length;
@@ -4270,6 +4286,7 @@ async function pollNotifsOnce(){
     const pendRiders=Object.values(ridersAll||{}).filter(r=>r.status==='pending_review').length;
     rdb.textContent=pendRiders;rdb.style.display=pendRiders>0?'flex':'none';
   }
+  }finally{_pollNotifsOnceInFlight=false;}
 }
 // Live background polling for admin notifications/order badges, uses
 // setInterval (not a self-chaining setTimeout) so a single failed cycle

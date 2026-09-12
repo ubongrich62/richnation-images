@@ -1195,19 +1195,28 @@ function invNotifMsg(n){
   if(n.type==='bank_verified')return '✔ Your bank account details have been verified by admin.';
   return n.message||'New notification';
 }
+let _loadInvestorNotifsInFlight=false;
 async function loadInvestorNotifs(){
   if(!investor)return;
-  const data=await fbG('rn_mall_investor_notifications/'+investor._id)||{};
-  const list=Object.entries(data).map(function(e){return Object.assign({_key:e[0]},e[1]);}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
-  const unread=list.filter(function(n){return !n.read;}).length;
-  const badge=document.getElementById('inv-notif-badge');
-  if(badge){badge.textContent=unread;badge.style.display=unread>0?'flex':'none';}
-  const panel=document.getElementById('inv-notif-panel');
-  if(panel){
-    panel.innerHTML=list.length?list.slice(0,25).map(function(n){
-      return '<div style="padding:8px;border-radius:8px;background:'+(n.read?'transparent':'rgba(255,106,0,0.06)')+';margin-bottom:2px;"><div style="font-size:11px;color:var(--wh);line-height:1.4;">'+invNotifMsg(n)+'</div><div style="font-size:9px;color:var(--wh);font-weight:700;margin-top:2px;">'+n.date+'</div></div>';
-    }).join(''):'<div style="padding:16px;text-align:center;color:var(--wh);font-weight:700;font-size:12px;">No notifications yet.</div>';
-  }
+  // Guards against a runaway pile-up: this runs on a 10s setInterval that
+  // doesn't wait for the previous call, so one slow response would otherwise
+  // let every later tick stack another fetch on top, forever, instead of
+  // recovering once things speed back up.
+  if(_loadInvestorNotifsInFlight)return;
+  _loadInvestorNotifsInFlight=true;
+  try{
+    const data=await fbG('rn_mall_investor_notifications/'+investor._id)||{};
+    const list=Object.entries(data).map(function(e){return Object.assign({_key:e[0]},e[1]);}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+    const unread=list.filter(function(n){return !n.read;}).length;
+    const badge=document.getElementById('inv-notif-badge');
+    if(badge){badge.textContent=unread;badge.style.display=unread>0?'flex':'none';}
+    const panel=document.getElementById('inv-notif-panel');
+    if(panel){
+      panel.innerHTML=list.length?list.slice(0,25).map(function(n){
+        return '<div style="padding:8px;border-radius:8px;background:'+(n.read?'transparent':'rgba(255,106,0,0.06)')+';margin-bottom:2px;"><div style="font-size:11px;color:var(--wh);line-height:1.4;">'+invNotifMsg(n)+'</div><div style="font-size:9px;color:var(--wh);font-weight:700;margin-top:2px;">'+n.date+'</div></div>';
+      }).join(''):'<div style="padding:16px;text-align:center;color:var(--wh);font-weight:700;font-size:12px;">No notifications yet.</div>';
+    }
+  }finally{_loadInvestorNotifsInFlight=false;}
 }
 async function toggleInvestorNotifPanel(){
   const panel=document.getElementById('inv-notif-panel');
