@@ -14,11 +14,11 @@
 // fonts, map tiles, and any other cross-origin request are passed straight
 // through, never cached, never intercepted beyond this file existing.
 
-const CACHE_NAME = 'richnation-shell-v2';
+const CACHE_NAME = 'richnation-shell-v3';
 const SHELL_ASSETS = [
   '/index.html',
   '/manifest.json',
-  '/images/branding/richnation-logo-v2.png'
+  '/images/branding/richnation-logo-v3.png'
 ];
 
 self.addEventListener('install', (event) => {

@@ -1176,7 +1176,20 @@ else window.addEventListener('load',function(){setTimeout(loadAppCheckWhenIdle,2
 // Registered only for PWA/TWA installability (the Android Play Store wrapper and
 // "Add to Home Screen" both require one), deferred so it costs nothing on first
 // load. sw.js deliberately caches only the static shell, never Firebase data.
+//
+// Without the controllerchange listener below, every deploy showed the OLD
+// page first: the browser only starts using a newly-activated service worker
+// on the NEXT navigation, not the one already open, so a visitor's current
+// tab kept rendering whatever the previous worker had cached until they
+// manually reloaded (often twice). Reloading once, automatically, the moment
+// a new worker actually takes control closes that gap.
 if('serviceWorker' in navigator){
+  let swRefreshed=false;
+  navigator.serviceWorker.addEventListener('controllerchange',function(){
+    if(swRefreshed)return;
+    swRefreshed=true;
+    window.location.reload();
+  });
   window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});
 }
 const WA_NUM='2349164678560';
