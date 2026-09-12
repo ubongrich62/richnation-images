@@ -2728,7 +2728,20 @@ async function markWalletIssuePaid(id){
 }
 
 // ── VENDORS ──
+let _vendorView='list';
+function vendorNav(view){_vendorView=view;nav('vendors',false);}
 async function renderVendors(c){
+  var html='<div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;">';
+  [['list','Vendors'],['messages','Messages']].forEach(function(t){
+    html+='<button class="btn '+(_vendorView===t[0]?'btn-or':'btn-dk')+'" onclick="vendorNav(\''+t[0]+'\')">'+t[1]+'</button>';
+  });
+  html+='</div><div id="vendor-view-body"></div>';
+  c.innerHTML=html;
+  const body=document.getElementById('vendor-view-body');
+  if(_vendorView==='messages')renderVendorMessagesList(body);
+  else renderVendorMain(body);
+}
+async function renderVendorMain(c){
   c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Vendors</div></div><div style="padding:20px;color:var(--wh);font-weight:700;">Loading...</div>';
   const settingsData=await fbG('rn_mall_settings')||{};
   const commissionRate=settingsData.vendorCommissionRate!=null?settingsData.vendorCommissionRate:10;
@@ -2794,6 +2807,45 @@ function vendorRow(v){
     +(v.status==='suspended'?'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="approveVendor(\''+v._id+'\',\''+escAttr(v.storeName)+'\')">Reactivate</button>':'')
     +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteVendor(\''+v._id+'\',\''+escAttr(v.storeName)+'\',this)">Delete</button>'
     +'</div></div>';
+}
+async function renderVendorMessagesList(c){
+  c.innerHTML='<div style="color:var(--wh);font-weight:700;">Loading...</div>';
+  const vendorsAll=await fbG('rn_mall_vendors')||{};
+  const threads=[];
+  for(const vid in vendorsAll){
+    const msgs=await fbG('rn_mall_vendor_admin_chat_'+vid)||{};
+    const list=Object.values(msgs);
+    if(list.length){
+      const last=list.sort(function(a,b){return (b.ts||0)-(a.ts||0);})[0];
+      threads.push({vendorId:vid,vendorName:vendorsAll[vid].storeName,lastMsg:last,count:list.length});
+    }
+  }
+  threads.sort(function(a,b){return (b.lastMsg.ts||0)-(a.lastMsg.ts||0);});
+  c.innerHTML=threads.length?threads.map(function(t){return '<div class="data-row" style="cursor:pointer;" onclick="openVendorMessageThread(\''+t.vendorId+'\',\''+escAttr(t.vendorName)+'\')"><div class="row-av">'+ini(t.vendorName)+'</div><div style="flex:1;"><div class="row-name">'+t.vendorName+'</div><div class="row-meta">'+t.count+' message(s) &middot; "'+t.lastMsg.text.slice(0,50)+'"</div></div></div>';}).join(''):'<div class="card" style="text-align:center;padding:30px;color:var(--wh);font-weight:700;">No vendor messages yet.</div>';
+}
+async function openVendorMessageThread(vendorId,vendorName){
+  const c=document.getElementById('vendor-view-body');
+  c.innerHTML='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;"><div class="card-title"">'+iconBadge('chat',14)+' '+vendorName+'</div><button class="wallpaper-btn" onclick="toggleWallpaperPanel(\'wp-panel\',\'wp-grid\',\'rnm_chat_wallpaper_admin\')"">'+iconBadge('palette',13)+'</button></div><div class="wallpaper-panel" id="wp-panel"><div class="cwp-title">Chat Wallpaper</div><div class="cwp-grid" id="wp-grid"></div><div class="cwp-custom-row"><input type="color" onchange="applyAppWallpaper(this.value,\'rnm_chat_wallpaper_admin\')"/><span>Or pick any color</span></div></div><div class="wallpaper-target" id="vm-admin-msgs" style="margin:12px 0;max-height:360px;overflow-y:auto;"></div><div style="display:flex;gap:8px;"><input class="inp" id="vm-admin-input" placeholder="Type a reply..." style="flex:1;" onkeydown="if(event.key===\'Enter\')sendVendorAdminReply(\''+vendorId+'\')"/><button class="btn btn-or" onclick="sendVendorAdminReply(\''+vendorId+'\')">Send</button></div><button class="btn" style="margin-top:10px;" onclick="vendorNav(\'messages\')">← Back</button></div>';
+  loadAppWallpaper('rnm_chat_wallpaper_admin');
+  await loadVendorAdminMsgs(vendorId);
+}
+async function loadVendorAdminMsgs(vendorId){
+  const key='rn_mall_vendor_admin_chat_'+vendorId;
+  const msgs=Object.values(await fbG(key)||{}).sort(function(a,b){return (a.ts||0)-(b.ts||0);});
+  const el=document.getElementById('vm-admin-msgs');if(!el)return;
+  el.innerHTML=msgs.length?msgs.map(function(m){
+    const label=m.isAdmin?(m.senderName||'Admin')+(m.senderRole?', '+(ROLE_LABELS[m.senderRole]||m.senderRole):''):(m.senderName||'Vendor');
+    return '<div style="display:flex;'+(m.isAdmin?'flex-direction:row-reverse;':'')+'gap:10px;margin-bottom:10px;"><div style="width:28px;height:28px;border-radius:99px;background:'+(m.isAdmin?'var(--or)':'rgba(91,155,245,0.15)')+';color:'+(m.isAdmin?'#fff':'var(--bl)')+';font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+ini(m.senderName||(m.isAdmin?'A':'V'))+'</div><div><div style="background:'+(m.isAdmin?'rgba(255,106,0,0.1)':'var(--card2)')+';padding:8px 12px;border-radius:9px;font-size:13px;max-width:100%;color:var(--wh);">'+m.text+'</div><div style="font-size:9px;color:var(--wh);font-weight:700;margin-top:2px;'+(m.isAdmin?'text-align:right;':'')+'">'+label+'</div></div></div>';
+  }).join(''):'<div style="color:var(--wh);font-weight:700;font-size:13px;">No messages yet.</div>';
+  el.scrollTop=el.scrollHeight;
+}
+async function sendVendorAdminReply(vendorId){
+  const inp=document.getElementById('vm-admin-input');const text=(inp.value||'').trim();if(!text)return;
+  const key='rn_mall_vendor_admin_chat_'+vendorId;
+  const senderName=sessionStorage.getItem('rnm_admin_ceo_name')||'RichNation Mall';
+  await fbP(key,{senderId:'admin',senderName:senderName,senderRole:sessionStorage.getItem('rnm_admin_is_ceo')==='1'?'ceo':null,text:text,isAdmin:true,ts:Date.now(),date:ds()});
+  await fbP('rn_mall_vendor_notifications/'+vendorId,{type:'admin_reply',from:senderName,preview:text.slice(0,60),date:ds(),read:false,ts:Date.now()});
+  inp.value='';await loadVendorAdminMsgs(vendorId);
 }
 async function openVendorForm(id){
   const v=await fbG('rn_mall_vendors/'+id);if(!v)return;
@@ -4181,7 +4233,7 @@ async function renderNotifs(c){
   ${list.length===0?`<div class="card fade-in"><div class="empty"><div class="empty-icon">&#9740;</div><div class="empty-title">No notifications</div><div class="empty-sub">New orders, messages and alerts will appear here.</div></div></div>`:
   `<div class="card fade-in"><div class="stagger">
     ${list.slice(0,40).map(([k,n2])=>{
-      const ico=n2.type==='new_order'?'&#128722;':n2.type==='chat'?'&#9998;':n2.type==='delivery_confirmed'?'&#9989;':n2.type==='password_reset_request'?'&#128273;':n2.type==='account_locked'?'&#128274;':n2.type==='wallet_topup_request'?'&#128179;':n2.type==='wholesale_application'?'&#128230;':n2.type==='new_vendor_signup'?'&#127970;':n2.type==='wallet_issue'?'&#127890;':n2.type==='wallet_refund_ready'?'&#127974;':n2.type==='new_investor_application'?'&#128176;':n2.type==='investor_chat'?'&#9998;':n2.type==='new_rider_application'?'&#127957;':n2.type==='delivery_incident'?'&#9888;':'&#128230;';
+      const ico=n2.type==='new_order'?'&#128722;':n2.type==='chat'?'&#9998;':n2.type==='delivery_confirmed'?'&#9989;':n2.type==='password_reset_request'?'&#128273;':n2.type==='account_locked'?'&#128274;':n2.type==='wallet_topup_request'?'&#128179;':n2.type==='wholesale_application'?'&#128230;':n2.type==='new_vendor_signup'?'&#127970;':n2.type==='wallet_issue'?'&#127890;':n2.type==='wallet_refund_ready'?'&#127974;':n2.type==='new_investor_application'?'&#128176;':n2.type==='investor_chat'?'&#9998;':n2.type==='new_rider_application'?'&#127957;':n2.type==='delivery_incident'?'&#9888;':n2.type==='rider_message'?'&#127957;':n2.type==='vendor_message'?'&#127970;':'&#128230;';
       const msg=n2.type==='new_order'?`New order from ${n2.customer}, ${fmt(n2.total)} &middot; ${n2.items||0} item(s)`:
         n2.type==='delivery_incident'?`⚠️ ${n2.riderName} reported "${n2.incidentLabel}" on order ${n2.orderId}${n2.note?': "'+n2.note+'"':''}`:
         n2.type==='chat'?`Message from ${n2.from}: "${n2.preview}"`:
@@ -4195,7 +4247,9 @@ async function renderNotifs(c){
         n2.type==='wallet_refund_ready'?`🏦 ${n2.name} submitted bank details for a ${fmt(n2.amount)} refund payout, mark as paid in Wallet Issues once sent`:
         n2.type==='new_investor_application'?`💰 ${n2.name} applied to invest ${fmt(n2.amount)} (${n2.option}), review in Investors`:
         n2.type==='investor_chat'?`Investor message from ${n2.name}: "${n2.preview}"`:
-        n2.type==='new_rider_application'?`🏍️ ${n2.name} applied as a dispatch rider (${n2.vehicleType}), review in Dispatch Riders`:n2.type;
+        n2.type==='new_rider_application'?`🏍️ ${n2.name} applied as a dispatch rider (${n2.vehicleType}), review in Dispatch Riders`:
+        n2.type==='rider_message'?`🏍️ Message from rider ${n2.riderName}: "${n2.preview}", reply in Dispatch Riders → Messages`:
+        n2.type==='vendor_message'?`🏢 Message from vendor ${n2.vendorName}: "${n2.preview}", reply in Vendors → Messages`:n2.type;
       fbU('rn_mall_notifications/'+k,{read:true});
       if(n2.type==='password_reset_request'){
         const resetPageUrl=settings.resetPageUrl||'';
@@ -4215,7 +4269,7 @@ async function renderNotifs(c){
         </div>`;
       }
       return `<div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--bdr);cursor:pointer;align-items:flex-start;"
-        onclick="${n2.type==='new_order'?`openOrder('${n2.orderId}')`:n2.type==='chat'?`openOrder('${n2.chatId}')`:n2.type==='delivery_confirmed'?`openOrder('${n2.orderId||n2.tracking}')`:n2.type==='delivery_incident'?`openOrder('${n2.orderId}')`:''}" >
+        onclick="${n2.type==='new_order'?`openOrder('${n2.orderId}')`:n2.type==='chat'?`openOrder('${n2.chatId}')`:n2.type==='delivery_confirmed'?`openOrder('${n2.orderId||n2.tracking}')`:n2.type==='delivery_incident'?`openOrder('${n2.orderId}')`:n2.type==='rider_message'?`riderNav('messages')`:n2.type==='vendor_message'?`vendorNav('messages')`:''}" >
         <div style="font-size:20px;flex-shrink:0;">${ico}</div>
         <div style="flex:1;"><div style="font-size:12px;font-weight:700;color:var(--wh);">${msg}</div>
         <div style="font-size:10px;color:var(--wh);font-weight:700;margin-top:2px;">${n2.date||''}</div></div>

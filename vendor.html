@@ -110,6 +110,8 @@ button{font-family:inherit;}
 .inp:focus,.ta:focus{outline:none;border-color:var(--or);box-shadow:0 0 0 3px rgba(255,106,0,.15);}
 .ta{resize:vertical;}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.sec-hdr{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:11px;color:var(--or);text-transform:uppercase;letter-spacing:1.5px;margin:18px 0 10px;padding:8px 12px;background:rgba(255,106,0,0.06);border-left:3px solid var(--or);border-radius:0 8px 8px 0;}
 .data-row{display:flex;align-items:center;gap:12px;padding:12px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);margin-bottom:8px;flex-wrap:wrap;transition:box-shadow .15s,border-color .15s;}
 .data-row:hover{box-shadow:var(--sh-sm);border-color:rgba(21,21,26,.18);}
 .row-thumb{width:48px;height:48px;border-radius:var(--r-sm);overflow:hidden;background:var(--card2);flex-shrink:0;}
@@ -129,7 +131,7 @@ button{font-family:inherit;}
   .tb-right-group{flex-wrap:wrap;justify-content:flex-end;row-gap:6px;}
   .curr-row{order:5;flex-basis:100%;justify-content:flex-end;}
   .stats-grid{grid-template-columns:1fr 1fr;}
-  .g2{grid-template-columns:1fr;}
+  .g2,.g3{grid-template-columns:1fr;}
   .content{padding:14px;}
 }
 @media(max-width:480px){
@@ -950,11 +952,24 @@ async function togglePromo(productId,onSale){
 }
 
 // ── MESSAGES ──
-async function renderVMessages(c){
-  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Messages</div></div><div style="color:var(--wh);font-weight:700;">Loading...</div>';
+let _vMsgTab='customers';
+function vMsgTab(tab){_vMsgTab=tab;vnav('messages');}
+function renderVMessages(c){
+  var html='<div class="page-hdr"><div class="page-hdr-title">Messages</div></div>'
+    +'<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">'
+    +'<button class="btn '+(_vMsgTab==='customers'?'btn-or':'')+'" onclick="vMsgTab(\'customers\')">Customers</button>'
+    +'<button class="btn '+(_vMsgTab==='admin'?'btn-or':'')+'" onclick="vMsgTab(\'admin\')">Contact Admin</button>'
+    +'</div><div id="vmsg-body"></div>';
+  c.innerHTML=html;
+  const body=document.getElementById('vmsg-body');
+  if(_vMsgTab==='admin')renderVAdminChat(body);
+  else renderVCustomerThreads(body);
+}
+async function renderVCustomerThreads(c){
+  c.innerHTML='<div style="color:var(--wh);font-weight:700;">Loading...</div>';
   const threads=await fbG('rn_mall_vendor_chat_'+vendor.id)||{};
   const threadIds=Object.keys(threads);
-  let html='<div class="page-hdr"><div class="page-hdr-title">Messages</div><div class="page-hdr-sub">Customer questions about your products.</div></div>';
+  let html='';
   if(!threadIds.length){
     html+='<div class="card" style="text-align:center;padding:40px;color:var(--wh);font-weight:700;">No messages yet.</div>';
   }else{
@@ -962,6 +977,30 @@ async function renderVMessages(c){
     html+=sorted.map(function(t){return '<div class="card" style="cursor:pointer;" onclick="openVendorMsgThread(\''+t.key+'\')"><div style="font-weight:800;font-size:13px;">'+(t.last.customerName||'Customer')+'</div><div style="font-size:12px;color:var(--wh);font-weight:700;margin-top:4px;">'+t.last.text.slice(0,60)+'</div><div style="font-size:10px;color:var(--wh);font-weight:700;margin-top:4px;">'+t.count+' message(s)</div></div>';}).join('');
   }
   c.innerHTML=html;
+}
+async function renderVAdminChat(c){
+  c.innerHTML='<div style="color:var(--wh);font-weight:700;">Loading...</div>';
+  c.innerHTML='<div class="page-hdr-sub" style="margin-bottom:16px;">Direct line to admin, for anything, anytime</div>'
+    +'<div class="card"><div style="display:flex;justify-content:flex-end;margin-bottom:8px;"><button class="wallpaper-btn" onclick="toggleWallpaperPanel(\'wp-panel\',\'wp-grid\',\'rnm_chat_wallpaper_vendor_admin\')"">'+iconBadge('palette',13)+' Wallpaper</button></div><div class="wallpaper-panel" id="wp-panel"><div class="cwp-title">Chat Wallpaper</div><div class="cwp-grid" id="wp-grid"></div><div class="cwp-custom-row"><input type="color" onchange="applyAppWallpaper(this.value,\'rnm_chat_wallpaper_vendor_admin\')"/><span>Or pick any color</span></div></div><div class="wallpaper-target" id="va-msgs" style="margin-bottom:12px;max-height:360px;overflow-y:auto;"></div><div style="display:flex;gap:8px;"><input class="fi" id="va-input" placeholder="Type a message..." style="flex:1;margin-bottom:0;" onkeydown="if(event.key===\'Enter\')sendVendorAdminMsg()"/><button class="btn btn-or" onclick="sendVendorAdminMsg()">Send</button></div></div>';
+  loadAppWallpaper('rnm_chat_wallpaper_vendor_admin');
+  await loadVendorAdminChat();
+}
+async function loadVendorAdminChat(){
+  const key='rn_mall_vendor_admin_chat_'+vendor.id;
+  const msgs=Object.values(await fbG(key)||{}).sort(function(a,b){return (a.ts||0)-(b.ts||0);});
+  const el=document.getElementById('va-msgs');if(!el)return;
+  el.innerHTML=msgs.length?msgs.map(function(m){
+    const label=m.isAdmin?(m.senderName?m.senderName+(m.senderRole?', '+m.senderRole:', Admin'):'Admin'):'You';
+    return '<div style="display:flex;'+(m.isAdmin?'':'flex-direction:row-reverse;')+'gap:10px;margin-bottom:10px;"><div style="width:28px;height:28px;border-radius:99px;background:'+(m.isAdmin?'var(--card2)':'var(--or)')+';color:'+(m.isAdmin?'var(--wh)':'#fff')+';font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+(m.isAdmin?(m.senderName?m.senderName.charAt(0):'A'):'You')+'</div><div style="background:'+(m.isAdmin?'var(--card2)':'rgba(255,106,0,0.1)')+';padding:8px 12px;border-radius:9px;font-size:13px;max-width:70%;">'+m.text+'</div></div>';
+  }).join(''):'<div style="color:var(--wh);font-weight:700;font-size:13px;text-align:center;padding:20px;">No messages yet, say hello!</div>';
+  el.scrollTop=el.scrollHeight;
+}
+async function sendVendorAdminMsg(){
+  const inp=document.getElementById('va-input');const text=(inp.value||'').trim();if(!text)return;
+  const key='rn_mall_vendor_admin_chat_'+vendor.id;
+  await fbP(key,{senderId:vendor.id,senderName:vendor.storeName,text:text,isAdmin:false,ts:Date.now(),date:ds()});
+  await fbP('rn_mall_notifications',{type:'vendor_message',vendorName:vendor.storeName,preview:text.slice(0,60),date:ds(),read:false,ts:Date.now()});
+  inp.value='';await loadVendorAdminChat();
 }
 async function openVendorMsgThread(custId){
   const c=document.getElementById('content');
@@ -996,6 +1035,7 @@ function vendorNotifMsg(n){
   if(n.type==='bank_verified')return 'Your bank account details have been verified by admin.';
   if(n.type==='product_approved')return '"'+n.productName+'" was approved and is now live on RichNation Mall.';
   if(n.type==='product_rejected')return '"'+n.productName+'" was not approved. Reason: '+(n.reason||'N/A');
+  if(n.type==='admin_reply')return iconBadge('chat',13)+' Admin replied: '+(n.preview||'');
   return n.message||'New notification';
 }
 async function unreadVendorNotifCount(){
@@ -1115,27 +1155,92 @@ function openVProdForm(id){
   (async function(){
     const p=id?(await fbG('rn_mall_products/'+id))||{}:{};
     window._vImages=(p.images||[]).slice();
+    window._vColors=(p.colors||[]).map(function(c){return {name:c.name||'',image:c.image||''};});
+    window._vSizes=(p.sizes||[]).map(function(s){return {name:s.name||'',stock:s.stock!=null?s.stock:0};});
     const catOpts=allCategories.map(function(cat){return '<option value="'+cat.id+'" '+(p.category===cat.id?'selected':'')+'>'+cat.name+'</option>';}).join('');
     const c=document.getElementById('content');
     c.innerHTML=`
     <div class="page-hdr"><div class="page-hdr-title">${id?'Edit Product':'Add Product'}</div></div>
     <div class="card">
+      <div class="sec-hdr">Basic Information</div>
       <div class="g2">
         <div class="fg"><label class="lbl">Product Name</label><input class="inp" id="vp-name" value="${p.name||''}" placeholder="e.g. Ankara Print Dress"/></div>
         <div class="fg"><label class="lbl">Category</label><select class="inp" id="vp-cat"><option value="">Select category</option>${catOpts}</select></div>
       </div>
+      <div class="fg"><label class="lbl">Product Code (SKU)</label><div style="display:flex;gap:8px;"><input class="inp" id="vp-code" value="${p.code||(!id?genProdCode():'')}" placeholder="e.g. RNM-7F3A2" style="flex:1;"/><button type="button" class="btn" onclick="document.getElementById('vp-code').value=genProdCode()">🔄 Generate</button></div></div>
       <div class="fg"><label class="lbl">Description</label><textarea class="ta" id="vp-desc" rows="4" placeholder="Describe your product...">${p.description||''}</textarea></div>
-      <div class="g2">
+
+      <div class="sec-hdr">Pricing &amp; Stock</div>
+      <div style="background:rgba(255,106,0,0.06);border:1px solid rgba(255,106,0,0.2);border-radius:9px;padding:12px;margin-bottom:14px;">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;color:var(--wh);">
+        <input type="checkbox" id="vp-free" ${p.price===0?'checked':''} style="accent-color:var(--or);width:18px;height:18px;" onchange="toggleFreeVProduct(this)">
+        <span>🎁 <strong>Free Product</strong>, sets price to ₦0, shows FREE badge</span></label>
+      </div>
+      <div class="g2" id="vp-price-row" ${p.price===0?'style="opacity:.4;pointer-events:none;"':''}>
         <div class="fg"><label class="lbl">Price (₦)</label><input class="inp" type="number" id="vp-price" value="${p.price||''}" placeholder="15000"/></div>
         <div class="fg"><label class="lbl">Sale Price (optional)</label><input class="inp" type="number" id="vp-sale" value="${p.salePrice||''}" placeholder="12000"/></div>
       </div>
       <div class="fg"><label class="lbl">Stock Quantity</label><input class="inp" type="number" id="vp-stock" value="${p.stock!=null?p.stock:''}" placeholder="Leave blank for unlimited"/></div>
-      <div class="fg"><label class="lbl">Product Images</label>
-        <div id="vp-img-preview" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">${(window._vImages||[]).map(function(img,i){return '<div style="position:relative;width:60px;height:60px;"><img src="'+img+'" style="width:100%;height:100%;object-fit:cover;border-radius:6px;"/><span onclick="removeVImg('+i+')" style="position:absolute;top:-6px;right:-6px;background:var(--re);color:#fff;border-radius:99px;width:18px;height:18px;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;">×</span></div>';}).join('')}</div>
-        <input type="file" id="vp-img-upload" accept="image/*" multiple style="display:none;" onchange="previewVImages()">
-        <button class="btn" onclick="document.getElementById('vp-img-upload').click()">📁 Choose Images</button>
+      <div class="fg"><label class="lbl">Low Stock Alert (qty)</label><input class="inp" type="number" id="vp-lowstock" value="${p.lowStock||5}" style="max-width:120px;"/></div>
+      <div class="fg"><label class="lbl">Wholesale Pricing, optional</label>
+        <div class="g2">
+          <input class="inp" type="number" id="vp-wholesale-price" value="${p.wholesalePrice!=null?p.wholesalePrice:''}" placeholder="Wholesale price (₦)"/>
+          <input class="inp" type="number" id="vp-wholesale-minqty" value="${p.wholesaleMinQty!=null?p.wholesaleMinQty:''}" placeholder="Min. quantity (e.g. 10)"/>
+        </div>
+        <div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:5px;">Buyers automatically get this price when they order at least the minimum quantity. Leave blank if none.</div>
       </div>
-      <div style="background:var(--card2);border-radius:9px;padding:12px;margin-bottom:16px;font-size:12px;">
+
+      <div class="sec-hdr">Product Images</div>
+      <div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:10px;">Upload up to 15 images. The first image is the cover image shown in listings.</div>
+      <div id="vp-img-preview" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">${renderVImgsHTML()}</div>
+      <input type="file" id="vp-img-upload" accept="image/*" multiple style="display:none;" onchange="previewVImages()">
+      <button class="btn" onclick="document.getElementById('vp-img-upload').click()">📁 Choose Images</button>
+
+      <div class="sec-hdr">Product Video, optional</div>
+      <div class="fg"><label class="lbl">Video Link</label><input class="inp" id="vp-video-url" value="${(p.videos&&p.videos[0])||''}" placeholder="https://youtube.com/watch?v=... or a direct .mp4 link"/>
+      <div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:5px;">Upload your video to YouTube (can be Unlisted) or any video host, then paste the link here.</div></div>
+
+      <div class="sec-hdr">Colour Options, optional</div>
+      <div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:10px;">Add a colour with its own photo, customers see a colour grid and the photo switches when they tap one.</div>
+      <div id="vp-colors-list"></div>
+      <button type="button" class="btn" onclick="addVColorRow()">+ Add Colour</button>
+
+      <div class="sec-hdr">Sizes &amp; Stock, optional</div>
+      <div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:10px;">Add each size with how many are in stock. Leave empty to use the Stock Quantity field above instead.</div>
+      <div id="vp-sizes-list"></div>
+      <button type="button" class="btn" onclick="addVSizeRow()">+ Add Size</button>
+
+      <div class="sec-hdr">Variants &amp; Specs, optional</div>
+      <div class="g2">
+        <div class="fg"><label class="lbl">Variant Label (e.g. Size, Colour)</label><input class="inp" id="vp-varlbl" value="${p.variantLabel||''}" placeholder="e.g. Size"/></div>
+        <div class="fg"><label class="lbl">Variants (comma separated)</label><input class="inp" id="vp-vars" value="${(p.variants||[]).map(function(v){return v.value||v;}).join(',')}" placeholder="S, M, L, XL"/></div>
+      </div>
+      <div class="fg"><label class="lbl">Specs (one per line, format: Key: Value)</label><textarea class="ta" id="vp-specs" rows="4" placeholder="Material: Cotton\nWeight: 500g">${p.specs?Object.entries(p.specs).map(function(e){return e[0]+': '+e[1];}).join('\n'):''}</textarea></div>
+      <div class="fg"><label class="lbl">Dimensions &amp; Weight, optional</label>
+        <div class="g3" style="grid-template-columns:1fr 1fr 1fr 1fr;">
+          <input class="inp" id="vp-dim-l" value="${(p.dimensions||{}).length||''}" placeholder="Length (cm)"/>
+          <input class="inp" id="vp-dim-w" value="${(p.dimensions||{}).width||''}" placeholder="Width (cm)"/>
+          <input class="inp" id="vp-dim-h" value="${(p.dimensions||{}).height||''}" placeholder="Height (cm)"/>
+          <input class="inp" id="vp-dim-wt" value="${(p.dimensions||{}).weight||''}" placeholder="Weight (kg)"/>
+        </div>
+      </div>
+
+      <div class="sec-hdr">Delivery Options</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:4px;">
+        <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--wh);cursor:pointer;">
+        <input type="checkbox" id="vp-pickup" ${p.pickupAvailable?'checked':''} style="accent-color:var(--or);width:16px;height:16px;"> Allow Pick Up (customer collects in person)</label>
+        <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--wh);cursor:pointer;">
+        <input type="checkbox" id="vp-free-ship" ${p.freeShipping?'checked':''} style="accent-color:var(--or);width:16px;height:16px;"> Free Shipping on this product</label>
+      </div>
+
+      <div class="sec-hdr">Badges</div>
+      <div class="g2">
+        <div class="fg"><label class="lbl">Custom Badge Text</label><input class="inp" id="vp-badge" value="${p.badge||''}" placeholder="e.g. HANDMADE, LIMITED"/></div>
+        <div class="fg"><label class="lbl">Pre-Order Note</label><input class="inp" id="vp-preorder-note" value="${p.preOrderNote||''}" placeholder="Ships in 2-3 weeks"/></div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;color:var(--wh);margin-top:4px;"><input type="checkbox" id="vp-preorder" ${p.preOrder?'checked':''} style="accent-color:var(--or);"> Pre-Order</label>
+
+      <div style="background:var(--card2);border-radius:9px;padding:12px;margin:16px 0;font-size:12px;">
         ${p.approvalStatus==='approved'?'<span style="color:var(--su);font-weight:700;">Approved, live on RichNation Mall</span>':p.approvalStatus==='rejected'?'<span style="color:var(--re);font-weight:700;">Rejected</span>'+(p.rejectionReason?'<div style="color:var(--wh);font-weight:700;margin-top:4px;">Reason: '+p.rejectionReason+'</div>':''):'<span style="color:var(--w2);font-weight:700;">Pending admin approval</span>'}
         <div style="color:var(--wh);font-weight:700;margin-top:4px;">Every new listing and edit is reviewed by admin before it shows to customers.</div>
       </div>
@@ -1144,8 +1249,60 @@ function openVProdForm(id){
         <button class="btn btn-lg" onclick="vnav('products')">Cancel</button>
       </div>
     </div>`;
+    renderVColorRows();
+    renderVSizeRows();
   })();
 }
+function toggleFreeVProduct(cb){
+  var row=document.getElementById('vp-price-row');
+  var priceInp=document.getElementById('vp-price');
+  if(cb.checked){
+    if(row)row.style.cssText='opacity:.4;pointer-events:none;';
+    if(priceInp)priceInp.value='0';
+  }else{
+    if(row)row.style.cssText='';
+    if(priceInp&&priceInp.value==='0')priceInp.value='';
+  }
+}
+function renderVImgsHTML(){
+  return (window._vImages||[]).map(function(img,i){return '<div style="position:relative;width:60px;height:60px;"><img src="'+img+'" style="width:100%;height:100%;object-fit:cover;border-radius:6px;"/><span onclick="removeVImg('+i+')" style="position:absolute;top:-6px;right:-6px;background:var(--re);color:#fff;border-radius:99px;width:18px;height:18px;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;">×</span></div>';}).join('');
+}
+function renderVColorRows(){
+  var wrap=document.getElementById('vp-colors-list');if(!wrap)return;
+  var rows=window._vColors||[];
+  wrap.innerHTML=rows.map(function(c,i){
+    return '<div style="display:flex;gap:10px;align-items:center;margin-bottom:8px;background:var(--card2);padding:8px;border-radius:8px;">'
+      +'<div onclick="document.getElementById(\'vclr-file-'+i+'\').click()" title="Click to set photo" style="width:44px;height:44px;border-radius:6px;overflow:hidden;background:var(--bg);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid var(--bdr);">'
+      +(c.image?'<img loading="lazy" decoding="async" src="'+c.image+'" style="width:100%;height:100%;object-fit:cover;">':'<span style="font-size:9px;color:var(--wh);font-weight:700;">Photo</span>')
+      +'</div>'
+      +'<input type="file" id="vclr-file-'+i+'" accept="image/*" style="display:none;" onchange="vColorImgChange('+i+',this)">'
+      +'<input class="inp" style="flex:1;" placeholder="Colour name e.g. White" value="'+(c.name||'').replace(/"/g,'&quot;')+'" oninput="window._vColors['+i+'].name=this.value">'
+      +'<button type="button" onclick="removeVColorRow('+i+')" style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);color:var(--re);border-radius:6px;padding:8px 10px;cursor:pointer;flex-shrink:0;">🗑</button>'
+      +'</div>';
+  }).join('')||'<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:8px;">No colours added yet.</div>';
+}
+function addVColorRow(){window._vColors=window._vColors||[];window._vColors.push({name:'',image:''});renderVColorRows();}
+function removeVColorRow(i){window._vColors.splice(i,1);renderVColorRows();}
+async function vColorImgChange(i,inp){
+  if(!inp.files||!inp.files[0])return;
+  var b64=await compressImage(inp.files[0],500,0.75);
+  if(!b64)return;
+  var url=isGithubConfigured()?await uploadDataUrlToGithub(b64,'colors'):null;
+  window._vColors[i].image=url||b64;renderVColorRows();
+}
+function renderVSizeRows(){
+  var wrap=document.getElementById('vp-sizes-list');if(!wrap)return;
+  var rows=window._vSizes||[];
+  wrap.innerHTML=rows.map(function(s,i){
+    return '<div style="display:flex;gap:10px;align-items:center;margin-bottom:8px;">'
+      +'<input class="inp" style="flex:1;" placeholder="Size e.g. S, M, 42" value="'+(s.name||'').replace(/"/g,'&quot;')+'" oninput="window._vSizes['+i+'].name=this.value">'
+      +'<input class="inp" type="number" min="0" style="width:110px;" placeholder="Stock" value="'+(s.stock!=null?s.stock:'')+'" oninput="window._vSizes['+i+'].stock=parseInt(this.value)||0">'
+      +'<button type="button" onclick="removeVSizeRow('+i+')" style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);color:var(--re);border-radius:6px;padding:8px 10px;cursor:pointer;flex-shrink:0;">🗑</button>'
+      +'</div>';
+  }).join('')||'<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:8px;">No sizes added yet.</div>';
+}
+function addVSizeRow(){window._vSizes=window._vSizes||[];window._vSizes.push({name:'',stock:0});renderVSizeRows();}
+function removeVSizeRow(i){window._vSizes.splice(i,1);renderVSizeRows();}
 function removeVImg(i){window._vImages.splice(i,1);
   const prev=document.getElementById('vp-img-preview');
   if(prev)prev.innerHTML=(window._vImages||[]).map(function(img,idx){return '<div style="position:relative;width:60px;height:60px;"><img src="'+img+'" style="width:100%;height:100%;object-fit:cover;border-radius:6px;"/><span onclick="removeVImg('+idx+')" style="position:absolute;top:-6px;right:-6px;background:var(--re);color:#fff;border-radius:99px;width:18px;height:18px;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;">×</span></div>';}).join('');
@@ -1169,23 +1326,52 @@ async function saveVProd(id){
   if(!name){toast('Enter a product name','err');return;}
   const cat=document.getElementById('vp-cat').value;
   if(!cat){toast('Select a category','err');return;}
-  const price=parseFloat(document.getElementById('vp-price').value)||0;
-  if(price<=0){toast('Enter a valid price','err');return;}
+  const isFree=document.getElementById('vp-free')&&document.getElementById('vp-free').checked;
+  const price=isFree?0:parseFloat(document.getElementById('vp-price').value)||0;
+  if(!isFree&&price<=0){toast('Enter a valid price (or tick Free Product)','err');return;}
   const pid=id||'prod_'+Date.now()+'_'+Math.random().toString(36).slice(2,5);
   const existing=id?(await fbG('rn_mall_products/'+id))||{}:{};
+  const saleRaw=parseFloat(document.getElementById('vp-sale').value)||null;
+  const salePrice=saleRaw&&!isFree&&saleRaw<price?saleRaw:null;
+  const varStr=document.getElementById('vp-vars').value||'';
+  const variants=varStr?varStr.split(',').map(function(v){return v.trim();}).filter(Boolean).map(function(v){return{value:v,label:v};}):[];
+  const specsRaw=(document.getElementById('vp-specs').value||'').split('\n').filter(Boolean);
+  const specs={};specsRaw.forEach(function(l){var i=l.indexOf(':');if(i>0)specs[l.slice(0,i).trim()]=l.slice(i+1).trim();});
+  const dimVals={length:document.getElementById('vp-dim-l').value||'',width:document.getElementById('vp-dim-w').value||'',height:document.getElementById('vp-dim-h').value||'',weight:document.getElementById('vp-dim-wt').value||''};
+  const dimensions=Object.values(dimVals).some(function(v){return v.trim();})?dimVals:null;
+  const colors=(window._vColors||[]).filter(function(c){return (c.name||'').trim();}).map(function(c){return{name:c.name.trim(),image:c.image||''};});
+  const sizes=(window._vSizes||[]).filter(function(s){return (s.name||'').trim();}).map(function(s){return{name:s.name.trim(),stock:s.stock!=null?s.stock:0};});
+  const wholesalePriceRaw=document.getElementById('vp-wholesale-price').value;
+  const wholesaleMinQtyRaw=document.getElementById('vp-wholesale-minqty').value;
+  const videoUrl=(document.getElementById('vp-video-url').value||'').trim();
   const prod={
-    id:pid,name:name,code:existing.code||genProdCode(),
+    id:pid,name:name,code:(document.getElementById('vp-code').value||'').trim()||genProdCode(),
     category:cat,
     description:(document.getElementById('vp-desc').value||'').trim(),
     price:price,
-    salePrice:parseFloat(document.getElementById('vp-sale').value)||null,
+    salePrice:salePrice,
+    wholesalePrice:wholesalePriceRaw!==''?parseFloat(wholesalePriceRaw):null,
+    wholesaleMinQty:wholesaleMinQtyRaw!==''?parseInt(wholesaleMinQtyRaw):null,
     stock:document.getElementById('vp-stock').value!==''?parseInt(document.getElementById('vp-stock').value):null,
+    lowStock:parseInt(document.getElementById('vp-lowstock').value)||5,
+    variantLabel:(document.getElementById('vp-varlbl').value||'').trim()||null,
+    variants:variants,
+    colors:colors,
+    sizes:sizes,
+    dimensions:dimensions,
     images:window._vImages||[],
-    videos:existing.videos||[],
+    videos:videoUrl?[videoUrl]:[],
+    specs:Object.keys(specs).length?specs:null,
+    badge:isFree?'FREE':((document.getElementById('vp-badge').value||'').trim()||null),
+    preOrder:!!document.getElementById('vp-preorder').checked,
+    preOrderNote:(document.getElementById('vp-preorder-note').value||'').trim()||null,
+    freeProduct:isFree,
+    freeShipping:!!document.getElementById('vp-free-ship').checked,
+    pickupAvailable:!!document.getElementById('vp-pickup').checked,
     visible:false,approvalStatus:'pending',rejectionReason:null,
     vendorId:vendor.id,vendorName:vendor.storeName,
     rating:existing.rating||4,reviews:existing.reviews||0,
-    featured:false,isNew:!id,flashSale:false,preOrder:false,
+    featured:false,isNew:!id,flashSale:false,
     createdAt:existing.createdAt||new Date().toISOString(),
     updatedAt:new Date().toISOString()
   };
