@@ -32,6 +32,17 @@
     var pl=document.createElement('link');
     pl.rel='preload';pl.as='image';pl.href=url;pl.fetchPriority='high';
     document.head.appendChild(pl);
+    // Preloading the bytes isn't enough on its own, the hero <div> further down
+    // still has the placeholder photo hardcoded in its own inline style attribute,
+    // which paints first regardless of what's been preloaded. An inline style
+    // attribute normally beats a <style> block, so !important here is what
+    // actually makes a returning visitor's real banner win the very first paint
+    // instead of flashing the placeholder before JS swaps it in later.
+    if(cached){
+      var st=document.createElement('style');
+      st.textContent='#hero-banner{background-image:linear-gradient(rgba(0,0,0,0.45),rgba(0,0,0,0.45)), url(\''+url+'\') !important;}';
+      document.head.appendChild(st);
+    }
   }catch(e){}
 })();
 </script>
