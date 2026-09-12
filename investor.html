@@ -326,19 +326,17 @@ function downloadDataDoc(uri,filename){
 }
 async function fbG(p,ms){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{},ms);return await r.json();}catch(e){try{await new Promise(res=>setTimeout(res,400));const r2=await fbFetchTimeout(FB+'/'+p+'.json',{},ms);return await r2.json();}catch(e2){return null;}}}
 function watchFirebaseCollection(path,onChange){
-  if(typeof EventSource==='undefined')return null;
-  try{
-    var es=new EventSource(FB+'/'+path+'.json');
-    var debounceTimer=null;
-    function triggerRefresh(){
-      clearTimeout(debounceTimer);
-      debounceTimer=setTimeout(function(){fbG(path).then(onChange);},300);
-    }
-    es.addEventListener('put',triggerRefresh);
-    es.addEventListener('patch',triggerRefresh);
-    es.onerror=function(){/* EventSource retries on its own, nothing to do here */};
-    return es;
-  }catch(e){console.warn('Live watch unavailable for',path,':',e.message);return null;}
+  // Was a persistent EventSource per collection, several open at once across
+  // tabs/apps could exhaust the browser's per-origin connection limit and
+  // starve every other Firebase call on the page (the actual cause of the
+  // "stuck on Loading" reports), plain guarded polling avoids that entirely.
+  var inFlight=false;
+  var timer=setInterval(function(){
+    if(inFlight)return;
+    inFlight=true;
+    fbG(path).then(function(data){inFlight=false;onChange(data);});
+  },20000);
+  return {close:function(){clearInterval(timer);}};
 }
 let _settingsPromise=null;
 function getSettingsData(){if(!_settingsPromise)_settingsPromise=fbG('rn_mall_settings',6000);return _settingsPromise;}

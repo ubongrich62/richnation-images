@@ -1170,34 +1170,22 @@ async function fbG(p,ms){
 }
 async function fbS(p,d){try{await fbFetchTimeout(FB+'/'+p+'.json',{method:'PUT',body:JSON.stringify(d)});}catch(e){console.warn('fbS failed for',p,':',e.message);}}
 async function fbU(p,d){try{await fbFetchTimeout(FB+'/'+p+'.json',{method:'PATCH',body:JSON.stringify(d)});}catch(e){console.warn('fbU failed for',p,':',e.message);}}
-// Live updates for the handful of paths customers are actually looking at while
-// admin might be editing (products, categories, homepage settings), using
-// Firebase Realtime Database's REST streaming endpoint (Server-Sent Events)
-// instead of the full Firebase SDK, since this app already talks to Firebase
-// purely over REST everywhere else. Firebase pushes a 'put' or 'patch' event the
-// instant any data under the watched path changes, we don't try to hand-apply
-// the partial diff ourselves (that's easy to get subtly wrong), we just treat it
-// as a "something changed, go re-fetch" signal and reuse the existing fbG().
-// EventSource auto-reconnects on a dropped connection per the browser spec, no
-// retry logic needed here. If the browser doesn't support EventSource (very
-// old browsers only) this quietly no-ops, the page still works exactly as
-// before, just without live updates.
+// Periodic refresh for the handful of paths customers are actually looking at
+// while admin might be editing (products, categories, homepage settings).
 function watchFirebaseCollection(path,onChange){
-  if(typeof EventSource==='undefined')return null;
-  try{
-    var es=new EventSource(FB+'/'+path+'.json');
-    var debounceTimer=null;
-    function triggerRefresh(){
-      clearTimeout(debounceTimer);
-      // A single admin edit can fire several put/patch events in quick
-      // succession, debounce briefly so we don't re-render repeatedly for one change.
-      debounceTimer=setTimeout(function(){fbG(path).then(onChange);},300);
-    }
-    es.addEventListener('put',triggerRefresh);
-    es.addEventListener('patch',triggerRefresh);
-    es.onerror=function(){/* EventSource retries on its own, nothing to do here */};
-    return es;
-  }catch(e){console.warn('Live watch unavailable for',path,':',e.message);return null;}
+  // Was a persistent EventSource per collection, on the customer site alone
+  // that's 3 open per visitor tab, several open at once (many customers, or
+  // several apps in different tabs) could exhaust the browser's per-origin
+  // connection limit and starve every other Firebase call on the page (the
+  // actual cause of the "stuck on Loading" reports), plain guarded polling
+  // avoids that entirely.
+  var inFlight=false;
+  var timer=setInterval(function(){
+    if(inFlight)return;
+    inFlight=true;
+    fbG(path).then(function(data){inFlight=false;onChange(data);});
+  },20000);
+  return {close:function(){clearInterval(timer);}};
 }
 async function fbP(p,d){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'POST',body:JSON.stringify(d)});return await r.json();}catch(e){console.warn('fbP failed for',p,':',e.message);return null;}}
 async function fbD(p){try{await fbFetchTimeout(FB+'/'+p+'.json',{method:'DELETE'});}catch(e){console.warn('fbD failed for',p,':',e.message);}}
