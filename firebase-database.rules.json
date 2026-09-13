@@ -52,6 +52,20 @@
     "mgmt_vault": { ".read": false, ".write": false },
     "mgmt_notes": { ".read": false, ".write": false },
 
+    // Also not part of RichNation Mall — this same Firebase project hosts at
+    // least one other app (an "rna_"-prefixed academy/staff-chat system,
+    // plus a few loose top-level collections). Nothing in this repo touches
+    // that app's code, so its actual read/write access patterns are unknown
+    // here — locking it down without seeing its source could easily break
+    // it. Left exactly as open as it already was (root default before this
+    // file existed), not newly secured, not newly broken either. Securing
+    // that app properly is a separate task for whoever maintains its code.
+    "channel_settings": { ".read": true, ".write": true },
+    "divisions":        { ".read": true, ".write": true },
+    "dm":               { ".read": true, ".write": true },
+    "staff":            { ".read": true, ".write": true },
+    "staff_logins":     { ".read": true, ".write": true },
+
     "rn_mall_products":        { ".read": true, ".write": true, "$id": { ".validate": "newData.hasChildren(['name','price'])" } },
     "rn_mall_categories":      { ".read": true, ".write": true },
     "rn_mall_reviews":         { ".read": true, ".write": true },
@@ -121,11 +135,15 @@
     // they'd all fall through to the deny-by-default root rule, breaking
     // vendor/investor/rider chat entirely. This wildcard matches any
     // top-level path with one of those three prefixes instead, whatever id
-    // happens to be appended, and denies everything else at this level, so
-    // it can't be used to reach any other collection.
+    // happens to be appended, and denies everything else at this level
+    // EXCEPT one more case bolted on below: Firebase allows only one
+    // wildcard child per level, so the other app's entire "rna_" collection
+    // family (academy/staff-chat, not part of this repo) has to be granted
+    // its unchanged, already-open access from this same node too, rather
+    // than as a second wildcard rule, which Firebase would reject outright.
     "$topLevelPath": {
-      ".read": "$topLevelPath.beginsWith('rn_mall_vendor_chat_') || $topLevelPath.beginsWith('rn_mall_investor_chat_') || $topLevelPath.beginsWith('rn_mall_rider_admin_chat_')",
-      ".write": "$topLevelPath.beginsWith('rn_mall_vendor_chat_') || $topLevelPath.beginsWith('rn_mall_investor_chat_') || $topLevelPath.beginsWith('rn_mall_rider_admin_chat_')"
+      ".read": "$topLevelPath.beginsWith('rn_mall_vendor_chat_') || $topLevelPath.beginsWith('rn_mall_investor_chat_') || $topLevelPath.beginsWith('rn_mall_rider_admin_chat_') || $topLevelPath.beginsWith('rna_')",
+      ".write": "$topLevelPath.beginsWith('rn_mall_vendor_chat_') || $topLevelPath.beginsWith('rn_mall_investor_chat_') || $topLevelPath.beginsWith('rn_mall_rider_admin_chat_') || $topLevelPath.beginsWith('rna_')"
     },
     // rn_mall_notifications: admin's own notification bell lists the whole
     // collection, same limitation as rn_mall_orders above. The per-role
