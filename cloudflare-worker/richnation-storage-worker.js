@@ -106,8 +106,21 @@ export default {
     }
 
     // ── DELETE ──
+    // Previously had NO folder check at all, unlike upload just above it,
+    // meaning any path in the entire bucket (not just the app's own known
+    // folders) could be deleted by anyone who found this Worker's URL. Now
+    // held to the exact same allow-list as uploads, closing that gap without
+    // touching the "no secret key" design (there's still no login on this
+    // endpoint, deleting a file in one of the app's own folders is still
+    // possible for anyone who can reach it, same accepted trade-off as
+    // upload already has, but the entire rest of the bucket is now off-limits).
     if(request.method === 'DELETE' && url.searchParams.has('path')){
-      await env.BUCKET.delete(url.searchParams.get('path'));
+      const deletePath = url.searchParams.get('path');
+      const folder = folderOf(deletePath);
+      if(!IMAGE_FOLDERS.has(folder) && !ANY_FILE_FOLDERS.has(folder)){
+        return json({error:'Unknown folder: '+folder},400);
+      }
+      await env.BUCKET.delete(deletePath);
       return json({ok:true});
     }
 

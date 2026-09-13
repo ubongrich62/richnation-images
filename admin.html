@@ -810,6 +810,13 @@ function setCurr(c){
   nav(curNav||'dashboard',false);
 }
 function ini(n){return(n||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
+// General-purpose HTML-escaping for free text (chat messages, customer/
+// vendor/rider names, anything someone other than this admin typed) going
+// into innerHTML as visible text, not an attribute or onclick argument
+// (escAttr above is for those). Without this, a chat message or a name
+// containing something like <img src=x onerror=...> would run as code in
+// whoever's browser renders it, including this admin panel's own.
+function escHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 // Turns a raw timestamp into "3 days ago"/"2 weeks ago"/etc, picking
 // whichever unit reads most naturally, used on the Customers page to show
 // each customer's last visit at a glance.
@@ -1598,7 +1605,7 @@ async function finalizeApproveStaff(id,name,email){
   const roleObj=STAFF_ROLES.find(function(r){return r.id===role;});
   const department=roleObj?roleObj.dept:'';
   const bio=generateStaffBio(name,role,joinYear);
-  const update={status:'active',role:role,salary:salary,staffNumber:staffNumber,department:department,companyDivision:companyDivision,bio:bio};
+  const update={status:'active',role:role,staffNumber:staffNumber,department:department,companyDivision:companyDivision,bio:bio};
   let authUid=null;
   const authReady=await ensureFirebaseAuthReady();
   if(authReady){
@@ -1616,6 +1623,7 @@ async function finalizeApproveStaff(id,name,email){
     update.password=pass;
   }
   await fbU('rn_mall_staff/'+id,update);
+  if(salary>0)await adjustMoneyField('rn_mall_staff',id,'salary','set',salary);
   logActivity('Approved staff application',name+' ('+role+'), '+staffNumber);
   alert('✅ '+name+' approved as '+staffNumber+'!\n\nSend them these login details:\n\nEmail: '+email+'\nPassword: '+pass+'\n\n(There is no automatic email, please send this to them yourself via WhatsApp/email.)');
   toast('Approved, credentials shown above');
@@ -1719,7 +1727,12 @@ async function saveStaff(id){
   const roleObj=STAFF_ROLES.find(function(r){return r.id===role;});
   const department=roleObj?roleObj.dept:(existing.department||'');
   const bio=existing.bio||generateStaffBio(name,role,new Date().getFullYear());
-  await fbS('rn_mall_staff/'+sid,{id:sid,name,email,password:pass,role,companyDivision,salary,workingHours,staffNumber,department,bio,salaryStatus:existing.salaryStatus||'pending',points:existing.points||0,status:existing.status||'active',joinDate:existing.joinDate||ds(),ts:existing.ts||Date.now()});
+  // salary/points are written as their EXISTING values here (0 for a brand
+  // new record), never this form's own number, the database rule now
+  // requires that for any direct write, real salary changes go through
+  // adjustMoneyField below instead, see firebase-database.rules.json.
+  await fbS('rn_mall_staff/'+sid,{id:sid,name,email,password:pass,role,companyDivision,salary:existing.salary||0,workingHours,staffNumber,department,bio,salaryStatus:existing.salaryStatus||'pending',points:existing.points||0,status:existing.status||'active',joinDate:existing.joinDate||ds(),ts:existing.ts||Date.now()});
+  if(salary!==(existing.salary||0))await adjustMoneyField('rn_mall_staff',sid,'salary','set',salary);
   logActivity(id?'Updated staff':'Added staff',name+' ('+role+'), '+staffNumber);
   toast(id?'Staff updated!':'Staff added!');
   staffNav('list');
@@ -1739,7 +1752,8 @@ async function adjustStaffSalary(id,name,current){
   if(val===null)return;
   const amt=parseFloat(val);
   if(isNaN(amt)||amt<0){toast('Enter a valid amount','err');return;}
-  await fbU('rn_mall_staff/'+id,{salary:amt,salaryStatus:'pending'});
+  if(!(await adjustMoneyField('rn_mall_staff',id,'salary','set',amt)))return;
+  await fbU('rn_mall_staff/'+id,{salaryStatus:'pending'});
   await fbP('rn_mall_staff_salary_history/'+id,{amount:amt,status:'set',date:ds(),ts:Date.now()});
   await fbP('rn_mall_staff_notifications/'+id,{type:'salary_set',amount:amt,date:ds(),read:false,ts:Date.now()});
   notifyUserPush('rn_mall_staff',id,'Salary Updated','Your monthly salary was set to '+fmt(amt)+'.',{},'staff.html');
@@ -1786,9 +1800,7 @@ async function awardStaffPoints(id,name){
   const pts=parseInt(val);
   if(isNaN(pts)||pts===0){toast('Enter a valid number','err');return;}
   const reason=prompt('Reason for this bonus (shown to staff):','Great work this month!')||'';
-  const s=await fbG('rn_mall_staff/'+id);if(!s)return;
-  const newPts=(s.points||0)+pts;
-  await fbU('rn_mall_staff/'+id,{points:newPts});
+  if(!(await adjustMoneyField('rn_mall_staff',id,'points','add',pts)))return;
   await fbP('rn_mall_staff_points_log/'+id,{amount:pts,reason,date:ds(),ts:Date.now()});
   await fbP('rn_mall_staff_notifications/'+id,{type:'points_awarded',amount:pts,reason,date:ds(),read:false,ts:Date.now()});
   notifyUserPush('rn_mall_staff',id,'StaffPoints Awarded','+'+pts+' pts: '+reason,{},'staff.html');
@@ -2092,8 +2104,7 @@ async function processInvestorWithdrawal(investorId,key,approve){
   if(approve){
     if((v.walletBalance||0)<w.amount){toast('Investor\'s wallet balance is lower than this request, check before approving','err');return;}
     if(!confirm('Confirm you have sent '+fmt(w.amount)+' to '+v.name+'\'s bank account? This will deduct it from their wallet.'))return;
-    const newBalance=(v.walletBalance||0)-w.amount;
-    await fbU('rn_mall_investors/'+investorId,{walletBalance:newBalance});
+    if(!(await adjustMoneyField('rn_mall_investors',investorId,'walletBalance','add',-w.amount)))return;
     await fbU('rn_mall_investor_withdrawals/'+investorId+'/'+key,{status:'paid'});
     await fbP('rn_mall_wallet_transactions_investor/'+investorId,{type:'withdrawal',amount:w.amount,description:'Withdrawal to bank',date:ds(),ts:Date.now()});
     await fbP('rn_mall_investor_notifications/'+investorId,{type:'withdrawal_paid',amount:w.amount,date:ds(),read:false,ts:Date.now()});
@@ -2422,10 +2433,8 @@ async function finalizeInvestorPayout(id,name){
   const expectedDate=document.getElementById('po-date').value;
   const message=(document.getElementById('po-msg').value||'').trim();
   if(amount<=0){toast('Enter a valid amount','err');return;}
-  const v=await fbG('rn_mall_investors/'+id);if(!v)return;
-  const newTotal=(v.totalPaid||0)+amount;
-  const newWallet=(v.walletBalance||0)+amount;
-  await fbU('rn_mall_investors/'+id,{totalPaid:newTotal,walletBalance:newWallet});
+  if(!(await adjustMoneyField('rn_mall_investors',id,'totalPaid','add',amount)))return;
+  if(!(await adjustMoneyField('rn_mall_investors',id,'walletBalance','add',amount)))return;
   await fbP('rn_mall_investor_payouts/'+id,{amount,description,expectedDate,message,date:ds(),ts:Date.now()});
   await fbP('rn_mall_wallet_transactions_investor/'+id,{type:'payout',amount,description:description||'Investment return',date:ds(),ts:Date.now()});
   await fbPNotify('rn_mall_investor_notifications/'+id,{type:'payout',amount,description,message,expectedDate,date:ds(),read:false,ts:Date.now()});
@@ -2458,7 +2467,7 @@ async function loadInvestorChatAdmin(id){
   const msgs=Object.values(await fbG('rn_mall_investor_chat_'+id)||{}).sort(function(a,b){return (a.ts||0)-(b.ts||0);});
   const el=document.getElementById('inv-chat-msgs');if(!el)return;
   el.innerHTML=msgs.length?msgs.map(function(m){
-    return '<div class="timeline-item" style="border-bottom:none;padding:6px 0;"><div style="font-size:12px;font-weight:700;color:'+(m.isAdmin?'var(--or)':'var(--wh)')+';"><strong>'+(m.isAdmin?'You':'Investor')+':</strong> '+m.text+'</div></div>';
+    return '<div class="timeline-item" style="border-bottom:none;padding:6px 0;"><div style="font-size:12px;font-weight:700;color:'+(m.isAdmin?'var(--or)':'var(--wh)')+';"><strong>'+(m.isAdmin?'You':'Investor')+':</strong> '+escHtml(m.text)+'</div></div>';
   }).join(''):'<div style="color:var(--wh);font-weight:700;font-size:12px;">No messages yet.</div>';
   el.scrollTop=el.scrollHeight;
 }
@@ -2604,7 +2613,7 @@ async function loadRiderAdminMsgs(riderId){
   const el=document.getElementById('rm-admin-msgs');if(!el)return;
   el.innerHTML=msgs.length?msgs.map(function(m){
     const label=m.isAdmin?(m.senderName||'Admin')+(m.senderRole?', '+(ROLE_LABELS[m.senderRole]||m.senderRole):''):(m.senderName||'Rider');
-    return '<div style="display:flex;'+(m.isAdmin?'flex-direction:row-reverse;':'')+'gap:10px;margin-bottom:10px;"><div style="width:28px;height:28px;border-radius:99px;background:'+(m.isAdmin?'var(--or)':'rgba(91,155,245,0.15)')+';color:'+(m.isAdmin?'#fff':'var(--bl)')+';font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+ini(m.senderName||(m.isAdmin?'A':'R'))+'</div><div><div style="background:'+(m.isAdmin?'rgba(255,106,0,0.1)':'var(--card2)')+';padding:8px 12px;border-radius:9px;font-size:13px;max-width:100%;color:var(--wh);">'+m.text+'</div><div style="font-size:9px;color:var(--wh);font-weight:700;margin-top:2px;'+(m.isAdmin?'text-align:right;':'')+'">'+label+'</div></div></div>';
+    return '<div style="display:flex;'+(m.isAdmin?'flex-direction:row-reverse;':'')+'gap:10px;margin-bottom:10px;"><div style="width:28px;height:28px;border-radius:99px;background:'+(m.isAdmin?'var(--or)':'rgba(91,155,245,0.15)')+';color:'+(m.isAdmin?'#fff':'var(--bl)')+';font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+ini(m.senderName||(m.isAdmin?'A':'R'))+'</div><div><div style="background:'+(m.isAdmin?'rgba(255,106,0,0.1)':'var(--card2)')+';padding:8px 12px;border-radius:9px;font-size:13px;max-width:100%;color:var(--wh);">'+escHtml(m.text)+'</div><div style="font-size:9px;color:var(--wh);font-weight:700;margin-top:2px;'+(m.isAdmin?'text-align:right;':'')+'">'+label+'</div></div></div>';
   }).join(''):'<div style="color:var(--wh);font-weight:700;font-size:13px;">No messages yet.</div>';
   el.scrollTop=el.scrollHeight;
 }
@@ -2750,9 +2759,7 @@ async function awardRiderPoints(id,name){
   if(isNaN(amount)||amount<=0){toast('Enter a valid number','err');return;}
   const reason=prompt('Reason for this bonus (shown to the rider):');
   if(reason===null||!reason.trim()){toast('A reason is required','err');return;}
-  const r=await fbG('rn_mall_riders/'+id);if(!r)return;
-  const newPoints=(r.points||0)+amount;
-  await fbU('rn_mall_riders/'+id,{points:newPoints});
+  if(!(await adjustMoneyField('rn_mall_riders',id,'points','add',amount)))return;
   await fbP('rn_mall_rider_points_log/'+id,{amount:amount,reason:reason.trim(),date:ds(),ts:Date.now()});
   await fbP('rn_mall_rider_notifications/'+id,{type:'points_awarded',amount:amount,reason:reason.trim(),date:ds(),read:false,ts:Date.now()});
   notifyUserPush('rn_mall_riders',id,'Points Awarded','+'+amount+' pts: '+reason.trim(),{},'rider.html');
@@ -2782,9 +2789,7 @@ async function finalizeRiderPayout(id,name){
   const expectedDate=document.getElementById('rp-date').value;
   const message=(document.getElementById('rp-msg').value||'').trim();
   if(amount<=0){toast('Enter a valid amount','err');return;}
-  const r=await fbG('rn_mall_riders/'+id);if(!r)return;
-  const newTotal=(r.totalPaid||0)+amount;
-  await fbU('rn_mall_riders/'+id,{totalPaid:newTotal});
+  if(!(await adjustMoneyField('rn_mall_riders',id,'totalPaid','add',amount)))return;
   await fbP('rn_mall_rider_payouts/'+id,{amount,description,expectedDate,message,date:ds(),ts:Date.now()});
   await fbP('rn_mall_rider_notifications/'+id,{type:'payout',amount,description,message,expectedDate,date:ds(),read:false,ts:Date.now()});
   notifyUserPush('rn_mall_riders',id,'Payout Recorded',fmt(amount)+' has been recorded as paid to you.'+(message?' '+message:''),{},'rider.html');
@@ -3028,7 +3033,7 @@ async function loadVendorAdminMsgs(vendorId){
   const el=document.getElementById('vm-admin-msgs');if(!el)return;
   el.innerHTML=msgs.length?msgs.map(function(m){
     const label=m.isAdmin?(m.senderName||'Admin')+(m.senderRole?', '+(ROLE_LABELS[m.senderRole]||m.senderRole):''):(m.senderName||'Vendor');
-    return '<div style="display:flex;'+(m.isAdmin?'flex-direction:row-reverse;':'')+'gap:10px;margin-bottom:10px;"><div style="width:28px;height:28px;border-radius:99px;background:'+(m.isAdmin?'var(--or)':'rgba(91,155,245,0.15)')+';color:'+(m.isAdmin?'#fff':'var(--bl)')+';font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+ini(m.senderName||(m.isAdmin?'A':'V'))+'</div><div><div style="background:'+(m.isAdmin?'rgba(255,106,0,0.1)':'var(--card2)')+';padding:8px 12px;border-radius:9px;font-size:13px;max-width:100%;color:var(--wh);">'+m.text+'</div><div style="font-size:9px;color:var(--wh);font-weight:700;margin-top:2px;'+(m.isAdmin?'text-align:right;':'')+'">'+label+'</div></div></div>';
+    return '<div style="display:flex;'+(m.isAdmin?'flex-direction:row-reverse;':'')+'gap:10px;margin-bottom:10px;"><div style="width:28px;height:28px;border-radius:99px;background:'+(m.isAdmin?'var(--or)':'rgba(91,155,245,0.15)')+';color:'+(m.isAdmin?'#fff':'var(--bl)')+';font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+ini(m.senderName||(m.isAdmin?'A':'V'))+'</div><div><div style="background:'+(m.isAdmin?'rgba(255,106,0,0.1)':'var(--card2)')+';padding:8px 12px;border-radius:9px;font-size:13px;max-width:100%;color:var(--wh);">'+escHtml(m.text)+'</div><div style="font-size:9px;color:var(--wh);font-weight:700;margin-top:2px;'+(m.isAdmin?'text-align:right;':'')+'">'+label+'</div></div></div>';
   }).join(''):'<div style="color:var(--wh);font-weight:700;font-size:13px;">No messages yet.</div>';
   el.scrollTop=el.scrollHeight;
 }
@@ -3967,10 +3972,7 @@ async function saveOrderStatus(tracking){
     updates.cancelReason=note;
     updates.cancelledAt=Date.now();
     if(o.payMethod!=='pod'&&!o.refunded){
-      const cust=o.customer&&o.customer.id?await fbG('rn_mall_customers/'+o.customer.id):null;
-      if(cust){
-        const newBalance=(cust.walletBalance||0)+parseFloat(o.total||0);
-        await fbU('rn_mall_customers/'+o.customer.id,{walletBalance:newBalance});
+      if(o.customer&&o.customer.id&&(await adjustMoneyField('rn_mall_customers',o.customer.id,'walletBalance','add',parseFloat(o.total||0)))){
         await fbP('rn_mall_wallet_transactions/'+o.customer.id,{type:'refund',amount:o.total,description:'Refund for cancelled order '+tracking,date:ds(),ts:Date.now()});
         updates.refunded=true;
       }
@@ -4019,7 +4021,7 @@ async function loadOrderChat(tracking){
     const d=document.createElement('div');d.className='chat-msg'+(mine?' own':'');
     const av=`<div class="chat-av">${mine?(m.isBot?'AI':'RN'):ini(m.senderName||'C')}</div>`;
     const tick=mine&&!m.isBot?'<div style="font-size:9px;font-weight:700;color:'+(m.readByCustomer?'#5b9bf5':'var(--wh)')+';margin-top:2px;">'+(m.readByCustomer?'✔✔ Read':'✔ Sent')+'</div>':'';
-    d.innerHTML=(mine?'':av)+'<div><div class="chat-bubble'+(mine?' own-b':'')+'">'+m.text+'</div><div class="chat-time">'+m.date+' '+m.time+(m.senderName?' &middot; '+m.senderName:'')+'</div>'+tick+'</div>'+(mine?av:'');
+    d.innerHTML=(mine?'':av)+'<div><div class="chat-bubble'+(mine?' own-b':'')+'">'+escHtml(m.text)+'</div><div class="chat-time">'+m.date+' '+m.time+(m.senderName?' &middot; '+m.senderName:'')+'</div>'+tick+'</div>'+(mine?av:'');
     el.appendChild(d);
     if(!mine&&!m.readByAdmin)fbU('rn_mall_chat/'+tracking+'/'+key,{readByAdmin:true});
   });
@@ -4252,7 +4254,7 @@ async function adjustWallet(id,name,current){
   if(input===null)return;
   var val=parseFloat(input);
   if(isNaN(val)||val<0){toast('Enter a valid non-negative number','err');return;}
-  await fbU('rn_mall_customers/'+id,{walletBalance:val});
+  if(!(await adjustMoneyField('rn_mall_customers',id,'walletBalance','set',val)))return;
   await fbP('rn_mall_wallet_transactions/'+id,{type:val>=current?'credit':'debit',amount:val-current,description:val>=current?'Balance Added':'Balance Reduced',date:ds(),ts:Date.now()});
   await fbP('rn_mall_customer_notifications/'+id,{type:'points_earned',message:'Your wallet balance was updated by our team. New balance: ₦'+val.toLocaleString()+'.',date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
   notifyUserPush('rn_mall_customers',id,'Wallet Updated','Your wallet balance was updated. New balance: ₦'+val.toLocaleString()+'.',{},'index.html');
@@ -4264,7 +4266,7 @@ async function adjustPoints(id,name,current){
   if(input===null)return;
   var val=parseInt(input);
   if(isNaN(val)||val<0){toast('Enter a valid non-negative number','err');return;}
-  await fbU('rn_mall_customers/'+id,{points:val});
+  if(!(await adjustMoneyField('rn_mall_customers',id,'points','set',val)))return;
   await fbP('rn_mall_customer_notifications/'+id,{type:'points_earned',message:'Your RichPoints balance was updated by our team. New balance: '+val+' pts.',date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
   notifyUserPush('rn_mall_customers',id,'RichPoints Updated','Your RichPoints balance was updated. New balance: '+val+' pts.',{},'index.html');
   toast('Points updated for '+name);
@@ -4495,7 +4497,7 @@ async function loadGeneralChatMsgs(chatKey){
   const msgs=await fbG('rn_mall_chat/'+chatKey)||{};
   const list=Object.entries(msgs).map(e=>Object.assign({_key:e[0]},e[1])).sort((a,b)=>(a.ts||0)-(b.ts||0));
   const wrap=document.getElementById('gc-msgs');if(!wrap)return;
-  wrap.innerHTML=list.length?list.map(m=>`<div style="display:flex;${m.isAdmin?'flex-direction:row-reverse;':''}gap:10px;margin-bottom:10px;"><div style="width:28px;height:28px;border-radius:99px;background:${m.isAdmin?'var(--or)':'rgba(91,155,245,0.15)'};color:${m.isAdmin?'#fff':'var(--bl)'};font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${m.isAdmin?(m.isBot?'AI':'RN'):ini(m.senderName||'?')}</div><div style="background:${m.isAdmin?'rgba(255,106,0,0.1)':'var(--card2)'};padding:8px 12px;border-radius:9px;font-size:13px;max-width:70%;color:var(--wh);">${m.text}${m.isAdmin&&!m.isBot?'<div style="font-size:9px;font-weight:700;color:'+(m.readByCustomer?'#5b9bf5':'var(--wh)')+';text-align:right;margin-top:3px;">'+(m.readByCustomer?'✔✔ Read':'✔ Sent')+'</div>':''}</div></div>`).join(''):'<div style="color:var(--wh);font-weight:700;font-size:13px;">No messages yet.</div>';
+  wrap.innerHTML=list.length?list.map(m=>`<div style="display:flex;${m.isAdmin?'flex-direction:row-reverse;':''}gap:10px;margin-bottom:10px;"><div style="width:28px;height:28px;border-radius:99px;background:${m.isAdmin?'var(--or)':'rgba(91,155,245,0.15)'};color:${m.isAdmin?'#fff':'var(--bl)'};font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${m.isAdmin?(m.isBot?'AI':'RN'):ini(m.senderName||'?')}</div><div style="background:${m.isAdmin?'rgba(255,106,0,0.1)':'var(--card2)'};padding:8px 12px;border-radius:9px;font-size:13px;max-width:70%;color:var(--wh);">${escHtml(m.text)}${m.isAdmin&&!m.isBot?'<div style="font-size:9px;font-weight:700;color:'+(m.readByCustomer?'#5b9bf5':'var(--wh)')+';text-align:right;margin-top:3px;">'+(m.readByCustomer?'✔✔ Read':'✔ Sent')+'</div>':''}</div></div>`).join(''):'<div style="color:var(--wh);font-weight:700;font-size:13px;">No messages yet.</div>';
   wrap.scrollTop=wrap.scrollHeight;
   // Mark every customer message as read by admin now that this thread is open.
   list.forEach(function(m){if(!m.isAdmin&&!m.readByAdmin)fbU('rn_mall_chat/'+chatKey+'/'+m._key,{readByAdmin:true});});
@@ -4522,22 +4524,22 @@ async function renderNotifs(c){
   `<div class="card fade-in"><div class="stagger">
     ${list.slice(0,40).map(([k,n2])=>{
       const ico=iconBadge(n2.type==='new_order'?'cart':n2.type==='chat'?'chat':n2.type==='delivery_confirmed'?'check':n2.type==='password_reset_request'?'key':n2.type==='account_locked'?'lock':n2.type==='wallet_topup_request'?'card':n2.type==='wholesale_application'?'package':n2.type==='new_vendor_signup'?'building':n2.type==='wallet_issue'?'ticket':n2.type==='wallet_refund_ready'?'bank':n2.type==='new_investor_application'?'cash':n2.type==='investor_chat'?'chat':n2.type==='new_rider_application'?'bike':n2.type==='delivery_incident'?'warning':n2.type==='rider_message'?'bike':n2.type==='vendor_message'?'building':'package',20);
-      const msg=n2.type==='new_order'?`New order from ${n2.customer}, ${fmt(n2.total)} &middot; ${n2.items||0} item(s)`:
-        n2.type==='delivery_incident'?`${iconBadge('warning',14)} ${n2.riderName} reported "${n2.incidentLabel}" on order ${n2.orderId}${n2.note?': "'+n2.note+'"':''}`:
-        n2.type==='chat'?`Message from ${n2.from}: "${n2.preview}"`:
-        n2.type==='delivery_confirmed'?`Delivery confirmed for ${n2.orderId||n2.tracking}, signed by ${n2.receivedBy||n2.receiver||'customer'}`:
-        n2.type==='password_reset_request'?`Password reset requested by ${n2.email}`:
-        n2.type==='account_locked'?`${iconBadge('warning',14)} ${n2.name} (${n2.email}) was auto-locked after 3 failed sign-in attempts`:
-        n2.type==='wallet_topup_request'?`${iconBadge('cash',14)} ${n2.name} sent a bank transfer of ${fmt(n2.amount)} (ref: ${n2.ref}), verify and use Adjust Wallet to credit`:
-        n2.type==='wholesale_application'?`${n2.name} applied for wholesale pricing (${n2.business}), review in Customers`:
-        n2.type==='new_vendor_signup'?`${n2.name} applied to become a vendor (owner: ${n2.owner}), review in Vendors`:
-        n2.type==='wallet_issue'?`${iconBadge('ticket',14)} ${n2.name} reported a wallet issue (${n2.issueType}): "${n2.message}", review in Wallet Issues`:
-        n2.type==='wallet_refund_ready'?`${iconBadge('bank',14)} ${n2.name} submitted bank details for a ${fmt(n2.amount)} refund payout, mark as paid in Wallet Issues once sent`:
-        n2.type==='new_investor_application'?`${iconBadge('cash',14)} ${n2.name} applied to invest ${fmt(n2.amount)} (${n2.option}), review in Investors`:
-        n2.type==='investor_chat'?`Investor message from ${n2.name}: "${n2.preview}"`:
-        n2.type==='new_rider_application'?`${iconBadge('bike',14)} ${n2.name} applied as a dispatch rider (${n2.vehicleType}), review in Dispatch Riders`:
-        n2.type==='rider_message'?`${iconBadge('bike',14)} Message from rider ${n2.riderName}: "${n2.preview}", reply in Dispatch Riders → Messages`:
-        n2.type==='vendor_message'?`${iconBadge('building',14)} Message from vendor ${n2.vendorName}: "${n2.preview}", reply in Vendors → Messages`:n2.type;
+      const msg=n2.type==='new_order'?`New order from ${escHtml(n2.customer)}, ${fmt(n2.total)} &middot; ${n2.items||0} item(s)`:
+        n2.type==='delivery_incident'?`${iconBadge('warning',14)} ${escHtml(n2.riderName)} reported "${escHtml(n2.incidentLabel)}" on order ${escHtml(n2.orderId)}${n2.note?': "'+escHtml(n2.note)+'"':''}`:
+        n2.type==='chat'?`Message from ${escHtml(n2.from)}: "${escHtml(n2.preview)}"`:
+        n2.type==='delivery_confirmed'?`Delivery confirmed for ${escHtml(n2.orderId||n2.tracking)}, signed by ${escHtml(n2.receivedBy||n2.receiver||'customer')}`:
+        n2.type==='password_reset_request'?`Password reset requested by ${escHtml(n2.email)}`:
+        n2.type==='account_locked'?`${iconBadge('warning',14)} ${escHtml(n2.name)} (${escHtml(n2.email)}) was auto-locked after 3 failed sign-in attempts`:
+        n2.type==='wallet_topup_request'?`${iconBadge('cash',14)} ${escHtml(n2.name)} sent a bank transfer of ${fmt(n2.amount)} (ref: ${escHtml(n2.ref)}), verify and use Adjust Wallet to credit`:
+        n2.type==='wholesale_application'?`${escHtml(n2.name)} applied for wholesale pricing (${escHtml(n2.business)}), review in Customers`:
+        n2.type==='new_vendor_signup'?`${escHtml(n2.name)} applied to become a vendor (owner: ${escHtml(n2.owner)}), review in Vendors`:
+        n2.type==='wallet_issue'?`${iconBadge('ticket',14)} ${escHtml(n2.name)} reported a wallet issue (${escHtml(n2.issueType)}): "${escHtml(n2.message)}", review in Wallet Issues`:
+        n2.type==='wallet_refund_ready'?`${iconBadge('bank',14)} ${escHtml(n2.name)} submitted bank details for a ${fmt(n2.amount)} refund payout, mark as paid in Wallet Issues once sent`:
+        n2.type==='new_investor_application'?`${iconBadge('cash',14)} ${escHtml(n2.name)} applied to invest ${fmt(n2.amount)} (${escHtml(n2.option)}), review in Investors`:
+        n2.type==='investor_chat'?`Investor message from ${escHtml(n2.name)}: "${escHtml(n2.preview)}"`:
+        n2.type==='new_rider_application'?`${iconBadge('bike',14)} ${escHtml(n2.name)} applied as a dispatch rider (${escHtml(n2.vehicleType)}), review in Dispatch Riders`:
+        n2.type==='rider_message'?`${iconBadge('bike',14)} Message from rider ${escHtml(n2.riderName)}: "${escHtml(n2.preview)}", reply in Dispatch Riders → Messages`:
+        n2.type==='vendor_message'?`${iconBadge('building',14)} Message from vendor ${escHtml(n2.vendorName)}: "${escHtml(n2.preview)}", reply in Vendors → Messages`:n2.type;
       fbU('rn_mall_notifications/'+k,{read:true});
       if(n2.type==='password_reset_request'){
         const resetPageUrl=settings.resetPageUrl||settings.siteUrl||'';
@@ -4737,6 +4739,18 @@ function renderSettings(c){
   </div>
 
   <div class="card fade-in">
+    <div class="card-title">${iconBadge('lock',14)} Wallet &amp; Payout Security</div>
+    <div class="card-sub">Wallet balances, RichPoints, salaries, and payout totals are now only ever changed by a small trusted Cloudflare Worker, not directly by any browser, so a customer can no longer set their own wallet balance and spend it on a real order. Deploy <code>cloudflare-worker/richnation-wallet-worker.js</code> (instructions are in the file itself), then paste its URL and the admin key you chose when deploying it below. The admin key is saved only in THIS browser's local storage, never sent to or stored in Firebase, so it can't be read out of the database the way a customer-facing setting could be. Until this is filled in, Adjust Wallet/Adjust Points/payouts/salary actions in this admin panel, and customers' own wallet payments/top-ups/RichPoints, will stop working, deploy the Worker first.</div>
+    <div class="fg"><label class="lbl">Wallet Worker URL</label>
+      <input class="inp" id="set-wallet-url" value="${settings.walletWorkerUrl||''}" placeholder="https://richnation-wallet.your-subdomain.workers.dev"/>
+    </div>
+    <div class="fg"><label class="lbl">Admin Key</label>
+      <input class="inp" type="password" id="set-wallet-key" value="${localStorage.getItem('rnm_admin_wallet_key')||''}" placeholder="The same ADMIN_KEY secret you set on the Worker"/>
+    </div>
+    <button class="btn btn-or" onclick="saveWalletWorkerSettings()">Save Wallet Security Settings</button>
+  </div>
+
+  <div class="card fade-in">
     <div class="card-title">${iconBadge('bell',14)} Push Notifications</div>
     <div class="card-sub">Real browser/phone push notifications, delivered even if the site isn't open, for order updates (customers), new orders (you), and new deliveries (riders). Needs a small Cloudflare Worker to actually send them, since none of these six apps have a real backend server. Deploy <code>cloudflare-worker/richnation-push-worker.js</code> (instructions are in the file itself) and a Web Push key from Firebase Console → Project Settings → Cloud Messaging, then paste both below. Leave blank to keep using the existing in-app notification bell only.</div>
     <div class="fg"><label class="lbl">Push Worker URL</label>
@@ -4804,6 +4818,39 @@ async function saveR2Url(){
   var ok=await fbU('rn_mall_settings',{r2WorkerUrl:url||null});
   if(!ok)return;
   toast(url?'Storage settings saved, new uploads now go to Cloudflare R2!':'Storage settings saved, back to Firebase Storage.');
+}
+async function saveWalletWorkerSettings(){
+  const url=document.getElementById('set-wallet-url')?.value.trim().replace(/\/+$/,'')||'';
+  const key=document.getElementById('set-wallet-key')?.value.trim()||'';
+  settings.walletWorkerUrl=url;
+  var ok=await fbU('rn_mall_settings',{walletWorkerUrl:url||null});
+  if(!ok)return;
+  // The admin key is deliberately NEVER sent to Firebase (rn_mall_settings
+  // is fully open to read), it only ever lives in this browser's own
+  // local storage, the same place every other login flag in this app is
+  // kept, so it can't simply be read out of the database by anyone else.
+  if(key)localStorage.setItem('rnm_admin_wallet_key',key);else localStorage.removeItem('rnm_admin_wallet_key');
+  toast('Wallet security settings saved!');
+}
+// Every wallet/points/salary/payout change an admin makes goes through
+// richnation-wallet-worker.js's /adjust action instead of writing the
+// field directly, gated on the admin key above, see that file's comments
+// for why (a browser writing these fields directly, even this one, can't
+// be told apart from a scripted request forging the same field once
+// Firebase's rules are locked down to match).
+async function adjustMoneyField(collection,id,field,mode,value){
+  const url=(settings.walletWorkerUrl||'').replace(/\/+$/,'');
+  const key=localStorage.getItem('rnm_admin_wallet_key')||'';
+  if(!url||!key){toast('Set up the Wallet Worker URL and admin key under Site Customiser → Wallet & Payout Security first','err');return null;}
+  try{
+    const r=await fetch(url+'/adjust',{
+      method:'POST',headers:{'Content-Type':'application/json','X-Admin-Key':key},
+      body:JSON.stringify({dbUrl:FB,collection,id,field,mode,value})
+    });
+    const data=await r.json();
+    if(!r.ok||!data.ok){toast((data&&data.error)||'Could not update this field','err');return null;}
+    return data;
+  }catch(e){toast('Wallet Worker request failed: '+e.message,'err');return null;}
 }
 async function savePushSettings(){
   const url=document.getElementById('set-push-url')?.value.trim().replace(/\/+$/,'')||'';
@@ -7201,9 +7248,7 @@ async function cancelOrder(tracking,customerName){
     await fbPNotify('rn_mall_customer_notifications/'+order.customer.id,{type:'order_cancelled',orderId:tracking,message:'Your order '+tracking+' was cancelled: '+reason,date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
     notifyUserPush('rn_mall_customers',order.customer.id,'Order Cancelled','Your order '+tracking+' was cancelled: '+reason,{tracking:tracking},'index.html');
     if(order.payMethod!=='pod'&&order.payMethod!=='preorder'&&confirm('Refund ₦'+(order.total||0).toLocaleString()+' to '+customerName+'\'s wallet?')){
-      var cust=await fbG('rn_mall_customers/'+order.customer.id);
-      var newBal=(cust&&cust.walletBalance||0)+(order.total||0);
-      await fbU('rn_mall_customers/'+order.customer.id,{walletBalance:newBal});
+      await adjustMoneyField('rn_mall_customers',order.customer.id,'walletBalance','add',order.total||0);
       await fbP('rn_mall_wallet_transactions/'+order.customer.id,{type:'credit',amount:order.total||0,description:'Refund for cancelled order '+tracking,date:ds(),ts:Date.now()});
       await fbPNotify('rn_mall_customer_notifications/'+order.customer.id,{type:'points_earned',message:'₦'+(order.total||0).toLocaleString()+' was refunded to your wallet for cancelled order '+tracking+'.',date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
       notifyUserPush('rn_mall_customers',order.customer.id,'Refund Processed','₦'+(order.total||0).toLocaleString()+' was refunded to your wallet for cancelled order '+tracking+'.',{tracking:tracking},'index.html');

@@ -80,7 +80,16 @@ async function getAccessToken(serviceAccount){
   const header = {alg:'RS256', typ:'JWT'};
   const claims = {
     iss: serviceAccount.client_email,
-    scope: 'https://www.googleapis.com/auth/firebase.messaging',
+    // Both scopes on one token: messaging to actually send the push, and
+    // database so this Worker can look up the admin team's own device
+    // tokens itself (see notifyAdmins below) instead of trusting whatever
+    // tokens the caller's browser hands it. A request signed by this service
+    // account is automatically treated as a trusted admin request by
+    // Realtime Database Rules, the same way the Firebase Admin SDK is,
+    // regardless of what the rules say for ordinary (unauthenticated)
+    // requests, so this works even once rn_mall_admin_fcm_tokens denies
+    // public read.
+    scope: 'https://www.googleapis.com/auth/firebase.messaging https://www.googleapis.com/auth/firebase.database',
     aud: 'https://oauth2.googleapis.com/token',
     exp: now + 3600,
     iat: now
@@ -143,8 +152,6 @@ export default {
     let payload;
     try { payload = await request.json(); } catch (e) { return json({error:'Invalid JSON body'},400); }
 
-    const tokens = Array.isArray(payload.tokens) ? payload.tokens.filter(Boolean) : (payload.token ? [payload.token] : []);
-    if (!tokens.length) return json({error:'No token(s) provided'},400);
     if (!payload.title || !payload.body) return json({error:'title and body are required'},400);
 
     let serviceAccount;
@@ -154,6 +161,27 @@ export default {
     let accessToken;
     try { accessToken = await getAccessToken(serviceAccount); }
     catch (e) { return json({error:'Auth with Google failed: ' + e.message},502); }
+
+    let tokens;
+    // notifyAdmins: used for "new order placed" and anything else a
+    // customer's own browser needs to alert the admin team about. That
+    // browser is never handed the admin team's device tokens directly
+    // (rn_mall_admin_fcm_tokens denies public read), it only says "notify
+    // the admins", this Worker looks the tokens up itself using its own
+    // trusted service-account credentials, so a scammer reading the page
+    // source can no longer harvest the admin team's tokens to send them
+    // fake/phishing push notifications of their own.
+    if (payload.notifyAdmins) {
+      if (!payload.dbUrl) return json({error:'dbUrl is required for notifyAdmins'},400);
+      try {
+        const dbRes = await fetch(payload.dbUrl.replace(/\/+$/,'') + '/rn_mall_admin_fcm_tokens.json?access_token=' + accessToken);
+        const dbData = dbRes.ok ? await dbRes.json() : null;
+        tokens = dbData ? Object.keys(dbData) : [];
+      } catch (e) { return json({error:'Could not look up admin tokens: ' + e.message},502); }
+    } else {
+      tokens = Array.isArray(payload.tokens) ? payload.tokens.filter(Boolean) : (payload.token ? [payload.token] : []);
+    }
+    if (!tokens.length) return json({results: []});
 
     const results = await Promise.all(tokens.map(function(t){
       return sendOne(serviceAccount, accessToken, t, payload.title, payload.body, payload.data, payload.url);

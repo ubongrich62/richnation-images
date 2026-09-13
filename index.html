@@ -1240,6 +1240,35 @@ async function sendPushToTokens(tokens,title,body,data,url){
     });
   }catch(e){console.warn('Push send failed:',e.message);}
 }
+// Every wallet/points change now goes through richnation-wallet-worker.js
+// instead of this browser computing and writing its own new balance, see
+// that file's comments for why (a customer's browser used to be able to
+// set its own walletBalance/points to any number and spend it on a real
+// order, with nothing checking that the number made any sense). Returns
+// the worker's parsed JSON response, or null if the Worker isn't
+// configured yet or the request failed outright.
+async function callWalletWorker(action,body){
+  if(!settings.walletWorkerUrl)return null;
+  try{
+    const r=await fetch(settings.walletWorkerUrl.replace(/\/+$/,'')+'/'+action,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(Object.assign({dbUrl:FB},body))
+    });
+    return await r.json();
+  }catch(e){console.warn('Wallet worker call failed ('+action+'):',e.message);return null;}
+}
+// Notifies the admin team without this browser ever reading their device
+// tokens itself (rn_mall_admin_fcm_tokens no longer allows public read) —
+// the push Worker looks its own tokens up server-side and sends to them.
+async function notifyAdminsOfNewOrder(title,body,data){
+  if(!settings.pushWorkerUrl)return;
+  try{
+    await fetch(settings.pushWorkerUrl.replace(/\/+$/,''),{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({notifyAdmins:true,dbUrl:FB,title:title,body:body,data:data||{},url:'admin.html'})
+    });
+  }catch(e){console.warn('Admin push notify failed:',e.message);}
+}
 async function enableCustomerPushNotifications(){
   const btn=document.getElementById('acct-push-enable-btn');
   if(!('Notification' in window)){toast('Push notifications are not supported in this browser.');return;}
@@ -1385,11 +1414,9 @@ async function subscribeNewsletter(form){
     already.push(email.toLowerCase());
     localStorage.setItem('rnm_newsletter_subs',JSON.stringify(already));
     if(currUser&&!currUser.newsletterBonusAwarded){
-      const bonus=rpRates().newsletter;
-      await fbU('rn_mall_customers/'+currUser.id,{newsletterBonusAwarded:true});
       currUser.newsletterBonusAwarded=true;localStorage.setItem('rnm_user',JSON.stringify(currUser));
-      awardPoints(currUser.id,bonus,'subscribing to the newsletter');
-      toast('Subscribed! You earned '+bonus+' RichPoints.');
+      const res=await awardPoints(currUser.id,'newsletter');
+      toast(res&&res.amount?'Subscribed! You earned '+res.amount+' RichPoints.':'Subscribed! Watch your inbox for offers.');
     }else{
       toast('Subscribed! Watch your inbox for offers.');
     }
@@ -1581,50 +1608,32 @@ function rpRates(){
     shippingCost:r.shippingCost||200 // points to redeem for free shipping
   };
 }
-async function awardPoints(customerId,amount,reason){
-  if(!customerId||!amount)return;
-  try{
-    const cust=await fbG('rn_mall_customers/'+customerId);
-    if(!cust)return;
-    const newBal=(cust.points||0)+amount;
-    await fbU('rn_mall_customers/'+customerId,{points:newBal});
-    await fbP('rn_mall_customer_notifications/'+customerId,{type:'points_earned',message:'You earned '+amount+' RichPoints for '+reason+'! New balance: '+newBal+' pts.',date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
-    if(currUser&&currUser.id===customerId){currUser.points=newBal;localStorage.setItem('rnm_user',JSON.stringify(currUser));}
-  }catch(e){console.warn('awardPoints failed:',e.message);}
+// reason is a fixed key (see richnation-wallet-worker.js's ONE_TIME_REASONS/
+// REPEATABLE_REASONS), never a raw amount, the Worker looks the correct
+// rate up itself server-side, extra carries whatever that reason needs to
+// verify against a real record (orderId for purchase/referral, reviewId
+// for review).
+async function awardPoints(customerId,reason,extra){
+  if(!customerId||!reason)return null;
+  const res=await callWalletWorker('earn',Object.assign({customerId,reason},extra||{}));
+  if(!res||!res.ok||!res.amount)return res;
+  await fbP('rn_mall_customer_notifications/'+customerId,{type:'points_earned',message:'You earned '+res.amount+' RichPoints! New balance: '+res.newBalance+' pts.',date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
+  if(currUser&&currUser.id===customerId){currUser.points=res.newBalance;localStorage.setItem('rnm_user',JSON.stringify(currUser));}
+  return res;
 }
 async function deductPoints(customerId,amount){
   if(!customerId||!amount)return;
-  try{
-    const cust=await fbG('rn_mall_customers/'+customerId);
-    if(!cust)return;
-    const newBal=Math.max(0,(cust.points||0)-amount);
-    await fbU('rn_mall_customers/'+customerId,{points:newBal});
-    if(currUser&&currUser.id===customerId){currUser.points=newBal;localStorage.setItem('rnm_user',JSON.stringify(currUser));}
-  }catch(e){console.warn('deductPoints failed:',e.message);}
+  const res=await callWalletWorker('spend',{customerId,field:'points',amount});
+  if(!res||!res.ok)return;
+  if(currUser&&currUser.id===customerId){currUser.points=res.newBalance;localStorage.setItem('rnm_user',JSON.stringify(currUser));}
 }
 
 // ── WALLET ──
-async function creditWallet(customerId,amount,description){
-  if(!customerId||!amount)return;
-  try{
-    const cust=await fbG('rn_mall_customers/'+customerId);
-    if(!cust)return;
-    const newBal=(cust.walletBalance||0)+amount;
-    await fbU('rn_mall_customers/'+customerId,{walletBalance:newBal});
-    await fbP('rn_mall_wallet_transactions/'+customerId,{type:'credit',amount,description,date:ds(),ts:Date.now()});
-    if(currUser&&currUser.id===customerId){currUser.walletBalance=newBal;localStorage.setItem('rnm_user',JSON.stringify(currUser));}
-  }catch(e){console.warn('creditWallet failed:',e.message);}
-}
 async function debitWallet(customerId,amount,description){
   if(!customerId||!amount)return;
-  try{
-    const cust=await fbG('rn_mall_customers/'+customerId);
-    if(!cust)return;
-    const newBal=Math.max(0,(cust.walletBalance||0)-amount);
-    await fbU('rn_mall_customers/'+customerId,{walletBalance:newBal});
-    await fbP('rn_mall_wallet_transactions/'+customerId,{type:'debit',amount:-amount,description,date:ds(),ts:Date.now()});
-    if(currUser&&currUser.id===customerId){currUser.walletBalance=newBal;localStorage.setItem('rnm_user',JSON.stringify(currUser));}
-  }catch(e){console.warn('debitWallet failed:',e.message);}
+  const res=await callWalletWorker('spend',{customerId,field:'walletBalance',amount,description});
+  if(!res||!res.ok)return;
+  if(currUser&&currUser.id===customerId){currUser.walletBalance=res.newBalance;localStorage.setItem('rnm_user',JSON.stringify(currUser));}
 }
 function topUpWalletCard(){
   const amt=parseFloat(document.getElementById('wallet-topup-amt')?.value);
@@ -1634,10 +1643,21 @@ function topUpWalletCard(){
     const handler=PaystackPop.setup({
       key:PAYSTACK_KEY,email:currUser.email,amount:Math.round(amt)*100,currency:'NGN',ref:'WALLET-'+Date.now(),
       metadata:{wallet_topup:true,customer:currUser.name},
-      callback:function(response){
-        creditWallet(currUser.id,amt,'Card top-up (Ref: '+response.reference+')');
-        toast('₦'+amt.toLocaleString()+' added to your wallet!');
-        accTab('wallet',null);
+      // This callback firing is NOT proof a payment actually happened, it
+      // runs purely in this browser and a scripted caller could invoke it
+      // directly without ever paying. verify-topup asks Paystack itself
+      // whether this exact reference was really paid before crediting
+      // anything, this browser never gets to just declare its own success.
+      callback:async function(response){
+        toast('Confirming payment...');
+        const res=await callWalletWorker('verify-topup',{customerId:currUser.id,reference:response.reference});
+        if(res&&res.ok){
+          currUser.walletBalance=res.newBalance;localStorage.setItem('rnm_user',JSON.stringify(currUser));
+          toast('₦'+(res.amount||amt).toLocaleString()+' added to your wallet!');
+          accTab('wallet',null);
+        }else{
+          toast((res&&res.error)||'Could not confirm this payment, contact support with reference '+response.reference,'err');
+        }
       },
       onClose:function(){toast('Payment window closed','warn');}
     });
@@ -2407,13 +2427,13 @@ function productCard(p){
   if((p.freeShipping||settings.freeShippingAll)&&!disabled)badges+='<span class="prod-badge" style="background:rgba(34,197,94,0.15);color:var(--su);">FREE SHIP</span>';
   return `<div class="prod-card${disabled?' prod-disabled':''}" onclick="${disabled?'':'openProduct(\''+p.id+'\')'}">
     <div class="prod-img-wrap">
-      ${p.images&&p.images[0]?`<div class="prod-img-loading"><img src="images/branding/richnation-logo-v3.png" alt=""/></div><img class="prod-img" src="${p.images[0]}" alt="${p.name}" loading="lazy" decoding="async" onload="this.previousElementSibling.classList.add('hide')" onerror="this.style.display='none';this.nextSibling.style.display='flex';this.previousElementSibling.classList.add('hide')"/><div class="prod-img-ph" style="display:none;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;color:var(--or);">${catIcon(p.category)}</div>`:`<div class="prod-img-ph" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;color:var(--or);">${catIcon(p.category)}</div>`}
+      ${p.images&&p.images[0]?`<div class="prod-img-loading"><img src="images/branding/richnation-logo-v3.png" alt=""/></div><img class="prod-img" src="${escHtml(p.images[0])}" alt="${escHtml(p.name)}" loading="lazy" decoding="async" onload="this.previousElementSibling.classList.add('hide')" onerror="this.style.display='none';this.nextSibling.style.display='flex';this.previousElementSibling.classList.add('hide')"/><div class="prod-img-ph" style="display:none;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;color:var(--or);">${catIcon(p.category)}</div>`:`<div class="prod-img-ph" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;color:var(--or);">${catIcon(p.category)}</div>`}
       <div style="position:absolute;top:8px;left:8px;display:flex;flex-direction:column;gap:3px;">${badges}</div>
       ${!disabled?`<button class="prod-wish${wished?' wished':''}" onclick="event.stopPropagation();toggleWish('${p.id}',this)" style="color:${wished?'var(--re)':'var(--or)'};">${wished?'&#9829;':'&#9825;'}</button>`:''}
     </div>
     <div class="prod-info">
       <div class="prod-cat-lbl">${catName(p.category)}</div>
-      <div class="prod-name">${p.name}</div>
+      <div class="prod-name">${escHtml(p.name)}</div>
       ${p.vendorId&&p.vendorName?`<div style="font-size:9px;color:var(--wh);font-weight:700;margin-bottom:3px;">Sold by ${p.vendorName}</div>`:''}
       <div class="prod-price-row">
         <div class="prod-price">${comingSoon?`<span style="color:var(--wh);font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;">${escHtml(settings.comingSoonText||'Coming Soon')}</span>`:disabled?'<span style="color:var(--wh);font-weight:700;">Unavailable</span>':isFree?'<span style="color:var(--su);font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:900;">FREE</span>':fmt(price)}</div>
@@ -2497,7 +2517,7 @@ async function openProduct(id){
     </div>
     <div class="modal-info">
       <div class="modal-cat">${catName(p.category)}</div>
-      <div class="modal-title">${p.name}</div>
+      <div class="modal-title">${escHtml(p.name)}</div>
       ${p.vendorId&&p.vendorName?`<div style="font-size:11px;color:var(--wh);font-weight:700;margin-bottom:4px;">Sold by <span style="color:var(--or);font-weight:700;">${p.vendorName}</span> <span onclick="openAskSellerModal('${p.vendorId}','${p.vendorName.replace(/'/g,"\\'")}')" style="color:var(--or);cursor:pointer;text-decoration:underline;font-weight:600;">Ask a question</span></div>`:''}
       ${p.code?`<div style="font-size:11px;color:var(--wh);font-weight:700;margin-bottom:8px;">Product Code: <span style="color:var(--w2);font-weight:600;">${p.code}</span></div>`:''}
       <div class="modal-stars">${stars(avgRating)} <span style="color:var(--wh);font-weight:700;font-size:11px;">(${reviews.length} reviews)</span></div>
@@ -2553,7 +2573,7 @@ async function openProduct(id){
   </div>
   <div class="reviews-sec">
     <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;margin-bottom:16px;">${t('reviews')} (${reviews.length})</div>
-    ${reviews.map(r=>`<div class="review-card"><div class="review-hdr"><div class="review-av">${ini(r.name||'A')}</div><div><div class="review-name">${r.name||'Anonymous'}${r.verified?'<span class="verified">Verified</span>':''}</div><div class="review-date">${r.date||''}</div></div><div class="review-stars" style="margin-left:auto;">${stars(r.rating||5)}</div></div><div class="review-text">${r.review||''}</div>${r.images&&r.images.length?`<div class="review-imgs">${r.images.map(img=>`<img class="review-img" loading="lazy" decoding="async" src="${img}" onclick="window.open('${img}','_blank')"/>`).join('')}</div>`:''}</div>`).join('')||`<div style="color:var(--wh);font-weight:700;font-size:13px;padding:14px 0;">No reviews yet. Be the first!</div>`}
+    ${reviews.map(r=>`<div class="review-card"><div class="review-hdr"><div class="review-av">${ini(r.name||'A')}</div><div><div class="review-name">${escHtml(r.name||'Anonymous')}${r.verified?'<span class="verified">Verified</span>':''}</div><div class="review-date">${escHtml(r.date||'')}</div></div><div class="review-stars" style="margin-left:auto;">${stars(r.rating||5)}</div></div><div class="review-text">${escHtml(r.review||'')}</div>${r.images&&r.images.length?`<div class="review-imgs">${r.images.map(img=>`<img class="review-img" loading="lazy" decoding="async" src="${escHtml(img)}" onclick="window.open('${escJs(img)}','_blank')"/>`).join('')}</div>`:''}</div>`).join('')||`<div style="color:var(--wh);font-weight:700;font-size:13px;padding:14px 0;">No reviews yet. Be the first!</div>`}
     <div class="write-review">
       <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;margin-bottom:12px;">${t('writeReview')}</div>
       <div class="star-select" id="star-sel">${[1,2,3,4,5].map(n=>`<span class="star-opt" onclick="setStars(${n},'star-sel')" data-val="${n}" style="color:var(--or);">&#9733;</span>`).join('')}</div>
@@ -2850,10 +2870,10 @@ async function submitReview(productId,isStandalone){
     imgs.push(url||b64);
   }
   const review={name,rating:window._reviewStars||5,review:text,date:ds(),images:imgs,verified:!!currUser,userId:currUser?.id||'guest',ts:Date.now()};
-  await fbP('rn_mall_reviews/'+productId,review);
+  const pushed=await fbP('rn_mall_reviews/'+productId,review);
   const allRevs=await fbG('rn_mall_reviews/'+productId)||{};const rl=Object.values(allRevs);const avg=rl.reduce((s,r)=>s+(r.rating||0),0)/rl.length;
   await fbU('rn_mall_products/'+productId,{rating:Math.round(avg*10)/10,reviews:rl.length});
-  if(currUser)awardPoints(currUser.id,rpRates().review,'leaving a verified review');
+  if(currUser&&pushed&&pushed.name)awardPoints(currUser.id,'review',{productId,reviewKey:pushed.name});
   if(msg){msg.textContent='Review submitted! Thank you.';msg.style.color='var(--su)';msg.style.display='block';}toast('Review submitted!');reviewFiles=[];
   const standalone=document.getElementById('standalone-review-overlay');
   if(standalone){setTimeout(()=>standalone.remove(),1200);}
@@ -2905,7 +2925,7 @@ function updateCartUI(){
   if(disc>0){if(el('cart-disc-row'))el('cart-disc-row').style.display='flex';if(el('cart-disc'))el('cart-disc').textContent='-₦'+disc.toLocaleString();}
   else if(el('cart-disc-row'))el('cart-disc-row').style.display='none';
 }
-async function applyCouponCart(){const code=(document.getElementById('cart-coupon')?.value||'').trim().toUpperCase();if(!code){toast('Enter a coupon code','err');return;}const coupons=await fbG('rn_mall_coupons')||{};const c=Object.values(coupons).find(x=>x.code===code&&x.active);if(!c){toast('Invalid or expired coupon','err');return;}const sub=cartTotal();if(c.minOrder&&sub<c.minOrder){toast('Min order ₦'+c.minOrder.toLocaleString()+' required','err');return;}discount={code,amount:c.type==='percent'?Math.round(sub*c.value/100):c.value,type:c.type};if(currUser)awardPoints(currUser.id,rpRates().coupon,'using a promo code');toast('Coupon applied! Saving ₦'+discount.amount.toLocaleString());updateCartUI();}
+async function applyCouponCart(){const code=(document.getElementById('cart-coupon')?.value||'').trim().toUpperCase();if(!code){toast('Enter a coupon code','err');return;}const coupons=await fbG('rn_mall_coupons')||{};const c=Object.values(coupons).find(x=>x.code===code&&x.active);if(!c){toast('Invalid or expired coupon','err');return;}const sub=cartTotal();if(c.minOrder&&sub<c.minOrder){toast('Min order ₦'+c.minOrder.toLocaleString()+' required','err');return;}discount={code,amount:c.type==='percent'?Math.round(sub*c.value/100):c.value,type:c.type};if(currUser)awardPoints(currUser.id,'coupon');toast('Coupon applied! Saving ₦'+discount.amount.toLocaleString());updateCartUI();}
 
 // ── CHECKOUT, requires login ──
 function goCheckout(){
@@ -3161,7 +3181,7 @@ async function applyCouponCO(){
   if(!c){toast('Invalid coupon','err');return;}
   const sub=cartTotal();if(c.minOrder&&sub<c.minOrder){toast('Min order ₦'+c.minOrder.toLocaleString(),'err');return;}
   discount={code,amount:c.type==='percent'?Math.round(sub*c.value/100):c.value,type:c.type};
-  if(currUser)awardPoints(currUser.id,rpRates().coupon,'using a promo code');
+  if(currUser)awardPoints(currUser.id,'coupon');
   toast('Coupon applied!');updateCOSummary();
   const r=document.getElementById('coupon-result');if(r){r.textContent='Saving ₦'+discount.amount.toLocaleString();r.style.color='var(--su)';r.style.display='block';}
 }
@@ -3214,7 +3234,13 @@ async function placeOrder(isPreorder=false){
       const handler=PaystackPop.setup({
         key:PAYSTACK_KEY,email,amount:Math.round(depositAmt)*100,currency:'NGN',ref:tracking,
         metadata:{order_id:tracking,customer:fn+' '+ln,type:'pod_deposit'},
-        callback:function(response){
+        // This callback firing is not proof a payment happened, it runs
+        // purely in this browser. verify-payment asks Paystack itself
+        // before this order is ever marked as paid.
+        callback:async function(response){
+          toast('Confirming payment...');
+          const res=await callWalletWorker('verify-payment',{reference:response.reference,expectedAmount:depositAmt});
+          if(!res||!res.ok){toast((res&&res.error)||'Could not confirm this payment, contact support with reference '+response.reference,'err');return;}
           order.podDepositPaid=true;order.podDepositRef=response.reference;order.status='confirmed';
           order.timeline.push({status:'Deposit Paid',time:new Date().toISOString(),note:'50% deposit of '+fmt(depositAmt)+' paid via Paystack. Reference: '+response.reference+'. Balance of '+fmt(tot-depositAmt)+' due on delivery.'});
           saveOrder(order);
@@ -3230,8 +3256,14 @@ async function placeOrder(isPreorder=false){
     saveOrder(order);
   }
   else if(payMethod==='wallet'){
-    if((currUser.walletBalance||0)<tot){toast('Insufficient wallet balance','err');return;}
-    debitWallet(currUser.id,tot,'Order payment ('+tracking+')');
+    // currUser.walletBalance is just this browser's last-known cached
+    // value, not proof of funds, debitWallet asks the Worker to check the
+    // TRUE balance and only deduct if it's actually sufficient. The order
+    // is only confirmed once that deduction genuinely succeeds, not just
+    // because this browser thought the balance looked high enough.
+    const res=await callWalletWorker('spend',{customerId:currUser.id,field:'walletBalance',amount:tot,description:'Order payment ('+tracking+')'});
+    if(!res||!res.ok){toast((res&&res.error)||'Insufficient wallet balance','err');return;}
+    currUser.walletBalance=res.newBalance;localStorage.setItem('rnm_user',JSON.stringify(currUser));
     order.status='confirmed';
     order.timeline.push({status:'Payment Confirmed',time:new Date().toISOString(),note:'Paid instantly via RichNation Wallet.'});
     saveOrder(order);
@@ -3242,7 +3274,13 @@ async function placeOrder(isPreorder=false){
       const handler=PaystackPop.setup({
         key:PAYSTACK_KEY,email,amount:Math.round(tot)*100,currency:'NGN',ref:tracking,
         metadata:{order_id:tracking,customer:fn+' '+ln},
-        callback:function(response){
+        // Same reasoning as the POD deposit callback above: verify with
+        // Paystack directly rather than trusting this browser's own report
+        // that the popup closed successfully.
+        callback:async function(response){
+          toast('Confirming payment...');
+          const res=await callWalletWorker('verify-payment',{reference:response.reference,expectedAmount:tot});
+          if(!res||!res.ok){toast((res&&res.error)||'Could not confirm this payment, contact support with reference '+response.reference,'err');return;}
           order.payRef=response.reference;order.status='confirmed';
           order.timeline.push({status:'Payment Confirmed',time:new Date().toISOString(),note:'Paid via Paystack. Reference: '+response.reference});
           saveOrder(order);
@@ -3262,16 +3300,17 @@ async function saveOrder(order){
   fbU('rn_mall_settings',{totalOrdersCount:newOrderCount});
   settings.totalOrdersCount=newOrderCount;
   await fbP('rn_mall_notifications',{type:'new_order',orderId:order.tracking,customer:order.customer.name,total:order.total,items:order.items.length,date:order.date,preOrder:order.preOrder||false,pod:order.payMethod==='pod',read:false,ts:Date.now()});
-  const adminFcmTokens=await fbG('rn_mall_admin_fcm_tokens');
-  sendPushToTokens(adminFcmTokens?Object.keys(adminFcmTokens):[],'New Order: '+order.tracking,order.customer.name+' just placed an order for '+fmt(order.total),{tracking:order.tracking},'admin.html');
+  notifyAdminsOfNewOrder('New Order: '+order.tracking,order.customer.name+' just placed an order for '+fmt(order.total),{tracking:order.tracking});
   const priorOrders=await fbG('rn_mall_customer_orders/'+currUser.id)||{};
   const isFirstOrder=Object.keys(priorOrders).length===0;
   await fbP('rn_mall_customer_orders/'+currUser.id,{orderId:order.tracking,date:order.date});
-  // RichPoints: earn points on purchase, plus a one-time referral bonus to whoever referred this customer
-  const rates=rpRates();
-  const earned=Math.floor((order.total||0)/rates.perNaira);
-  if(earned>0)awardPoints(currUser.id,earned,'your purchase ('+order.tracking+')');
-  if(isFirstOrder&&currUser.referredBy){awardPoints(currUser.referredBy,rates.referral,'referring '+currUser.fname+' who just made their first purchase');}
+  // RichPoints: earn points on purchase, plus a one-time referral bonus to
+  // whoever referred this customer. The Worker recomputes the earned amount
+  // itself from this order's real, stored total rather than trusting
+  // whatever this browser calculated, and independently re-checks this is
+  // genuinely the customer's first order before paying a referral bonus.
+  awardPoints(currUser.id,'purchase',{orderId:order.tracking});
+  if(isFirstOrder&&currUser.referredBy){awardPoints(currUser.referredBy,'referral',{orderId:order.tracking});}
   // Loyalty tiers: track lifetime spend (subtotal, excl. shipping) so permanent tier discounts can unlock
   const newLifetimeSpend=(currUser.lifetimeSpend||0)+(order.subtotal||0);
   await fbU('rn_mall_customers/'+currUser.id,{lifetimeSpend:newLifetimeSpend});
@@ -4269,8 +4308,12 @@ async function doRegister(){
   // signup entirely, this account can still be upgraded transparently on its next login.
   if(!id)id=secureId('cust');
   const referralCode=(fn.slice(0,4)+Math.random().toString(36).slice(2,6)).toUpperCase();
-  const registerBonus=rpRates().register;
-  const customer={id,fname:fn,lname:ln,name:fn+' '+ln,email,phone,joinDate:ds(),accountStatus:'active',points:registerBonus,referralCode};
+  // points starts at 0, not a client-computed bonus, the database rule now
+  // requires that for every new account (see firebase-database.rules.json),
+  // the signup bonus is credited by the wallet Worker right after creation
+  // instead, using ITS OWN copy of the rate rather than whatever this
+  // browser thinks it should be.
+  const customer={id,fname:fn,lname:ln,name:fn+' '+ln,email,phone,joinDate:ds(),accountStatus:'active',points:0,referralCode};
   if(authUid)customer.authUid=authUid;else customer.password=pass;
   if(refInput){
     const referrer=Object.values(all).find(c=>(c.referralCode||'').toUpperCase()===refInput);
@@ -4278,7 +4321,9 @@ async function doRegister(){
   }
   await fbS('rn_mall_customers/'+id,customer);
   await fbP('rn_mall_notifications',{type:'new_customer',name:fn+' '+ln,email,date:ds(),read:false,ts:Date.now()});
-  currUser=customer;localStorage.setItem('rnm_user',JSON.stringify(currUser));updateAuthUI();closeAuth();toast('Welcome to RichNation Mall, '+fn+'! You just earned '+registerBonus+' RichPoints.');
+  currUser=customer;localStorage.setItem('rnm_user',JSON.stringify(currUser));updateAuthUI();closeAuth();
+  const bonusRes=await awardPoints(id,'signup');
+  toast('Welcome to RichNation Mall, '+fn+'!'+(bonusRes&&bonusRes.amount?' You just earned '+bonusRes.amount+' RichPoints.':''));
 }
 async function signInWithGoogle(){
   const ready=await ensureFirebaseAuthReady();
@@ -4320,8 +4365,7 @@ async function signInWithGoogle(){
     const fn=nameParts[0]||'Customer';
     const ln=nameParts.slice(1).join(' ');
     const referralCode=(fn.slice(0,4)+Math.random().toString(36).slice(2,6)).toUpperCase();
-    const registerBonus=rpRates().register;
-    const customer={id:uid,fname:fn,lname:ln,name:displayName||fn,email,phone:'',photo:user.photoURL||null,authUid:uid,joinDate:ds(),accountStatus:'active',points:registerBonus,referralCode};
+    const customer={id:uid,fname:fn,lname:ln,name:displayName||fn,email,phone:'',photo:user.photoURL||null,authUid:uid,joinDate:ds(),accountStatus:'active',points:0,referralCode};
     const refInput=(sessionStorage.getItem('rnm_ref')||'').trim().toUpperCase();
     if(refInput){
       const all=await fbG('rn_mall_customers')||{};
@@ -4331,7 +4375,8 @@ async function signInWithGoogle(){
     await fbS('rn_mall_customers/'+uid,customer);
     await fbP('rn_mall_notifications',{type:'new_customer',name:customer.name,email,date:ds(),read:false,ts:Date.now()});
     currUser=customer;localStorage.setItem('rnm_user',JSON.stringify(currUser));updateAuthUI();closeAuth();
-    toast('Welcome to RichNation Mall, '+fn+'! You just earned '+registerBonus+' RichPoints.');
+    const bonusRes=await awardPoints(uid,'signup');
+    toast('Welcome to RichNation Mall, '+fn+'!'+(bonusRes&&bonusRes.amount?' You just earned '+bonusRes.amount+' RichPoints.':''));
   }catch(e){
     if(e.code==='auth/popup-closed-by-user'||e.code==='auth/cancelled-popup-request')return;
     if(e.code==='auth/unauthorized-domain'){console.warn('Sign-in domain not authorized, add this domain under Firebase Console → Authentication → Settings → Authorized domains');toast('One-tap sign-in isn\'t available on this address yet, please use email/password instead','err');return;}
@@ -4685,7 +4730,7 @@ async function loadWidgetMsgs(){
       appended=true;
       const d=document.createElement('div');d.className='chat-msg'+(mine?' own':'');
       const av=`<div class="chat-av" style="${m.isBot?'background:linear-gradient(135deg,#FF6A00,#FFA733);color:#000;':''}">${mine?ini(currUser?.fname||'?'):'RN'}</div>`;
-      d.innerHTML=(mine?'':av)+'<div class="chat-bubble'+(mine?' own-b':'')+'">'+m.text+(mine?msgReadTick(m):'')+'</div>'+(mine?av:'');
+      d.innerHTML=(mine?'':av)+'<div class="chat-bubble'+(mine?' own-b':'')+'">'+escHtml(m.text)+(mine?msgReadTick(m):'')+'</div>'+(mine?av:'');
       el.appendChild(d);
       const bubbleEl=d.querySelector('.chat-bubble');
       _widgetRendered.set(id,{readByAdmin:!!m.readByAdmin,bubbleEl,tickEl:mine?bubbleEl.lastElementChild:null});
@@ -4955,7 +5000,7 @@ async function saveProfile(){if(!currUser)return;const u={fname:document.getElem
     }
   }
   await fbU('rn_mall_customers/'+currUser.id,u);currUser={...currUser,...u};localStorage.setItem('rnm_user',JSON.stringify(currUser));
-  if(!currUser.profileBonusAwarded&&u.fname&&u.lname&&u.email&&u.phone){await fbU('rn_mall_customers/'+currUser.id,{profileBonusAwarded:true});currUser.profileBonusAwarded=true;localStorage.setItem('rnm_user',JSON.stringify(currUser));awardPoints(currUser.id,rpRates().profile,'completing your profile');}
+  if(!currUser.profileBonusAwarded&&u.fname&&u.lname&&u.email&&u.phone){currUser.profileBonusAwarded=true;localStorage.setItem('rnm_user',JSON.stringify(currUser));awardPoints(currUser.id,'profile');}
   toast('Profile updated!');}
 function onAddrCountry(presetState){
   const country=document.getElementById('addr-country')?.value;
@@ -4985,12 +5030,14 @@ async function cancelMyOrder(trackingNum){
   const timeline=(order.timeline||[]).concat([{status:'Cancelled',time:new Date().toISOString(),note:'Cancelled by customer'}]);
   const updates={status:'cancelled',timeline:timeline,cancelReason:'Cancelled by customer',cancelledAt:Date.now()};
   if(willRefund&&!order.refunded){
-    const newBalance=(currUser.walletBalance||0)+parseFloat(order.total||0);
-    await fbU('rn_mall_customers/'+currUser.id,{walletBalance:newBalance});
-    currUser.walletBalance=newBalance;
-    localStorage.setItem('rnm_user',JSON.stringify(currUser));
-    await fbP('rn_mall_wallet_transactions/'+currUser.id,{type:'refund',amount:order.total,description:'Refund for cancelled order '+trackingNum,date:ds(),ts:Date.now()});
-    updates.refunded=true;
+    // Re-verified against the real stored order server-side rather than
+    // crediting whatever this browser's own copy of order.total says.
+    const res=await callWalletWorker('refund-order',{customerId:currUser.id,orderId:trackingNum});
+    if(res&&res.ok){
+      currUser.walletBalance=res.newBalance;
+      localStorage.setItem('rnm_user',JSON.stringify(currUser));
+      updates.refunded=true;
+    }
   }
   await fbU('rn_mall_orders/'+trackingNum,updates);
   await fbP('rn_mall_notifications',{type:'order_cancelled_by_customer',orderId:trackingNum,customer:currUser.name,date:ds(),read:false,ts:Date.now()});
@@ -5145,7 +5192,7 @@ async function shareProduct(id,name){
     const shared=JSON.parse(localStorage.getItem('rnm_shared')||'[]');
     if(!shared.includes(id)){
       shared.push(id);localStorage.setItem('rnm_shared',JSON.stringify(shared));
-      awardPoints(currUser.id,rpRates().share,'sharing a product');
+      awardPoints(currUser.id,'share');
     }
   }
 }

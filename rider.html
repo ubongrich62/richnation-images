@@ -447,6 +447,10 @@ function setCurr(c){
   if(typeof curRNav!=='undefined'&&rider)rnav(curRNav);
 }
 function ini(name){return (name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
+// Escapes free text (chat messages, names) before it goes into innerHTML as
+// visible content, without this a chat message containing something like
+// <img src=x onerror=...> would run as code in whoever reads it.
+function escHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function svgIconPaths(name){
   var icons={
     'palette':'<path d="M12 3a9 8 0 100 16c1 0 1.5-.5 1.5-1.2 0-.3-.1-.6-.3-.8-.2-.3-.1-.7.3-.8H15a4 4 0 004-4c0-4.4-3.6-9.2-7-9.2z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="10.5" cy="7.5" r="1"/><circle cx="14.5" cy="8" r="1"/><circle cx="16.5" cy="11.5" r="1"/>',
@@ -1248,7 +1252,7 @@ async function loadRiderMessages(){
   const roleLabels={ceo:'CEO',general_manager:'General Manager',logistics_manager:'Logistics Manager',customer_service:'Customer Service',hr_manager:'HR Manager'};
   el.innerHTML=msgs.length?msgs.map(function(m){
     const label=m.isAdmin?(m.senderName?m.senderName+(m.senderRole?', '+(roleLabels[m.senderRole]||m.senderRole):', Admin'):'Admin'):'You';
-    return '<div class="chat-msg'+(m.isAdmin?'':' own')+'"><div class="chat-av">'+(m.isAdmin?(m.senderName?m.senderName.charAt(0):'A'):ini(rider.name))+'</div><div><div class="chat-bubble">'+m.text+'</div><div style="font-size:9px;color:var(--wh);font-weight:700;margin-top:2px;">'+label+'</div></div></div>';
+    return '<div class="chat-msg'+(m.isAdmin?'':' own')+'"><div class="chat-av">'+(m.isAdmin?(m.senderName?m.senderName.charAt(0):'A'):ini(rider.name))+'</div><div><div class="chat-bubble">'+escHtml(m.text)+'</div><div style="font-size:9px;color:var(--wh);font-weight:700;margin-top:2px;">'+label+'</div></div></div>';
   }).join(''):'<div style="color:var(--wh);font-weight:700;font-size:12px;text-align:center;padding:20px;">No messages yet, say hello!</div>';
   el.scrollTop=el.scrollHeight;
 }

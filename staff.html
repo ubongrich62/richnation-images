@@ -316,6 +316,29 @@ function openDataDoc(uri){
 async function fbG(p,ms){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{},ms);return r.ok?await r.json():null;}catch(e){try{await new Promise(res=>setTimeout(res,400));const r2=await fbFetchTimeout(FB+'/'+p+'.json',{},ms);return r2.ok?await r2.json():null;}catch(e2){return null;}}}
 async function fbS(p,d){try{await fbFetchTimeout(FB+'/'+p+'.json',{method:'PUT',body:JSON.stringify(d)});}catch(e){}}
 async function fbU(p,d){try{await fbFetchTimeout(FB+'/'+p+'.json',{method:'PATCH',body:JSON.stringify(d)});}catch(e){}}
+// Rider points/payout totals are now only ever changed by
+// richnation-wallet-worker.js, not written directly by any browser
+// (including this one), see that file's comments and
+// firebase-database.rules.json for why. A logistics-permission staff
+// member needs the same admin key the main admin panel uses, entered once
+// here and kept only in this browser's own local storage, never sent to or
+// stored in Firebase.
+async function adjustMoneyField(collection,id,field,mode,value){
+  const url=(settings.walletWorkerUrl||'').replace(/\/+$/,'');
+  const key=localStorage.getItem('rnm_staff_wallet_key')||prompt('Enter the Wallet Worker admin key (ask your admin if you don\'t have it, this is saved in this browser only):')||'';
+  if(!url){toast('Wallet Worker is not set up yet, ask admin to configure it under Site Customiser','err');return null;}
+  if(!key)return null;
+  localStorage.setItem('rnm_staff_wallet_key',key);
+  try{
+    const r=await fetch(url+'/adjust',{
+      method:'POST',headers:{'Content-Type':'application/json','X-Admin-Key':key},
+      body:JSON.stringify({dbUrl:FB,collection,id,field,mode,value})
+    });
+    const data=await r.json();
+    if(!r.ok||!data.ok){toast((data&&data.error)||'Could not update this field','err');if(r.status===401)localStorage.removeItem('rnm_staff_wallet_key');return null;}
+    return data;
+  }catch(e){toast('Wallet Worker request failed: '+e.message,'err');return null;}
+}
 async function fbP(p,d){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'POST',body:JSON.stringify(d)});return await r.json();}catch(e){return null;}}
 async function fbD(p){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'DELETE'},4000);return !!(r&&r.ok);}catch{return false;}}
 function watchFirebaseCollection(path,onChange){
@@ -339,6 +362,10 @@ function toast(msg,type){
 }
 function ds(){return new Date().toLocaleDateString('en-GB');}
 function ini(name){return (name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
+// Escapes free text (chat messages, names) before it goes into innerHTML as
+// visible content, without this a chat message containing something like
+// <img src=x onerror=...> would run as code in whoever reads it.
+function escHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function svgIconPaths(name){
   var icons={
     'palette':'<path d="M12 3a9 8 0 100 16c1 0 1.5-.5 1.5-1.2 0-.3-.1-.6-.3-.8-.2-.3-.1-.7.3-.8H15a4 4 0 004-4c0-4.4-3.6-9.2-7-9.2z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="10.5" cy="7.5" r="1"/><circle cx="14.5" cy="8" r="1"/><circle cx="16.5" cy="11.5" r="1"/>',
@@ -1243,7 +1270,7 @@ async function loadRiderAdminMsgs(riderId){
   const el=document.getElementById('rm-admin-msgs');if(!el)return;
   el.innerHTML=msgs.length?msgs.map(function(m){
     const label=m.isAdmin?(m.senderName||'Staff')+(m.senderRole?', '+(ROLE_LABELS[m.senderRole]||m.senderRole):''):(m.senderName||'Rider');
-    return '<div style="display:flex;'+(m.isAdmin?'flex-direction:row-reverse;':'')+'gap:10px;margin-bottom:10px;"><div style="width:28px;height:28px;border-radius:99px;background:'+(m.isAdmin?'var(--or)':'var(--card2)')+';color:'+(m.isAdmin?'#fff':'var(--wh)')+';font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+ini(m.senderName||(m.isAdmin?'S':'R'))+'</div><div><div style="background:'+(m.isAdmin?'rgba(255,106,0,0.1)':'var(--card2)')+';padding:8px 12px;border-radius:9px;font-size:13px;max-width:100%;color:var(--wh);">'+m.text+'</div><div style="font-size:9px;color:var(--wh);font-weight:700;margin-top:2px;'+(m.isAdmin?'text-align:right;':'')+'">'+label+'</div></div></div>';
+    return '<div style="display:flex;'+(m.isAdmin?'flex-direction:row-reverse;':'')+'gap:10px;margin-bottom:10px;"><div style="width:28px;height:28px;border-radius:99px;background:'+(m.isAdmin?'var(--or)':'var(--card2)')+';color:'+(m.isAdmin?'#fff':'var(--wh)')+';font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+ini(m.senderName||(m.isAdmin?'S':'R'))+'</div><div><div style="background:'+(m.isAdmin?'rgba(255,106,0,0.1)':'var(--card2)')+';padding:8px 12px;border-radius:9px;font-size:13px;max-width:100%;color:var(--wh);">'+escHtml(m.text)+'</div><div style="font-size:9px;color:var(--wh);font-weight:700;margin-top:2px;'+(m.isAdmin?'text-align:right;':'')+'">'+label+'</div></div></div>';
   }).join(''):'<div style="color:var(--wh);font-weight:700;font-size:13px;">No messages yet.</div>';
   el.scrollTop=el.scrollHeight;
 }
@@ -1391,9 +1418,7 @@ async function awardRiderPoints(id,name){
   if(isNaN(amount)||amount<=0){toast('Enter a valid number','err');return;}
   const reason=prompt('Reason for this bonus (shown to the rider):');
   if(reason===null||!reason.trim()){toast('A reason is required','err');return;}
-  const r=await fbG('rn_mall_riders/'+id);if(!r)return;
-  const newPoints=(r.points||0)+amount;
-  await fbU('rn_mall_riders/'+id,{points:newPoints});
+  if(!(await adjustMoneyField('rn_mall_riders',id,'points','add',amount)))return;
   await fbP('rn_mall_rider_points_log/'+id,{amount:amount,reason:reason.trim(),date:ds(),ts:Date.now()});
   await fbP('rn_mall_rider_notifications/'+id,{type:'points_awarded',amount:amount,reason:reason.trim(),date:ds(),read:false,ts:Date.now()});
   await logStaffActivity('Awarded rider points',name+': +'+amount+' ('+reason.trim()+')');
@@ -1423,9 +1448,7 @@ async function finalizeRiderPayout(id,name){
   const expectedDate=document.getElementById('rp-date').value;
   const message=(document.getElementById('rp-msg').value||'').trim();
   if(amount<=0){toast('Enter a valid amount','err');return;}
-  const r=await fbG('rn_mall_riders/'+id);if(!r)return;
-  const newTotal=(r.totalPaid||0)+amount;
-  await fbU('rn_mall_riders/'+id,{totalPaid:newTotal});
+  if(!(await adjustMoneyField('rn_mall_riders',id,'totalPaid','add',amount)))return;
   await fbP('rn_mall_rider_payouts/'+id,{amount,description,expectedDate,message,date:ds(),ts:Date.now()});
   await fbP('rn_mall_rider_notifications/'+id,{type:'payout',amount,description,message,expectedDate,date:ds(),read:false,ts:Date.now()});
   if(message)await fbU('rn_mall_settings',{payoutMessageTemplate:message});
@@ -1707,7 +1730,7 @@ async function loadFleetChat(riderId){
   el.innerHTML=msgs.length?msgs.map(function(m){
     const senderRole=m.senderRole?(ROLE_LABELS[m.senderRole]||m.senderRole):(m.isAdmin?'Admin':'Rider');
     const label=m.isAdmin?(m.senderName?m.senderName+', '+senderRole:'Admin'):(m.senderName||'Rider');
-    return '<div style="display:flex;'+(m.isAdmin?'flex-direction:row-reverse;':'')+'gap:10px;margin-bottom:10px;"><div style="width:28px;height:28px;border-radius:99px;background:'+(m.isAdmin?'var(--or)':'var(--card2)')+';color:'+(m.isAdmin?'#fff':'var(--wh)')+';font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+(m.senderName||'R').charAt(0)+'</div><div><div style="background:'+(m.isAdmin?'rgba(255,106,0,0.1)':'var(--card2)')+';padding:8px 12px;border-radius:9px;font-size:13px;max-width:100%;">'+m.text+'</div><div style="font-size:9px;color:var(--wh);font-weight:700;margin-top:2px;'+(m.isAdmin?'text-align:right;':'')+'">'+label+'</div></div></div>';
+    return '<div style="display:flex;'+(m.isAdmin?'flex-direction:row-reverse;':'')+'gap:10px;margin-bottom:10px;"><div style="width:28px;height:28px;border-radius:99px;background:'+(m.isAdmin?'var(--or)':'var(--card2)')+';color:'+(m.isAdmin?'#fff':'var(--wh)')+';font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+(m.senderName||'R').charAt(0)+'</div><div><div style="background:'+(m.isAdmin?'rgba(255,106,0,0.1)':'var(--card2)')+';padding:8px 12px;border-radius:9px;font-size:13px;max-width:100%;">'+escHtml(m.text)+'</div><div style="font-size:9px;color:var(--wh);font-weight:700;margin-top:2px;'+(m.isAdmin?'text-align:right;':'')+'">'+label+'</div></div></div>';
   }).join(''):'<div style="color:var(--wh);font-weight:700;font-size:13px;">No messages yet.</div>';
   el.scrollTop=el.scrollHeight;
 }
@@ -1906,7 +1929,7 @@ async function loadChannelMsgs(key,elId,isDM){
     const mine=m.senderId===staff._id;
     const senderRole=m.senderRole?(ROLE_LABELS[m.senderRole]||m.senderRole):'';
     const tick=isDM&&mine?'<div style="font-size:9px;color:'+(m.readByRecipient?'#5b9bf5':'var(--mu)')+';margin-top:2px;">'+(m.readByRecipient?'✔✔ Read':'✔ Sent')+'</div>':'';
-    return '<div class="chat-msg'+(mine?' own':'')+'"><div class="chat-av">'+ini(m.senderName)+'</div><div><div class="chat-bubble">'+m.text+'</div><div style="font-size:9px;color:var(--wh);font-weight:700;margin-top:2px;">'+(mine?'You':m.senderName+(senderRole?', '+senderRole:''))+'</div>'+tick+'</div></div>';
+    return '<div class="chat-msg'+(mine?' own':'')+'"><div class="chat-av">'+ini(m.senderName)+'</div><div><div class="chat-bubble">'+escHtml(m.text)+'</div><div style="font-size:9px;color:var(--wh);font-weight:700;margin-top:2px;">'+(mine?'You':m.senderName+(senderRole?', '+senderRole:''))+'</div>'+tick+'</div></div>';
   }).join(''):'<div style="color:var(--wh);font-weight:700;font-size:12px;text-align:center;padding:20px;">No messages yet, say hello!</div>';
   el.scrollTop=el.scrollHeight;
   if(isDM){
@@ -2322,7 +2345,7 @@ async function loadStaffChatMsgs(key){
   const msgs=Object.values(await fbG('rn_mall_chat/'+key)||{}).sort(function(a,b){return (a.ts||0)-(b.ts||0);});
   const el=document.getElementById('cc-msgs');if(!el)return;
   el.innerHTML=msgs.length?msgs.map(function(m){
-    return '<div class="chat-msg'+(m.isAdmin?' own':'')+'"><div class="chat-av">'+(m.isAdmin?'RN':ini(m.senderName||'?'))+'</div><div><div class="chat-bubble">'+m.text+'</div></div></div>';
+    return '<div class="chat-msg'+(m.isAdmin?' own':'')+'"><div class="chat-av">'+(m.isAdmin?'RN':ini(m.senderName||'?'))+'</div><div><div class="chat-bubble">'+escHtml(m.text)+'</div></div></div>';
   }).join(''):'<div style="color:var(--wh);font-weight:700;font-size:12px;text-align:center;padding:20px;">No messages yet.</div>';
   el.scrollTop=el.scrollHeight;
 }

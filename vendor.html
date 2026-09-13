@@ -483,6 +483,10 @@ function toast(msg,type){
 }
 function ds(){return new Date().toLocaleDateString('en-GB');}
 function ini(name){return (name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
+// Escapes free text (chat messages, names) before it goes into innerHTML as
+// visible content, without this a chat message containing something like
+// <img src=x onerror=...> would run as code in whoever reads it.
+function escHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function fmt(n){const num=parseFloat(n)||0;if(currency==='USD')return '$'+(num/exchangeRate).toFixed(2);if(currency==='EUR')return '€'+((num/exchangeRate)*0.92).toFixed(2);if(currency==='GBP')return '£'+((num/exchangeRate)*0.79).toFixed(2);return '₦'+parseInt(num).toLocaleString();}
 function setCurr(c){
   currency=c;localStorage.setItem('rnm_currency',c);
@@ -1094,7 +1098,7 @@ async function loadVendorAdminChat(){
   const el=document.getElementById('va-msgs');if(!el)return;
   el.innerHTML=msgs.length?msgs.map(function(m){
     const label=m.isAdmin?(m.senderName?m.senderName+(m.senderRole?', '+m.senderRole:', Admin'):'Admin'):'You';
-    return '<div style="display:flex;'+(m.isAdmin?'':'flex-direction:row-reverse;')+'gap:10px;margin-bottom:10px;"><div style="width:28px;height:28px;border-radius:99px;background:'+(m.isAdmin?'var(--card2)':'var(--or)')+';color:'+(m.isAdmin?'var(--wh)':'#fff')+';font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+(m.isAdmin?(m.senderName?m.senderName.charAt(0):'A'):'You')+'</div><div style="background:'+(m.isAdmin?'var(--card2)':'rgba(255,106,0,0.1)')+';padding:8px 12px;border-radius:9px;font-size:13px;max-width:70%;">'+m.text+'</div></div>';
+    return '<div style="display:flex;'+(m.isAdmin?'':'flex-direction:row-reverse;')+'gap:10px;margin-bottom:10px;"><div style="width:28px;height:28px;border-radius:99px;background:'+(m.isAdmin?'var(--card2)':'var(--or)')+';color:'+(m.isAdmin?'var(--wh)':'#fff')+';font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+(m.isAdmin?(m.senderName?m.senderName.charAt(0):'A'):'You')+'</div><div style="background:'+(m.isAdmin?'var(--card2)':'rgba(255,106,0,0.1)')+';padding:8px 12px;border-radius:9px;font-size:13px;max-width:70%;">'+escHtml(m.text)+'</div></div>';
   }).join(''):'<div style="color:var(--wh);font-weight:700;font-size:13px;text-align:center;padding:20px;">No messages yet, say hello!</div>';
   el.scrollTop=el.scrollHeight;
 }
@@ -1114,7 +1118,7 @@ async function openVendorMsgThread(custId){
 async function loadVendorMsgThread(custId){
   const msgs=Object.values(await fbG('rn_mall_vendor_chat_'+vendor.id+'/'+custId)||{}).sort(function(a,b){return (a.ts||0)-(b.ts||0);});
   const el=document.getElementById('vm-msgs');if(!el)return;
-  el.innerHTML=msgs.length?msgs.map(function(m){return '<div style="display:flex;'+(m.fromVendor?'flex-direction:row-reverse;':'')+'gap:10px;margin-bottom:10px;"><div style="width:28px;height:28px;border-radius:99px;background:'+(m.fromVendor?'var(--or)':'var(--card2)')+';color:'+(m.fromVendor?'#fff':'var(--wh)')+';font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+(m.fromVendor?'You':(m.customerName||'C').charAt(0))+'</div><div style="background:'+(m.fromVendor?'rgba(255,106,0,0.1)':'var(--card2)')+';padding:8px 12px;border-radius:9px;font-size:13px;max-width:70%;">'+m.text+'</div></div>';}).join(''):'<div style="color:var(--wh);font-weight:700;font-size:13px;">No messages yet.</div>';
+  el.innerHTML=msgs.length?msgs.map(function(m){return '<div style="display:flex;'+(m.fromVendor?'flex-direction:row-reverse;':'')+'gap:10px;margin-bottom:10px;"><div style="width:28px;height:28px;border-radius:99px;background:'+(m.fromVendor?'var(--or)':'var(--card2)')+';color:'+(m.fromVendor?'#fff':'var(--wh)')+';font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+(m.fromVendor?'You':(m.customerName||'C').charAt(0))+'</div><div style="background:'+(m.fromVendor?'rgba(255,106,0,0.1)':'var(--card2)')+';padding:8px 12px;border-radius:9px;font-size:13px;max-width:70%;">'+escHtml(m.text)+'</div></div>';}).join(''):'<div style="color:var(--wh);font-weight:700;font-size:13px;">No messages yet.</div>';
   el.scrollTop=el.scrollHeight;
 }
 async function sendVendorMsgReply(custId){

@@ -406,6 +406,10 @@ function downloadDataDoc(uri,filename){
     document.body.appendChild(a);a.click();document.body.removeChild(a);
   }catch(e){toast('Could not download this document','err');}
 }
+// Escapes free text (chat messages, names) before it goes into innerHTML as
+// visible content, without this a chat message containing something like
+// <img src=x onerror=...> would run as code in whoever reads it.
+function escHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 // A permission-denied response from Firebase still arrives as a normal fetch
 // (fetch only throws on a real network failure, not on an HTTP error status),
 // so without checking r.ok that error body used to be returned as if it were
@@ -1145,7 +1149,7 @@ async function loadInvestorChat(){
   const el=document.getElementById('ch-msgs');if(!el)return;
   el.innerHTML=msgs.length?msgs.map(function(m){
     const mine=!m.isAdmin;
-    return '<div class="chat-msg'+(mine?' own':'')+'"><div class="chat-av">'+(mine?investor.name[0]:'RN')+'</div><div><div class="chat-bubble">'+m.text+'</div></div></div>';
+    return '<div class="chat-msg'+(mine?' own':'')+'"><div class="chat-av">'+(mine?investor.name[0]:'RN')+'</div><div><div class="chat-bubble">'+escHtml(m.text)+'</div></div></div>';
   }).join(''):'<div style="color:var(--wh);font-weight:700;font-size:12px;text-align:center;padding:20px;">Say hello to Ubong Rich!</div>';
   el.scrollTop=el.scrollHeight;
 }
