@@ -58,7 +58,7 @@ const IMAGE_FOLDERS = new Set([
   'banners','products','staff','investors','riders','vendors','orders',
   'hero-banner','payment-icons','colors','vendor-photos','vendor-products',
   'reviews','staff-photos','staff-products','investor-photos','rider-photos',
-  'promo-ads'
+  'promo-ads','popup-ads'
 ]);
 const ANY_FILE_FOLDERS = new Set(['task-files','submissions','promo-ad-videos']);
 

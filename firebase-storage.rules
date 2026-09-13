@@ -38,7 +38,8 @@ service firebase.storage {
                         'vendors','orders','hero-banner','payment-icons',
                         'colors','vendor-photos','vendor-products',
                         'reviews','staff-photos','staff-products',
-                        'investor-photos','rider-photos'
+                        'investor-photos','rider-photos','promo-ads',
+                        'popup-ads'
                       ]
                    && request.resource.size < 8 * 1024 * 1024
                    && request.resource.contentType.matches('image/.*');
