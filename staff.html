@@ -608,6 +608,9 @@ function startApp(){
   document.getElementById('login').style.display='none';
   document.getElementById('app').style.display='block';
   document.getElementById('tb-role-badge').textContent=staff.name+', '+(ROLE_LABELS[staff.role]||staff.role);
+  // settings was only ever declared, never actually loaded, meaning
+  // settings.pushVapidKey (and anything else read off it) was always empty here.
+  fbG('rn_mall_settings').then(function(s){settings=s||{};silentlyRefreshStaffPushToken();}).catch(function(){});
   buildSidebar();
   var validPages=['dashboard','orders','products','vendors','analytics','customers','wallet-issues','customer-chat','salary','points','reports','complaints','leave','messages','activity','policy','profile','submissions','approvals','fleet'];
   var lastPage=sessionStorage.getItem('rnm_staff_lastpage');
@@ -1095,20 +1098,34 @@ async function enableStaffPushNotifications(){
   if(btn)btn.disabled=true;
   try{
     const perm=await Notification.requestPermission();
-    if(perm!=='granted'){toast('Notifications permission was not granted.');return;}
+    if(perm!=='granted'){toast('Notifications permission was not granted.');if(btn)btn.disabled=false;return;}
     const messaging=await ensureFirebaseMessagingReady();
-    if(!messaging){toast('Could not set up push notifications on this device.');return;}
+    if(!messaging){toast('Could not set up push notifications on this device.');if(btn)btn.disabled=false;return;}
     const reg=await navigator.serviceWorker.register('sw.js');
     const token=await messaging.getToken({vapidKey:vapidKey,serviceWorkerRegistration:reg});
-    if(!token){toast('Could not get a push token from this browser.');return;}
+    if(!token){toast('Could not get a push token from this browser.');if(btn)btn.disabled=false;return;}
     await fbS('rn_mall_staff/'+staff._id+'/fcmTokens/'+token,{ts:Date.now()});
     toast('Push notifications enabled on this device!');
-    if(btn)btn.textContent='✅ Notifications Enabled';
+    if(btn){btn.textContent='✅ Notifications Enabled';btn.disabled=true;}
   }catch(e){
     toast('Could not enable push notifications: '+e.message);
-  }finally{
     if(btn)btn.disabled=false;
   }
+}
+// A token can go stale on its own (service worker update, subscription rotation,
+// months of inactivity), and only ever fetching it once at click-time meant it
+// could silently stop working forever with no sign anything was wrong. Runs on
+// every login, re-saves the current valid token, no re-enabling ever needed.
+async function silentlyRefreshStaffPushToken(){
+  try{
+    if(!staff||!('Notification' in window)||Notification.permission!=='granted')return;
+    if(!settings.pushVapidKey)return;
+    const messaging=await ensureFirebaseMessagingReady();
+    if(!messaging)return;
+    const reg=await navigator.serviceWorker.register('sw.js');
+    const token=await messaging.getToken({vapidKey:settings.pushVapidKey,serviceWorkerRegistration:reg});
+    if(token)await fbS('rn_mall_staff/'+staff._id+'/fcmTokens/'+token,{ts:Date.now()});
+  }catch(e){console.warn('Silent push token refresh failed:',e.message);}
 }
 async function fbDeleteWithRetry(path,attempts){
   attempts=attempts||4;
@@ -1980,7 +1997,7 @@ function renderProfile(c){
   <div class="card" style="max-width:460px;">
     <div class="card-title">${iconBadge('bell',14)} Push Notifications</div>
     <div style="font-size:11px;color:var(--wh);font-weight:700;margin:8px 0 12px;">Get notified on this device for tasks, messages, and admin replies, even if the tab isn't open.</div>
-    <button class="btn" id="pf-push-enable-btn" onclick="enableStaffPushNotifications()">${iconBadge('bell',14)} Enable Notifications on This Device</button>
+    <button class="btn" id="pf-push-enable-btn" ${(typeof Notification!=='undefined'&&Notification.permission==='granted')?'disabled':''} onclick="enableStaffPushNotifications()">${(typeof Notification!=='undefined'&&Notification.permission==='granted')?'✅ Notifications Enabled':(iconBadge('bell',14)+' Enable Notifications on This Device')}</button>
   </div>`;
 }
 function compressPhotoFile(file,maxDim,quality){

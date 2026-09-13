@@ -1085,6 +1085,7 @@ async function initAdmin(){
       localStorage.setItem('rnm_admin_cache_settings',JSON.stringify(sett||settings));
     }catch(cacheWriteErr){/* storage full or unavailable, skip caching */}
     settings=sett||settings||{exchangeRate:1600,podEnabled:true};
+    silentlyRefreshAdminPushToken(); // fire-and-forget, every load, see its own comment for why
     var validPages=['dashboard','analytics','vendors','wallet-issues','staff','investors','riders','bundles','promos','orders','products','categories','coupons','delivery','customers','chat','notifications','settings','customiser','hero','preorders','reviews','pod','newsletter'];
     var lastPage=sessionStorage.getItem('rnm_admin_lastpage');
     nav(validPages.includes(lastPage)?lastPage:'dashboard');
@@ -4687,8 +4688,8 @@ function renderSettings(c){
     </div>
     <button class="btn btn-or" onclick="savePushSettings()">Save Push Settings</button>
     <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--bdr);">
-      <div class="card-sub" style="margin-bottom:8px;">Get push notifications yourself here in the admin panel, for new orders.</div>
-      <button class="btn" id="admin-push-enable-btn" onclick="enableAdminPushNotifications()">${iconBadge('bell',14)} Enable Notifications on This Device</button>
+      <div class="card-sub" style="margin-bottom:8px;">Get push notifications yourself here in the admin panel, for new orders. Once granted, this device keeps working automatically, no need to enable it again.</div>
+      <button class="btn" id="admin-push-enable-btn" ${(typeof Notification!=='undefined'&&Notification.permission==='granted')?'disabled':''} onclick="enableAdminPushNotifications()">${(typeof Notification!=='undefined'&&Notification.permission==='granted')?'✅ Notifications Enabled on This Device':(iconBadge('bell',14)+' Enable Notifications on This Device')}</button>
     </div>
   </div>
 
@@ -4761,20 +4762,38 @@ async function enableAdminPushNotifications(){
   if(btn)btn.disabled=true;
   try{
     const perm=await Notification.requestPermission();
-    if(perm!=='granted'){toast('Notifications permission was not granted.');return;}
+    if(perm!=='granted'){toast('Notifications permission was not granted.');if(btn)btn.disabled=false;return;}
     const messaging=await ensureFirebaseMessagingReady();
-    if(!messaging){toast('Could not set up push notifications on this device.');return;}
+    if(!messaging){toast('Could not set up push notifications on this device.');if(btn)btn.disabled=false;return;}
     const reg=await navigator.serviceWorker.register('sw.js');
     const token=await messaging.getToken({vapidKey:settings.pushVapidKey,serviceWorkerRegistration:reg});
-    if(!token){toast('Could not get a push token from this browser.');return;}
+    if(!token){toast('Could not get a push token from this browser.');if(btn)btn.disabled=false;return;}
     await fbS('rn_mall_admin_fcm_tokens/'+token,{ts:Date.now()});
     toast('Push notifications enabled on this device!');
-    if(btn){btn.textContent='✅ Notifications Enabled on This Device';}
+    if(btn){btn.textContent='✅ Notifications Enabled on This Device';btn.disabled=true;}
   }catch(e){
     toast('Could not enable push notifications: '+e.message);
-  }finally{
     if(btn)btn.disabled=false;
   }
+}
+// Browsers can quietly rotate a device's push token (a service worker update, the
+// underlying push subscription changing, months of inactivity), and the old code
+// only ever fetched it once, at the moment "Enable" was clicked. If that token
+// ever went stale, pushes to it would just silently fail forever after, with
+// nothing telling the admin notifications had stopped. Firebase's own guidance is
+// to call getToken() on every app load, not just once, it's cheap and always
+// returns whatever token is currently valid, so this keeps re-saving it
+// automatically as long as permission is already granted, no re-enabling needed.
+async function silentlyRefreshAdminPushToken(){
+  try{
+    if(!('Notification' in window)||Notification.permission!=='granted')return;
+    if(!settings.pushVapidKey)return;
+    const messaging=await ensureFirebaseMessagingReady();
+    if(!messaging)return;
+    const reg=await navigator.serviceWorker.register('sw.js');
+    const token=await messaging.getToken({vapidKey:settings.pushVapidKey,serviceWorkerRegistration:reg});
+    if(token)await fbS('rn_mall_admin_fcm_tokens/'+token,{ts:Date.now()});
+  }catch(e){console.warn('Silent admin push token refresh failed:',e.message);}
 }
 async function saveFlash(){
   const v=document.getElementById('set-flash')?.value;

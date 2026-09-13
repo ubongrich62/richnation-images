@@ -1249,20 +1249,35 @@ async function enableCustomerPushNotifications(){
   if(btn)btn.disabled=true;
   try{
     const perm=await Notification.requestPermission();
-    if(perm!=='granted'){toast('Notifications permission was not granted.');return;}
+    if(perm!=='granted'){toast('Notifications permission was not granted.');if(btn)btn.disabled=false;return;}
     const messaging=await ensureFirebaseMessagingReady();
-    if(!messaging){toast('Could not set up push notifications on this device.');return;}
+    if(!messaging){toast('Could not set up push notifications on this device.');if(btn)btn.disabled=false;return;}
     const reg=await navigator.serviceWorker.register('sw.js');
     const token=await messaging.getToken({vapidKey:settings.pushVapidKey,serviceWorkerRegistration:reg});
-    if(!token){toast('Could not get a push token from this browser.');return;}
+    if(!token){toast('Could not get a push token from this browser.');if(btn)btn.disabled=false;return;}
     await fbS('rn_mall_customers/'+currUser.id+'/fcmTokens/'+token,{ts:Date.now()});
     toast('Push notifications enabled on this device!');
-    if(btn){btn.textContent='✅ Notifications Enabled';}
+    if(btn){btn.textContent='✅ Notifications Enabled';btn.disabled=true;}
   }catch(e){
     toast('Could not enable push notifications: '+e.message);
-  }finally{
     if(btn)btn.disabled=false;
   }
+}
+// Same reasoning as admin.html's silentlyRefreshAdminPushToken(): a token can go
+// stale on its own (service worker update, subscription rotation, months of
+// inactivity), and only ever fetching it once at click-time meant it could
+// silently stop working forever with no sign anything was wrong. Runs on every
+// sign-in, re-saves the current valid token, no re-enabling ever needed.
+async function silentlyRefreshCustomerPushToken(){
+  try{
+    if(!currUser||!('Notification' in window)||Notification.permission!=='granted')return;
+    if(!settings.pushVapidKey)return;
+    const messaging=await ensureFirebaseMessagingReady();
+    if(!messaging)return;
+    const reg=await navigator.serviceWorker.register('sw.js');
+    const token=await messaging.getToken({vapidKey:settings.pushVapidKey,serviceWorkerRegistration:reg});
+    if(token)await fbS('rn_mall_customers/'+currUser.id+'/fcmTokens/'+token,{ts:Date.now()});
+  }catch(e){console.warn('Silent push token refresh failed:',e.message);}
 }
 const WA_NUM='2349164678560';
 let PAYSTACK_KEY='pk_live_005d2ffa19fb3405849eb17c44af15e007c3027a';
@@ -4326,7 +4341,7 @@ async function signInWithGoogle(){
     toast('Sign-in failed, please try again or use email/password','err');
   }
 }
-function updateAuthUI(){document.getElementById('auth-btns').style.display=currUser?'none':'flex';document.getElementById('user-menu').style.display=currUser?'block':'none';if(currUser){loadCustNotifs();trackCustomerActivity();startPodLockWatcher();}else{const b=document.getElementById('cnotif-badge');if(b)b.style.display='none';stopPodLockWatcher();}}
+function updateAuthUI(){document.getElementById('auth-btns').style.display=currUser?'none':'flex';document.getElementById('user-menu').style.display=currUser?'block':'none';if(currUser){loadCustNotifs();trackCustomerActivity();startPodLockWatcher();silentlyRefreshCustomerPushToken();}else{const b=document.getElementById('cnotif-badge');if(b)b.style.display='none';stopPodLockWatcher();}}
 // ── PAY ON DELIVERY, PROXIMITY PAYMENT LOCK ──
 // A Pay-on-Delivery order only ever collects 50% upfront, the other 50% used to
 // just be cash/transfer to the rider on arrival, on trust. This closes that gap:
@@ -4906,7 +4921,7 @@ async function accTab(tab,el,silent){
     <div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:16px;margin-top:20px;">
       <div style="font-weight:800;margin-bottom:6px;">${iconBadge('bell',14)} Push Notifications</div>
       <div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:10px;">Get notified the moment your order status changes or a rider is on the way, even when this tab isn't open.</div>
-      <button class="auth-btn" id="acct-push-enable-btn" style="max-width:280px;" onclick="enableCustomerPushNotifications()">${iconBadge('bell',14)} Enable Notifications on This Device</button>
+      <button class="auth-btn" id="acct-push-enable-btn" style="max-width:280px;" ${(typeof Notification!=='undefined'&&Notification.permission==='granted')?'disabled':''} onclick="enableCustomerPushNotifications()">${(typeof Notification!=='undefined'&&Notification.permission==='granted')?'✅ Notifications Enabled':(iconBadge('bell',14)+' Enable Notifications on This Device')}</button>
     </div>
     <div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:16px;margin-top:20px;">
       <div style="font-weight:800;margin-bottom:6px;">${iconBadge('package',14)} Wholesale Pricing</div>

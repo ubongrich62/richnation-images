@@ -347,20 +347,35 @@ async function enableInvestorPushNotifications(){
   if(btn)btn.disabled=true;
   try{
     const perm=await Notification.requestPermission();
-    if(perm!=='granted'){toast('Notifications permission was not granted.');return;}
+    if(perm!=='granted'){toast('Notifications permission was not granted.');if(btn)btn.disabled=false;return;}
     const messaging=await ensureFirebaseMessagingReady();
-    if(!messaging){toast('Could not set up push notifications on this device.');return;}
+    if(!messaging){toast('Could not set up push notifications on this device.');if(btn)btn.disabled=false;return;}
     const reg=await navigator.serviceWorker.register('sw.js');
     const token=await messaging.getToken({vapidKey:vapidKey,serviceWorkerRegistration:reg});
-    if(!token){toast('Could not get a push token from this browser.');return;}
+    if(!token){toast('Could not get a push token from this browser.');if(btn)btn.disabled=false;return;}
     await fbS('rn_mall_investors/'+investor._id+'/fcmTokens/'+token,{ts:Date.now()});
     toast('Push notifications enabled on this device!');
-    if(btn)btn.textContent='✅ Notifications Enabled';
+    if(btn){btn.textContent='✅ Notifications Enabled';btn.disabled=true;}
   }catch(e){
     toast('Could not enable push notifications: '+e.message);
-  }finally{
     if(btn)btn.disabled=false;
   }
+}
+// A token can go stale on its own (service worker update, subscription rotation,
+// months of inactivity), and only ever fetching it once at click-time meant it
+// could silently stop working forever with no sign anything was wrong. Runs on
+// every login, re-saves the current valid token, no re-enabling ever needed.
+async function silentlyRefreshInvestorPushToken(){
+  try{
+    if(!investor||!('Notification' in window)||Notification.permission!=='granted')return;
+    const vapidKey=await fbG('rn_mall_settings/pushVapidKey');
+    if(!vapidKey)return;
+    const messaging=await ensureFirebaseMessagingReady();
+    if(!messaging)return;
+    const reg=await navigator.serviceWorker.register('sw.js');
+    const token=await messaging.getToken({vapidKey:vapidKey,serviceWorkerRegistration:reg});
+    if(token)await fbS('rn_mall_investors/'+investor._id+'/fcmTokens/'+token,{ts:Date.now()});
+  }catch(e){console.warn('Silent push token refresh failed:',e.message);}
 }
 let investor=null;
 let curNav='dashboard';
@@ -676,6 +691,7 @@ function startApp(){
   var lastPage=sessionStorage.getItem('rnm_investor_lastpage');
   inav(validPages.includes(lastPage)?lastPage:'dashboard');
   loadInvestorNotifs();
+  silentlyRefreshInvestorPushToken();
   watchFirebaseCollection('rn_mall_settings',function(sett){
     if(!sett)return;
     window._settings=sett;
@@ -1171,7 +1187,7 @@ function renderProfile(c){
   <div class="card" style="max-width:460px;text-align:left;">
     <div class="card-title">${iconBadge('bell',14)} Push Notifications</div>
     <div style="font-size:11px;color:var(--wh);font-weight:700;margin:6px 0 12px;">Get notified on this device for updates, replies, and payouts, even if the tab isn't open.</div>
-    <button class="btn" id="pf-push-enable-btn" onclick="enableInvestorPushNotifications()">${iconBadge('bell',14)} Enable Notifications on This Device</button>
+    <button class="btn" id="pf-push-enable-btn" ${(typeof Notification!=='undefined'&&Notification.permission==='granted')?'disabled':''} onclick="enableInvestorPushNotifications()">${(typeof Notification!=='undefined'&&Notification.permission==='granted')?'✅ Notifications Enabled':(iconBadge('bell',14)+' Enable Notifications on This Device')}</button>
   </div>`;
 }
 function compressPhotoFile(file,maxDim,quality){

@@ -329,22 +329,36 @@ async function enableRiderPushNotifications(){
   if(btn)btn.disabled=true;
   try{
     const perm=await Notification.requestPermission();
-    if(perm!=='granted'){toast('Notifications permission was not granted.');return;}
+    if(perm!=='granted'){toast('Notifications permission was not granted.');if(btn)btn.disabled=false;return;}
     const messaging=await ensureFirebaseMessagingReady();
-    if(!messaging){toast('Could not set up push notifications on this device.');return;}
+    if(!messaging){toast('Could not set up push notifications on this device.');if(btn)btn.disabled=false;return;}
     const reg=await navigator.serviceWorker.register('sw.js');
     const token=await messaging.getToken({vapidKey:settings.pushVapidKey,serviceWorkerRegistration:reg});
-    if(!token){toast('Could not get a push token from this browser.');return;}
+    if(!token){toast('Could not get a push token from this browser.');if(btn)btn.disabled=false;return;}
     await fbS('rn_mall_riders/'+rider._id+'/fcmTokens/'+token,{ts:Date.now()});
     if(!rider.fcmTokens)rider.fcmTokens={};
     rider.fcmTokens[token]={ts:Date.now()};
     toast('Push notifications enabled on this device!');
-    if(btn){btn.textContent='✅ Notifications Enabled';}
+    if(btn){btn.textContent='✅ Notifications Enabled';btn.disabled=true;}
   }catch(e){
     toast('Could not enable push notifications: '+e.message);
-  }finally{
     if(btn)btn.disabled=false;
   }
+}
+// A token can go stale on its own (service worker update, subscription rotation,
+// months of inactivity), and only ever fetching it once at click-time meant it
+// could silently stop working forever with no sign anything was wrong. Runs on
+// every login, re-saves the current valid token, no re-enabling ever needed.
+async function silentlyRefreshRiderPushToken(){
+  try{
+    if(!rider||!('Notification' in window)||Notification.permission!=='granted')return;
+    if(!settings.pushVapidKey)return;
+    const messaging=await ensureFirebaseMessagingReady();
+    if(!messaging)return;
+    const reg=await navigator.serviceWorker.register('sw.js');
+    const token=await messaging.getToken({vapidKey:settings.pushVapidKey,serviceWorkerRegistration:reg});
+    if(token)await fbS('rn_mall_riders/'+rider._id+'/fcmTokens/'+token,{ts:Date.now()});
+  }catch(e){console.warn('Silent push token refresh failed:',e.message);}
 }
 // Google Maps (map library) is only ever needed inside showDeliveryMapModal(), when a
 // rider taps "View Map" on a delivery, never for the initial login/dashboard render.
@@ -633,7 +647,7 @@ function startApp(){
   document.getElementById('login').style.display='none';
   document.getElementById('app').style.display='block';
   document.querySelectorAll('.curr-btn').forEach(el=>el.classList.toggle('active',el.dataset.curr===currency));
-  fbG('rn_mall_settings').then(function(s){settings=s||{};}).catch(function(){});
+  fbG('rn_mall_settings').then(function(s){settings=s||{};silentlyRefreshRiderPushToken();}).catch(function(){});
   buildRiderSidebar();
   var validPages=['dashboard','deliveries','history','salary','points','reports','complaints','leave','messages','activity','policy','profile'];
   var lastPage=sessionStorage.getItem('rnm_rider_lastpage');
@@ -1319,7 +1333,7 @@ function renderProfile(c){
   <div class="card" style="max-width:460px;text-align:left;">
     <div class="card-title">${iconBadge('bell',14)} Push Notifications</div>
     <div style="font-size:11px;color:var(--mu);margin:8px 0 12px;">Get notified on this device the moment a new delivery is assigned to you, even if the app isn't open.</div>
-    <button class="btn" id="pf-push-enable-btn" onclick="enableRiderPushNotifications()">${iconBadge('bell',14)} Enable Notifications on This Device</button>
+    <button class="btn" id="pf-push-enable-btn" ${(typeof Notification!=='undefined'&&Notification.permission==='granted')?'disabled':''} onclick="enableRiderPushNotifications()">${(typeof Notification!=='undefined'&&Notification.permission==='granted')?'✅ Notifications Enabled':(iconBadge('bell',14)+' Enable Notifications on This Device')}</button>
   </div>`;
 }
 function compressPhotoFile(file,maxDim,quality){
