@@ -227,41 +227,46 @@ let appCheckToken=null;
 // Resolves to true once firebase.auth() is safe to call, or false if the SDK failed to
 // load (offline, blocked, etc.), in which case callers fall back to the pre-migration
 // plaintext-password path rather than failing outright.
+function fbLoadScript(src){
+  return new Promise(function(res){
+    const s=document.createElement('script');
+    s.src=src;s.onload=function(){res(true);};s.onerror=function(){res(false);};
+    document.head.appendChild(s);
+  });
+}
+// Loading firebase-app-compat.js a second time via its own separate <script> tag
+// replaces window.firebase with a brand new object, silently discarding whatever
+// firebase-auth-compat.js had already attached to the old one: ensureFirebaseAuthReady()
+// runs first, then the App Check idle-loader below reloads app-compat.js 2s later and
+// quietly wipes out .auth, crashing any Firebase Auth call (sign-in, migration) made
+// after that point with "firebase.auth is not a function". Sharing one memoized load
+// of app-compat.js between both callers guarantees it only ever runs once.
+let _fbAppCompatPromise=null;
+function loadFirebaseAppCompat(){
+  if(_fbAppCompatPromise)return _fbAppCompatPromise;
+  if(typeof firebase!=='undefined'&&firebase.apps){_fbAppCompatPromise=Promise.resolve(true);}
+  else{_fbAppCompatPromise=fbLoadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');}
+  return _fbAppCompatPromise;
+}
 let _firebaseAuthReadyPromise=null;
 function ensureFirebaseAuthReady(){
   if(_firebaseAuthReadyPromise)return _firebaseAuthReadyPromise;
-  _firebaseAuthReadyPromise=new Promise(function(resolve){
-    function loadScript(src){
-      return new Promise(function(res){
-        const s=document.createElement('script');
-        s.src=src;s.onload=function(){res(true);};s.onerror=function(){res(false);};
-        document.head.appendChild(s);
-      });
-    }
-    function afterAppLoaded(){
-      try{if(typeof firebase!=='undefined'&&(!firebase.apps||!firebase.apps.length))firebase.initializeApp(FIREBASE_CONFIG);}catch(e){}
-      loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js').then(function(ok){resolve(ok&&typeof firebase!=='undefined'&&!!firebase.auth);});
-    }
-    if(typeof firebase!=='undefined'&&firebase.apps){afterAppLoaded();}
-    else{loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js').then(function(ok){if(ok)afterAppLoaded();else resolve(false);});}
+  _firebaseAuthReadyPromise=loadFirebaseAppCompat().then(function(ok){
+    if(!ok)return false;
+    try{if(typeof firebase!=='undefined'&&(!firebase.apps||!firebase.apps.length))firebase.initializeApp(FIREBASE_CONFIG);}catch(e){}
+    if(typeof firebase!=='undefined'&&firebase.auth)return true;
+    return fbLoadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js').then(function(ok2){return ok2&&typeof firebase!=='undefined'&&!!firebase.auth;});
   });
   return _firebaseAuthReadyPromise;
 }
 // App Check isn't enforced yet, so it adds nothing functional right now, loaded only
 // after the page is fully done loading, so it costs the page nothing while unused.
 function loadAppCheckWhenIdle(){
-  function loadScript(src){
-    return new Promise(function(resolve){
-      const s=document.createElement('script');
-      s.src=src;s.onload=resolve;s.onerror=resolve;
-      document.head.appendChild(s);
-    });
-  }
-  loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js')
-    .then(function(){return loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js');})
+  loadFirebaseAppCompat()
+    .then(function(){return fbLoadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js');})
     .then(function(){
       try{
-        firebase.initializeApp(FIREBASE_CONFIG);
+        if(typeof firebase!=='undefined'&&(!firebase.apps||!firebase.apps.length))firebase.initializeApp(FIREBASE_CONFIG);
         const appCheckInstance=firebase.appCheck();
         appCheckInstance.activate(new firebase.appCheck.ReCaptchaV3Provider(RECAPTCHA_SITE_KEY),true);
         appCheckInstance.getToken().then(function(r){appCheckToken=r.token;}).catch(function(e){console.warn('App Check token fetch failed:',e.message);});
