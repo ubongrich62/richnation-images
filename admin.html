@@ -4483,11 +4483,10 @@ function renderSettings(c){
     <div class="card-title">${iconBadge('trash',14)} Storage Cleanup</div>
     <div class="card-sub">Photos and videos are now stored on Cloudflare R2, Firebase Storage is only used as a fallback. Old files uploaded before that move can still be sitting in Firebase Storage taking up space.</div>
     <div class="info-box">
-      Scans every folder Firebase Storage actually accepts uploads to and shows how many files and how much space each one is using. Deleting a folder here permanently removes every file in it from Firebase, this cannot be undone and does not check whether anything currently displayed on the site still points at one of those files, only delete a folder you're sure is no longer needed.
+      Scans every folder Firebase Storage actually accepts uploads to and shows how many files and how much space each one is using. Tap a folder to see the actual files inside it (with a preview) and delete individual ones, one at a time, nothing is ever wiped in bulk. Deleting a file here permanently removes it from Firebase and cannot be undone, this doesn't check whether anything currently displayed on the site still points at it, only delete files you're sure are no longer needed.
     </div>
     <button class="btn btn-or" id="storage-scan-btn" onclick="scanStorageFolders()">Scan Firebase Storage</button>
     <div id="storage-scan-results" style="display:none;margin-top:14px;"></div>
-    <div id="storage-cleanup-log" style="display:none;margin-top:12px;max-height:260px;overflow-y:auto;background:var(--card2);border:1px solid var(--bdr);border-radius:8px;padding:12px;font-size:11px;font-family:monospace;color:var(--wh);line-height:1.7;"></div>
   </div>
 
   <div class="card fade-in">
@@ -4716,34 +4715,84 @@ async function scanStorageFolders(){
   const rows=[];
   for(const folder of STORAGE_CLEANUP_FOLDERS){
     const items=await fbStorageListAll(folder+'/');
+    // Newest first, so a huge folder's "load more" surfaces recent uploads
+    // before ancient ones, and the visible/capped slice below stays useful.
+    items.sort(function(a,b){return (b.timeCreated||'').localeCompare(a.timeCreated||'');});
     const totalBytes=items.reduce(function(sum,it){return sum+(parseInt(it.size)||0);},0);
-    rows.push({folder:folder,count:items.length,bytes:totalBytes});
+    rows.push({folder:folder,items:items,bytes:totalBytes,visibleCount:50});
   }
-  resultsEl.innerHTML=rows.map(function(r){
-    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--bdr);">'
-      +'<div><div style="font-weight:800;font-size:12px;">'+r.folder+'</div><div style="font-size:11px;color:var(--mu);margin-top:2px;">'+r.count+' file'+(r.count===1?'':'s')+', '+fmtBytes(r.bytes)+'</div></div>'
-      +(r.count>0?'<button class="btn btn-re" style="font-size:10px;padding:6px 12px;flex-shrink:0;" onclick="deleteStorageFolderPrompt(\''+r.folder+'\','+r.count+')">Delete Forever</button>':'<span style="font-size:10px;color:var(--mu);flex-shrink:0;">Empty</span>');
-  }).join('');
+  window._storageScanRows=rows;
+  window._storageExpandedFolder=null;
+  renderStorageScanRows();
   btn.disabled=false;btn.textContent='Re-scan Firebase Storage';
 }
-async function deleteStorageFolderPrompt(folder,count){
-  const typed=prompt('This permanently deletes all '+count+' file(s) in "'+folder+'" from Firebase Storage. This cannot be undone.\n\nType the folder name ('+folder+') to confirm:');
-  if(typed!==folder){if(typed!==null)toast('Folder name did not match, nothing was deleted','err');return;}
-  const logEl=document.getElementById('storage-cleanup-log');
-  logEl.style.display='block';
-  function log(msg){logEl.innerHTML+=msg+'<br>';logEl.scrollTop=logEl.scrollHeight;}
-  log('<b>Deleting '+folder+'…</b>');
-  const items=await fbStorageListAll(folder+'/');
-  let deleted=0,failed=0;
-  for(const item of items){
-    try{
-      await fbFetchTimeout('https://firebasestorage.googleapis.com/v0/b/'+FIREBASE_STORAGE_BUCKET+'/o/'+encodeURIComponent(item.name),{method:'DELETE'},8000);
-      deleted++;
-    }catch(e){failed++;}
+function toggleStorageFolderExpand(folder){
+  window._storageExpandedFolder=window._storageExpandedFolder===folder?null:folder;
+  renderStorageScanRows();
+}
+function showMoreStorageFiles(folder){
+  const row=(window._storageScanRows||[]).find(function(r){return r.folder===folder;});
+  if(!row)return;
+  row.visibleCount+=50;
+  renderStorageScanRows();
+}
+function renderStorageScanRows(){
+  const resultsEl=document.getElementById('storage-scan-results');
+  const rows=window._storageScanRows||[];
+  resultsEl.innerHTML=rows.map(function(r){
+    const count=r.items.length;
+    const expanded=window._storageExpandedFolder===r.folder;
+    let inner='';
+    if(expanded){
+      const visible=r.items.slice(0,r.visibleCount);
+      inner='<div style="padding:2px 0 10px 0;">'
+        +visible.map(function(it,idx){return renderStorageFileRow(r.folder,it,idx);}).join('')
+        +(r.items.length>visible.length?'<button class="btn" style="font-size:10px;padding:6px 12px;margin:8px 0 0 14px;" onclick="showMoreStorageFiles(\''+r.folder+'\')">Show '+Math.min(50,r.items.length-visible.length)+' more (of '+r.items.length+')</button>':'')
+      +'</div>';
+    }
+    return '<div style="border-bottom:1px solid var(--bdr);">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;'+(count>0?'cursor:pointer;':'opacity:0.5;')+'"'+(count>0?' onclick="toggleStorageFolderExpand(\''+r.folder+'\')"':'')+'>'
+        +'<div><div style="font-weight:800;font-size:12px;">'+(count>0?(expanded?'▾ ':'▸ '):'')+r.folder+'</div><div style="font-size:11px;color:var(--mu);margin-top:2px;">'+count+' file'+(count===1?'':'s')+', '+fmtBytes(r.bytes)+'</div></div>'
+        +(count>0?'<span style="font-size:10px;color:var(--or);flex-shrink:0;font-weight:700;">'+(expanded?'Hide files':'View files')+'</span>':'<span style="font-size:10px;color:var(--mu);flex-shrink:0;">Empty</span>')
+      +'</div>'
+      +inner
+    +'</div>';
+  }).join('');
+}
+function renderStorageFileRow(folder,item,idx){
+  const contentType=item.contentType||'';
+  const isImage=contentType.indexOf('image/')===0;
+  const isVideo=contentType.indexOf('video/')===0;
+  const url='https://firebasestorage.googleapis.com/v0/b/'+FIREBASE_STORAGE_BUCKET+'/o/'+encodeURIComponent(item.name)+'?alt=media';
+  const shortName=item.name.split('/').pop();
+  const preview=isImage
+    ?'<img src="'+url+'" loading="lazy" style="width:40px;height:40px;object-fit:cover;border-radius:5px;flex-shrink:0;background:var(--card2);" onerror="this.style.visibility=\'hidden\'"/>'
+    :'<div style="width:40px;height:40px;border-radius:5px;background:var(--card2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+iconBadge(isVideo?'film':'document',18)+'</div>';
+  return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0 7px 14px;border-top:1px solid var(--bdr);" id="sf-row-'+folder+'-'+idx+'">'
+    +preview
+    +'<div style="flex:1;min-width:0;"><div style="font-size:11px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+escAttr(shortName)+'">'+shortName+'</div><div style="font-size:10px;color:var(--mu);">'+fmtBytes(parseInt(item.size)||0)+(item.timeCreated?' &middot; '+new Date(item.timeCreated).toLocaleDateString('en-GB'):'')+'</div></div>'
+    +'<button class="btn btn-re" style="font-size:9px;padding:5px 10px;flex-shrink:0;" onclick="deleteStorageFilePrompt(\''+folder+'\','+idx+')">Delete</button>'
+  +'</div>';
+}
+async function deleteStorageFilePrompt(folder,idx){
+  const row=(window._storageScanRows||[]).find(function(r){return r.folder===folder;});
+  if(!row)return;
+  const item=row.items[idx];
+  if(!item)return;
+  const shortName=item.name.split('/').pop();
+  if(!confirm('Permanently delete "'+shortName+'" from Firebase Storage? This cannot be undone.'))return;
+  const rowEl=document.getElementById('sf-row-'+folder+'-'+idx);
+  if(rowEl)rowEl.style.opacity='0.4';
+  try{
+    await fbFetchTimeout('https://firebasestorage.googleapis.com/v0/b/'+FIREBASE_STORAGE_BUCKET+'/o/'+encodeURIComponent(item.name),{method:'DELETE'},8000);
+    row.items.splice(idx,1);
+    row.bytes=row.items.reduce(function(s,it){return s+(parseInt(it.size)||0);},0);
+    toast(shortName+' deleted permanently');
+    renderStorageScanRows();
+  }catch(e){
+    toast('Delete failed, try again','err');
+    if(rowEl)rowEl.style.opacity='1';
   }
-  log('&nbsp;&nbsp;'+iconBadge('check',14)+' '+deleted+' file(s) deleted'+(failed?', '+failed+' failed':''));
-  toast(folder+': '+deleted+' file(s) deleted permanently'+(failed?', '+failed+' failed':''));
-  scanStorageFolders();
 }
 function showPwMsg(text,type){
   const el=document.getElementById('pw-msg');if(!el)return;
@@ -5285,12 +5334,14 @@ function renderCustomBannerEditor(){
 async function uploadCustomBannerImage(inp){
   if(!inp||!inp.files||!inp.files[0])return;
   toast('Uploading banner…');
+  var oldUrl=(settings.customBanner||{}).image;
   var b64=await compressImage(inp.files[0],1600,0.85);
   if(!b64){toast('Upload failed, try a different image','err');return;}
   var url=isGithubConfigured()?await uploadDataUrlToGithub(b64,'banners'):null;
   if(!url){toast('Banner NOT saved, '+(window._lastStorageError||'Storage upload failed'),'err');return;}
   settings.customBanner=Object.assign({},settings.customBanner||{},{image:url});
   await fbU('rn_mall_settings',{customBanner:settings.customBanner});
+  if(oldUrl&&oldUrl!==url)deleteStorageFile(oldUrl);
   toast('Banner image saved!');
   renderCustomBannerEditor();
 }
@@ -5304,8 +5355,10 @@ async function saveCustomBanner(){
 }
 async function removeCustomBanner(){
   if(!confirm('Remove the custom banner?'))return;
+  var oldUrl=(settings.customBanner||{}).image;
   settings.customBanner=null;
   await fbD('rn_mall_settings/customBanner');
+  if(oldUrl)deleteStorageFile(oldUrl);
   toast('Banner removed.');
   renderCustomBannerEditor();
 }
@@ -5377,6 +5430,7 @@ function renderHeroBannerRows(){
 async function uploadHeroBanner(slot,inp){
   if(!inp||!inp.files||!inp.files[0])return;
   toast('Uploading design…');
+  var oldUrl=(settings.heroConfig||{}).bannerImages&&settings.heroConfig.bannerImages[slot];
   var b64=await compressImage(inp.files[0],1920,0.9);
   if(!b64){toast('Upload failed, try a different image','err');return;}
   var url=isGithubConfigured()?await uploadDataUrlToGithub(b64,'banners'):null;
@@ -5396,6 +5450,7 @@ async function uploadHeroBanner(slot,inp){
   settings.heroConfig.activeBanner=slot; // a fresh upload goes live immediately, it doesn't just join a rotation
   delete settings.heroConfig.bannerImage; // migrate away from the old single-image field
   await fbU('rn_mall_settings',{heroConfig:settings.heroConfig});
+  if(oldUrl&&oldUrl!==url)deleteStorageFile(oldUrl);
   toast('Design '+(slot+1)+' is now live on the homepage!');
   renderHeroBannerRows();
 }
@@ -5410,6 +5465,7 @@ async function removeHeroBanner(slot){
   if(!confirm('Remove Design '+(slot+1)+'?'))return;
   settings.heroConfig=settings.heroConfig||{};
   var imgs=(settings.heroConfig.bannerImages||[]).slice();
+  var oldUrl=imgs[slot];
   imgs[slot]=null;
   // trim trailing empties so the array doesn't grow with nulls
   while(imgs.length&&!imgs[imgs.length-1])imgs.pop();
@@ -5419,6 +5475,7 @@ async function removeHeroBanner(slot){
     if(fallback>-1)settings.heroConfig.activeBanner=fallback;else delete settings.heroConfig.activeBanner;
   }
   await fbU('rn_mall_settings',{heroConfig:settings.heroConfig});
+  if(oldUrl)deleteStorageFile(oldUrl);
   toast('Design removed.');
   renderHeroBannerRows();
 }
@@ -5477,13 +5534,16 @@ function setPromoAdType(slot,type){
 async function uploadPromoAdImage(slot,inp){
   if(!inp||!inp.files||!inp.files[0])return;
   toast('Uploading ad photo…');
+  var old=settings.promoAds&&settings.promoAds[slot];
+  var oldUrl=old&&(old.image||old.videoUrl);
   var b64=await compressImage(inp.files[0],1000,0.85);
   if(!b64){toast('Upload failed, try a different image','err');return;}
   var url=isGithubConfigured()?await uploadDataUrlToGithub(b64,'promo-ads'):null;
   if(!url){toast('Ad NOT saved, '+(window._lastStorageError||'Storage upload failed'),'err');return;}
   settings.promoAds=settings.promoAds||[];
-  settings.promoAds[slot]=Object.assign({},settings.promoAds[slot]||{},{type:'image',image:url});
+  settings.promoAds[slot]=Object.assign({},settings.promoAds[slot]||{},{type:'image',image:url,videoUrl:null});
   await fbU('rn_mall_settings',{promoAds:settings.promoAds});
+  if(oldUrl&&oldUrl!==url)deleteStorageFile(oldUrl);
   toast('Promo Ad '+(slot+1)+' saved!');
   renderPromoAdRows();
 }
@@ -5492,11 +5552,14 @@ async function uploadPromoAdVideo(slot,inp){
   var file=inp.files[0];
   if(file.size>15*1024*1024){toast('That video is over 15MB, use a shorter clip or paste a hosted video link instead','err');return;}
   toast('Uploading video…');
+  var old=settings.promoAds&&settings.promoAds[slot];
+  var oldUrl=old&&(old.image||old.videoUrl);
   var url=await uploadFileToStorage(file,'promo-ad-videos');
   if(!url){toast('Ad NOT saved, '+(window._lastStorageError||'Storage upload failed'),'err');return;}
   settings.promoAds=settings.promoAds||[];
-  settings.promoAds[slot]=Object.assign({},settings.promoAds[slot]||{},{type:'video',videoUrl:url});
+  settings.promoAds[slot]=Object.assign({},settings.promoAds[slot]||{},{type:'video',videoUrl:url,image:null});
   await fbU('rn_mall_settings',{promoAds:settings.promoAds});
+  if(oldUrl&&oldUrl!==url)deleteStorageFile(oldUrl);
   toast('Promo Ad '+(slot+1)+' saved!');
   renderPromoAdRows();
 }
@@ -5522,9 +5585,12 @@ async function savePromoAdMeta(slot){
 async function removePromoAd(slot){
   if(!confirm('Remove Promo Ad '+(slot+1)+'?'))return;
   settings.promoAds=settings.promoAds||[];
+  var old=settings.promoAds[slot];
+  var oldUrl=old&&(old.image||old.videoUrl);
   settings.promoAds[slot]=null;
   while(settings.promoAds.length&&!settings.promoAds[settings.promoAds.length-1])settings.promoAds.pop();
   await fbU('rn_mall_settings',{promoAds:settings.promoAds});
+  if(oldUrl)deleteStorageFile(oldUrl);
   toast('Promo Ad removed.');
   renderPromoAdRows();
 }
