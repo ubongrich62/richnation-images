@@ -4549,8 +4549,25 @@ async function migrateAllLegacyAccounts(){
     log('<b>'+col.label+'</b>: '+pending.length+' account(s) still on the old system.');
     for(const [id,rec] of pending){
       try{
-        const cred=await firebase.auth().createUserWithEmailAndPassword(rec.email,rec.password);
-        const uid=cred.user.uid;
+        let uid;
+        try{
+          const cred=await firebase.auth().createUserWithEmailAndPassword(rec.email,rec.password);
+          uid=cred.user.uid;
+        }catch(createErr){
+          // Same email already has a real Firebase Auth account, most likely because
+          // the same person also has a customer/staff/vendor/rider/investor account
+          // under this email that migrated first, Firebase Auth only allows one
+          // account per email, it doesn't know about this app's separate role
+          // collections. If this role's password matches that account's, sign in
+          // with it instead of creating a new one and link this record to it, same
+          // end result as if creation had succeeded. If the password doesn't match
+          // (a genuinely different person coincidentally sharing an email, or this
+          // role really does use a different password), this is a real conflict
+          // that needs a human to sort out, not something to paper over silently.
+          if(createErr.code!=='auth/email-already-in-use')throw createErr;
+          const cred2=await firebase.auth().signInWithEmailAndPassword(rec.email,rec.password);
+          uid=cred2.user.uid;
+        }
         await fbU(col.path+'/'+id,{authUid:uid,password:null});
         await fbS(col.byUid+'/'+uid,id);
         try{await firebase.auth().signOut();}catch(soErr){}
@@ -4558,7 +4575,11 @@ async function migrateAllLegacyAccounts(){
         log('&nbsp;&nbsp;✅ '+rec.email);
       }catch(migrateErr){
         failed++;
-        log('&nbsp;&nbsp;⚠️ '+rec.email+' — '+(migrateErr.code||migrateErr.message));
+        if(migrateErr.code==='auth/wrong-password'||migrateErr.code==='auth/invalid-credential'){
+          log('&nbsp;&nbsp;⚠️ '+rec.email+' — already has a different account with a DIFFERENT password under this email, needs manual review');
+        }else{
+          log('&nbsp;&nbsp;⚠️ '+rec.email+' — '+(migrateErr.code||migrateErr.message));
+        }
       }
       // Small pause between account creations, Firebase Auth rate-limits rapid
       // signups from the same browser session.
