@@ -174,13 +174,14 @@ export default {
     if (payload.notifyAdmins) {
       if (!payload.dbUrl) return json({error:'dbUrl is required for notifyAdmins'},400);
       try {
-        // A Google service-account OAuth token must be presented as an
-        // Authorization: Bearer header, Firebase Realtime Database's REST
-        // API does not accept it as an ?access_token= URL parameter the
-        // way some other Google APIs do, that form is rejected outright as
-        // "Unauthorized request." regardless of whether the token itself
-        // is valid.
-        const dbRes = await fetch(payload.dbUrl.replace(/\/+$/,'') + '/rn_mall_admin_fcm_tokens.json', {headers:{'Authorization':'Bearer '+accessToken}});
+        // Firebase Realtime Database's REST API authenticates via an "auth"
+        // QUERY PARAMETER for any credential type (legacy secret, ID token,
+        // or a service-account OAuth2 access token like this one), see
+        // https://firebase.google.com/docs/database/rest/auth. It does NOT
+        // recognize ?access_token= or an Authorization header, both
+        // conventions from OTHER Google APIs, those get silently treated
+        // as no credential at all.
+        const dbRes = await fetch(payload.dbUrl.replace(/\/+$/,'') + '/rn_mall_admin_fcm_tokens.json?auth=' + accessToken);
         const dbData = dbRes.ok ? await dbRes.json() : null;
         tokens = dbData ? Object.keys(dbData) : [];
       } catch (e) { return json({error:'Could not look up admin tokens: ' + e.message},502); }

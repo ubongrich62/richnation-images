@@ -129,17 +129,21 @@ async function getAccessToken(serviceAccount){
   return _cachedToken;
 }
 
-// A Google service-account OAuth token has to be presented as an
-// Authorization: Bearer header, Firebase Realtime Database's REST API does
-// NOT accept it as an ?access_token= URL parameter the way some other
-// Google APIs do, that form gets treated as no credential at all and
-// rejected with a flat 401 "Unauthorized request." regardless of whether
-// the token itself is valid, no matter what the rules say.
-function authHeaders(accessToken, extra){
-  return Object.assign({'Authorization':'Bearer '+accessToken}, extra||{});
+// Firebase Realtime Database's REST API authenticates via an "auth" QUERY
+// PARAMETER, whatever the credential type (legacy secret, a user's ID
+// token, or a service-account OAuth2 access token), see
+// https://firebase.google.com/docs/database/rest/auth. Neither of the two
+// things this used to try (?access_token=, then an Authorization: Bearer
+// header, both conventions from OTHER Google APIs) are what the Realtime
+// Database itself checks, so both were silently ignored and every request
+// was treated as fully unauthenticated, a flat 401 "Unauthorized request."
+// regardless of whether the token was valid or the service account had the
+// right IAM role.
+function authedUrl(dbUrl, path, accessToken){
+  return dbUrl.replace(/\/+$/,'') + '/' + path + '.json?auth=' + accessToken;
 }
 async function dbGet(dbUrl, path, accessToken){
-  const r = await fetch(dbUrl.replace(/\/+$/,'') + '/' + path + '.json', {headers: authHeaders(accessToken)});
+  const r = await fetch(authedUrl(dbUrl, path, accessToken));
   if (!r.ok) return null;
   return await r.json();
 }
@@ -149,20 +153,20 @@ async function dbGet(dbUrl, path, accessToken){
 // didn't work" — the difference between debugging this in five seconds
 // versus guessing blind.
 async function dbPatch(dbUrl, path, data, accessToken){
-  const r = await fetch(dbUrl.replace(/\/+$/,'') + '/' + path + '.json', {
-    method:'PATCH', headers: authHeaders(accessToken,{'Content-Type':'application/json'}), body: JSON.stringify(data)
+  const r = await fetch(authedUrl(dbUrl, path, accessToken), {
+    method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)
   });
   return {ok:r.ok, status:r.status, text: r.ok ? '' : await r.text()};
 }
 async function dbPut(dbUrl, path, data, accessToken){
-  const r = await fetch(dbUrl.replace(/\/+$/,'') + '/' + path + '.json', {
-    method:'PUT', headers: authHeaders(accessToken,{'Content-Type':'application/json'}), body: JSON.stringify(data)
+  const r = await fetch(authedUrl(dbUrl, path, accessToken), {
+    method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)
   });
   return {ok:r.ok, status:r.status, text: r.ok ? '' : await r.text()};
 }
 async function dbPost(dbUrl, path, data, accessToken){
-  const r = await fetch(dbUrl.replace(/\/+$/,'') + '/' + path + '.json', {
-    method:'POST', headers: authHeaders(accessToken,{'Content-Type':'application/json'}), body: JSON.stringify(data)
+  const r = await fetch(authedUrl(dbUrl, path, accessToken), {
+    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)
   });
   return {ok:r.ok, status:r.status, text: r.ok ? '' : await r.text()};
 }
