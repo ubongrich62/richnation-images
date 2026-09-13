@@ -2052,6 +2052,7 @@ function showPopupAd(pa){
   const placement=pa.placement||'center';
   const width=pa.widthPx||360;
   const isBanner=placement==='top-banner'||placement==='bottom-banner';
+  const maxHeight=pa.maxHeightPx||(isBanner?140:480);
   const overlay=document.createElement('div');
   overlay.id='popup-ad-overlay';
   let posStyle='';
@@ -2064,8 +2065,12 @@ function showPopupAd(pa){
   const cardStyle=isBanner
     ?'position:relative;width:100%;background:var(--card,#161616);'
     :'position:relative;width:'+width+'px;max-width:100%;background:var(--card,#161616);border-radius:12px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.5);';
+  // min() combines the admin's own cap with a viewport-relative one, so even a
+  // very large number typed into Max Height can never push the flyer taller
+  // than the screen itself on a small phone.
+  const imgStyle='width:100%;display:block;max-height:min('+(isBanner?'40vh':'80vh')+','+maxHeight+'px);object-fit:'+(isBanner?'cover':'contain')+';';
   overlay.innerHTML='<div style="'+cardStyle+'">'
-    +'<img src="'+pa.image+'" alt="'+escHtml(pa.caption||'Promotion')+'"'+imgClick+' style="width:100%;display:block;'+(isBanner?'max-height:140px;object-fit:cover;':'')+'"/>'
+    +'<img src="'+pa.image+'" alt="'+escHtml(pa.caption||'Promotion')+'"'+imgClick+' style="'+imgStyle+'"/>'
     +(pa.caption?'<div style="padding:10px 14px;font-size:12px;font-weight:700;color:var(--wh,#ccc);text-align:center;">'+escHtml(pa.caption)+'</div>':'')
     +'<span onclick="closePopupAd()" style="position:absolute;top:6px;right:8px;width:26px;height:26px;border-radius:99px;background:rgba(0,0,0,0.6);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;line-height:1;">&times;</span>'
     +'</div>';
