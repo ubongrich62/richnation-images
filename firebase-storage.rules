@@ -14,6 +14,19 @@
 // task-files/submissions are staff task attachments, not necessarily
 // photos (could be a PDF or doc), so they get their own rule: no content
 // type restriction, capped higher at 15MB.
+//
+// promo-ad-videos: video clips for the homepage promo ad slots (uploaded via
+// Firebase Storage as an R2 fallback), same 15MB cap the app already
+// enforces client-side, restricted to actual video files. Was previously
+// missing here entirely, meaning any upload landing on this fallback path
+// (R2 Worker unreachable/misconfigured) would get rejected.
+//
+// "read" already implies "list" under Storage's rule model, so the admin
+// panel's Storage Cleanup tool can enumerate what's in each of these
+// folders before deleting anything, using the same public visibility these
+// files already have. Delete is covered by "write" below and, like
+// uploads, stays scoped to this same folder allowlist, admin can only ever
+// clear out folders the app itself created, not arbitrary bucket paths.
 
 rules_version = '2';
 service firebase.storage {
@@ -34,6 +47,12 @@ service firebase.storage {
       allow read: if true;
       allow write: if folder in ['task-files','submissions']
                    && request.resource.size < 15 * 1024 * 1024;
+    }
+    match /{folder}/{allPaths=**} {
+      allow read: if true;
+      allow write: if folder == 'promo-ad-videos'
+                   && request.resource.size < 15 * 1024 * 1024
+                   && request.resource.contentType.matches('video/.*');
     }
   }
 }

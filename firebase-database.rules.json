@@ -153,6 +153,13 @@
       ".read": true,
       "$id": { ".write": true }
     },
+    // rn_mall_admin_login_attempts: the admin login-lockout counter. Has to
+    // be readable/writable before login succeeds, same reason as
+    // rn_mall_settings above, there is no authenticated session yet at that
+    // point. $id here is the sanitised admin/CEO email, not a secret.
+    "rn_mall_admin_login_attempts": {
+      "$id": { ".read": true, ".write": true }
+    },
     "rn_mall_customer_notifications": { "$id": { ".read": true, ".write": true } },
     "rn_mall_vendor_notifications":   { "$id": { ".read": true, ".write": true } },
     "rn_mall_staff_notifications":    { "$id": { ".read": true, ".write": true } },

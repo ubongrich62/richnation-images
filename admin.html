@@ -854,20 +854,39 @@ function togglePw(id,btn){
 }
 
 // ── LOGIN ──
+// Admin login has no per-account Firebase record the way customers do (the
+// Owner password is a shared array, not a per-email record), so a permanent
+// "locked until manually unlocked" scheme like the customer one would risk
+// locking the Owner out with nobody above them to unlock it. Instead this
+// tracks failed attempts per email in rn_mall_admin_login_attempts and applies
+// a temporary, self-expiring cooldown, protection against brute-forcing a
+// known admin/CEO email without any risk of permanent self-lockout.
+function adminAttemptsKey(email){return email.replace(/[.#$/\[\]]/g,'_');}
 async function doLogin(){
   const e=document.getElementById('li-e').value.trim().toLowerCase();
   const p=document.getElementById('li-p').value.trim();
   const err=document.getElementById('li-err');
   if(!p){err.textContent='Enter your password.';err.style.display='block';return;}
+  const attemptsKey=e?adminAttemptsKey(e):null;
   // Checked in Firebase first, not just localStorage, so a changed password works
   // from any device/browser, not only the one it was changed on. Two passwords are
   // supported (either one signs in), stored as an array, editable anytime in
   // Settings without needing to know the other one.
-  // Both reads fired together, not one after the other, the staff lookup is
+  // All three reads fired together, not one after another, the staff lookup is
   // only a fallback path (CEO login) but there's no reason to make every
   // Owner login wait through it sequentially when it doesn't depend on the
   // settings fetch at all, that used to double the real-world wait here.
-  const [s,allStaffMaybe]=await Promise.all([fbG('rn_mall_settings'),e?fbG('rn_mall_staff'):Promise.resolve(null)]);
+  const [s,allStaffMaybe,attemptsRec]=await Promise.all([
+    fbG('rn_mall_settings'),
+    e?fbG('rn_mall_staff'):Promise.resolve(null),
+    attemptsKey?fbG('rn_mall_admin_login_attempts/'+attemptsKey):Promise.resolve(null)
+  ]);
+  if(attemptsRec&&attemptsRec.lockedUntil&&attemptsRec.lockedUntil>Date.now()){
+    const mins=Math.ceil((attemptsRec.lockedUntil-Date.now())/60000);
+    err.textContent='Too many failed attempts. Try again in '+mins+' minute'+(mins===1?'':'s')+'.';
+    err.style.display='block';
+    return;
+  }
   let validList=Array.isArray((s||{}).adminPasswords)&&s.adminPasswords.length?s.adminPasswords:null;
   if(!validList){
     const local=JSON.parse(localStorage.getItem('rnm_admin_passwords')||'null');
@@ -878,7 +897,14 @@ async function doLogin(){
   // ever required the single password string below with no second factor at all.
   // Require it to actually match an authorised address now.
   const emailOk=ADMIN_EMAILS.includes(e);
+  const allStaff=allStaffMaybe||{};
+  const ceoMatch=e?Object.values(allStaff).find(st=>st.email===e&&st.role==='ceo'&&st.status==='active'):null;
+  const isKnownIdentity=emailOk||!!ceoMatch;
+  function clearAttempts(){
+    if(attemptsKey&&attemptsRec)fbU('rn_mall_admin_login_attempts/'+attemptsKey,{count:0,lockedUntil:null});
+  }
   if(validList.includes(p)&&emailOk){
+    clearAttempts();
     sessionStorage.setItem('rnm_admin_session','1');
     sessionStorage.removeItem('rnm_admin_is_ceo');
     if(e)sessionStorage.setItem('rnm_admin_email',e);
@@ -890,31 +916,38 @@ async function doLogin(){
   }
   // Not the Owner password, check if this is a CEO staff member who has been
   // explicitly granted admin panel access. Without that grant, this path does nothing.
-  if(e){
-    const allStaff=allStaffMaybe||{};
-    const match=Object.values(allStaff).find(s=>s.email===e&&s.password===p&&s.role==='ceo'&&s.status==='active');
-    if(match&&match.adminPanelAccess){
+  if(e&&ceoMatch&&ceoMatch.password===p){
+    if(ceoMatch.adminPanelAccess){
+      clearAttempts();
       sessionStorage.setItem('rnm_admin_session','1');
       sessionStorage.setItem('rnm_admin_is_ceo','1');
       sessionStorage.setItem('rnm_admin_email',e);
-      sessionStorage.setItem('rnm_admin_ceo_name',match.name);
+      sessionStorage.setItem('rnm_admin_ceo_name',ceoMatch.name);
       document.getElementById('login').style.display='none';
       document.getElementById('app').style.display='flex';
-      document.getElementById('tb-user').textContent=match.name+' (CEO)';
+      document.getElementById('tb-user').textContent=ceoMatch.name+' (CEO)';
       initAdmin();
       return;
     }
-    if(match&&!match.adminPanelAccess){
-      err.textContent='Your CEO account hasn\'t been granted admin panel access yet, ask the Owner to enable it in Staff & Roles.';err.style.display='block';
-      return;
-    }
+    err.textContent='Your CEO account hasn\'t been granted admin panel access yet, ask the Owner to enable it in Staff & Roles.';err.style.display='block';
+    return;
   }
-  if(!emailOk){
+  if(!isKnownIdentity){
     err.textContent='That email is not authorised.';err.style.display='block';
-  }else{
-    err.textContent='Incorrect password.';err.style.display='block';
-    err.style.animation='none';void err.offsetWidth;err.style.animation='shake 0.4s ease';
+    return;
   }
+  const count=((attemptsRec&&attemptsRec.count)||0)+1;
+  if(count>=3){
+    const lockedUntil=Date.now()+15*60*1000;
+    await fbU('rn_mall_admin_login_attempts/'+attemptsKey,{count:0,lockedUntil,email:e});
+    fbP('rn_mall_notifications',{type:'admin_login_locked',email:e,date:ds(),read:false,ts:Date.now()});
+    err.textContent='Too many failed attempts. This sign-in is temporarily locked for 15 minutes.';
+  }else{
+    await fbU('rn_mall_admin_login_attempts/'+attemptsKey,{count,email:e});
+    err.textContent='Incorrect password. ('+count+'/3 attempts before a temporary lock.)';
+  }
+  err.style.display='block';
+  err.style.animation='none';void err.offsetWidth;err.style.animation='shake 0.4s ease';
 }
 document.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&document.getElementById('login').style.display!=='none')doLogin();
@@ -4447,6 +4480,17 @@ function renderSettings(c){
   </div>
 
   <div class="card fade-in">
+    <div class="card-title">${iconBadge('trash',14)} Storage Cleanup</div>
+    <div class="card-sub">Photos and videos are now stored on Cloudflare R2, Firebase Storage is only used as a fallback. Old files uploaded before that move can still be sitting in Firebase Storage taking up space.</div>
+    <div class="info-box">
+      Scans every folder Firebase Storage actually accepts uploads to and shows how many files and how much space each one is using. Deleting a folder here permanently removes every file in it from Firebase, this cannot be undone and does not check whether anything currently displayed on the site still points at one of those files, only delete a folder you're sure is no longer needed.
+    </div>
+    <button class="btn btn-or" id="storage-scan-btn" onclick="scanStorageFolders()">Scan Firebase Storage</button>
+    <div id="storage-scan-results" style="display:none;margin-top:14px;"></div>
+    <div id="storage-cleanup-log" style="display:none;margin-top:12px;max-height:260px;overflow-y:auto;background:var(--card2);border:1px solid var(--bdr);border-radius:8px;padding:12px;font-size:11px;font-family:monospace;color:var(--wh);line-height:1.7;"></div>
+  </div>
+
+  <div class="card fade-in">
     <div class="card-title">Currency & Exchange Rate</div>
     <div class="card-sub">Set the USD to NGN exchange rate. This controls all dollar price displays on the mall.</div>
     <div class="fg"><label class="lbl">Exchange Rate (1 USD = ? NGN)</label>
@@ -4635,6 +4679,71 @@ async function migrateAllLegacyAccounts(){
   log('<b>Done.</b> '+migrated+' migrated, '+failed+' failed.');
   btn.disabled=false;
   toast('Migration finished: '+migrated+' migrated, '+failed+' failed');
+}
+// Kept in sync with the folder allowlist in firebase-storage.rules, deletion
+// only ever targets folders the app itself created (and rules would reject
+// a delete outside this list anyway), never an arbitrary bucket path.
+const STORAGE_CLEANUP_FOLDERS=[
+  'banners','products','staff','investors','riders','vendors','orders',
+  'hero-banner','payment-icons','colors','vendor-photos','vendor-products',
+  'reviews','staff-photos','staff-products','investor-photos','rider-photos',
+  'task-files','submissions','promo-ad-videos'
+];
+async function fbStorageListAll(prefix){
+  let items=[],pageToken;
+  do{
+    const url='https://firebasestorage.googleapis.com/v0/b/'+FIREBASE_STORAGE_BUCKET+'/o?prefix='+encodeURIComponent(prefix)+'&maxResults=1000'+(pageToken?'&pageToken='+encodeURIComponent(pageToken):'');
+    let res;
+    try{res=await fbFetchTimeout(url,null,10000);}catch(e){break;}
+    if(!res||!res.ok)break;
+    const data=await res.json();
+    items=items.concat(data.items||[]);
+    pageToken=data.nextPageToken;
+  }while(pageToken);
+  return items;
+}
+function fmtBytes(n){
+  if(n<1024)return n+' B';
+  if(n<1024*1024)return (n/1024).toFixed(1)+' KB';
+  return (n/(1024*1024)).toFixed(1)+' MB';
+}
+async function scanStorageFolders(){
+  const btn=document.getElementById('storage-scan-btn');
+  const resultsEl=document.getElementById('storage-scan-results');
+  btn.disabled=true;btn.textContent='Scanning…';
+  resultsEl.style.display='block';
+  resultsEl.innerHTML='<div style="font-size:12px;color:var(--wh);font-weight:700;">Scanning '+STORAGE_CLEANUP_FOLDERS.length+' folders, this can take a moment…</div>';
+  const rows=[];
+  for(const folder of STORAGE_CLEANUP_FOLDERS){
+    const items=await fbStorageListAll(folder+'/');
+    const totalBytes=items.reduce(function(sum,it){return sum+(parseInt(it.size)||0);},0);
+    rows.push({folder:folder,count:items.length,bytes:totalBytes});
+  }
+  resultsEl.innerHTML=rows.map(function(r){
+    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--bdr);">'
+      +'<div><div style="font-weight:800;font-size:12px;">'+r.folder+'</div><div style="font-size:11px;color:var(--mu);margin-top:2px;">'+r.count+' file'+(r.count===1?'':'s')+', '+fmtBytes(r.bytes)+'</div></div>'
+      +(r.count>0?'<button class="btn btn-re" style="font-size:10px;padding:6px 12px;flex-shrink:0;" onclick="deleteStorageFolderPrompt(\''+r.folder+'\','+r.count+')">Delete Forever</button>':'<span style="font-size:10px;color:var(--mu);flex-shrink:0;">Empty</span>');
+  }).join('');
+  btn.disabled=false;btn.textContent='Re-scan Firebase Storage';
+}
+async function deleteStorageFolderPrompt(folder,count){
+  const typed=prompt('This permanently deletes all '+count+' file(s) in "'+folder+'" from Firebase Storage. This cannot be undone.\n\nType the folder name ('+folder+') to confirm:');
+  if(typed!==folder){if(typed!==null)toast('Folder name did not match, nothing was deleted','err');return;}
+  const logEl=document.getElementById('storage-cleanup-log');
+  logEl.style.display='block';
+  function log(msg){logEl.innerHTML+=msg+'<br>';logEl.scrollTop=logEl.scrollHeight;}
+  log('<b>Deleting '+folder+'…</b>');
+  const items=await fbStorageListAll(folder+'/');
+  let deleted=0,failed=0;
+  for(const item of items){
+    try{
+      await fbFetchTimeout('https://firebasestorage.googleapis.com/v0/b/'+FIREBASE_STORAGE_BUCKET+'/o/'+encodeURIComponent(item.name),{method:'DELETE'},8000);
+      deleted++;
+    }catch(e){failed++;}
+  }
+  log('&nbsp;&nbsp;'+iconBadge('check',14)+' '+deleted+' file(s) deleted'+(failed?', '+failed+' failed':''));
+  toast(folder+': '+deleted+' file(s) deleted permanently'+(failed?', '+failed+' failed':''));
+  scanStorageFolders();
 }
 function showPwMsg(text,type){
   const el=document.getElementById('pw-msg');if(!el)return;
