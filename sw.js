@@ -13,6 +13,48 @@
 // static assets (this HTML shell, icons, the manifest). Firebase, Paystack,
 // fonts, map tiles, and any other cross-origin request are passed straight
 // through, never cached, never intercepted beyond this file existing.
+//
+// This file ALSO now handles real push notifications (Firebase Cloud
+// Messaging). A push arriving while no tab has focus only reliably shows a
+// system notification if a service worker actually calls showNotification()
+// for it, browsers don't guarantee that on their own, so this is required,
+// not optional, for background delivery to actually work. Firebase's own
+// compat SDK is loaded here (importScripts, not a <script> tag, service
+// workers can't use those) purely to get its onBackgroundMessage helper,
+// this doesn't add anything to what the six app pages themselves load.
+
+importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
+// Same public config every app page already uses (protected by Firebase's
+// own rules and API key restrictions, not by secrecy, same as the Maps key).
+firebase.initializeApp({apiKey:"AIzaSyDLGnyGB8ZnEc2u6TbVzjIAQi1pgSaZVyQ",authDomain:"richnation-portal.firebaseapp.com",databaseURL:"https://richnation-portal-default-rtdb.firebaseio.com",projectId:"richnation-portal",storageBucket:"richnation-portal.firebasestorage.app",messagingSenderId:"175550692963",appId:"1:175550692963:web:1e3c995b3ed0baaadac256"});
+try{
+  const messaging = firebase.messaging();
+  messaging.onBackgroundMessage(function(payload){
+    const n = payload.notification || {};
+    self.registration.showNotification(n.title || 'RichNation Mall', {
+      body: n.body || '',
+      icon: n.icon || 'https://richnationmall.com/images/branding/richnation-logo-v3.png',
+      data: payload.data || {}
+    });
+  });
+}catch(e){
+  // Messaging not supported in this browser/context, the rest of the SW
+  // (PWA shell caching below) still works fine without it.
+}
+
+self.addEventListener('notificationclick', function(event){
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || '/';
+  event.waitUntil(
+    self.clients.matchAll({type:'window'}).then(function(clientsArr){
+      for (const client of clientsArr){
+        if (client.url.indexOf(url) !== -1 && 'focus' in client) return client.focus();
+      }
+      if (self.clients.openWindow) return self.clients.openWindow(url);
+    })
+  );
+});
 
 const CACHE_NAME = 'richnation-shell-v3';
 const SHELL_ASSETS = [

@@ -160,6 +160,14 @@
     "rn_mall_admin_login_attempts": {
       "$id": { ".read": true, ".write": true }
     },
+    // rn_mall_admin_fcm_tokens: push-notification device tokens for the admin
+    // panel (customers' saveOrder() reads the whole collection to push every
+    // admin device on a new order, same shape/reason as rn_mall_notifications
+    // above, so it needs collection-level read, not just per-token).
+    "rn_mall_admin_fcm_tokens": {
+      ".read": true,
+      "$id": { ".write": true }
+    },
     "rn_mall_customer_notifications": { "$id": { ".read": true, ".write": true } },
     "rn_mall_vendor_notifications":   { "$id": { ".read": true, ".write": true } },
     "rn_mall_staff_notifications":    { "$id": { ".read": true, ".write": true } },

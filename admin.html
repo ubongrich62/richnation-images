@@ -588,6 +588,52 @@ function loadAppCheckWhenIdle(){
 }
 if(document.readyState==='complete'){setTimeout(loadAppCheckWhenIdle,2000);}
 else window.addEventListener('load',function(){setTimeout(loadAppCheckWhenIdle,2000);});
+// Registered here too (not just on index.html) because getting a push token below
+// requires a service worker already registered on this exact origin/scope, an admin
+// who never visits the customer site otherwise never gets one.
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});
+}
+// Loads firebase-messaging-compat.js on demand and hands back a ready firebase.messaging()
+// instance, or null if push isn't supported/configured here, following the exact same
+// memoized-loader pattern as ensureFirebaseAuthReady() above (reusing loadFirebaseAppCompat()
+// so this never re-triggers the app-compat double-load bug).
+let _firebaseMessagingReadyPromise=null;
+function ensureFirebaseMessagingReady(){
+  if(_firebaseMessagingReadyPromise)return _firebaseMessagingReadyPromise;
+  _firebaseMessagingReadyPromise=loadFirebaseAppCompat().then(function(ok){
+    if(!ok||!('serviceWorker' in navigator)||!('Notification' in window))return null;
+    try{if(typeof firebase!=='undefined'&&(!firebase.apps||!firebase.apps.length))firebase.initializeApp(FIREBASE_CONFIG);}catch(e){}
+    function ready(){
+      if(typeof firebase==='undefined'||!firebase.messaging)return null;
+      var m=firebase.messaging();
+      try{m.onMessage(function(payload){handleForegroundPush(payload);});}catch(e){}
+      return m;
+    }
+    if(typeof firebase!=='undefined'&&firebase.messaging)return ready();
+    return fbLoadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js').then(function(ok2){return ok2?ready():null;});
+  });
+  return _firebaseMessagingReadyPromise;
+}
+// Browsers only show a system notification for push automatically when no tab has
+// focus, this covers the case where an admin has the tab open and focused already.
+function handleForegroundPush(payload){
+  var n=(payload&&payload.notification)||{};
+  toast((n.title?n.title+': ':'')+(n.body||'New notification'));
+}
+// Shared by every trigger point that needs to actually send a push (new order, chat
+// reply, etc). Silently does nothing if no Worker is configured yet, callers don't
+// need to check settings.pushWorkerUrl themselves first.
+async function sendPushToTokens(tokens,title,body,data,url){
+  var list=(tokens||[]).filter(Boolean);
+  if(!list.length||!settings.pushWorkerUrl)return;
+  try{
+    await fetch(settings.pushWorkerUrl.replace(/\/+$/,''),{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({tokens:list,title:title,body:body,data:data||{},url:url||''})
+    });
+  }catch(e){console.warn('Push send failed:',e.message);}
+}
 const WA_NUM='2349164678560';
 const ADMIN_EMAILS=['richnationwbpt61@gmail.com','ubongrich62@gmail.com'];
 
@@ -2724,6 +2770,8 @@ async function assignRiderToOrder(tracking){
   const order=await fbG('rn_mall_orders/'+tracking);if(!order)return;
   const tl=(order.timeline||[]).concat([{status:'Assigned to Rider',time:new Date().toISOString(),note:'Assigned to '+riderData.name+' ('+riderData.vehicleType+')'}]);
   await fbU('rn_mall_orders/'+tracking,{riderId:riderId,riderName:riderData.name,riderPhone:riderData.phone||'',riderVehicleType:riderData.vehicleType||'',deliveryStage:'assigned',timeline:tl});
+  const riderTokens=riderData.fcmTokens?Object.keys(riderData.fcmTokens):[];
+  sendPushToTokens(riderTokens,'New Delivery Assigned','Order '+tracking+' has been assigned to you, tap to view.',{tracking:tracking},'rider.html');
   toast('Assigned to '+riderData.name+'!');
   nav('orders',false);
 }
@@ -3873,6 +3921,8 @@ async function saveOrderStatus(tracking){
       ?'Your order '+tracking+' was cancelled. Reason: '+note+(updates.refunded?', ₦'+parseInt(o.total||0).toLocaleString()+' has been refunded to your Wallet.':'')
       :'Your order '+tracking+' is now: '+dispStatus+(note?'. '+note:'');
     await fbPNotify('rn_mall_customer_notifications/'+o.customer.id,{type:'status_update',orderId:tracking,message:msg,date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
+    const custFcmTokens=await fbG('rn_mall_customers/'+o.customer.id+'/fcmTokens');
+    sendPushToTokens(custFcmTokens?Object.keys(custFcmTokens):[],'RichNation Mall',msg,{tracking:tracking},'index.html');
   }
   toast(status==='cancelled'?'Order cancelled, customer notified and refunded!':'Status updated to: '+dispStatus+', customer notified!');
   loadOrderChat(tracking);
@@ -3926,6 +3976,8 @@ async function notifyCustomerOfChatReply(chatKey,text,orderId){
     }
     if(!custId)return;
     await fbPNotify('rn_mall_customer_notifications/'+custId,{type:'chat_reply',orderId:orderId||'',chatKey:chatKey,message:'RichNation Mall replied: "'+text.slice(0,80)+'"',date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
+    const chatFcmTokens=await fbG('rn_mall_customers/'+custId+'/fcmTokens');
+    sendPushToTokens(chatFcmTokens?Object.keys(chatFcmTokens):[],'RichNation Mall','New message: "'+text.slice(0,120)+'"',{orderId:orderId||''},'index.html');
   }catch(e){console.warn('Chat notify failed:',e);}
 }
 async function sendOrderChat(tracking){
@@ -4610,6 +4662,22 @@ function renderSettings(c){
   </div>
 
   <div class="card fade-in">
+    <div class="card-title">${iconBadge('bell',14)} Push Notifications</div>
+    <div class="card-sub">Real browser/phone push notifications, delivered even if the site isn't open, for order updates (customers), new orders (you), and new deliveries (riders). Needs a small Cloudflare Worker to actually send them, since none of these six apps have a real backend server. Deploy <code>cloudflare-worker/richnation-push-worker.js</code> (instructions are in the file itself) and a Web Push key from Firebase Console → Project Settings → Cloud Messaging, then paste both below. Leave blank to keep using the existing in-app notification bell only.</div>
+    <div class="fg"><label class="lbl">Push Worker URL</label>
+      <input class="inp" id="set-push-url" value="${settings.pushWorkerUrl||''}" placeholder="https://richnation-push.your-subdomain.workers.dev"/>
+    </div>
+    <div class="fg"><label class="lbl">Web Push (VAPID) Key</label>
+      <input class="inp" id="set-push-vapid" value="${settings.pushVapidKey||''}" placeholder="From Firebase Console → Cloud Messaging → Web configuration"/>
+    </div>
+    <button class="btn btn-or" onclick="savePushSettings()">Save Push Settings</button>
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--bdr);">
+      <div class="card-sub" style="margin-bottom:8px;">Get push notifications yourself here in the admin panel, for new orders.</div>
+      <button class="btn" id="admin-push-enable-btn" onclick="enableAdminPushNotifications()">${iconBadge('bell',14)} Enable Notifications on This Device</button>
+    </div>
+  </div>
+
+  <div class="card fade-in">
     <div class="card-title">Flash Sale Timer</div>
     <div class="card-sub">Set a countdown timer that shows on the mall homepage. Leave blank to disable.</div>
     <div class="fg"><label class="lbl">Flash Sale End Date and Time</label>
@@ -4661,6 +4729,37 @@ async function saveR2Url(){
   var ok=await fbU('rn_mall_settings',{r2WorkerUrl:url||null});
   if(!ok)return;
   toast(url?'Storage settings saved, new uploads now go to Cloudflare R2!':'Storage settings saved, back to Firebase Storage.');
+}
+async function savePushSettings(){
+  const url=document.getElementById('set-push-url')?.value.trim().replace(/\/+$/,'')||'';
+  const vapid=document.getElementById('set-push-vapid')?.value.trim()||'';
+  settings.pushWorkerUrl=url;settings.pushVapidKey=vapid;
+  var ok=await fbU('rn_mall_settings',{pushWorkerUrl:url||null,pushVapidKey:vapid||null});
+  if(!ok)return;
+  toast(url&&vapid?'Push settings saved, real push notifications are now live!':'Push settings saved.');
+}
+async function enableAdminPushNotifications(){
+  const btn=document.getElementById('admin-push-enable-btn');
+  if(!('Notification' in window)){toast('Push notifications are not supported in this browser.');return;}
+  if(Notification.permission==='denied'){toast("Notifications are blocked for this site, allow them in your browser's site settings first.");return;}
+  if(!settings.pushVapidKey){toast('Add and save the Web Push (VAPID) key above first.');return;}
+  if(btn)btn.disabled=true;
+  try{
+    const perm=await Notification.requestPermission();
+    if(perm!=='granted'){toast('Notifications permission was not granted.');return;}
+    const messaging=await ensureFirebaseMessagingReady();
+    if(!messaging){toast('Could not set up push notifications on this device.');return;}
+    const reg=await navigator.serviceWorker.register('sw.js');
+    const token=await messaging.getToken({vapidKey:settings.pushVapidKey,serviceWorkerRegistration:reg});
+    if(!token){toast('Could not get a push token from this browser.');return;}
+    await fbS('rn_mall_admin_fcm_tokens/'+token,{ts:Date.now()});
+    toast('Push notifications enabled on this device!');
+    if(btn){btn.textContent='✅ Notifications Enabled on This Device';}
+  }catch(e){
+    toast('Could not enable push notifications: '+e.message);
+  }finally{
+    if(btn)btn.disabled=false;
+  }
 }
 async function saveFlash(){
   const v=document.getElementById('set-flash')?.value;

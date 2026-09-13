@@ -1203,6 +1203,67 @@ if('serviceWorker' in navigator){
   });
   window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});
 }
+// Loads firebase-messaging-compat.js on demand and hands back a ready firebase.messaging()
+// instance, or null if push isn't supported/configured here, same memoized-loader pattern
+// as ensureFirebaseAuthReady() above (reusing loadFirebaseAppCompat() so this never
+// re-triggers the app-compat double-load bug).
+let _firebaseMessagingReadyPromise=null;
+function ensureFirebaseMessagingReady(){
+  if(_firebaseMessagingReadyPromise)return _firebaseMessagingReadyPromise;
+  _firebaseMessagingReadyPromise=loadFirebaseAppCompat().then(function(ok){
+    if(!ok||!('serviceWorker' in navigator)||!('Notification' in window))return null;
+    try{if(typeof firebase!=='undefined'&&(!firebase.apps||!firebase.apps.length))firebase.initializeApp(FIREBASE_CONFIG);}catch(e){}
+    function ready(){
+      if(typeof firebase==='undefined'||!firebase.messaging)return null;
+      var m=firebase.messaging();
+      try{m.onMessage(function(payload){handleForegroundPush(payload);});}catch(e){}
+      return m;
+    }
+    if(typeof firebase!=='undefined'&&firebase.messaging)return ready();
+    return fbLoadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js').then(function(ok2){return ok2?ready():null;});
+  });
+  return _firebaseMessagingReadyPromise;
+}
+// Browsers only show a system notification for push automatically when no tab has
+// focus, this covers the case where a customer has the tab open and focused already.
+function handleForegroundPush(payload){
+  var n=(payload&&payload.notification)||{};
+  toast((n.title?n.title+': ':'')+(n.body||'New notification'));
+}
+async function sendPushToTokens(tokens,title,body,data,url){
+  var list=(tokens||[]).filter(Boolean);
+  if(!list.length||!settings.pushWorkerUrl)return;
+  try{
+    await fetch(settings.pushWorkerUrl.replace(/\/+$/,''),{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({tokens:list,title:title,body:body,data:data||{},url:url||''})
+    });
+  }catch(e){console.warn('Push send failed:',e.message);}
+}
+async function enableCustomerPushNotifications(){
+  const btn=document.getElementById('acct-push-enable-btn');
+  if(!('Notification' in window)){toast('Push notifications are not supported in this browser.');return;}
+  if(Notification.permission==='denied'){toast("Notifications are blocked for this site, allow them in your browser's site settings first.");return;}
+  if(!settings.pushVapidKey){toast('Push notifications are not set up yet, please check back later.');return;}
+  if(!currUser){toast('Please sign in first.');return;}
+  if(btn)btn.disabled=true;
+  try{
+    const perm=await Notification.requestPermission();
+    if(perm!=='granted'){toast('Notifications permission was not granted.');return;}
+    const messaging=await ensureFirebaseMessagingReady();
+    if(!messaging){toast('Could not set up push notifications on this device.');return;}
+    const reg=await navigator.serviceWorker.register('sw.js');
+    const token=await messaging.getToken({vapidKey:settings.pushVapidKey,serviceWorkerRegistration:reg});
+    if(!token){toast('Could not get a push token from this browser.');return;}
+    await fbS('rn_mall_customers/'+currUser.id+'/fcmTokens/'+token,{ts:Date.now()});
+    toast('Push notifications enabled on this device!');
+    if(btn){btn.textContent='✅ Notifications Enabled';}
+  }catch(e){
+    toast('Could not enable push notifications: '+e.message);
+  }finally{
+    if(btn)btn.disabled=false;
+  }
+}
 const WA_NUM='2349164678560';
 let PAYSTACK_KEY='pk_live_005d2ffa19fb3405849eb17c44af15e007c3027a';
 let cart=JSON.parse(localStorage.getItem('rnm_cart')||'[]');
@@ -3107,6 +3168,8 @@ async function saveOrder(order){
   fbU('rn_mall_settings',{totalOrdersCount:newOrderCount});
   settings.totalOrdersCount=newOrderCount;
   await fbP('rn_mall_notifications',{type:'new_order',orderId:order.tracking,customer:order.customer.name,total:order.total,items:order.items.length,date:order.date,preOrder:order.preOrder||false,pod:order.payMethod==='pod',read:false,ts:Date.now()});
+  const adminFcmTokens=await fbG('rn_mall_admin_fcm_tokens');
+  sendPushToTokens(adminFcmTokens?Object.keys(adminFcmTokens):[],'New Order: '+order.tracking,order.customer.name+' just placed an order for '+fmt(order.total),{tracking:order.tracking},'admin.html');
   const priorOrders=await fbG('rn_mall_customer_orders/'+currUser.id)||{};
   const isFirstOrder=Object.keys(priorOrders).length===0;
   await fbP('rn_mall_customer_orders/'+currUser.id,{orderId:order.tracking,date:order.date});
@@ -4654,6 +4717,11 @@ async function accTab(tab,el,silent){
     initAccountAddressAutocomplete();
   }
   else if(tab==='profile'){c.innerHTML=`<div style="max-width:480px;"><div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;margin-bottom:14px;">My Profile</div><div class="g2"><div class="fg"><label class="lbl">First Name</label><input class="inp" id="pf-fn" value="${currUser.fname||''}"/></div><div class="fg"><label class="lbl">Last Name</label><input class="inp" id="pf-ln" value="${currUser.lname||''}"/></div></div><div class="fg"><label class="lbl">Email</label><input class="inp" type="email" id="pf-em" value="${currUser.email||''}"/></div><div class="fg"><label class="lbl">Phone</label><input class="inp" id="pf-ph" value="${currUser.phone||''}"/></div><div class="fg"><label class="lbl">New Password (leave blank to keep current)</label><div class="pw-wrap"><input class="inp" id="pf-pw" type="password" placeholder="New password" style="margin-bottom:0;"/><button class="pw-eye" onclick="this.previousElementSibling.type=this.previousElementSibling.type==='password'?'text':'password'">Show</button></div></div><button class="auth-btn" style="max-width:180px;" onclick="saveProfile()">Save Profile</button>
+    <div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:16px;margin-top:20px;">
+      <div style="font-weight:800;margin-bottom:6px;">${iconBadge('bell',14)} Push Notifications</div>
+      <div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:10px;">Get notified the moment your order status changes or a rider is on the way, even when this tab isn't open.</div>
+      <button class="auth-btn" id="acct-push-enable-btn" style="max-width:280px;" onclick="enableCustomerPushNotifications()">${iconBadge('bell',14)} Enable Notifications on This Device</button>
+    </div>
     <div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:16px;margin-top:20px;">
       <div style="font-weight:800;margin-bottom:6px;">${iconBadge('package',14)} Wholesale Pricing</div>
       ${currUser.wholesaleStatus==='approved'?'<div style="font-size:12px;color:var(--su);">'+iconBadge('check',12)+' You are an approved wholesale buyer, bulk pricing applies automatically on eligible products.</div>'
