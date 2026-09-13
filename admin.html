@@ -4876,8 +4876,17 @@ const STORAGE_CLEANUP_FOLDERS=[
   'banners','products','staff','investors','riders','vendors','orders',
   'hero-banner','payment-icons','colors','vendor-photos','vendor-products',
   'reviews','staff-photos','staff-products','investor-photos','rider-photos',
-  'task-files','submissions','promo-ad-videos'
+  'task-files','submissions','promo-ad-videos','promo-ads','popup-ads'
 ];
+// "hero-banner" and "banners" both legitimately hold hero banner images (the
+// current upload flow, Site Customiser -> Hero Banner, saves into "banners",
+// alongside Custom Banner images; "hero-banner" only ever gets used by the
+// one-time "move old base64 images to Storage" migration tool). Both are
+// real, both are worth checking, they're just easy to mix up by name alone.
+const STORAGE_FOLDER_LABELS={
+  'banners':'banners (hero &amp; custom banner images)',
+  'hero-banner':'hero-banner (older hero banners, from Storage migration)'
+};
 async function fbStorageGetMetadata(name){
   try{
     const res=await fbFetchTimeout('https://firebasestorage.googleapis.com/v0/b/'+FIREBASE_STORAGE_BUCKET+'/o/'+encodeURIComponent(name),null,10000);
@@ -4962,7 +4971,7 @@ function renderStorageScanRows(){
     }
     return '<div style="border-bottom:1px solid var(--bdr);">'
       +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;'+(count>0?'cursor:pointer;':'opacity:0.5;')+'"'+(count>0?' onclick="toggleStorageFolderExpand(\''+r.folder+'\')"':'')+'>'
-        +'<div><div style="font-weight:800;font-size:12px;">'+(count>0?(expanded?'▾ ':'▸ '):'')+r.folder+'</div><div style="font-size:11px;color:var(--mu);margin-top:2px;">'+count+' file'+(count===1?'':'s')+', '+fmtBytes(r.bytes)+'</div></div>'
+        +'<div><div style="font-weight:800;font-size:12px;">'+(count>0?(expanded?'▾ ':'▸ '):'')+(STORAGE_FOLDER_LABELS[r.folder]||r.folder)+'</div><div style="font-size:11px;color:var(--mu);margin-top:2px;">'+count+' file'+(count===1?'':'s')+', '+fmtBytes(r.bytes)+'</div></div>'
         +(count>0?'<span style="font-size:10px;color:var(--or);flex-shrink:0;font-weight:700;">'+(expanded?'Hide files':'View files')+'</span>':'<span style="font-size:10px;color:var(--mu);flex-shrink:0;">Empty</span>')
       +'</div>'
       +inner
