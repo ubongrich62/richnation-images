@@ -129,8 +129,17 @@ async function getAccessToken(serviceAccount){
   return _cachedToken;
 }
 
+// A Google service-account OAuth token has to be presented as an
+// Authorization: Bearer header, Firebase Realtime Database's REST API does
+// NOT accept it as an ?access_token= URL parameter the way some other
+// Google APIs do, that form gets treated as no credential at all and
+// rejected with a flat 401 "Unauthorized request." regardless of whether
+// the token itself is valid, no matter what the rules say.
+function authHeaders(accessToken, extra){
+  return Object.assign({'Authorization':'Bearer '+accessToken}, extra||{});
+}
 async function dbGet(dbUrl, path, accessToken){
-  const r = await fetch(dbUrl.replace(/\/+$/,'') + '/' + path + '.json?access_token=' + accessToken);
+  const r = await fetch(dbUrl.replace(/\/+$/,'') + '/' + path + '.json', {headers: authHeaders(accessToken)});
   if (!r.ok) return null;
   return await r.json();
 }
@@ -140,20 +149,20 @@ async function dbGet(dbUrl, path, accessToken){
 // didn't work" — the difference between debugging this in five seconds
 // versus guessing blind.
 async function dbPatch(dbUrl, path, data, accessToken){
-  const r = await fetch(dbUrl.replace(/\/+$/,'') + '/' + path + '.json?access_token=' + accessToken, {
-    method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)
+  const r = await fetch(dbUrl.replace(/\/+$/,'') + '/' + path + '.json', {
+    method:'PATCH', headers: authHeaders(accessToken,{'Content-Type':'application/json'}), body: JSON.stringify(data)
   });
   return {ok:r.ok, status:r.status, text: r.ok ? '' : await r.text()};
 }
 async function dbPut(dbUrl, path, data, accessToken){
-  const r = await fetch(dbUrl.replace(/\/+$/,'') + '/' + path + '.json?access_token=' + accessToken, {
-    method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)
+  const r = await fetch(dbUrl.replace(/\/+$/,'') + '/' + path + '.json', {
+    method:'PUT', headers: authHeaders(accessToken,{'Content-Type':'application/json'}), body: JSON.stringify(data)
   });
   return {ok:r.ok, status:r.status, text: r.ok ? '' : await r.text()};
 }
 async function dbPost(dbUrl, path, data, accessToken){
-  const r = await fetch(dbUrl.replace(/\/+$/,'') + '/' + path + '.json?access_token=' + accessToken, {
-    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)
+  const r = await fetch(dbUrl.replace(/\/+$/,'') + '/' + path + '.json', {
+    method:'POST', headers: authHeaders(accessToken,{'Content-Type':'application/json'}), body: JSON.stringify(data)
   });
   return {ok:r.ok, status:r.status, text: r.ok ? '' : await r.text()};
 }
