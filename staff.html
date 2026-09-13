@@ -82,6 +82,9 @@ button{font-family:inherit;}
 .stat-sub{font-size:11px;color:var(--wh);font-weight:700;margin-top:4px;}
 .card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r-md);padding:18px;margin-bottom:14px;}
 .card-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14px;}
+.card-sub{font-size:11px;color:var(--wh);font-weight:700;margin-bottom:16px;line-height:1.65;}
+.row-av{width:40px;height:40px;border-radius:var(--r-sm);background:rgba(255,106,0,0.12);color:var(--or);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;font-family:'Plus Jakarta Sans',sans-serif;overflow:hidden;}
+.row-av img{width:100%;height:100%;object-fit:cover;}
 .btn{background:transparent;border:1.5px solid var(--bdr);border-radius:var(--r-md);padding:9px 16px;font-size:12px;font-weight:600;color:var(--wh);font-weight:700;cursor:pointer;transition:border-color .15s,color .15s,background .15s;}
 .btn:hover{border-color:var(--wh);color:var(--wh);}
 .btn-or{background:var(--or);border:1.5px solid var(--or);color:#fff;font-weight:800;}
@@ -90,6 +93,8 @@ button{font-family:inherit;}
 .btn-dk:hover{border-color:var(--wh);color:var(--wh);}
 .btn-re{background:rgba(244,63,94,0.1);border:1.5px solid rgba(244,63,94,0.3);color:var(--re);font-weight:700;}
 .btn-re:hover{background:rgba(244,63,94,0.16);}
+.btn-gr{background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.25);}
+.row-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center;flex-shrink:0;}
 .btn-lg{padding:11px 18px;font-size:13px;}
 .fg{margin-bottom:14px;}
 .inp,.ta{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:11px 13px;color:var(--wh);font-size:13px;font-family:inherit;transition:border-color .15s,box-shadow .15s;}
@@ -386,7 +391,7 @@ const STAFF_ROLES=[
   {id:'warehouse_manager',label:'Warehouse Manager',access:'product_manager',dept:'Operations'},
   {id:'accountant',label:'Accountant',access:'accountant',dept:'Finance'},
   {id:'hr_manager',label:'HR Manager',access:'hr',dept:'Human Resources'},
-  {id:'logistics_manager',label:'Logistics Manager',access:'logistics',dept:'Logistics'},
+  {id:'logistics_manager',label:'Logistics Manager',access:'logistics_manager',dept:'Logistics'},
   {id:'dispatch_rider',label:'Dispatch Rider',access:'logistics',dept:'Logistics'},
   {id:'customer_service',label:'Customer Service',access:'support',dept:'Customer Experience'},
   {id:'marketer',label:'Marketer',access:'marketing',dept:'Marketing'},
@@ -402,7 +407,7 @@ const ROLE_JOB_DESCRIPTIONS={
   warehouse_manager:'Manages stock levels, receives new inventory, keeps product quantities accurate, flags low-stock items.',
   accountant:'Tracks revenue and analytics, reviews and approves wallet refund requests, handles financial reporting.',
   hr_manager:'Manages staff records, reviews reports/complaints/leave requests from the team, oversees onboarding of new staff.',
-  logistics_manager:'Oversees the delivery operation, assigns riders to orders, monitors active deliveries, resolves delivery issues.',
+  logistics_manager:'Full control of the delivery operation: assigns/reassigns riders to orders, approves or rejects new rider applications, manages the rider roster (strikes, suspensions, payouts, bank verification), monitors the live fleet map, resolves rider complaints and reports, and sets delivery fees.',
   dispatch_rider:'Picks up and delivers assigned orders, updates delivery status live so customers can track progress, collects proof of delivery.',
   customer_service:'Responds to customer chat messages, resolves wallet/refund complaints, handles general customer questions.',
   marketer:'Plans and runs promotional campaigns, coordinates with Social Media/Content/Graphics roles, tracks campaign performance.',
@@ -413,13 +418,20 @@ const ROLE_JOB_DESCRIPTIONS={
 };
 function accessFor(roleId){const r=STAFF_ROLES.find(function(x){return x.id===roleId;});return r?r.access:'viewer';}
 const ACCESS_NAV={
-  exec:[['dashboard','home','Dashboard'],['orders','box','Orders'],['products','box','Products'],['vendors','building','Vendors'],['analytics','chart','Analytics'],['customers','user','Customers'],['wallet-issues','ticket','Wallet Issues'],['customer-chat','chat','Customer Chat'],['approvals','star','Approvals']],
+  exec:[['dashboard','home','Dashboard'],['orders','box','Orders'],['products','box','Products'],['vendors','building','Vendors'],['analytics','chart','Analytics'],['customers','user','Customers'],['wallet-issues','ticket','Wallet Issues'],['customer-chat','chat','Customer Chat'],['approvals','star','Approvals'],['riders','bike','Riders'],['fleet','building','Fleet'],['delivery-fees','cash','Delivery Fees']],
   manager:[['dashboard','home','Dashboard'],['orders','box','Orders'],['products','box','Products'],['vendors','building','Vendors'],['analytics','chart','Analytics'],['customers','user','Customers']],
   product_manager:[['dashboard','home','Dashboard'],['products','box','Products']],
   marketing:[['dashboard','home','Dashboard'],['analytics','chart','Analytics'],['products','box','Products'],['submissions','file','My Submissions']],
   support:[['dashboard','home','Dashboard'],['orders','box','Orders'],['wallet-issues','ticket','Wallet Issues']],
   vendor_relations:[['dashboard','home','Dashboard'],['vendors','building','Vendors'],['analytics','chart','Analytics']],
   logistics:[['dashboard','home','Dashboard'],['orders','box','Orders'],['fleet','building','Fleet']],
+  // Logistics Manager gets full run of the delivery operation: every order (to
+  // assign/reassign a rider), the complete rider roster (approve applications,
+  // suspend, strikes, payouts, bank verification), the live fleet map, delivery
+  // complaints/messages, delivery fee settings, and analytics/wallet issues
+  // (revenue itself still stays hidden unless admin grants staff.permissions.viewRevenue,
+  // same gate every other role goes through).
+  logistics_manager:[['dashboard','home','Dashboard'],['orders','box','Orders'],['riders','bike','Riders'],['fleet','building','Fleet'],['delivery-fees','cash','Delivery Fees'],['analytics','chart','Analytics'],['wallet-issues','ticket','Wallet Issues']],
   accountant:[['dashboard','home','Dashboard'],['analytics','chart','Analytics'],['wallet-issues','ticket','Wallet Issues']],
   hr:[['dashboard','home','Dashboard']],
   viewer:[['dashboard','home','Dashboard'],['analytics','chart','Analytics']]
@@ -728,7 +740,8 @@ async function snav(page){
     'customer-chat':renderCustomerChatList,
     salary:renderSalary,points:renderPoints,reports:renderReports,complaints:renderComplaints,
     leave:renderLeave,messages:renderMessages,activity:renderMyActivity,policy:renderCompanyPolicy,profile:renderProfile,
-    submissions:renderSubmissions,approvals:renderApprovals,fleet:renderFleet
+    submissions:renderSubmissions,approvals:renderApprovals,fleet:renderFleet,
+    riders:renderRiders,'delivery-fees':renderStaffDeliveryFees
   };
   // Render right away with whatever staff data is already cached, never make the
   // person wait on a network round-trip just to see the page they clicked into.
@@ -1017,6 +1030,464 @@ function fileToBase64(file){
   });
 }
 // ── SUBMISSIONS (Content Creator / Graphic Designer / Marketer / Social Media Manager) ──
+// ── RIDERS / DISPATCH (Logistics Manager) ──
+// Full parity with admin.html's Dispatch Riders section: approve/reject rider
+// applications, manage the active roster (strikes, suspension, payouts, bank
+// verification), assign/reassign riders to orders, and handle rider
+// complaints/reports/messages. Reads and writes the exact same Firebase
+// collections admin.html and rider.html already use, this is the same rider
+// data seen from the Logistics Manager's own portal, not a separate copy.
+function escAttr(s){
+  return String(s==null?'':s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/\\/g,'\\\\')
+    .replace(/'/g,"\\'")
+    .replace(/"/g,'&quot;');
+}
+// staff.html has no push-notification opt-in flow of its own (staff sign in with a
+// shared office device far more often than a personal phone), but assigning a rider
+// from here should still trigger the same real push that admin.html sends, so this
+// just posts to whatever Worker URL is already configured, exactly like the other
+// apps' sendPushToTokens() does, fetched fresh rather than cached in a global
+// (staff.html doesn't keep one, matching how it already fetches rn_mall_settings
+// ad hoc elsewhere in this file).
+async function sendPushToTokens(tokens,title,body,data,url){
+  var list=(tokens||[]).filter(Boolean);
+  if(!list.length)return;
+  try{
+    var pushWorkerUrl=await fbG('rn_mall_settings/pushWorkerUrl');
+    if(!pushWorkerUrl)return;
+    await fetch(pushWorkerUrl.replace(/\/+$/,''),{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({tokens:list,title:title,body:body,data:data||{},url:url||''})
+    });
+  }catch(e){console.warn('Push send failed:',e.message);}
+}
+async function fbDeleteWithRetry(path,attempts){
+  attempts=attempts||4;
+  for(var i=0;i<attempts;i++){
+    var ok=await fbD(path);
+    if(ok)return true;
+    if(i<attempts-1)await new Promise(function(res){setTimeout(res,600*(i+1));});
+  }
+  return false;
+}
+async function deleteStorageFile(url){
+  if(!url||typeof url!=='string')return;
+  try{
+    if(url.indexOf('firebasestorage.googleapis.com')!==-1){
+      var m=url.match(/\/o\/([^?]+)/);
+      if(!m)return;
+      await fbFetchTimeout('https://firebasestorage.googleapis.com/v0/b/'+FIREBASE_STORAGE_BUCKET+'/o/'+m[1],{method:'DELETE'},8000);
+      return;
+    }
+    var r2WorkerUrl=await fbG('rn_mall_settings/r2WorkerUrl');
+    if(r2WorkerUrl){
+      var base=r2WorkerUrl.replace(/\/+$/,'');
+      if(url.indexOf(base)===0){
+        var path=url.slice(base.length).replace(/^\//,'').split('?')[0];
+        await fetch(base+'/?path='+encodeURIComponent(path),{method:'DELETE'});
+      }
+    }
+  }catch(e){console.warn('Storage delete failed:',e);}
+}
+async function generateRiderNumber(){
+  const all=await fbG('rn_mall_riders')||{};
+  const nums=Object.values(all).map(function(r){return r.riderNumber||'';}).filter(function(n){return /^RNGR-\d+$/.test(n);}).map(function(n){return parseInt(n.split('-')[1]);});
+  const next=(nums.length?Math.max.apply(null,nums):0)+1;
+  return 'RNGR-'+String(next).padStart(3,'0');
+}
+function generateRiderBio(name,vehicleType,joinYear){
+  return name+' is a Dispatch Rider at RichNation Global Ltd, working within the RichNation Mall division. Riding a '+(vehicleType||'vehicle')+', they have been delivering orders and keeping customers updated in real time since joining in '+joinYear+', supporting RichNation Mall\'s mission to Build People, Build Platforms, and Create Millionaires.';
+}
+const STAGE_LABELS_ADMIN={assigned:'Assigned',picked_up:'Picked Up',in_transit:'In Transit',arrived:'Arrived',delivered:'Delivered'};
+let _riderView='list';
+function riderNav(view){_riderView=view;snav('riders');}
+async function renderRiders(c){
+  var html='<div class="page-hdr"><div class="page-hdr-title">Riders</div></div>';
+  html+='<div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;">';
+  [['list','Riders'],['active','Active Deliveries'],['reports','Reports & Complaints'],['messages','Messages']].forEach(function(t){
+    html+='<button class="btn '+(_riderView===t[0]?'btn-or':'btn-dk')+'" onclick="riderNav(\''+t[0]+'\')">'+t[1]+'</button>';
+  });
+  html+='</div><div id="rider-view-body"></div>';
+  c.innerHTML=html;
+  const body=document.getElementById('rider-view-body');
+  if(_riderView==='list')renderRiderList(body);
+  else if(_riderView==='active')renderActiveDeliveries(body);
+  else if(_riderView==='reports')renderRiderReportsComplaints(body);
+  else renderRiderMessagesList(body);
+}
+async function renderRiderReportsComplaints(c){
+  c.innerHTML='<div style="color:var(--wh);font-weight:700;">Loading...</div>';
+  const ridersAll=await fbG('rn_mall_riders')||{};
+  let allComplaints=[],allReports=[];
+  for(const rid in ridersAll){
+    const comps=await fbG('rn_mall_rider_complaints/'+rid)||{};
+    Object.entries(comps).forEach(function(e){allComplaints.push(Object.assign({_key:e[0],riderId:rid},e[1]));});
+    const reps=await fbG('rn_mall_rider_reports/'+rid)||{};
+    Object.entries(reps).forEach(function(e){allReports.push(Object.assign({_key:e[0],riderId:rid},e[1]));});
+  }
+  allComplaints.sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  allReports.sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  const urgent=allComplaints.filter(function(cm){return cm.urgent&&cm.status!=='resolved';});
+  var html='';
+  if(urgent.length){
+    html+='<div class="card-title" style="color:var(--re);margin-bottom:10px;">'+iconBadge('warning',14)+' Urgent, Needs Immediate Attention ('+urgent.length+')</div>';
+    html+=urgent.map(function(cm){return '<div class="data-row" style="border-color:var(--re);background:rgba(244,63,94,0.06);"><div style="flex:1;"><div class="row-name">'+cm.riderName+'</div><div class="row-meta">'+cm.message+'</div><div class="row-meta">'+cm.date+'</div></div><button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="resolveRiderComplaint(\''+cm.riderId+'\',\''+cm._key+'\')">Resolve</button></div>';}).join('');
+  }
+  html+='<div class="card-title" style="margin:16px 0 10px;">All Complaints</div>';
+  html+=allComplaints.length?allComplaints.map(function(cm){return '<div class="data-row"><div style="flex:1;">'+(cm.urgent?'<span style="font-size:9px;font-weight:800;color:var(--re);">'+iconBadge('warning',14)+' URGENT</span> ':'')+'<div class="row-name">'+cm.riderName+'</div><div class="row-meta">'+cm.message+'</div><div class="row-meta">'+cm.date+' &middot; '+(cm.status||'pending')+'</div></div>'+(cm.status!=='resolved'?'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="resolveRiderComplaint(\''+cm.riderId+'\',\''+cm._key+'\')">Mark Resolved</button>':'')+'</div>';}).join(''):'<div class="card" style="text-align:center;padding:30px;color:var(--wh);font-weight:700;">No complaints yet.</div>';
+  html+='<div class="card-title" style="margin:16px 0 10px;">Reports</div>';
+  html+=allReports.length?allReports.map(function(r){return '<div class="data-row"><div style="flex:1;"><div class="row-name">'+r.riderName+'</div><div class="row-meta">'+r.message+'</div><div class="row-meta">'+r.date+'</div></div></div>';}).join(''):'<div class="card" style="text-align:center;padding:30px;color:var(--wh);font-weight:700;">No reports yet.</div>';
+  c.innerHTML=html;
+}
+async function resolveRiderComplaint(riderId,key){
+  const reply=prompt('Optional reply to the rider (or leave blank):');
+  await fbU('rn_mall_rider_complaints/'+riderId+'/'+key,{status:'resolved',adminReply:reply||''});
+  await logStaffActivity('Resolved rider complaint',riderId);
+  toast('Marked resolved');
+  riderNav('reports');
+}
+async function renderRiderMessagesList(c){
+  c.innerHTML='<div style="color:var(--wh);font-weight:700;">Loading...</div>';
+  const ridersAll=await fbG('rn_mall_riders')||{};
+  const threads=[];
+  for(const rid in ridersAll){
+    const msgs=await fbG('rn_mall_rider_admin_chat_'+rid)||{};
+    const list=Object.values(msgs);
+    if(list.length){
+      const last=list.sort(function(a,b){return (b.ts||0)-(a.ts||0);})[0];
+      threads.push({riderId:rid,riderName:ridersAll[rid].name,lastMsg:last,count:list.length});
+    }
+  }
+  threads.sort(function(a,b){return (b.lastMsg.ts||0)-(a.lastMsg.ts||0);});
+  c.innerHTML=threads.length?threads.map(function(t){return '<div class="data-row" style="cursor:pointer;" onclick="openRiderMessageThread(\''+t.riderId+'\',\''+escAttr(t.riderName)+'\')"><div class="row-av">'+ini(t.riderName)+'</div><div style="flex:1;"><div class="row-name">'+t.riderName+'</div><div class="row-meta">'+t.count+' message(s) &middot; "'+t.lastMsg.text.slice(0,50)+'"</div></div></div>';}).join(''):'<div class="card" style="text-align:center;padding:30px;color:var(--wh);font-weight:700;">No rider messages yet.</div>';
+}
+async function openRiderMessageThread(riderId,riderName){
+  const c=document.getElementById('rider-view-body');
+  c.innerHTML='<div class="card"><div class="card-title">'+iconBadge('chat',14)+' '+riderName+'</div><div id="rm-admin-msgs" style="margin:12px 0;max-height:360px;overflow-y:auto;"></div><div style="display:flex;gap:8px;"><input class="inp" id="rm-admin-input" placeholder="Type a reply..." style="flex:1;" onkeydown="if(event.key===\'Enter\')sendRiderAdminReply(\''+riderId+'\')"/><button class="btn btn-or" onclick="sendRiderAdminReply(\''+riderId+'\')">Send</button></div><button class="btn" style="margin-top:10px;" onclick="riderNav(\'messages\')">← Back</button></div>';
+  await loadRiderAdminMsgs(riderId);
+}
+async function loadRiderAdminMsgs(riderId){
+  const key='rn_mall_rider_admin_chat_'+riderId;
+  const msgs=Object.values(await fbG(key)||{}).sort(function(a,b){return (a.ts||0)-(b.ts||0);});
+  const el=document.getElementById('rm-admin-msgs');if(!el)return;
+  el.innerHTML=msgs.length?msgs.map(function(m){
+    const label=m.isAdmin?(m.senderName||'Staff')+(m.senderRole?', '+(ROLE_LABELS[m.senderRole]||m.senderRole):''):(m.senderName||'Rider');
+    return '<div style="display:flex;'+(m.isAdmin?'flex-direction:row-reverse;':'')+'gap:10px;margin-bottom:10px;"><div style="width:28px;height:28px;border-radius:99px;background:'+(m.isAdmin?'var(--or)':'var(--card2)')+';color:'+(m.isAdmin?'#fff':'var(--wh)')+';font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+ini(m.senderName||(m.isAdmin?'S':'R'))+'</div><div><div style="background:'+(m.isAdmin?'rgba(255,106,0,0.1)':'var(--card2)')+';padding:8px 12px;border-radius:9px;font-size:13px;max-width:100%;color:var(--wh);">'+m.text+'</div><div style="font-size:9px;color:var(--wh);font-weight:700;margin-top:2px;'+(m.isAdmin?'text-align:right;':'')+'">'+label+'</div></div></div>';
+  }).join(''):'<div style="color:var(--wh);font-weight:700;font-size:13px;">No messages yet.</div>';
+  el.scrollTop=el.scrollHeight;
+}
+async function sendRiderAdminReply(riderId){
+  const inp=document.getElementById('rm-admin-input');const text=(inp.value||'').trim();if(!text)return;
+  const key='rn_mall_rider_admin_chat_'+riderId;
+  await fbP(key,{senderId:'staff_'+staff._id,senderName:staff.name,senderRole:staff.role,text:text,isAdmin:true,ts:Date.now(),date:ds()});
+  await fbP('rn_mall_rider_notifications/'+riderId,{type:'admin_reply',from:staff.name,preview:text.slice(0,60),date:ds(),read:false,ts:Date.now()});
+  inp.value='';await loadRiderAdminMsgs(riderId);
+}
+async function renderRiderList(c){
+  c.innerHTML='<div style="color:var(--wh);font-weight:700;">Loading...</div>';
+  const data=await fbG('rn_mall_riders')||{};
+  const list=Object.entries(data).map(function(e){return Object.assign({_id:e[0]},e[1]);});
+  const pending=list.filter(function(r){return r.status==='pending_review';});
+  const active=list.filter(function(r){return r.status!=='pending_review';});
+  const onlineNow=active.filter(function(r){return r.online&&r.status==='active';}).length;
+  const totalStrikes=active.reduce(function(s,r){return s+(r.strikes||0);},0);
+  var html='<div class="stats-grid" style="margin-bottom:16px;">';
+  html+='<div class="stat-card"><div class="stat-num">'+active.length+'</div><div class="stat-lbl">Total Riders</div></div>';
+  html+='<div class="stat-card"><div class="stat-num" style="color:var(--su);">'+onlineNow+'</div><div class="stat-lbl">Online Now</div></div>';
+  html+='<div class="stat-card"><div class="stat-num" style="color:'+(totalStrikes>0?'var(--re)':'var(--su)')+';">'+totalStrikes+'</div><div class="stat-lbl">Total Strikes</div></div>';
+  html+='</div>';
+  if(pending.length){
+    html+='<div class="card-title" style="margin:10px 0;color:var(--or);">Pending Applications ('+pending.length+')</div>';
+    html+=pending.map(pendingRiderRow).join('');
+  }
+  html+='<div class="card-title" style="margin:16px 0 10px;">All Riders</div>';
+  html+=active.length?active.map(riderRow).join(''):'<div class="card" style="text-align:center;padding:40px;color:var(--wh);font-weight:700;">No riders yet.</div>';
+  c.innerHTML=html;
+}
+function pendingRiderRow(r){
+  return '<div class="card" style="margin-bottom:10px;">'
+    +'<div style="font-weight:800;margin-bottom:6px;">'+r.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(255,106,0,0.12);color:var(--or);">'+(r.vehicleType||'')+'</span></div>'
+    +'<div style="font-size:12px;color:var(--wh);font-weight:700;line-height:1.9;">'
+    +''+iconBadge('envelope',14)+' '+r.email+' &middot; '+iconBadge('phone',14)+' '+r.phone+'<br>'
+    +''+iconBadge('home',14)+' '+r.address+', '+(r.lga||'')+', '+(r.state||'')+', '+(r.country||'')+'<br>'
+    +''+iconBadge('cake',14)+' DOB: '+(r.dob||'N/A')+' &middot; Gender: '+(r.gender||'N/A')+'<br>'
+    +''+iconBadge('card',14)+' ID: '+(r.idNumber||'N/A')
+    +(r.note?'<br>'+iconBadge('edit',14)+' "'+r.note+'"':'')
+    +'</div>'
+    +'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'
+    +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="approveRider(\''+r._id+'\',\''+escAttr(r.name)+'\')">Approve</button>'
+    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="rejectRider(\''+r._id+'\',\''+escAttr(r.name)+'\')">Reject</button>'
+    +'</div></div>';
+}
+async function approveRider(id,name){
+  const r=await fbG('rn_mall_riders/'+id);if(!r)return;
+  const suggested=Math.random().toString(36).slice(2,6).toUpperCase()+Math.random().toString(36).slice(2,4);
+  const pass=prompt('Set a password for '+name+' (edit or keep the suggestion):',suggested);
+  if(pass===null)return;
+  if(!pass.trim()){toast('Password cannot be empty','err');return;}
+  const riderNumber=r.riderNumber||await generateRiderNumber();
+  const bio=generateRiderBio(name,r.vehicleType,new Date().getFullYear());
+  const trimmedPass=pass.trim();
+  const update={status:'active',riderNumber:riderNumber,bio:bio};
+  let authUid=null;
+  const authReady=await ensureFirebaseAuthReady();
+  if(authReady){
+    try{
+      const cred=await firebase.auth().createUserWithEmailAndPassword(r.email,trimmedPass);
+      authUid=cred.user.uid;
+    }catch(authErr){
+      console.warn('Firebase Auth account creation failed for rider, falling back to plaintext password:',authErr.message);
+    }
+  }
+  if(authUid){
+    update.authUid=authUid;update.password=null;
+    await fbS('rn_mall_riders_by_uid/'+authUid,id);
+  }else{
+    update.password=trimmedPass;
+  }
+  await fbU('rn_mall_riders/'+id,update);
+  await logStaffActivity('Approved rider application',name+' ('+riderNumber+')');
+  alert('✅ '+name+' approved as '+riderNumber+'!\n\nSend them these login details:\n\nEmail: '+r.email+'\nPassword: '+trimmedPass+'\n\n(There is no automatic email, please send this to them yourself via WhatsApp/email.)');
+  toast('Approved, credentials shown above');
+  snav('riders');
+}
+async function rejectRider(id,name){
+  if(!confirm('Reject and remove '+name+'\'s application?'))return;
+  await fbD('rn_mall_riders/'+id);
+  await logStaffActivity('Rejected rider application',name);
+  toast('Application rejected');
+  snav('riders');
+}
+function riderRow(r){
+  const suspended=r.status==='suspended';
+  const strikes=r.strikes||0;
+  const online=r.online===true;
+  const ratings=r.ratings||[];
+  const avgRating=ratings.length?(ratings.reduce(function(s,x){return s+x;},0)/ratings.length).toFixed(1):null;
+  return '<div class="data-row" style="align-items:flex-start;flex-direction:column;">'
+    +'<div style="display:flex;justify-content:space-between;width:100%;flex-wrap:wrap;gap:8px;">'
+    +'<div><div class="row-name">'+r.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(255,106,0,0.12);color:var(--or);">'+(r.vehicleType||'')+'</span> <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:'+(online?'rgba(255,106,0,0.15)':'rgba(153,153,153,0.15)')+';color:'+(online?'var(--su)':'var(--wh)')+';">'+(online?'● ONLINE':'○ OFFLINE')+'</span>'+(suspended?' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(244,63,94,0.12);color:var(--re);">SUSPENDED</span>':'')+(strikes>0?' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(244,63,94,0.12);color:var(--re);">'+iconBadge('warning',14)+' '+strikes+'/3 STRIKES</span>':'')+'</div>'
+    +'<div class="row-meta">'+r.email+' &middot; '+r.phone+(r.riderNumber?' &middot; '+r.riderNumber:'')+' &middot; Pays: '+(r.payFrequency||'weekly')+'</div>'
+    +'<div class="row-meta">'+iconBadge('cash',14)+' Total Paid Out: <strong style="color:var(--su);">'+fmt(r.totalPaid||0)+'</strong>'+(avgRating?' &middot; '+iconBadge('star',14)+' Rating: <strong style="color:var(--or);">'+avgRating+'/5</strong> ('+ratings.length+')':'')+'</div>'
+    +(r.bankAcctNo?'<div class="row-meta">'+iconBadge('bank',14)+' '+r.bankName+', '+r.bankAcctNo+' ('+r.bankAcctName+') '+(r.bankVerified?'<strong style="color:var(--su);">✔ Verified</strong>':'<strong style="color:var(--or);">Awaiting Verification</strong>')+'</div>':'')
+    +'<div class="row-meta">Password: <span id="pw-'+r._id+'" style="font-family:monospace;letter-spacing:1px;">••••••••</span> <span onclick="togglePwView(\''+r._id+'\',\''+escAttr((r.password||''))+'\')" style="color:var(--or);cursor:pointer;font-weight:700;">show</span></div>'
+    +'</div></div>'
+    +'<div class="row-actions" style="margin-top:6px;">'
+    +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="recordRiderPayout(\''+r._id+'\',\''+escAttr(r.name)+'\')">'+iconBadge('cash',14)+' Record Payout</button>'
+    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="awardRiderPoints(\''+r._id+'\',\''+escAttr(r.name)+'\')">'+iconBadge('star',14)+' Award Points</button>'
+    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="addRiderStrike(\''+r._id+'\',\''+escAttr(r.name)+'\')">'+iconBadge('warning',14)+' Add Strike</button>'
+    +(strikes>0?'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="removeRiderStrike(\''+r._id+'\',\''+escAttr(r.name)+'\')">Remove Strike</button>':'')
+    +(r.bankAcctNo&&!r.bankVerified?'<button class="btn btn-gr" style="font-size:10px;padding:5px 10px;" onclick="verifyRiderBank(\''+r._id+'\',\''+escAttr(r.name)+'\')">✔ Verify Bank</button>':'')
+    +'</div>'
+    +'<div class="row-actions" style="margin-top:6px;">'
+    +'<button class="btn '+(suspended?'btn-gr':'btn-or')+'" style="font-size:10px;padding:5px 10px;" onclick="toggleSuspendRider(\''+r._id+'\','+suspended+')">'+(suspended?'Reactivate':'Suspend')+'</button>'
+    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteRider(\''+r._id+'\',\''+escAttr(r.name)+'\',this)">Delete</button>'
+    +'</div></div>';
+}
+function togglePwView(id,pw){const el=document.getElementById('pw-'+id);if(!el)return;if(el.textContent==='••••••••'){el.textContent=pw||'(not set)';}else{el.textContent='••••••••';}}
+async function addRiderStrike(id,name){
+  const reason=prompt('Reason for this strike against '+name+':');
+  if(reason===null||!reason.trim()){toast('A reason is required','err');return;}
+  const r=await fbG('rn_mall_riders/'+id);if(!r)return;
+  const newStrikes=(r.strikes||0)+1;
+  const strikeLog=(r.strikeLog||[]).concat([{reason:reason.trim(),date:ds(),ts:Date.now()}]);
+  const update={strikes:newStrikes,strikeLog:strikeLog};
+  if(newStrikes>=3)update.status='suspended';
+  await fbU('rn_mall_riders/'+id,update);
+  await fbP('rn_mall_rider_notifications/'+id,{type:'strike',reason:reason.trim(),strikes:newStrikes,date:ds(),read:false,ts:Date.now()});
+  await logStaffActivity('Added rider strike',name+': '+reason.trim());
+  toast(newStrikes>=3?name+' auto-suspended after 3 strikes':'Strike added for '+name);
+  snav('riders');
+}
+async function removeRiderStrike(id,name){
+  if(!confirm('Remove one strike from '+name+'?'))return;
+  const r=await fbG('rn_mall_riders/'+id);if(!r)return;
+  await fbU('rn_mall_riders/'+id,{strikes:Math.max(0,(r.strikes||0)-1)});
+  await logStaffActivity('Removed rider strike',name);
+  toast('Strike removed for '+name);
+  snav('riders');
+}
+async function verifyRiderBank(id,name){
+  if(!confirm('Confirm '+name+'\'s bank details are correct and verified?'))return;
+  await fbU('rn_mall_riders/'+id,{bankVerified:true});
+  await fbP('rn_mall_rider_notifications/'+id,{type:'bank_verified',date:ds(),read:false,ts:Date.now()});
+  await logStaffActivity('Verified rider bank details',name);
+  toast('Bank details verified for '+name);
+  snav('riders');
+}
+async function awardRiderPoints(id,name){
+  const amount=parseInt(prompt('How many StaffPoints to award '+name+'?','50'));
+  if(isNaN(amount)||amount<=0){toast('Enter a valid number','err');return;}
+  const reason=prompt('Reason for this bonus (shown to the rider):');
+  if(reason===null||!reason.trim()){toast('A reason is required','err');return;}
+  const r=await fbG('rn_mall_riders/'+id);if(!r)return;
+  const newPoints=(r.points||0)+amount;
+  await fbU('rn_mall_riders/'+id,{points:newPoints});
+  await fbP('rn_mall_rider_points_log/'+id,{amount:amount,reason:reason.trim(),date:ds(),ts:Date.now()});
+  await fbP('rn_mall_rider_notifications/'+id,{type:'points_awarded',amount:amount,reason:reason.trim(),date:ds(),read:false,ts:Date.now()});
+  await logStaffActivity('Awarded rider points',name+': +'+amount+' ('+reason.trim()+')');
+  toast(amount+' points awarded to '+name+'!');
+  snav('riders');
+}
+async function recordRiderPayout(id,name){
+  const s=await fbG('rn_mall_settings')||{};
+  const defaultMsg=s.payoutMessageTemplate||'Payment has been sent. You should receive it between 3 to 7 working days.';
+  const c=document.getElementById('content');
+  c.innerHTML=`
+  <div class="page-hdr"><div class="page-hdr-title">Record Payout, ${name}</div></div>
+  <div class="card">
+    <div class="fg"><label class="lbl">Amount (₦)</label><input class="inp" type="number" id="rp-amount" placeholder="0"/></div>
+    <div class="fg"><label class="lbl">Description</label><input class="inp" id="rp-desc" placeholder="e.g. Week of Aug 4 deliveries"/></div>
+    <div class="fg"><label class="lbl">Expected Arrival Date</label><input class="inp" type="date" id="rp-date"/></div>
+    <div class="fg"><label class="lbl">Message to Rider</label><textarea class="ta" id="rp-msg" rows="3">${defaultMsg}</textarea></div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-or btn-lg" onclick="finalizeRiderPayout('${id}','${escAttr(name)}')">${iconBadge('cash',14)} Record &amp; Notify</button>
+      <button class="btn btn-lg" onclick="snav('riders')">Cancel</button>
+    </div>
+  </div>`;
+}
+async function finalizeRiderPayout(id,name){
+  const amount=parseFloat(document.getElementById('rp-amount').value)||0;
+  const description=(document.getElementById('rp-desc').value||'').trim();
+  const expectedDate=document.getElementById('rp-date').value;
+  const message=(document.getElementById('rp-msg').value||'').trim();
+  if(amount<=0){toast('Enter a valid amount','err');return;}
+  const r=await fbG('rn_mall_riders/'+id);if(!r)return;
+  const newTotal=(r.totalPaid||0)+amount;
+  await fbU('rn_mall_riders/'+id,{totalPaid:newTotal});
+  await fbP('rn_mall_rider_payouts/'+id,{amount,description,expectedDate,message,date:ds(),ts:Date.now()});
+  await fbP('rn_mall_rider_notifications/'+id,{type:'payout',amount,description,message,expectedDate,date:ds(),read:false,ts:Date.now()});
+  if(message)await fbU('rn_mall_settings',{payoutMessageTemplate:message});
+  await logStaffActivity('Recorded rider payout',name+': '+fmt(amount));
+  toast('Payout recorded, '+name+' notified!');
+  snav('riders');
+}
+async function toggleSuspendRider(id,wasSuspended){
+  await fbU('rn_mall_riders/'+id,{status:wasSuspended?'active':'suspended'});
+  await logStaffActivity(wasSuspended?'Reactivated rider':'Suspended rider',id);
+  toast('Updated');
+  snav('riders');
+}
+async function deleteRider(id,name,btnEl){
+  if(!confirm('Permanently delete '+name+'\'s rider account?'))return;
+  btnEl?.closest('.data-row')?.remove();
+  toast('Deleted');
+  const record=await fbG('rn_mall_riders/'+id);
+  const ok=await fbDeleteWithRetry('rn_mall_riders/'+id);
+  if(!ok){toast('That delete may not have completed, please refresh and check','err');return;}
+  if(record&&record.photo)deleteStorageFile(record.photo);
+  await logStaffActivity('Deleted rider account',name);
+}
+async function renderActiveDeliveries(c){
+  c.innerHTML='<div style="color:var(--wh);font-weight:700;">Loading...</div>';
+  const orders=Object.values(await fbG('rn_mall_orders')||{}).filter(function(o){return o.riderId&&o.deliveryStage&&o.deliveryStage!=='delivered';});
+  c.innerHTML=orders.length?orders.map(function(o){
+    return '<div class="data-row"><div style="flex:1;"><div class="row-name">'+o.tracking+', '+(o.riderName||'')+'</div><div class="row-meta">'+(o.customer?o.customer.name+' &middot; '+o.customer.address:'')+'</div></div><span style="font-size:10px;font-weight:800;padding:3px 9px;border-radius:99px;background:rgba(91,155,245,0.12);color:var(--bl);">'+(STAGE_LABELS_ADMIN[o.deliveryStage]||o.deliveryStage)+'</span></div>';
+  }).join(''):'<div class="card" style="text-align:center;padding:40px;color:var(--wh);font-weight:700;">No active rider deliveries right now.</div>';
+}
+async function assignRiderToOrder(tracking){
+  const riders=await fbG('rn_mall_riders')||{};
+  const activeRiders=Object.entries(riders).filter(function(e){return e[1].status==='active';}).sort(function(a,b){return (b[1].online?1:0)-(a[1].online?1:0);});
+  if(!activeRiders.length){alert('No active riders available. Approve a rider first under Riders.');return;}
+  const list=activeRiders.map(function(e,i){return (i+1)+'. '+(e[1].online?'🟢':'⚪')+' '+e[1].name+' ('+e[1].vehicleType+')'+(e[1].online?', ONLINE':', offline');}).join('\n');
+  const choice=prompt('Assign which rider to order '+tracking+'?\n\n'+list+'\n\nEnter the number:');
+  if(choice===null)return;
+  const idx=parseInt(choice)-1;
+  if(isNaN(idx)||!activeRiders[idx]){toast('Invalid selection','err');return;}
+  const riderId=activeRiders[idx][0],riderData=activeRiders[idx][1];
+  const order=await fbG('rn_mall_orders/'+tracking);if(!order)return;
+  const tl=(order.timeline||[]).concat([{status:'Assigned to Rider',time:new Date().toISOString(),note:'Assigned to '+riderData.name+' ('+riderData.vehicleType+')'}]);
+  await fbU('rn_mall_orders/'+tracking,{riderId:riderId,riderName:riderData.name,riderPhone:riderData.phone||'',riderVehicleType:riderData.vehicleType||'',deliveryStage:'assigned',timeline:tl});
+  const riderTokens=riderData.fcmTokens?Object.keys(riderData.fcmTokens):[];
+  sendPushToTokens(riderTokens,'New Delivery Assigned','Order '+tracking+' has been assigned to you, tap to view.',{tracking:tracking},'rider.html');
+  await logStaffActivity('Assigned rider to order',tracking+' → '+riderData.name);
+  toast('Assigned to '+riderData.name+'!');
+  snav('orders');
+}
+// ── DELIVERY FEES (Logistics Manager) ──
+async function renderStaffDeliveryFees(c){
+  c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Delivery Fees</div></div><div style="color:var(--wh);font-weight:700;">Loading...</div>';
+  const s=await fbG('rn_mall_settings')||{};
+  const customFees=s.deliveryFees||{};
+  const ngStates=['lagos','abuja','rivers','akwa_ibom','anambra','enugu','imo','oyo','ogun','kano','kaduna','katsina','borno','delta','edo','cross_river','bayelsa','abia','ebonyi','ekiti','ondo','osun','kwara','kogi','benue','plateau','nasarawa','niger','kebbi','sokoto','zamfara','jigawa','bauchi','gombe','yobe','adamawa','taraba'];
+  const defNG={lagos:1500,abuja:1500,rivers:1500,akwa_ibom:2000,anambra:2500,enugu:2500,imo:2500,oyo:2000,ogun:2000,kano:3000,kaduna:3000,katsina:3500,borno:4000,delta:2000,edo:2000,cross_river:2500,bayelsa:2500,abia:2500,ebonyi:2500,ekiti:2500,ondo:2500,osun:2500,kwara:3000,kogi:3000,benue:3000,plateau:3000,nasarawa:3000,niger:3000,kebbi:3500,sokoto:3500,zamfara:3500,jigawa:3500,bauchi:3500,gombe:3500,yobe:4000,adamawa:4000,taraba:4000};
+  const intl={GH:8000,KE:15000,ZA:15000,GB:25000,US:30000,CA:30000,DE:25000,FR:25000,OTHER:35000};
+  const intlNames={GH:'Ghana',KE:'Kenya',ZA:'South Africa',GB:'United Kingdom',US:'United States',CA:'Canada',DE:'Germany',FR:'France',OTHER:'Rest of World'};
+  const feeGridStyle='display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:10px;';
+  const feeCardStyle='background:var(--card2);border:1px solid var(--bdr);border-radius:8px;padding:8px 10px;';
+  c.innerHTML=`
+  <div class="page-hdr"><div class="page-hdr-title">Delivery Fees</div><div class="page-hdr-sub">Set delivery fees for every Nigerian state and international zones</div></div>
+  <div class="card">
+    <div class="card-title">Nigeria, Delivery Fees by State</div>
+    <div class="card-sub">Edit any amount below. Click Save to apply.</div>
+    <div style="${feeGridStyle}">
+      ${ngStates.map(function(s2){return '<div style="'+feeCardStyle+'"><div style="font-size:10px;font-weight:800;text-transform:capitalize;color:var(--wh);margin-bottom:4px;">'+s2.replace(/_/g,' ')+'</div><div style="display:flex;align-items:center;gap:3px;"><span style="font-size:11px;color:var(--wh);font-weight:700;">₦</span><input type="number" class="inp" style="margin-bottom:0;padding:6px 8px;" id="fee-ng-'+s2+'" value="'+(customFees['ng_'+s2]||defNG[s2]||2500)+'"/></div></div>';}).join('')}
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn btn-or" onclick="saveNgFees()">Save Nigeria Fees</button>
+      <button class="btn btn-dk" onclick="if(confirm('Reset all Nigeria fees to defaults?'))resetNgFees()">Reset Defaults</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">International Delivery Rates</div>
+    <div class="card-sub">Flat rate fees for international orders</div>
+    <div style="${feeGridStyle}">
+      ${Object.entries(intl).map(function(e){var code=e[0],def=e[1];return '<div style="'+feeCardStyle+'"><div style="font-size:10px;font-weight:800;color:var(--wh);margin-bottom:4px;">'+(intlNames[code]||code)+'</div><div style="display:flex;align-items:center;gap:3px;"><span style="font-size:11px;color:var(--wh);font-weight:700;">₦</span><input type="number" class="inp" style="margin-bottom:0;padding:6px 8px;" id="fee-intl-'+code+'" value="'+(customFees['intl_'+code]||def)+'"/></div></div>';}).join('')}
+    </div>
+    <button class="btn btn-or" style="margin-top:16px;" onclick="saveIntlFees()">Save International Fees</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Delivery Options</div>
+    <div class="g2" style="margin-top:12px;">
+      <div class="fg"><label class="lbl">Free Delivery Threshold (₦), 0 to disable</label>
+        <input class="inp" type="number" id="del-free" value="${s.freeDeliveryThreshold||0}" placeholder="e.g. 50000"/>
+      </div>
+      <div class="fg"><label class="lbl">Express Delivery Surcharge (₦)</label>
+        <input class="inp" type="number" id="del-express" value="${s.expressCharge||2000}" placeholder="2000"/>
+      </div>
+    </div>
+    <button class="btn btn-or" onclick="saveDeliveryOpts()">Save Options</button>
+  </div>`;
+}
+async function saveNgFees(){
+  const s=await fbG('rn_mall_settings')||{};
+  const fees=s.deliveryFees||{};
+  ['lagos','abuja','rivers','akwa_ibom','anambra','enugu','imo','oyo','ogun','kano','kaduna','katsina','borno','delta','edo','cross_river','bayelsa','abia','ebonyi','ekiti','ondo','osun','kwara','kogi','benue','plateau','nasarawa','niger','kebbi','sokoto','zamfara','jigawa','bauchi','gombe','yobe','adamawa','taraba'].forEach(function(st){
+    const v=document.getElementById('fee-ng-'+st)?.value;if(v!==undefined)fees['ng_'+st]=parseInt(v)||2500;
+  });
+  await fbU('rn_mall_settings',{deliveryFees:fees});
+  await logStaffActivity('Updated Nigeria delivery fees','');
+  toast('Nigeria fees saved!');
+}
+async function resetNgFees(){
+  const s=await fbG('rn_mall_settings')||{};
+  const fees=s.deliveryFees||{};
+  Object.keys(fees).filter(function(k){return k.indexOf('ng_')===0;}).forEach(function(k){delete fees[k];});
+  await fbU('rn_mall_settings',{deliveryFees:fees});
+  await logStaffActivity('Reset Nigeria delivery fees to defaults','');
+  toast('Reset to defaults!');
+  snav('delivery-fees');
+}
+async function saveIntlFees(){
+  const s=await fbG('rn_mall_settings')||{};
+  const fees=s.deliveryFees||{};
+  ['GH','KE','ZA','GB','US','CA','DE','FR','OTHER'].forEach(function(cd){
+    const v=document.getElementById('fee-intl-'+cd)?.value;if(v!==undefined)fees['intl_'+cd]=parseInt(v)||15000;
+  });
+  await fbU('rn_mall_settings',{deliveryFees:fees});
+  await logStaffActivity('Updated international delivery fees','');
+  toast('International fees saved!');
+}
+async function saveDeliveryOpts(){
+  const t=parseInt(document.getElementById('del-free')?.value)||0;
+  const e=parseInt(document.getElementById('del-express')?.value)||2000;
+  await fbU('rn_mall_settings',{freeDeliveryThreshold:t,expressCharge:e});
+  await logStaffActivity('Updated delivery options','Free threshold: '+t+', Express: '+e);
+  toast('Delivery options saved!');
+}
 // ── FLEET (Logistics Manager) ──
 let _fleetMap=null;
 async function renderFleet(c){
@@ -1577,6 +2048,7 @@ async function openStaffOrder(tracking){
     <select class="inp" id="so-status" style="margin:10px 0;">${opts}</select>
     <button class="btn btn-or btn-lg" onclick="saveStaffOrderStatus('${tracking}')">Save Status</button>
     <button class="btn btn-lg" onclick="snav('orders')" style="margin-left:8px;">← Back</button>
+    ${(staff.role==='logistics_manager'||staff.role==='ceo'||staff.role==='general_manager')&&o.deliveryMethod!=='pickup'&&o.status!=='delivered'&&o.status!=='delivered confirmed'&&o.status!=='cancelled'&&o.status!=='deleted'?`<button class="btn btn-dk" style="width:100%;padding:12px;margin-top:8px;" onclick="assignRiderToOrder('${tracking}')">${iconBadge('bike',14)} ${o.riderName?'Reassign Rider (currently: '+o.riderName+')':'Assign Dispatch Rider'}</button>`:''}
   </div>`;
 }
 async function saveStaffOrderStatus(tracking){
