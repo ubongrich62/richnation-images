@@ -406,7 +406,12 @@ function downloadDataDoc(uri,filename){
     document.body.appendChild(a);a.click();document.body.removeChild(a);
   }catch(e){toast('Could not download this document','err');}
 }
-async function fbG(p,ms){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{},ms);return await r.json();}catch(e){try{await new Promise(res=>setTimeout(res,400));const r2=await fbFetchTimeout(FB+'/'+p+'.json',{},ms);return await r2.json();}catch(e2){return null;}}}
+// A permission-denied response from Firebase still arrives as a normal fetch
+// (fetch only throws on a real network failure, not on an HTTP error status),
+// so without checking r.ok that error body used to be returned as if it were
+// real data, crashing whatever rendered it and leaving the page stuck on its
+// loading placeholder forever with no visible error.
+async function fbG(p,ms){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{},ms);return r.ok?await r.json():null;}catch(e){try{await new Promise(res=>setTimeout(res,400));const r2=await fbFetchTimeout(FB+'/'+p+'.json',{},ms);return r2.ok?await r2.json():null;}catch(e2){return null;}}}
 function watchFirebaseCollection(path,onChange){
   // Was a persistent EventSource per collection, several open at once across
   // tabs/apps could exhaust the browser's per-origin connection limit and

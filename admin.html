@@ -715,12 +715,28 @@ async function fbG(p,ms){
   // connection, a non-JSON error page) rejects outside this try/catch instead of
   // being caught by it, so a single bad response can crash a whole Promise.all
   // boot sequence with nothing to catch it, freezing the page mid-load forever.
-  try{const r=await fbFetchTimeout(FB+'/'+p+'.json',null,ms);return await r.json();}
+  //
+  // fetch() only rejects on a real network failure, never on an HTTP error
+  // status, so a permission-denied response from Firebase (401/403, body like
+  // {"error":"Permission Denied"}) used to sail straight through as if it were
+  // real data, none of the collection/array code downstream expects an object
+  // shaped like that, so it threw partway through rendering and left the page
+  // stuck on its "Loading..." placeholder forever with no visible error at all.
+  try{
+    const r=await fbFetchTimeout(FB+'/'+p+'.json',null,ms);
+    if(!r.ok){console.warn('fbG denied for',p,':',r.status);return null;}
+    return await r.json();
+  }
   catch(e){
     // Two automatic retries before giving up, a slow or unstable connection
     // shouldn't make admin content (or a correct password) vanish outright.
     for(let attempt=0;attempt<2;attempt++){
-      try{await new Promise(res=>setTimeout(res,600));const r2=await fbFetchTimeout(FB+'/'+p+'.json',null,ms);return await r2.json();}
+      try{
+        await new Promise(res=>setTimeout(res,600));
+        const r2=await fbFetchTimeout(FB+'/'+p+'.json',null,ms);
+        if(!r2.ok){console.warn('fbG denied for',p,':',r2.status);return null;}
+        return await r2.json();
+      }
       catch(e2){/* try next attempt */}
     }
     return null;
@@ -5148,37 +5164,38 @@ document.addEventListener('click',function(e){
 });
 
 // ── NAV ──
+// Every renderX(ci) below is async and fire-and-forget (nav() itself isn't
+// async), so an error thrown partway through one, e.g. Firebase denying a
+// read and the response shape not being what the code expected, used to be
+// an unhandled promise rejection: invisible except in devtools, leaving the
+// "Loading..." placeholder each renderX sets at its very start on screen
+// forever with no visible error. Routing every page through this lookup lets
+// one shared .catch() replace that with a real error message and a retry
+// button, instead of every renderX needing its own try/catch.
+const NAV_RENDERERS={
+  dashboard:renderDash,analytics:renderAnalytics,visitors:renderVisitors,vendors:renderVendors,
+  'wallet-issues':renderWalletIssues,staff:renderStaff,investors:renderInvestors,riders:renderRiders,
+  bundles:renderBundles,promos:renderPromos,orders:renderOrders,products:renderProducts,
+  categories:renderCategories,coupons:renderCoupons,delivery:renderDelivery,customers:renderCustomers,
+  newsletter:renderNewsletter,chat:renderChat,notifications:renderNotifs,settings:renderSettings,
+  customiser:renderSiteCustomiser,hero:renderHeroEditor,preorders:renderPreOrders,reviews:renderReviews,
+  pod:renderPODApproval
+};
 function nav(page,push){
   try{sessionStorage.setItem('rnm_admin_lastpage',page);}catch(e){}
   if(push!==false){window._nh=window._nh||[];window._nh.push(page);pushAdminNavState();}
   var ci=document.getElementById('content-inner');if(!ci)return;
   document.querySelectorAll('.sb-item').forEach(function(el){el.classList.toggle('active',el.getAttribute('onclick')==="nav('"+page+"')");});
   if(window.innerWidth<=768){document.querySelector('.sb')?.classList.remove('open');document.getElementById('sb-backdrop')?.classList.remove('open');}
-  if(page==='dashboard')renderDash(ci);
-  else if(page==='analytics')renderAnalytics(ci);
-  else if(page==='visitors')renderVisitors(ci);
-  else if(page==='vendors')renderVendors(ci);
-  else if(page==='wallet-issues')renderWalletIssues(ci);
-  else if(page==='staff')renderStaff(ci);
-  else if(page==='investors')renderInvestors(ci);
-  else if(page==='riders')renderRiders(ci);
-  else if(page==='bundles')renderBundles(ci);
-  else if(page==='promos')renderPromos(ci);
-  else if(page==='orders')renderOrders(ci);
-  else if(page==='products')renderProducts(ci);
-  else if(page==='categories')renderCategories(ci);
-  else if(page==='coupons')renderCoupons(ci);
-  else if(page==='delivery')renderDelivery(ci);
-  else if(page==='customers')renderCustomers(ci);
-  else if(page==='newsletter')renderNewsletter(ci);
-  else if(page==='chat')renderChat(ci);
-  else if(page==='notifications')renderNotifs(ci);
-  else if(page==='settings')renderSettings(ci);
-  else if(page==='customiser')renderSiteCustomiser(ci);
-  else if(page==='hero')renderHeroEditor(ci);
-  else if(page==='preorders')renderPreOrders(ci);
-  else if(page==='reviews')renderReviews(ci);
-  else if(page==='pod')renderPODApproval(ci);
+  var fn=NAV_RENDERERS[page];
+  if(fn){
+    Promise.resolve(fn(ci)).catch(function(e){
+      console.warn('Page render failed for',page,':',e&&e.message);
+      if(document.getElementById('content-inner')===ci){
+        ci.innerHTML='<div class="card" style="text-align:center;padding:40px;"><div style="font-weight:800;font-size:15px;margin-bottom:8px;">Something went wrong loading this page.</div><div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:16px;">'+((e&&e.message)||'Unknown error')+', this is usually a Firebase permissions or connection issue, not a bug you need to worry about.</div><button class="btn btn-or" onclick="nav(\''+page+'\',false)">Try Again</button></div>';
+      }
+    });
+  }
   curNav=page;
   var sb=document.querySelector('.sb');if(sb)sb.classList.remove('open');
 }
