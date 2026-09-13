@@ -2006,6 +2006,67 @@ function renderVideoGalleryBlock(sett){
   slot.appendChild(wrap);
   setupVideoGalleryReveal(wrap);
 }
+// ── POP-UP AD / FLYER ──
+// Admin-controlled promotional pop-up, like Jumia/Konga's own homepage flyers,
+// fully configurable (image, link, placement, size, delay, how often it shows)
+// from Site Customiser rather than hardcoded here.
+function popupAdFrequencyKey(pa){return 'rnm_popup_ad_seen|'+(pa.image||'')+'|'+(pa.frequency||'session');}
+function popupAdAlreadySeen(pa){
+  const key=popupAdFrequencyKey(pa);
+  if(pa.frequency==='daily'){
+    try{return localStorage.getItem(key)===ds();}catch(e){return false;}
+  }
+  if(pa.frequency==='always')return false;
+  // default: once per session (tab), cleared automatically when the tab closes
+  try{return sessionStorage.getItem(key)==='1';}catch(e){return false;}
+}
+function markPopupAdSeen(pa){
+  const key=popupAdFrequencyKey(pa);
+  try{
+    if(pa.frequency==='daily')localStorage.setItem(key,ds());
+    else if(pa.frequency!=='always')sessionStorage.setItem(key,'1');
+  }catch(e){}
+}
+function initPopupAd(sett){
+  const pa=sett&&sett.popupAd;
+  document.getElementById('popup-ad-overlay')?.remove();
+  if(!pa||!pa.enabled||!pa.image)return;
+  if(popupAdAlreadySeen(pa))return;
+  setTimeout(function(){showPopupAd(pa);},Math.max(0,(pa.delaySec||0))*1000);
+}
+function closePopupAd(){
+  document.getElementById('popup-ad-overlay')?.remove();
+  if(window._activePopupAd)markPopupAdSeen(window._activePopupAd);
+  window._activePopupAd=null;
+}
+function showPopupAd(pa){
+  if(document.getElementById('popup-ad-overlay'))return;
+  window._activePopupAd=pa;
+  const placement=pa.placement||'center';
+  const width=pa.widthPx||360;
+  const isBanner=placement==='top-banner'||placement==='bottom-banner';
+  const overlay=document.createElement('div');
+  overlay.id='popup-ad-overlay';
+  let posStyle='';
+  if(placement==='center')posStyle='position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9998;display:flex;align-items:center;justify-content:center;padding:20px;';
+  else if(placement==='bottom-right')posStyle='position:fixed;bottom:16px;right:16px;z-index:9998;max-width:calc(100vw - 32px);';
+  else if(placement==='top-banner')posStyle='position:fixed;top:0;left:0;right:0;z-index:9998;';
+  else posStyle='position:fixed;bottom:0;left:0;right:0;z-index:9998;';
+  overlay.style.cssText=posStyle;
+  const imgClick=pa.link?' onclick="goPromoAdLink(\''+escJs(pa.link)+'\');closePopupAd()" style="cursor:pointer;"':'';
+  const cardStyle=isBanner
+    ?'position:relative;width:100%;background:var(--card,#161616);'
+    :'position:relative;width:'+width+'px;max-width:100%;background:var(--card,#161616);border-radius:12px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.5);';
+  overlay.innerHTML='<div style="'+cardStyle+'">'
+    +'<img src="'+pa.image+'" alt="'+escHtml(pa.caption||'Promotion')+'"'+imgClick+' style="width:100%;display:block;'+(isBanner?'max-height:140px;object-fit:cover;':'')+'"/>'
+    +(pa.caption?'<div style="padding:10px 14px;font-size:12px;font-weight:700;color:var(--wh,#ccc);text-align:center;">'+escHtml(pa.caption)+'</div>':'')
+    +'<span onclick="closePopupAd()" style="position:absolute;top:6px;right:8px;width:26px;height:26px;border-radius:99px;background:rgba(0,0,0,0.6);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;line-height:1;">&times;</span>'
+    +'</div>';
+  if(placement==='center'){
+    overlay.addEventListener('click',function(e){if(e.target===overlay)closePopupAd();});
+  }
+  document.body.appendChild(overlay);
+}
 function setupVideoGalleryReveal(wrap){
   const tiles=wrap.querySelectorAll('.video-gallery-item');
   if(!tiles.length)return;
@@ -2089,7 +2150,7 @@ async function init(){
       localStorage.setItem('rnm_cache_settings',JSON.stringify(settings));
     }
   }catch(cacheWriteErr){/* storage full or unavailable, skip caching */}
-  applyHeroConfig(settings);renderPromoAds(settings);renderCustomBannerBlock(settings);renderVideoGalleryBlock(settings);
+  applyHeroConfig(settings);renderPromoAds(settings);renderCustomBannerBlock(settings);renderVideoGalleryBlock(settings);initPopupAd(settings);
   if(settings.announcement){const ab=document.getElementById('announce-bar');if(ab){ab.textContent=settings.announcement;ab.style.display='block';}}
   computeActivePromo().then(function(){
     if(activePromo&&activePromo.bannerText){const ab=document.getElementById('announce-bar');if(ab){ab.textContent=activePromo.bannerText;ab.style.display='block';}}

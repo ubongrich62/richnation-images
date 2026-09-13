@@ -5498,6 +5498,9 @@ function renderHeroEditor(c){
   html+='<div class="cs-section"><div class="cs-section-title">'+iconBadge('film',14)+' Video Gallery, optional</div>';
   html+='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">A scrollable row of brand/product videos (paste YouTube links), shown with a title you choose, placed wherever you choose on the homepage.</div>';
   html+='<div id="video-gallery-editor"></div>';
+  html+='<div class="cs-section"><div class="cs-section-title">'+iconBadge('megaphone',14)+' Pop-Up Ad / Flyer, optional</div>';
+  html+='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">A promotional flyer that pops up over the site, like Jumia/Konga, for a sale, an announcement, anything you want front and centre. Full control over size, shape, where it appears, and how often.</div>';
+  html+='<div id="popup-ad-editor"></div>';
   html+='<div class="cs-section"><div class="cs-section-title">'+iconBadge('megaphone',14)+' Announcement Bar</div>';
   html+='<div class="fg"><input class="inp" id="he-ann" value="'+(settings.announcement||'')+'" placeholder="e.g. FREE delivery this week!"/></div>';
   html+='<button class="btn btn-or" onclick="saveAnnEditor()">Save</button></div>';
@@ -5506,6 +5509,7 @@ function renderHeroEditor(c){
   renderPromoAdRows();
   renderCustomBannerEditor();
   renderVideoGalleryEditor();
+  renderPopupAdEditor();
 }
 const CONTENT_SLOT_OPTIONS=[
   ['after-hero','Right below the hero banner'],
@@ -5565,6 +5569,79 @@ async function removeCustomBanner(){
   if(oldUrl)deleteStorageFile(oldUrl);
   toast('Banner removed.');
   renderCustomBannerEditor();
+}
+const POPUP_AD_PLACEMENTS=[
+  ['center','Centre of the screen, over everything (modal)'],
+  ['bottom-right','Bottom-right corner (small card)'],
+  ['bottom-banner','Full-width bar, bottom of the screen'],
+  ['top-banner','Full-width bar, top of the screen']
+];
+const POPUP_AD_FREQUENCIES=[
+  ['always','Every page load'],
+  ['session','Once per visit (until they close the tab)'],
+  ['daily','Once per day']
+];
+function renderPopupAdEditor(){
+  var wrap=document.getElementById('popup-ad-editor');if(!wrap)return;
+  var pa=settings.popupAd||{};
+  wrap.innerHTML=''
+    +'<div style="width:100%;max-width:320px;height:120px;border-radius:6px;overflow:hidden;background:var(--bg);margin-bottom:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid var(--bdr);" onclick="document.getElementById(\'pa-file\').click()">'
+    +(pa.image?'<img src="'+pa.image+'" style="width:100%;height:100%;object-fit:contain;">':'<span style="font-size:10px;color:var(--wh);font-weight:700;">Click to upload flyer image</span>')
+    +'</div>'
+    +'<input type="file" id="pa-file" accept="image/*" style="display:none;" onchange="uploadPopupAdImage(this)">'
+    +'<div class="g2">'
+    +'<input class="inp" id="pa-link" value="'+(pa.link||'')+'" placeholder="Link when tapped, optional">'
+    +'<input class="inp" id="pa-caption" value="'+(pa.caption||'')+'" placeholder="Caption text, optional">'
+    +'</div>'
+    +'<div class="g2">'
+    +'<div class="fg"><label class="lbl">Placement</label><select class="inp" id="pa-placement">'+POPUP_AD_PLACEMENTS.map(function(o){return '<option value="'+o[0]+'"'+((pa.placement||'center')===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select></div>'
+    +'<div class="fg"><label class="lbl">How often it shows</label><select class="inp" id="pa-frequency">'+POPUP_AD_FREQUENCIES.map(function(o){return '<option value="'+o[0]+'"'+((pa.frequency||'session')===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select></div>'
+    +'</div>'
+    +'<div class="g2">'
+    +'<div class="fg"><label class="lbl">Width (px), ignored for full-width bars</label><input class="inp" type="number" id="pa-width" value="'+(pa.widthPx||360)+'" placeholder="360"></div>'
+    +'<div class="fg"><label class="lbl">Delay before it appears (seconds)</label><input class="inp" type="number" id="pa-delay" value="'+(pa.delaySec!=null?pa.delaySec:3)+'" placeholder="3"></div>'
+    +'</div>'
+    +'<label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;cursor:pointer;"><input type="checkbox" id="pa-enabled" '+(pa.enabled?'checked':'')+'/> Show this pop-up on the site</label>'
+    +'<div style="display:flex;gap:8px;">'
+    +'<button type="button" class="btn btn-or" onclick="savePopupAd()">'+iconBadge('save',14)+' Save Pop-Up Ad</button>'
+    +(pa.image?'<button type="button" class="btn btn-re" onclick="removePopupAd()">'+iconBadge('trash',14)+' Remove</button>':'')
+    +'</div>';
+}
+async function uploadPopupAdImage(inp){
+  if(!inp||!inp.files||!inp.files[0])return;
+  toast('Uploading flyer…');
+  var oldUrl=(settings.popupAd||{}).image;
+  var b64=await compressImage(inp.files[0],1400,0.85);
+  if(!b64){toast('Upload failed, try a different image','err');return;}
+  var url=isGithubConfigured()?await uploadDataUrlToGithub(b64,'popup-ads'):null;
+  if(!url){toast('Flyer NOT saved, '+(window._lastStorageError||'Storage upload failed'),'err');return;}
+  settings.popupAd=Object.assign({},settings.popupAd||{},{image:url});
+  await fbU('rn_mall_settings',{popupAd:settings.popupAd});
+  if(oldUrl&&oldUrl!==url)deleteStorageFile(oldUrl);
+  toast('Flyer image saved!');
+  renderPopupAdEditor();
+}
+async function savePopupAd(){
+  var link=(document.getElementById('pa-link')||{}).value||'';
+  var caption=(document.getElementById('pa-caption')||{}).value||'';
+  var placement=(document.getElementById('pa-placement')||{}).value||'center';
+  var frequency=(document.getElementById('pa-frequency')||{}).value||'session';
+  var widthPx=parseInt((document.getElementById('pa-width')||{}).value)||360;
+  var delaySec=parseInt((document.getElementById('pa-delay')||{}).value);if(isNaN(delaySec)||delaySec<0)delaySec=3;
+  var enabled=!!(document.getElementById('pa-enabled')||{}).checked;
+  if(enabled&&!(settings.popupAd||{}).image){toast('Upload a flyer image first','err');return;}
+  settings.popupAd=Object.assign({},settings.popupAd||{},{link:link.trim(),caption:caption.trim(),placement:placement,frequency:frequency,widthPx:widthPx,delaySec:delaySec,enabled:enabled});
+  await fbU('rn_mall_settings',{popupAd:settings.popupAd});
+  toast('Pop-up ad saved!');
+}
+async function removePopupAd(){
+  if(!confirm('Remove the pop-up ad?'))return;
+  var oldUrl=(settings.popupAd||{}).image;
+  settings.popupAd=null;
+  await fbD('rn_mall_settings/popupAd');
+  if(oldUrl)deleteStorageFile(oldUrl);
+  toast('Pop-up ad removed.');
+  renderPopupAdEditor();
 }
 function renderVideoGalleryEditor(){
   var wrap=document.getElementById('video-gallery-editor');if(!wrap)return;
