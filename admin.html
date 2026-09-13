@@ -634,6 +634,15 @@ async function sendPushToTokens(tokens,title,body,data,url){
     });
   }catch(e){console.warn('Push send failed:',e.message);}
 }
+// Fetches a user's current fcmTokens and pushes to them in one call, used by every
+// admin action (wallet/points/salary/payout/bank/strike/etc) that already writes an
+// in-app notification for that user, so they also get a real device push for it.
+async function notifyUserPush(collection,id,title,body,data,page){
+  try{
+    const tokens=await fbG(collection+'/'+id+'/fcmTokens');
+    sendPushToTokens(tokens?Object.keys(tokens):[],title,body,data||{},page);
+  }catch(e){console.warn('notifyUserPush failed:',e.message);}
+}
 const WA_NUM='2349164678560';
 const ADMIN_EMAILS=['richnationwbpt61@gmail.com','ubongrich62@gmail.com'];
 
@@ -1401,6 +1410,7 @@ async function reviewStaffSubmissionAdmin(id,decision){
   const s=await fbG('rn_mall_staff_submissions/'+id);if(!s)return;
   await fbU('rn_mall_staff_submissions/'+id,{status:decision,reviewNote:note.trim()||null,reviewedBy:sessionStorage.getItem('rnm_admin_ceo_name')||'Admin',reviewedAt:Date.now()});
   await fbP('rn_mall_staff_notifications/'+s.staffId,{type:decision==='approved'?'submission_approved':'submission_rejected',title:s.title,note:note.trim()||null,date:ds(),read:false,ts:Date.now()});
+  notifyUserPush('rn_mall_staff',s.staffId,decision==='approved'?'Submission Approved':'Submission Rejected',s.title+(note.trim()?': '+note.trim():''),{},'staff.html');
   toast(decision==='approved'?'Approved!':'Rejected, feedback sent');
   staffNav('submissions');
 }
@@ -1446,10 +1456,12 @@ async function processStaffWithdrawal(staffId,key,approve){
     if(!confirm('Confirm you have sent '+fmt(w.amount)+' to '+s.name+'\'s bank account?'))return;
     await fbU('rn_mall_staff_withdrawals/'+staffId+'/'+key,{status:'paid'});
     await fbP('rn_mall_staff_notifications/'+staffId,{type:'withdrawal_paid',amount:w.amount,date:ds(),read:false,ts:Date.now()});
+    notifyUserPush('rn_mall_staff',staffId,'Withdrawal Paid',fmt(w.amount)+' has been sent to your bank account.',{},'staff.html');
     toast('Marked paid!');
   }else{
     await fbU('rn_mall_staff_withdrawals/'+staffId+'/'+key,{status:'declined'});
     await fbP('rn_mall_staff_notifications/'+staffId,{type:'withdrawal_declined',amount:w.amount,date:ds(),read:false,ts:Date.now()});
+    notifyUserPush('rn_mall_staff',staffId,'Withdrawal Declined','Your withdrawal request for '+fmt(w.amount)+' was declined.',{},'staff.html');
     toast('Withdrawal declined');
   }
   staffNav('withdrawals');
@@ -1701,6 +1713,7 @@ async function setStaffHours(id,name,current){
   if(val===null)return;
   await fbU('rn_mall_staff/'+id,{workingHours:val.trim()});
   await fbP('rn_mall_staff_notifications/'+id,{type:'hours_set',hours:val.trim(),date:ds(),read:false,ts:Date.now()});
+  notifyUserPush('rn_mall_staff',id,'Working Hours Updated','Your working hours are now: '+val.trim(),{},'staff.html');
   logActivity('Set working hours',name+', '+val.trim());
   toast('Working hours updated for '+name);
   nav('staff',false);
@@ -1713,6 +1726,7 @@ async function adjustStaffSalary(id,name,current){
   await fbU('rn_mall_staff/'+id,{salary:amt,salaryStatus:'pending'});
   await fbP('rn_mall_staff_salary_history/'+id,{amount:amt,status:'set',date:ds(),ts:Date.now()});
   await fbP('rn_mall_staff_notifications/'+id,{type:'salary_set',amount:amt,date:ds(),read:false,ts:Date.now()});
+  notifyUserPush('rn_mall_staff',id,'Salary Updated','Your monthly salary was set to '+fmt(amt)+'.',{},'staff.html');
   logActivity('Set salary',name+' → '+fmt(amt)+'/mo');
   toast('Salary updated for '+name);
   nav('staff',false);
@@ -1744,6 +1758,7 @@ async function finalizeSalaryPaid(id,name){
   await fbU('rn_mall_staff/'+id,{salaryStatus:'paid'});
   await fbP('rn_mall_staff_salary_history/'+id,{amount,description,expectedDate,message,status:'paid',date:ds(),ts:Date.now()});
   await fbP('rn_mall_staff_notifications/'+id,{type:'salary_paid',amount,description,message,expectedDate,date:ds(),read:false,ts:Date.now()});
+  notifyUserPush('rn_mall_staff',id,'Salary Paid',fmt(amount)+' has been paid to you.'+(message?' '+message:''),{},'staff.html');
   if(message)await fbU('rn_mall_settings',{payoutMessageTemplate:message});
   logActivity('Paid salary',name+', '+fmt(amount));
   toast('Marked as paid, '+name+' notified!');
@@ -1760,6 +1775,7 @@ async function awardStaffPoints(id,name){
   await fbU('rn_mall_staff/'+id,{points:newPts});
   await fbP('rn_mall_staff_points_log/'+id,{amount:pts,reason,date:ds(),ts:Date.now()});
   await fbP('rn_mall_staff_notifications/'+id,{type:'points_awarded',amount:pts,reason,date:ds(),read:false,ts:Date.now()});
+  notifyUserPush('rn_mall_staff',id,'StaffPoints Awarded','+'+pts+' pts: '+reason,{},'staff.html');
   logActivity('Awarded StaffPoints',name+' +'+pts+' pts, '+reason);
   toast('Awarded '+pts+' points to '+name);
   nav('staff',false);
@@ -1820,6 +1836,7 @@ async function approveStaffTask(staffId,taskKey,staffName){
   const approverName=sessionStorage.getItem('rnm_admin_ceo_name')||'Admin';
   await fbU('rn_mall_staff_tasks/'+staffId+'/'+taskKey,{status:'approved',approvedBy:approverName,approvedAt:Date.now()});
   await fbP('rn_mall_staff_notifications/'+staffId,{type:'task_approved',date:ds(),read:false,ts:Date.now()});
+  notifyUserPush('rn_mall_staff',staffId,'Task Approved','Your task was approved.',{},'staff.html');
   toast('Task approved!');
   viewStaffTasks(staffId,staffName);
 }
@@ -1857,6 +1874,7 @@ async function addStaffStrike(id,name){
   }
   await fbU('rn_mall_staff/'+id,update);
   await fbP('rn_mall_staff_notifications/'+id,{type:'strike',reason:reason.trim(),strikes:newStrikes,date:ds(),read:false,ts:Date.now()});
+  notifyUserPush('rn_mall_staff',id,newStrikes>=3?'Suspended':'Strike Added',msg,{},'staff.html');
   logActivity('Added strike',name+' ('+newStrikes+'/3), '+reason.trim());
   toast(newStrikes>=3?name+' auto-suspended after 3 strikes':'Strike added for '+name);
   nav('staff',false);
@@ -1912,6 +1930,7 @@ async function editSalaryRecord(staffId,recordKey,name){
   await fbU('rn_mall_staff_salary_history/'+staffId+'/'+recordKey,{amount:parseFloat(newAmount)||rec.amount,status:markPaid?'paid':'pending'});
   if(markPaid){
     await fbP('rn_mall_staff_notifications/'+staffId,{type:'salary_paid',amount:parseFloat(newAmount)||rec.amount,description:rec.month||rec.description,date:ds(),read:false,ts:Date.now()});
+    notifyUserPush('rn_mall_staff',staffId,'Salary Paid',fmt(parseFloat(newAmount)||rec.amount)+' has been paid to you.',{},'staff.html');
   }
   logActivity('Edited salary record',name+', '+(rec.month||rec.date));
   toast('Record updated!');
@@ -1921,6 +1940,7 @@ async function verifyStaffBank(id,name){
   if(!confirm('Confirm '+name+'\'s bank details are correct and verified?'))return;
   await fbU('rn_mall_staff/'+id,{bankVerified:true});
   await fbP('rn_mall_staff_notifications/'+id,{type:'bank_verified',date:ds(),read:false,ts:Date.now()});
+  notifyUserPush('rn_mall_staff',id,'Bank Details Verified','Your bank details have been verified.',{},'staff.html');
   logActivity('Verified bank details',name);
   toast('Bank details verified for '+name);
   nav('staff',false);
@@ -2061,10 +2081,12 @@ async function processInvestorWithdrawal(investorId,key,approve){
     await fbU('rn_mall_investor_withdrawals/'+investorId+'/'+key,{status:'paid'});
     await fbP('rn_mall_wallet_transactions_investor/'+investorId,{type:'withdrawal',amount:w.amount,description:'Withdrawal to bank',date:ds(),ts:Date.now()});
     await fbP('rn_mall_investor_notifications/'+investorId,{type:'withdrawal_paid',amount:w.amount,date:ds(),read:false,ts:Date.now()});
+    notifyUserPush('rn_mall_investors',investorId,'Withdrawal Paid',fmt(w.amount)+' has been sent to your bank account.',{},'investor.html');
     toast('Marked paid, wallet updated!');
   }else{
     await fbU('rn_mall_investor_withdrawals/'+investorId+'/'+key,{status:'declined'});
     await fbP('rn_mall_investor_notifications/'+investorId,{type:'withdrawal_declined',amount:w.amount,date:ds(),read:false,ts:Date.now()});
+    notifyUserPush('rn_mall_investors',investorId,'Withdrawal Declined','Your withdrawal request for '+fmt(w.amount)+' was declined.',{},'investor.html');
     toast('Withdrawal declined');
   }
   investorNav('withdrawals');
@@ -2253,6 +2275,7 @@ async function verifyInvestorBank(id,name){
   if(!confirm('Confirm '+name+'\'s bank details are correct and verified?'))return;
   await fbU('rn_mall_investors/'+id,{bankVerified:true});
   await fbP('rn_mall_investor_notifications/'+id,{type:'bank_verified',date:ds(),read:false,ts:Date.now()});
+  notifyUserPush('rn_mall_investors',id,'Bank Details Verified','Your bank details have been verified.',{},'investor.html');
   toast('Bank details verified for '+name);
   nav('investors',false);
 }
@@ -2347,6 +2370,7 @@ async function finalizeVendorPayout(id,name){
   if(amount<=0){toast('Enter a valid amount','err');return;}
   await fbP('rn_mall_vendor_payouts/'+id,{amount:amount,description:description,date:ds(),ts:Date.now()});
   await fbP('rn_mall_vendor_notifications/'+id,{type:'payout',amount:amount,description:description,date:ds(),read:false,ts:Date.now()});
+  notifyUserPush('rn_mall_vendors',id,'Payout Recorded',fmt(amount)+' has been recorded as paid to you.',{},'vendor.html');
   toast('Payout recorded for '+name+'!');
   nav('vendors',false);
 }
@@ -2354,6 +2378,7 @@ async function verifyVendorBank(id,name){
   if(!confirm('Confirm '+name+'\'s bank details are correct and verified?'))return;
   await fbU('rn_mall_vendors/'+id,{bankVerified:true});
   await fbP('rn_mall_vendor_notifications/'+id,{type:'bank_verified',date:ds(),read:false,ts:Date.now()});
+  notifyUserPush('rn_mall_vendors',id,'Bank Details Verified','Your bank details have been verified.',{},'vendor.html');
   toast('Bank details verified for '+name);
   nav('vendors',false);
 }
@@ -2388,6 +2413,7 @@ async function finalizeInvestorPayout(id,name){
   await fbP('rn_mall_investor_payouts/'+id,{amount,description,expectedDate,message,date:ds(),ts:Date.now()});
   await fbP('rn_mall_wallet_transactions_investor/'+id,{type:'payout',amount,description:description||'Investment return',date:ds(),ts:Date.now()});
   await fbPNotify('rn_mall_investor_notifications/'+id,{type:'payout',amount,description,message,expectedDate,date:ds(),read:false,ts:Date.now()});
+  notifyUserPush('rn_mall_investors',id,'Payout Recorded',fmt(amount)+' has been recorded as paid to you.'+(message?' '+message:''),{},'investor.html');
   if(message)await fbU('rn_mall_settings',{payoutMessageTemplate:message});
   toast('Payout recorded, '+name+' notified!');
   nav('investors',false);
@@ -2441,7 +2467,10 @@ async function postInvestorUpdate(){
   await fbP('rn_mall_investor_updates',{message:msg,date:ds(),ts:Date.now()});
   const all=await fbG('rn_mall_investors')||{};
   Object.keys(all).forEach(function(id){
-    if(all[id].status==='active')fbPNotify('rn_mall_investor_notifications/'+id,{type:'update',preview:msg.slice(0,80),date:ds(),read:false,ts:Date.now()});
+    if(all[id].status==='active'){
+      fbPNotify('rn_mall_investor_notifications/'+id,{type:'update',preview:msg.slice(0,80),date:ds(),read:false,ts:Date.now()});
+      notifyUserPush('rn_mall_investors',id,'RichNation Mall',msg.slice(0,120),{},'investor.html');
+    }
   });
   toast('Update posted to all investors!');
   investorNav('updates');
@@ -2569,6 +2598,7 @@ async function sendRiderAdminReply(riderId){
   const senderName=sessionStorage.getItem('rnm_admin_ceo_name')||'RichNation Mall';
   await fbP(key,{senderId:'admin',senderName:senderName,senderRole:sessionStorage.getItem('rnm_admin_is_ceo')==='1'?'ceo':null,text:text,isAdmin:true,ts:Date.now(),date:ds()});
   await fbP('rn_mall_rider_notifications/'+riderId,{type:'admin_reply',from:senderName,preview:text.slice(0,60),date:ds(),read:false,ts:Date.now()});
+  notifyUserPush('rn_mall_riders',riderId,senderName,text.slice(0,120),{},'rider.html');
   inp.value='';await loadRiderAdminMsgs(riderId);
 }
 async function renderRiderList(c){
@@ -2680,6 +2710,7 @@ async function addRiderStrike(id,name){
   if(newStrikes>=3)update.status='suspended';
   await fbU('rn_mall_riders/'+id,update);
   await fbP('rn_mall_rider_notifications/'+id,{type:'strike',reason:reason.trim(),strikes:newStrikes,date:ds(),read:false,ts:Date.now()});
+  notifyUserPush('rn_mall_riders',id,newStrikes>=3?'Suspended':'Strike Added',newStrikes>=3?'You have been suspended after 3 strikes. Last strike: '+reason.trim():'You received a strike ('+newStrikes+'/3): '+reason.trim(),{},'rider.html');
   toast(newStrikes>=3?name+' auto-suspended after 3 strikes':'Strike added for '+name);
   nav('riders',false);
 }
@@ -2694,6 +2725,7 @@ async function verifyRiderBank(id,name){
   if(!confirm('Confirm '+name+'\'s bank details are correct and verified?'))return;
   await fbU('rn_mall_riders/'+id,{bankVerified:true});
   await fbP('rn_mall_rider_notifications/'+id,{type:'bank_verified',date:ds(),read:false,ts:Date.now()});
+  notifyUserPush('rn_mall_riders',id,'Bank Details Verified','Your bank details have been verified.',{},'rider.html');
   toast('Bank details verified for '+name);
   nav('riders',false);
 }
@@ -2707,6 +2739,7 @@ async function awardRiderPoints(id,name){
   await fbU('rn_mall_riders/'+id,{points:newPoints});
   await fbP('rn_mall_rider_points_log/'+id,{amount:amount,reason:reason.trim(),date:ds(),ts:Date.now()});
   await fbP('rn_mall_rider_notifications/'+id,{type:'points_awarded',amount:amount,reason:reason.trim(),date:ds(),read:false,ts:Date.now()});
+  notifyUserPush('rn_mall_riders',id,'Points Awarded','+'+amount+' pts: '+reason.trim(),{},'rider.html');
   toast(amount+' points awarded to '+name+'!');
   nav('riders',false);
 }
@@ -2738,6 +2771,7 @@ async function finalizeRiderPayout(id,name){
   await fbU('rn_mall_riders/'+id,{totalPaid:newTotal});
   await fbP('rn_mall_rider_payouts/'+id,{amount,description,expectedDate,message,date:ds(),ts:Date.now()});
   await fbP('rn_mall_rider_notifications/'+id,{type:'payout',amount,description,message,expectedDate,date:ds(),read:false,ts:Date.now()});
+  notifyUserPush('rn_mall_riders',id,'Payout Recorded',fmt(amount)+' has been recorded as paid to you.'+(message?' '+message:''),{},'rider.html');
   if(message)await fbU('rn_mall_settings',{payoutMessageTemplate:message});
   toast('Payout recorded, '+name+' notified!');
   nav('riders',false);
@@ -2836,6 +2870,7 @@ async function approveWalletIssue(id){
   const iss=await fbG('rn_mall_wallet_issues/'+id);if(!iss)return;
   await fbU('rn_mall_wallet_issues/'+id,{status:'approved_awaiting_bank'});
   await fbPNotify('rn_mall_customer_notifications/'+iss.customerId,{type:'points_earned',message:'Your refund request was approved! Please go to your Wallet and enter your bank details to receive payment.',date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
+  notifyUserPush('rn_mall_customers',iss.customerId,'Refund Approved','Please go to your Wallet and enter your bank details to receive payment.',{},'index.html');
   toast('Approved, customer notified to enter bank details');
   nav('wallet-issues',false);
 }
@@ -2845,6 +2880,7 @@ async function declineWalletIssue(id){
   const iss=await fbG('rn_mall_wallet_issues/'+id);if(!iss)return;
   await fbU('rn_mall_wallet_issues/'+id,{status:'declined',adminReply:reason});
   await fbPNotify('rn_mall_customer_notifications/'+iss.customerId,{type:'points_earned',message:'Your wallet report was declined: '+reason,date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
+  notifyUserPush('rn_mall_customers',iss.customerId,'Wallet Report Declined',reason,{},'index.html');
   toast('Declined, customer notified');
   nav('wallet-issues',false);
 }
@@ -2854,6 +2890,7 @@ async function resolveWalletIssue(id){
   const iss=await fbG('rn_mall_wallet_issues/'+id);if(!iss)return;
   await fbU('rn_mall_wallet_issues/'+id,{status:'resolved',adminReply:reply});
   await fbPNotify('rn_mall_customer_notifications/'+iss.customerId,{type:'points_earned',message:'Reply to your report: '+reply,date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
+  notifyUserPush('rn_mall_customers',iss.customerId,'RichNation Mall','Reply to your report: '+reply,{},'index.html');
   toast('Resolved, customer notified');
   nav('wallet-issues',false);
 }
@@ -2862,6 +2899,7 @@ async function markWalletIssuePaid(id){
   if(!confirm('Confirm you have sent '+fmt(iss.amount||0)+' to '+iss.bankAcctName+' ('+iss.bankName+', '+iss.bankAcctNo+')?'))return;
   await fbU('rn_mall_wallet_issues/'+id,{status:'paid'});
   await fbPNotify('rn_mall_customer_notifications/'+iss.customerId,{type:'points_earned',message:fmt(iss.amount||0)+' has been sent to your bank account ('+iss.bankName+', '+iss.bankAcctNo+'). It should reflect shortly.',date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
+  notifyUserPush('rn_mall_customers',iss.customerId,'Payment Sent',fmt(iss.amount||0)+' has been sent to your bank account. It should reflect shortly.',{},'index.html');
   toast('Marked as paid, customer notified');
   nav('wallet-issues',false);
 }
@@ -3923,6 +3961,7 @@ async function saveOrderStatus(tracking){
     }
     if(o.riderId){
       await fbP('rn_mall_rider_notifications/'+o.riderId,{type:'order_cancelled',orderId:tracking,reason:note,date:ds(),read:false,ts:Date.now()});
+      notifyUserPush('rn_mall_riders',o.riderId,'Order Cancelled','Order '+tracking+' was cancelled: '+note,{tracking:tracking},'rider.html');
     }
   }
   await fbU('rn_mall_orders/'+tracking,updates);
@@ -4182,6 +4221,7 @@ async function deleteCustomer(id,name){
 async function approveWholesale(id,name){
   await fbU('rn_mall_customers/'+id,{wholesaleStatus:'approved'});
   await fbP('rn_mall_customer_notifications/'+id,{type:'points_earned',message:'Your wholesale pricing application was approved! Bulk pricing now applies automatically on eligible products.',date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
+  notifyUserPush('rn_mall_customers',id,'Wholesale Approved','Your wholesale pricing application was approved! Bulk pricing now applies automatically.',{},'index.html');
   toast(name+' approved for wholesale pricing!');
   nav('customers',false);
 }
@@ -4199,6 +4239,7 @@ async function adjustWallet(id,name,current){
   await fbU('rn_mall_customers/'+id,{walletBalance:val});
   await fbP('rn_mall_wallet_transactions/'+id,{type:val>=current?'credit':'debit',amount:val-current,description:val>=current?'Balance Added':'Balance Reduced',date:ds(),ts:Date.now()});
   await fbP('rn_mall_customer_notifications/'+id,{type:'points_earned',message:'Your wallet balance was updated by our team. New balance: ₦'+val.toLocaleString()+'.',date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
+  notifyUserPush('rn_mall_customers',id,'Wallet Updated','Your wallet balance was updated. New balance: ₦'+val.toLocaleString()+'.',{},'index.html');
   toast('Wallet updated for '+name);
   nav('customers',false);
 }
@@ -4209,6 +4250,7 @@ async function adjustPoints(id,name,current){
   if(isNaN(val)||val<0){toast('Enter a valid non-negative number','err');return;}
   await fbU('rn_mall_customers/'+id,{points:val});
   await fbP('rn_mall_customer_notifications/'+id,{type:'points_earned',message:'Your RichPoints balance was updated by our team. New balance: '+val+' pts.',date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
+  notifyUserPush('rn_mall_customers',id,'RichPoints Updated','Your RichPoints balance was updated. New balance: '+val+' pts.',{},'index.html');
   toast('Points updated for '+name);
   nav('customers',false);
 }
@@ -4218,6 +4260,7 @@ async function blockCustomer(id,name,wasSuspended){
   allCusts[id].accountStatus=newStatus;
   if(!wasSuspended){
     await fbPNotify('rn_mall_customer_notifications/'+id,{type:'account_suspended',message:'Your RichNation Mall account has been suspended. Please contact our support team for more information.',date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
+    notifyUserPush('rn_mall_customers',id,'RichNation Mall','Your account has been suspended. Contact support for more information.',{},'index.html');
   }
   toast(name+(wasSuspended?' reactivated':' suspended'));nav('customers',false);
 }
@@ -6066,7 +6109,7 @@ async function approvePOD(id){
   var order=await fbG('rn_mall_orders/'+id);if(!order)return;
   var tl=(order.timeline||[]).concat([{status:'Pay on Delivery Approved',time:new Date().toISOString(),note:msg}]);
   await fbS('rn_mall_orders/'+id,Object.assign({},order,{status:'confirmed',podApproved:true,timeline:tl}));
-  if(order.customer&&order.customer.id){await fbPNotify('rn_mall_customer_notifications/'+order.customer.id,{type:'pod_approved',orderId:id,message:msg,date:new Date().toLocaleDateString(),read:false,ts:Date.now()});}
+  if(order.customer&&order.customer.id){await fbPNotify('rn_mall_customer_notifications/'+order.customer.id,{type:'pod_approved',orderId:id,message:msg,date:new Date().toLocaleDateString(),read:false,ts:Date.now()});notifyUserPush('rn_mall_customers',order.customer.id,'Pay on Delivery Approved',msg,{tracking:id},'index.html');}
   toast('Pay on Delivery approved, customer notified!');nav('pod',false);
 }
 async function declinePOD(id){
@@ -6075,7 +6118,7 @@ async function declinePOD(id){
   var order=await fbG('rn_mall_orders/'+id);if(!order)return;
   var tl=(order.timeline||[]).concat([{status:'Pay on Delivery Declined',time:new Date().toISOString(),note:msg}]);
   await fbS('rn_mall_orders/'+id,Object.assign({},order,{status:'pod_declined',timeline:tl}));
-  if(order.customer&&order.customer.id){await fbPNotify('rn_mall_customer_notifications/'+order.customer.id,{type:'pod_cancelled',orderId:id,message:msg,date:new Date().toLocaleDateString(),read:false,ts:Date.now()});}
+  if(order.customer&&order.customer.id){await fbPNotify('rn_mall_customer_notifications/'+order.customer.id,{type:'pod_cancelled',orderId:id,message:msg,date:new Date().toLocaleDateString(),read:false,ts:Date.now()});notifyUserPush('rn_mall_customers',order.customer.id,'Pay on Delivery Declined',msg,{tracking:id},'index.html');}
   toast('Pay on Delivery declined, customer notified.');nav('pod',false);
 }
 
@@ -7126,6 +7169,7 @@ async function deleteOrder(tracking,customerName){
   allOrders[tracking]=updated;
   if(order.customer&&order.customer.id){
     fbPNotify('rn_mall_customer_notifications/'+order.customer.id,{type:'order_deleted',orderId:tracking,message:'Your order '+tracking+' has been deleted by our team. Contact support if you have questions.',date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
+    notifyUserPush('rn_mall_customers',order.customer.id,'Order Deleted','Your order '+tracking+' has been deleted by our team. Contact support if you have questions.',{tracking:tracking},'index.html');
   }
   toast('Order '+tracking+' marked as deleted');
   nav('orders',false);
@@ -7138,12 +7182,14 @@ async function cancelOrder(tracking,customerName){
   await fbS('rn_mall_orders/'+tracking,Object.assign({},order,{status:'cancelled',cancelReason:reason,timeline:tl}));
   if(order.customer&&order.customer.id){
     await fbPNotify('rn_mall_customer_notifications/'+order.customer.id,{type:'order_cancelled',orderId:tracking,message:'Your order '+tracking+' was cancelled: '+reason,date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
+    notifyUserPush('rn_mall_customers',order.customer.id,'Order Cancelled','Your order '+tracking+' was cancelled: '+reason,{tracking:tracking},'index.html');
     if(order.payMethod!=='pod'&&order.payMethod!=='preorder'&&confirm('Refund ₦'+(order.total||0).toLocaleString()+' to '+customerName+'\'s wallet?')){
       var cust=await fbG('rn_mall_customers/'+order.customer.id);
       var newBal=(cust&&cust.walletBalance||0)+(order.total||0);
       await fbU('rn_mall_customers/'+order.customer.id,{walletBalance:newBal});
       await fbP('rn_mall_wallet_transactions/'+order.customer.id,{type:'credit',amount:order.total||0,description:'Refund for cancelled order '+tracking,date:ds(),ts:Date.now()});
       await fbPNotify('rn_mall_customer_notifications/'+order.customer.id,{type:'points_earned',message:'₦'+(order.total||0).toLocaleString()+' was refunded to your wallet for cancelled order '+tracking+'.',date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
+      notifyUserPush('rn_mall_customers',order.customer.id,'Refund Processed','₦'+(order.total||0).toLocaleString()+' was refunded to your wallet for cancelled order '+tracking+'.',{tracking:tracking},'index.html');
       toast('Refunded to wallet');
     }
   }
@@ -7179,6 +7225,7 @@ async function addLocationUpdate(tracking){
   await fbS('rn_mall_orders/'+tracking,Object.assign({},order,{timeline:tl,lastLocation:loc.trim()}));
   if(order.customer&&order.customer.id){
     await fbPNotify('rn_mall_customer_notifications/'+order.customer.id,{type:'status_update',orderId:tracking,message:'Update on your order '+tracking+': '+loc.trim(),date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
+    notifyUserPush('rn_mall_customers',order.customer.id,'Order Update','Update on your order '+tracking+': '+loc.trim(),{tracking:tracking},'index.html');
   }
   toast('Location update posted, customer notified!');
   openOrder(tracking);
@@ -7195,6 +7242,7 @@ async function markReadyForPickup(tracking){
   allOrders[tracking]=Object.assign({},order,{status:'ready_for_pickup',timeline:tl});
   if(order.customer&&order.customer.id){
     await fbPNotify('rn_mall_customer_notifications/'+order.customer.id,{type:'pickup_ready',orderId:tracking,message:'Your order '+tracking+' has arrived and is ready for pickup! Please come collect it at your convenience.',date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
+    notifyUserPush('rn_mall_customers',order.customer.id,'Ready for Pickup','Your order '+tracking+' has arrived and is ready for pickup!',{tracking:tracking},'index.html');
   }
   toast('Order '+tracking+' marked Ready for Pickup, customer notified');
   openOrder(tracking);
