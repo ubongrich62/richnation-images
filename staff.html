@@ -200,7 +200,7 @@ button{font-family:inherit;}
         <button class="curr-btn" data-curr="EUR" onclick="setCurr('EUR')">€</button>
         <button class="curr-btn" data-curr="GBP" onclick="setCurr('GBP')">£</button>
       </div>
-      <button class="tb-btn" style="position:relative;" onclick="toggleStaffNotifPanel()">🔔<span id="staff-notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--re);color:#fff;font-size:9px;font-weight:800;min-width:15px;height:15px;border-radius:99px;align-items:center;justify-content:center;padding:0 3px;">0</span></button>
+      <button class="tb-btn" style="position:relative;" onclick="toggleStaffNotifPanel()">${iconBadge('bell',14)}<span id="staff-notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--re);color:#fff;font-size:9px;font-weight:800;min-width:15px;height:15px;border-radius:99px;align-items:center;justify-content:center;padding:0 3px;">0</span></button>
       <div id="staff-notif-panel" style="display:none;position:absolute;top:44px;right:0;width:300px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--bdr);border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,0.6);z-index:500;padding:8px;"></div>
       <button class="tb-btn" onclick="staffLogout()">Sign Out</button>
     </div>
@@ -331,6 +331,24 @@ function ds(){return new Date().toLocaleDateString('en-GB');}
 function ini(name){return (name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
 function svgIconPaths(name){
   var icons={
+    'palette':'<path d="M12 3a9 8 0 100 16c1 0 1.5-.5 1.5-1.2 0-.3-.1-.6-.3-.8-.2-.3-.1-.7.3-.8H15a4 4 0 004-4c0-4.4-3.6-9.2-7-9.2z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="10.5" cy="7.5" r="1"/><circle cx="14.5" cy="8" r="1"/><circle cx="16.5" cy="11.5" r="1"/>',
+'bank':'<path d="M3 10l9-6 9 6"/><path d="M4 10v9M9 10v9M15 10v9M20 10v9"/><path d="M2 21h20"/>',
+    'bell':'<path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/>',
+    'bike':'<circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M6 17l4-8h4l3 8M10 9l3 4h5"/>',
+    'check':'<path d="M20 6L9 17l-5-5"/>',
+    'cloud':'<path d="M6.5 18a4 4 0 01-.4-8 5.5 5.5 0 0110.6-1.8A4.5 4.5 0 0117 18z"/>',
+    'document':'<path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h6M9 17h6"/>',
+    'folder':'<path d="M3 6a1 1 0 011-1h5l2 2h9a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1z"/>',
+    'lock':'<path d="M6 11V7a6 6 0 0112 0v4M4 11h16v9H4z"/>',
+    'megaphone':'<path d="M3 10v4h3l7 4V6l-7 4H3z"/><path d="M17 9a4 4 0 010 6"/>',
+    'monitor':'<rect x="3" y="4" width="18" height="12" rx="1"/><path d="M8 20h8M12 16v4"/>',
+    'save':'<path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3M7 21v-8h10v8"/>',
+    'signal':'<path d="M4 20v-4M9 20v-8M14 20v-12M19 20V4"/>',
+    'sync':'<path d="M4 4v6h6"/><path d="M20 20v-6h-6"/><path d="M5.5 9A7 7 0 0119 8m-.5 7A7 7 0 015 16"/>',
+    'target':'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+    'warning':'<path d="M12 2L2 20h20L12 2z"/><path d="M12 9v5M12 17v.01"/>',
+    'wrench':'<path d="M14.7 6.3a4 4 0 00-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 005.4-5.4l-2.8 2.8-2-2z"/>',
+
     home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
     box:'<path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/>',
     cart:'<circle cx="9" cy="20" r="1.3"/><circle cx="18" cy="20" r="1.3"/><path d="M2 3h3l2.4 12.2a2 2 0 002 1.8h8.6a2 2 0 002-1.7L22 8H6"/>',
@@ -345,7 +363,7 @@ function svgIconPaths(name){
     palm:'<path d="M12 22V12M12 12C7 12 4 8 4 4c4 0 8 3 8 8zM12 12c5 0 8-4 8-8-4 0-8 3-8 8z"/>',
     chat:'<path d="M21 12a8 8 0 11-3.5-6.6L21 4l-1 4.5A7.9 7.9 0 0121 12z"/>',
     clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>',
-    file:'<path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/>'
+    file:'<path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/>',
   };
   return icons[name]||icons.star;
 }
@@ -498,7 +516,7 @@ async function submitStaffApplication(){
     status:'pending_review',joinDate:ds(),ts:Date.now()
   });
   err.style.display='none';
-  document.getElementById('apply-form').innerHTML='<div style="text-align:center;padding:10px 0;"><div style="font-size:32px;margin-bottom:10px;">✅</div><div style="font-weight:800;margin-bottom:8px;">Application Submitted!</div><div style="font-size:12px;color:var(--wh);font-weight:700;line-height:1.7;">Thanks, '+fname+'! Our admin will review your application. Once approved, you\'ll receive your login email and password separately, check with us if you don\'t hear back soon.</div></div>';
+  document.getElementById('apply-form').innerHTML='<div style="text-align:center;padding:10px 0;"><div style="font-size:32px;margin-bottom:10px;">'+iconBadge('check',32)+'</div><div style="font-weight:800;margin-bottom:8px;">Application Submitted!</div><div style="font-size:12px;color:var(--wh);font-weight:700;line-height:1.7;">Thanks, '+fname+'! Our admin will review your application. Once approved, you\'ll receive your login email and password separately, check with us if you don\'t hear back soon.</div></div>';
 }
 async function doStaffLogin(){
   const email=document.getElementById('s-email').value.trim().toLowerCase();
@@ -626,7 +644,7 @@ function maybeShowWelcomeSetup(){
   if(!staff.bankAcctNo)missing.push('Add your bank account details');
   if(!staff.policyRead)missing.push('Read and confirm the Company Policy');
   if(!missing.length)return;
-  showInfoModal('👋 Welcome, '+staff.name.split(' ')[0]+'!',`
+  showInfoModal(''+iconBadge('star',14)+' Welcome, '+staff.name.split(' ')[0]+'!',`
     <div style="font-size:13px;color:var(--wh);font-weight:700;line-height:1.7;margin-bottom:14px;">Let's finish setting up your dashboard, a few things left:</div>
     <div style="margin-bottom:16px;">${missing.map(function(m){return '<div style="padding:8px 0;border-top:1px solid var(--bdr);font-size:13px;color:var(--wh);font-weight:700;">☐ '+m+'</div>';}).join('')}</div>
     <button class="btn btn-or btn-lg" onclick="closeInfoModal();snav('profile');" style="width:100%;">Complete My Setup</button>
@@ -787,17 +805,17 @@ async function renderDashboard(c){
       <div onclick="document.getElementById('dash-photo-upload').click()" style="font-size:11px;color:var(--or);cursor:pointer;margin-top:4px;">Change Photo</div>
     </div>
     </div>
-    <button onclick="manualRefreshStaffDash(this)" class="btn" style="font-size:11px;">🔄 Refresh</button>
+    <button onclick="manualRefreshStaffDash(this)" class="btn" style="font-size:11px;">${iconBadge('sync',14)} Refresh</button>
   </div>
   ${staff.role==='ceo'?(staff.adminPanelAccess?`<div class="card" style="border-color:rgba(255,140,0,0.4);background:rgba(255,140,0,0.06);">
-    <div style="font-weight:800;color:var(--or);font-size:14px;">🖥️ You have full Admin Panel access</div>
+    <div style="font-weight:800;color:var(--or);font-size:14px;">${iconBadge('monitor',14)} You have full Admin Panel access</div>
     <div style="font-size:12px;color:var(--wh);font-weight:700;margin-top:6px;line-height:1.7;">This Staff Portal is for your day-to-day tasks, salary, points, messages, your own reports. For company-wide access (all products, orders, vendors, investors, riders, promotions, settings, everything Admin sees), log into the <strong>Admin Panel</strong> with these same email and password. Every action you take there is visible to Admin for review.</div>
   </div>`:`<div class="card" style="border-color:rgba(255,140,0,0.4);background:rgba(255,140,0,0.06);">
-    <div style="font-weight:800;color:var(--or);font-size:14px;">🖥️ Full Admin Panel access not yet granted</div>
+    <div style="font-weight:800;color:var(--or);font-size:14px;">${iconBadge('monitor',14)} Full Admin Panel access not yet granted</div>
     <div style="font-size:12px;color:var(--wh);font-weight:700;margin-top:6px;line-height:1.7;">This Staff Portal only shows a limited view. For the full company-wide experience, same as Admin sees, ask Admin to grant you Admin Panel Access from Staff & Roles.</div>
   </div>`):''}
-  ${accessFor(staff.role)==='exec'?`<div class="card-title" style="margin:16px 0 10px;">🏢 Company Overview</div><div class="stats-grid" id="ceo-overview-grid"><div style="color:var(--wh);font-weight:700;font-size:12px;">Loading...</div></div>`:''}
-  ${(accessFor(staff.role)==='exec'&&!(staff.permissions&&staff.permissions.viewRevenue))?`<div style="font-size:11px;color:var(--wh);font-weight:700;margin:-10px 0 16px;">🔒 Revenue figures are hidden. Ask Admin to grant "View Revenue Figures" access.</div>`:''}
+  ${accessFor(staff.role)==='exec'?`<div class="card-title" style="margin:16px 0 10px;">${iconBadge('building',14)} Company Overview</div><div class="stats-grid" id="ceo-overview-grid"><div style="color:var(--wh);font-weight:700;font-size:12px;">Loading...</div></div>`:''}
+  ${(accessFor(staff.role)==='exec'&&!(staff.permissions&&staff.permissions.viewRevenue))?`<div style="font-size:11px;color:var(--wh);font-weight:700;margin:-10px 0 16px;">${iconBadge('lock',14)} Revenue figures are hidden. Ask Admin to grant "View Revenue Figures" access.</div>`:''}
   <div class="stats-grid">
     <div class="stat-card"><div class="stat-num" style="color:var(--su);">${fmt(staff.salary||0)}</div><div class="stat-lbl">Monthly Salary</div><div class="stat-sub">Status: ${staff.salaryStatus||'pending'}</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--or);">${staff.points||0} pts</div><div class="stat-lbl">StaffPoints</div><div class="stat-sub">Bonus points from admin</div></div>
@@ -811,15 +829,15 @@ async function renderDashboard(c){
     <div id="my-tasks-list" style="margin-top:8px;color:var(--wh);font-weight:700;font-size:12px;">Loading...</div>
   </div>
   <div class="card">
-    <div class="card-title">📋 My Bio</div>
+    <div class="card-title">${iconBadge('document',14)} My Bio</div>
     <div style="font-size:12px;color:var(--wh);font-weight:700;line-height:1.8;margin-top:8px;">${staff.bio||'No bio set yet.'}</div>
   </div>
   <div class="card">
-    <div class="card-title">🎯 My Job Description</div>
+    <div class="card-title">${iconBadge('target',14)} My Job Description</div>
     <div style="font-size:12px;color:var(--wh);font-weight:700;line-height:1.8;margin-top:8px;">${ROLE_JOB_DESCRIPTIONS[staff.role]||'Contact HR for your job description.'}</div>
   </div>
   <div class="card">
-    <div class="card-title">📢 Announcements</div>
+    <div class="card-title">${iconBadge('megaphone',14)} Announcements</div>
     <div id="dash-anns" style="margin-top:8px;color:var(--wh);font-weight:700;font-size:12px;">Loading...</div>
   </div>`;
   if(accessFor(staff.role)==='exec'){
@@ -1085,7 +1103,7 @@ async function initFleetMap(allRiders){
   fbG('rn_mall_settings').then(function(settingsData){
     var pickup=(settingsData||{}).pickupLocation;
     if(pickup&&pickup.lat!=null){
-      var storeIcon=L.divIcon({html:'<div style="background:#FF6A00;width:28px;height:28px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid #fff;">🏬</div>',iconSize:[28,28],className:''});
+      var storeIcon=L.divIcon({html:'<div style="background:#FF6A00;width:28px;height:28px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid #fff;">'+iconBadge('building',18)+'</div>',iconSize:[28,28],className:''});
       L.marker([pickup.lat,pickup.lng],{icon:storeIcon}).addTo(map).bindPopup('Pickup Point, RichNation Mall');
       bounds.push([pickup.lat,pickup.lng]);
       if(bounds.length>1)map.fitBounds(L.latLngBounds(bounds),{padding:[40,40]});
@@ -1094,7 +1112,7 @@ async function initFleetMap(allRiders){
   withLocation.forEach(function(r){
     var isLive=r.liveTs&&(Date.now()-r.liveTs)<2*60*1000;
     var minsAgo=r.liveTs?Math.round((Date.now()-r.liveTs)/60000):null;
-    const icon=L.divIcon({html:'<div style="background:#161616;width:30px;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:15px;border:2px solid '+(isLive?'#FF6A00':'#6b6b72')+';">🏍️</div>',iconSize:[30,30],className:''});
+    const icon=L.divIcon({html:'<div style="background:#161616;width:30px;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:15px;border:2px solid '+(isLive?'#FF6A00':'#6b6b72')+';">'+iconBadge('bike',14)+'</div>',iconSize:[30,30],className:''});
     L.marker([r.liveLat,r.liveLng],{icon:icon}).addTo(map).bindPopup(r.name+(isLive?', live':', last seen '+(minsAgo!=null?minsAgo+' min ago':'a while ago')));
     bounds.push([r.liveLat,r.liveLng]);
   });
@@ -1318,7 +1336,7 @@ async function renderChannelChat(c,key,mode){
   if(mode==='general'){
     const settings=await fbG('rn_mall_settings')||{};
     if(settings.staffDiscussionOpen===false){
-      c.innerHTML='<div class="card" style="text-align:center;padding:30px;color:var(--wh);font-weight:700;">🔒 General Discussion is currently closed by admin.</div>';
+      c.innerHTML='<div class="card" style="text-align:center;padding:30px;color:var(--wh);font-weight:700;">'+iconBadge('lock',14)+' General Discussion is currently closed by admin.</div>';
       return;
     }
   }
@@ -1426,16 +1444,16 @@ function renderProfile(c){
     <button class="btn btn-or btn-lg" onclick="saveMyProfile()">Save Password</button>
   </div>
   <div class="card" style="max-width:460px;">
-    <div class="card-title">📋 My Bio</div>
+    <div class="card-title">${iconBadge('document',14)} My Bio</div>
     <div style="font-size:12px;color:var(--wh);font-weight:700;line-height:1.8;margin-top:8px;">${staff.bio||'No bio set yet.'}</div>
     <div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:8px;">Want this changed? Reach out via Complaints.</div>
   </div>
   <div class="card" style="max-width:460px;">
-    <div class="card-title">🎯 My Job Description</div>
+    <div class="card-title">${iconBadge('target',14)} My Job Description</div>
     <div style="font-size:12px;color:var(--wh);font-weight:700;line-height:1.8;margin-top:8px;">${ROLE_JOB_DESCRIPTIONS[staff.role]||'Contact HR for your job description.'}</div>
   </div>
   <div class="card" style="max-width:460px;">
-    <div class="card-title">🏦 Bank Account Details</div>
+    <div class="card-title">${iconBadge('bank',14)} Bank Account Details</div>
     <div style="font-size:11px;color:var(--wh);font-weight:700;margin:8px 0 12px;">Where you'd like to receive your salary payments.${staff.bankVerified?' <strong style="color:var(--su);">✔ Verified by admin</strong>':staff.bankAcctNo?' <strong style="color:var(--or);">Awaiting admin verification</strong>':''}</div>
     <div class="fg"><label class="lbl">Bank Name</label><input class="inp" id="pf-bank" value="${staff.bankName||''}" placeholder="e.g. GTBank"/></div>
     <div class="fg"><label class="lbl">Account Number</label><input class="inp" id="pf-acctno" value="${staff.bankAcctNo||''}" placeholder="0123456789"/></div>
@@ -1515,7 +1533,7 @@ async function saveMyProfile(){
 // ── ROLE WORK VIEWS (read/scoped access to shared store data) ──
 function renderOrdersInner(c,orders){
   c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">Orders</div><div class="page-hdr-sub">Most recent 50 orders, tap one to update its status</div></div>'
-    +orders.map(function(o){return '<div class="data-row" onclick="openStaffOrder(\''+o.tracking+'\')" style="cursor:pointer;"><div style="flex:1;"><div class="row-name">'+o.tracking+(o.activeIncident?' <span style="background:rgba(244,63,94,.15);color:#f43f5e;font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:0.3px;">⚠️ Issue</span>':'')+'</div><div class="row-meta">'+(o.customer?o.customer.name:'')+' &middot; '+o.date+' &middot; '+fmt(o.total)+'</div></div><div class="row-meta">'+(o.status||'pending')+'</div></div>';}).join('');
+    +orders.map(function(o){return '<div class="data-row" onclick="openStaffOrder(\''+o.tracking+'\')" style="cursor:pointer;"><div style="flex:1;"><div class="row-name">'+o.tracking+(o.activeIncident?' <span style="background:rgba(244,63,94,.15);color:#f43f5e;font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:0.3px;">'+iconBadge('warning',14)+' Issue</span>':'')+'</div><div class="row-meta">'+(o.customer?o.customer.name:'')+' &middot; '+o.date+' &middot; '+fmt(o.total)+'</div></div><div class="row-meta">'+(o.status||'pending')+'</div></div>';}).join('');
 }
 async function renderOrders(c){
   var cachedO=null;
@@ -1529,11 +1547,11 @@ async function renderOrders(c){
 const STAFF_STATUSES=['pending','confirmed','packed','shipped','out for delivery','delivered','cancelled'];
 const STAFF_STATUSES_RIDER_ASSIGNED=['pending','confirmed','packed','cancelled'];
 const INCIDENT_TYPES_STAFF={
-  traffic:{emoji:'🚦',label:'Heavy Traffic'},
-  breakdown:{emoji:'🔧',label:'Vehicle Breakdown'},
-  road_closed:{emoji:'🚧',label:'Road Closed / Accident'},
-  weather:{emoji:'🌧️',label:'Bad Weather'},
-  other:{emoji:'⚠️',label:'Other Issue'}
+  traffic:{emoji:''+iconBadge('signal',14)+'',label:'Heavy Traffic'},
+  breakdown:{emoji:''+iconBadge('wrench',14)+'',label:'Vehicle Breakdown'},
+  road_closed:{emoji:''+iconBadge('warning',14)+'',label:'Road Closed / Accident'},
+  weather:{emoji:''+iconBadge('cloud',14)+'',label:'Bad Weather'},
+  other:{emoji:''+iconBadge('warning',14)+'',label:'Other Issue'}
 };
 async function openStaffOrder(tracking){
   const o=await fbG('rn_mall_orders/'+tracking);if(!o)return;
@@ -1555,7 +1573,7 @@ async function openStaffOrder(tracking){
   </div>
   <div class="card">
     <div class="card-title">Update Status</div>
-    ${hasRider?`<div style="font-size:11px;color:var(--or);margin-bottom:10px;">🏍️ ${o.riderName} is handling delivery for this order, shipping/delivery statuses are controlled by the rider's own updates to keep the timeline in order.</div>`:''}
+    ${hasRider?`<div style="font-size:11px;color:var(--or);margin-bottom:10px;">${iconBadge('bike',14)} ${o.riderName} is handling delivery for this order, shipping/delivery statuses are controlled by the rider's own updates to keep the timeline in order.</div>`:''}
     <select class="inp" id="so-status" style="margin:10px 0;">${opts}</select>
     <button class="btn btn-or btn-lg" onclick="saveStaffOrderStatus('${tracking}')">Save Status</button>
     <button class="btn btn-lg" onclick="snav('orders')" style="margin-left:8px;">← Back</button>
@@ -1611,11 +1629,11 @@ async function openStaffProductForm(id){
     <div class="fg"><label class="lbl">Product Images</label>
       <div id="sp-img-preview" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">${(window._spImages||[]).map(function(img,i){return '<div style="position:relative;width:60px;height:60px;"><img src="'+img+'" style="width:100%;height:100%;object-fit:cover;border-radius:6px;"/><span onclick="removeStaffProdImg('+i+')" style="position:absolute;top:-6px;right:-6px;background:var(--re);color:#fff;border-radius:99px;width:18px;height:18px;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;">×</span></div>';}).join('')}</div>
       <input type="file" id="sp-img-upload" accept="image/*" multiple style="display:none;" onchange="uploadStaffProdImages()">
-      <button class="btn" onclick="document.getElementById('sp-img-upload').click()">📁 Choose Images</button>
+      <button class="btn" onclick="document.getElementById('sp-img-upload').click()">${iconBadge('folder',14)} Choose Images</button>
     </div>
     <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;margin-bottom:16px;"><input type="checkbox" id="sp-visible" ${p.visible!==false?'checked':''} style="accent-color:var(--or);width:16px;height:16px;"/> Visible to customers</label>
     <div style="display:flex;gap:10px;">
-      <button class="btn btn-or btn-lg" onclick="saveStaffProduct('${id||''}')">💾 ${id?'Update':'Save'} Product</button>
+      <button class="btn btn-or btn-lg" onclick="saveStaffProduct('${id||''}')">${iconBadge('save',14)} ${id?'Update':'Save'} Product</button>
       <button class="btn btn-lg" onclick="snav('products')">Cancel</button>
       ${id?'<button class="btn btn-lg" style="color:var(--re);" onclick="deleteStaffProduct(\''+id+'\')">Delete</button>':''}
     </div>
@@ -1725,7 +1743,7 @@ async function renderAnalyticsView(c){
   const canViewRevenue=!!(staff.permissions&&staff.permissions.viewRevenue);
   c.innerHTML=`<div class="page-hdr"><div class="page-hdr-title">Analytics</div></div>
   <div class="stats-grid">
-    ${canViewRevenue?`<div class="stat-card"><div class="stat-num" style="color:var(--su);">${fmt(totalRev)}</div><div class="stat-lbl">Total Revenue</div><div class="stat-sub">${orders.length} orders</div></div>`:`<div class="stat-card"><div class="stat-num" style="font-size:15px;">🔒 Hidden</div><div class="stat-lbl">Total Revenue</div><div class="stat-sub">Ask Admin for access</div></div>`}
+    ${canViewRevenue?`<div class="stat-card"><div class="stat-num" style="color:var(--su);">${fmt(totalRev)}</div><div class="stat-lbl">Total Revenue</div><div class="stat-sub">${orders.length} orders</div></div>`:`<div class="stat-card"><div class="stat-num" style="font-size:15px;">${iconBadge('lock',14)} Hidden</div><div class="stat-lbl">Total Revenue</div><div class="stat-sub">Ask Admin for access</div></div>`}
     <div class="stat-card"><div class="stat-num">${todayOrds.length}</div><div class="stat-lbl">Orders Today</div></div>
     <div class="stat-card"><div class="stat-num">${Object.keys(prods||{}).length}</div><div class="stat-lbl">Products</div><div class="stat-sub">${Object.keys(custs||{}).length} customers</div></div>
   </div>`;
@@ -1816,7 +1834,7 @@ function notifMsg(n){
   if(n.type==='submission_rejected')return '"'+n.title+'" needs changes, '+(n.note||'see feedback in My Submissions')+'.';
   if(n.type==='task_assigned')return 'New task assigned: '+n.description+(n.dueDate?', due '+n.dueDate:'')+'.';
   if(n.type==='task_approved')return 'Your task completion was approved.';
-  if(n.type==='delivery_incident')return '⚠️ '+n.riderName+' reported "'+n.incidentLabel+'" on order '+n.orderId+(n.note?': "'+n.note+'"':'')+'.';
+  if(n.type==='delivery_incident')return ''+iconBadge('warning',14)+' '+n.riderName+' reported "'+n.incidentLabel+'" on order '+n.orderId+(n.note?': "'+n.note+'"':'')+'.';
   return n.preview||'New notification';
 }
 let _loadStaffNotifsInFlight=false;

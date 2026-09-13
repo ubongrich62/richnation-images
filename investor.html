@@ -227,7 +227,7 @@ button{font-family:inherit;}
         <button class="curr-btn" data-curr="EUR" onclick="setCurr('EUR')">€</button>
         <button class="curr-btn" data-curr="GBP" onclick="setCurr('GBP')">£</button>
       </div>
-      <button class="tb-btn" style="position:relative;" onclick="toggleInvestorNotifPanel()">🔔<span id="inv-notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--re);color:#fff;font-size:9px;font-weight:800;min-width:15px;height:15px;border-radius:99px;align-items:center;justify-content:center;padding:0 3px;">0</span></button>
+      <button class="tb-btn" style="position:relative;" onclick="toggleInvestorNotifPanel()">${iconBadge('bell',14)}<span id="inv-notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--re);color:#fff;font-size:9px;font-weight:800;min-width:15px;height:15px;border-radius:99px;align-items:center;justify-content:center;padding:0 3px;">0</span></button>
       <div id="inv-notif-panel" style="display:none;position:absolute;top:44px;right:0;width:300px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--bdr);border-radius:10px;box-shadow:var(--sh-lg);z-index:500;padding:8px;"></div>
       <button class="tb-btn" onclick="investorLogout()">Sign Out</button>
     </div>
@@ -372,6 +372,19 @@ function setCurr(c){
 }
 function svgIconPaths(name){
   var icons={
+    'palette':'<path d="M12 3a9 8 0 100 16c1 0 1.5-.5 1.5-1.2 0-.3-.1-.6-.3-.8-.2-.3-.1-.7.3-.8H15a4 4 0 004-4c0-4.4-3.6-9.2-7-9.2z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="10.5" cy="7.5" r="1"/><circle cx="14.5" cy="8" r="1"/><circle cx="16.5" cy="11.5" r="1"/>',
+'bank':'<path d="M3 10l9-6 9 6"/><path d="M4 10v9M9 10v9M15 10v9M20 10v9"/><path d="M2 21h20"/>',
+    'bell':'<path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/>',
+    'card':'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 9h20"/>',
+    'cash':'<rect x="2" y="7" width="20" height="10" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 7v10M18 7v10"/>',
+    'check':'<path d="M20 6L9 17l-5-5"/>',
+    'document':'<path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h6M9 17h6"/>',
+    'lock':'<path d="M6 11V7a6 6 0 0112 0v4M4 11h16v9H4z"/>',
+    'megaphone':'<path d="M3 10v4h3l7 4V6l-7 4H3z"/><path d="M17 9a4 4 0 010 6"/>',
+    'party':'<path d="M4 20l4-12 8 8-12 4z"/><path d="M14 3l1.5 3M19 6l2 1.5M17 10l3 .5"/>',
+    'sync':'<path d="M4 4v6h6"/><path d="M20 20v-6h-6"/><path d="M5.5 9A7 7 0 0119 8m-.5 7A7 7 0 015 16"/>',
+    'warning':'<path d="M12 2L2 20h20L12 2z"/><path d="M12 9v5M12 17v.01"/>',
+
     home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
     chart:'<path d="M4 20V10M12 20V4M20 20v-7"/>',
     note:'<path d="M4 3h16v18l-4-3H4z"/><path d="M8 8h8M8 12h5"/>',
@@ -384,7 +397,7 @@ function svgIconPaths(name){
     phone:'<path d="M4 3h4l2 6-3 2a12 12 0 006 6l2-3 6 2v4a2 2 0 01-2 2C10 22 2 14 2 5a2 2 0 012-2z"/>',
     cake:'<path d="M4 21h16v-8H4z"/><path d="M4 13a3 3 0 013-3h10a3 3 0 013 3"/><path d="M9 10V6M12 10V4M15 10V6"/>',
     briefcase:'<path d="M3 7h18v13H3z"/><path d="M8 7V4h8v3"/>',
-    plus:'<path d="M12 5v14M5 12h14"/>'
+    plus:'<path d="M12 5v14M5 12h14"/>',
   };
   return icons[name]||icons.star;
 }
@@ -519,7 +532,7 @@ async function finalizeInvestorApplication(a,paymentRef){
     password:'',status:'pending_review',joinDate:ds(),ts:Date.now()
   });
   await fbP('rn_mall_notifications',{type:'new_investor_application',name:a.fname,amount:a.amount,option:a.option,email:a.email,paymentRef:paymentRef,date:ds(),read:false,ts:Date.now()});
-  document.getElementById('apply-form').innerHTML='<div style="text-align:center;padding:10px 0;"><div style="font-size:32px;margin-bottom:10px;">✅</div><div style="font-weight:800;margin-bottom:8px;">Payment Received, Application Submitted!</div><div style="font-size:12px;color:var(--wh);font-weight:700;line-height:1.7;">Thank you, '+a.fname+'! Your payment of '+fmt(a.amount)+' is confirmed (ref: '+paymentRef+'). Our team will review your application and activate your investor portal shortly.</div></div>';
+  document.getElementById('apply-form').innerHTML='<div style="text-align:center;padding:10px 0;"><div style="font-size:32px;margin-bottom:10px;">'+iconBadge('check',32)+'</div><div style="font-weight:800;margin-bottom:8px;">Payment Received, Application Submitted!</div><div style="font-size:12px;color:var(--wh);font-weight:700;line-height:1.7;">Thank you, '+a.fname+'! Your payment of '+fmt(a.amount)+' is confirmed (ref: '+paymentRef+'). Our team will review your application and activate your investor portal shortly.</div></div>';
 }
 async function doInvestorLogin(){
   const email=document.getElementById('in-email').value.trim().toLowerCase();
@@ -715,10 +728,10 @@ function renderDashboardInner(c,settings,payoutsData){
       <div onclick="document.getElementById('dash-photo-upload').click()" style="font-size:11px;color:var(--or);cursor:pointer;margin-top:4px;">Change Photo</div>
     </div>
     </div>
-    <button onclick="manualRefreshInvestorDash(this)" class="btn" style="font-size:11px;">🔄 Refresh</button>
+    <button onclick="manualRefreshInvestorDash(this)" class="btn" style="font-size:11px;">${iconBadge('sync',14)} Refresh</button>
   </div>
   ${latestPayout&&latestPayout.expectedDate&&new Date(latestPayout.expectedDate)>=now?`<div class="card">
-    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:var(--or);">💰 A payment is on its way!</div>
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:var(--or);">${iconBadge('cash',14)} A payment is on its way!</div>
     <div style="font-size:12px;color:var(--wh);font-weight:700;margin-top:4px;">Expect ${fmt(latestPayout.amount)} around ${new Date(latestPayout.expectedDate).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}</div>
     ${latestPayout.message?`<div style="font-size:12px;color:var(--w2);margin-top:6px;">${latestPayout.message}</div>`:''}
   </div>`:''}
@@ -732,7 +745,7 @@ function renderDashboardInner(c,settings,payoutsData){
     <div class="stat-card"><div class="stat-num" style="color:${investor.status==='active'?'var(--su)':'var(--or)'};">${investor.status==='active'?'Active':investor.status}</div><div class="stat-lbl">Status</div></div>
   </div>
   <div class="card">
-    <div class="card-title">📋 Your Partnership Terms</div>
+    <div class="card-title">${iconBadge('document',14)} Your Partnership Terms</div>
     <div style="font-size:12px;color:var(--w2);line-height:1.9;margin-top:8px;">
       ${investor.investmentOption==='profit_share'?'You receive a share of net profits monthly, starting 6 months after the mall reaches full-capacity launch. Your return grows as the business grows, no cap on upside.':
         investor.investmentOption==='equity'?'You hold a permanent ownership stake in RichNation Mall, proportional to your investment vs. the total capital raised. Your stake includes a share of profits and a voice in major decisions.':
@@ -740,13 +753,13 @@ function renderDashboardInner(c,settings,payoutsData){
     </div>
   </div>
   <div class="card">
-    <div class="card-title">📊 Earnings Analytics</div>
+    <div class="card-title">${iconBadge('chart',14)} Earnings Analytics</div>
     <div style="font-size:11px;color:var(--wh);font-weight:700;margin:6px 0 14px;">Last 6 months, and how often you've been paid.</div>
     <div id="earnings-chart" style="display:flex;align-items:flex-end;gap:8px;height:100px;margin-bottom:10px;"></div>
     <div id="earnings-freq" style="font-size:12px;color:var(--w2);"></div>
   </div>
   <div class="card">
-    <div class="card-title">💰 What You've Been Paid</div>
+    <div class="card-title">${iconBadge('cash',14)} What You've Been Paid</div>
     <div style="margin-top:8px;">${payouts.length?payouts.map(function(p){return '<div style="padding:10px 0;border-top:1px solid var(--bdr);"><div style="display:flex;justify-content:space-between;"><span style="font-size:13px;color:var(--w2);">'+(p.description||'Payment')+'</span><span style="font-weight:800;color:var(--su);">'+fmt(p.amount)+'</span></div>'+(p.message?'<div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:3px;">'+p.message+'</div>':'')+'<div style="font-size:10px;color:var(--wh);font-weight:700;margin-top:3px;">'+p.date+(p.expectedDate?' &middot; Expected: '+new Date(p.expectedDate).toLocaleDateString('en-GB'):'')+'</div></div>';}).join(''):'<div style="color:var(--wh);font-weight:700;font-size:12px;">No payments recorded yet.</div>'}</div>
   </div>`;
   renderEarningsChart(payouts);
@@ -837,7 +850,7 @@ async function renderTopUp(c){
     <div id="topup-preview" style="margin-top:10px;"></div>
   </div>
   <div class="card">
-    <div class="card-title">📜 About Topping Up</div>
+    <div class="card-title">${iconBadge('document',14)} About Topping Up</div>
     <div style="font-size:12px;color:var(--w2);line-height:1.9;margin-top:8px;">
       • You can top up any amount, anytime, no minimum holding period.<br>
       • Your plan structure (${OPTION_LABELS[investor.investmentOption]||investor.investmentOption}) stays exactly the same, this only adds capital.<br>
@@ -857,9 +870,9 @@ function previewTopUp(){
   const tierChanged=newTier!==currentTier;
   box.innerHTML='<div style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;font-size:12px;color:var(--w2);">'
     +'New total investment: <strong style="color:var(--or);">'+fmt(newTotal)+'</strong><br>'
-    +(tierChanged?'🎉 This moves you up to <strong style="color:var(--or);">'+newTier+'</strong>!<br>':'')
+    +(tierChanged?''+iconBadge('party',14)+' This moves you up to <strong style="color:var(--or);">'+newTier+'</strong>!<br>':'')
     +'Your plan structure ('+(OPTION_LABELS[investor.investmentOption]||investor.investmentOption)+') stays the same.<br><br>'
-    +'<button class="btn btn-or" onclick="payTopUp('+amt+')">💳 Pay '+fmt(amt)+' &amp; Top Up</button></div>';
+    +'<button class="btn btn-or" onclick="payTopUp('+amt+')">'+iconBadge('card',14)+' Pay '+fmt(amt)+' &amp; Top Up</button></div>';
 }
 function payTopUp(amount){
   try{
@@ -905,7 +918,7 @@ async function renderSwitchPlan(c){
     <div style="font-size:12px;color:var(--w2);margin-top:6px;">Requested: ${OPTION_LABELS[pendingReq.option]}${pendingReq.newAmount&&pendingReq.newAmount>investor.investmentAmount?' &middot; Top-up to '+fmt(pendingReq.newAmount):''}</div>
     <div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:6px;">${pendingReq.newAmount&&pendingReq.newAmount>investor.investmentAmount?(pendingReq.paymentConfirmed?'✔ Your top-up payment was received. Waiting on admin approval.':'Admin will confirm your top-up payment before approving.'):'We\'ll notify you once admin reviews this.'}</div>
   </div>`:!canSwitch?`<div class="card" style="border-color:rgba(244,63,94,0.4);background:rgba(244,63,94,0.06);">
-    <div style="font-weight:800;color:var(--re);">🔒 Not eligible to switch yet</div>
+    <div style="font-weight:800;color:var(--re);">${iconBadge('lock',14)} Not eligible to switch yet</div>
     <div style="font-size:12px;color:var(--w2);margin-top:6px;">You can request a switch starting <strong>${nextEligible.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}</strong>, plans must be held at least 3 months before switching.</div>
   </div>`:`
   <div class="card">
@@ -921,7 +934,7 @@ async function renderSwitchPlan(c){
     <div id="switch-preview" style="margin-top:14px;"></div>
   </div>`}
   <div class="card">
-    <div class="card-title">📜 What Switching Means</div>
+    <div class="card-title">${iconBadge('document',14)} What Switching Means</div>
     <div style="font-size:12px;color:var(--w2);line-height:1.9;margin-top:8px;">
       • Every switch request requires admin approval, nothing changes until approved.<br>
       • If you're increasing your investment amount, you pay the top-up securely by card when you submit, admin then reviews and approves.<br>
@@ -942,11 +955,11 @@ function previewPlanSwitch(){
   const topUp=newAmount-investor.investmentAmount;
   box.innerHTML='<div style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;font-size:12px;color:var(--w2);">'
     +'Requesting <strong style="color:var(--or);">'+OPTION_LABELS[newOption]+'</strong>'+(newAmount!==investor.investmentAmount?' at '+fmt(newAmount):'')+'.<br><br>'
-    +(isTopUp?'⚠ This requires a top-up of <strong style="color:var(--or);">'+fmt(topUp)+'</strong>, pay securely below to submit your request.<br>':'✔ No additional payment needed for this switch.<br>')
+    +(isTopUp?''+iconBadge('warning',14)+' This requires a top-up of <strong style="color:var(--or);">'+fmt(topUp)+'</strong>, pay securely below to submit your request.<br>':'✔ No additional payment needed for this switch.<br>')
     +'✔ Your Wallet balance of '+fmt(investor.walletBalance||0)+' is unaffected either way<br>'
-    +'⚠ Nothing changes until admin approves<br><br>'
+    +''+iconBadge('warning',14)+' Nothing changes until admin approves<br><br>'
     +(isTopUp
-      ?'<button class="btn btn-or" onclick="payTopUpAndSubmitSwitch(\''+newOption+'\','+newAmount+')">💳 Pay '+fmt(topUp)+' &amp; Submit Request</button>'
+      ?'<button class="btn btn-or" onclick="payTopUpAndSubmitSwitch(\''+newOption+'\','+newAmount+')">'+iconBadge('card',14)+' Pay '+fmt(topUp)+' &amp; Submit Request</button>'
       :'<button class="btn btn-or" onclick="submitSwitchRequest(\''+newOption+'\','+newAmount+')">Submit Request</button>')
     +'</div>';
 }
@@ -985,10 +998,10 @@ async function renderInvestorWallet(c){
   <div class="card" style="text-align:center;">
     <div style="font-size:11px;color:var(--wh);font-weight:700;text-transform:uppercase;">Wallet Balance</div>
     <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:32px;color:var(--su);margin-top:6px;">${fmt(investor.walletBalance||0)}</div>
-    <button class="btn btn-or" style="margin-top:12px;" onclick="requestInvestorWithdrawal()">💸 Request Withdrawal</button>
+    <button class="btn btn-or" style="margin-top:12px;" onclick="requestInvestorWithdrawal()">${iconBadge('cash',14)} Request Withdrawal</button>
   </div>
   <div class="card">
-    <div class="card-title">🏦 Bank Account Details</div>
+    <div class="card-title">${iconBadge('bank',14)} Bank Account Details</div>
     <div style="font-size:11px;color:var(--wh);font-weight:700;margin:8px 0 12px;">Where withdrawals will be sent.${investor.bankVerified?' <strong style="color:var(--su);">✔ Verified by admin</strong>':investor.bankAcctNo?' <strong style="color:var(--or);">Awaiting admin verification</strong>':''}</div>
     <div class="fg"><label class="lbl">Bank Name</label><input class="fi" id="iw-bank" value="${investor.bankName||''}" placeholder="e.g. GTBank"/></div>
     <div class="fg"><label class="lbl">Account Number</label><input class="fi" id="iw-acctno" value="${investor.bankAcctNo||''}" placeholder="0123456789"/></div>
@@ -1075,7 +1088,7 @@ function renderProfile(c){
     <div style="font-size:11px;color:var(--or);font-weight:700;margin-top:2px;">${investor.investorNumber||'N/A'}</div>
   </div>
   <div class="card" style="max-width:460px;text-align:left;">
-    <div class="card-title">📋 My Bio</div>
+    <div class="card-title">${iconBadge('document',14)} My Bio</div>
     <div style="font-size:12px;color:var(--w2);line-height:1.8;margin-top:8px;">${investor.bio||'No bio set yet.'}</div>
   </div>
   <div class="card" style="max-width:460px;text-align:left;">
@@ -1092,7 +1105,7 @@ function renderProfile(c){
     <button class="btn btn-or btn-lg" onclick="saveInvestorProfile()">Save Password</button>
   </div>
   <div class="card" style="max-width:460px;text-align:left;">
-    <div class="card-title">🏦 Bank Account Details</div>
+    <div class="card-title">${iconBadge('bank',14)} Bank Account Details</div>
     <div style="font-size:11px;color:var(--wh);font-weight:700;margin:6px 0 12px;">Manage your bank details and withdrawals from the <span onclick="inav('wallet')" style="color:var(--or);cursor:pointer;font-weight:700;">Wallet</span> tab.</div>
   </div>`;
 }
@@ -1191,12 +1204,12 @@ async function saveInvestorProfile(){
 // ── NOTIFICATIONS ──
 function invNotifMsg(n){
   if(n.type==='investor_chat_reply')return 'Ubong Rich replied: "'+n.preview+'"';
-  if(n.type==='payout')return '💰 A payment of '+fmt(n.amount)+' was recorded for you, '+(n.description||'');
-  if(n.type==='update')return '📢 New update posted: "'+n.preview+'"';
+  if(n.type==='payout')return ''+iconBadge('cash',14)+' A payment of '+fmt(n.amount)+' was recorded for you, '+(n.description||'');
+  if(n.type==='update')return ''+iconBadge('megaphone',14)+' New update posted: "'+n.preview+'"';
   if(n.type==='switch_approved')return '✔ Your switch to '+(OPTION_LABELS[n.option]||n.option)+' was approved and is now active.';
-  if(n.type==='switch_denied')return '⚠ Your plan switch request was denied. Contact Chat with Founder for details.';
-  if(n.type==='withdrawal_paid')return '💸 Your withdrawal of '+fmt(n.amount)+' has been paid.';
-  if(n.type==='withdrawal_declined')return '⚠ Your withdrawal request for '+fmt(n.amount)+' was declined.';
+  if(n.type==='switch_denied')return ''+iconBadge('warning',14)+' Your plan switch request was denied. Contact Chat with Founder for details.';
+  if(n.type==='withdrawal_paid')return ''+iconBadge('cash',14)+' Your withdrawal of '+fmt(n.amount)+' has been paid.';
+  if(n.type==='withdrawal_declined')return ''+iconBadge('warning',14)+' Your withdrawal request for '+fmt(n.amount)+' was declined.';
   if(n.type==='bank_verified')return '✔ Your bank account details have been verified by admin.';
   return n.message||'New notification';
 }

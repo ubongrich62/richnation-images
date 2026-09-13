@@ -393,7 +393,7 @@ html,body{color-scheme:dark;height:100%;font-family:'Inter',sans-serif;backgroun
     <input class="fi" id="li-e" type="email" placeholder="Admin email" autocomplete="off"/>
     <div class="pw-wrap">
       <input class="fi" id="li-p" type="password" placeholder="Admin password" style="margin-bottom:0;"/>
-      <button class="pw-eye" onclick="togglePw('li-p',this)">&#128065;</button>
+      <button class="pw-eye" onclick="togglePw('li-p',this)"><span style="display:inline-block;position:relative;width:18px;height:18px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></span></button>
     </div>
     <button class="lbtn" onclick="doLogin()">Sign In as Admin</button>
     <div class="lerr" id="li-err"></div>
@@ -417,7 +417,7 @@ html,body{color-scheme:dark;height:100%;font-family:'Inter',sans-serif;backgroun
         <button class="curr-btn" data-curr="GBP" onclick="setCurr('GBP')">£</button>
       </div>
       <button class="tb-notif" id="notif-btn" onclick="nav('notifications')">
-        &#128276;<span class="notif-badge" id="notif-badge"></span>
+        <span style="display:inline-block;position:relative;width:18px;height:18px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg></span><span class="notif-badge" id="notif-badge"></span>
       </button>
       <div class="tb-user" id="tb-user">Admin</div>
       <span id="tb-ceo-badge" style="display:none;font-size:9px;font-weight:800;padding:3px 8px;border-radius:99px;background:rgba(255,106,0,0.15);color:var(--or);margin-left:6px;">CEO MODE, actions reviewed by Owner</span>
@@ -432,87 +432,87 @@ html,body{color-scheme:dark;height:100%;font-family:'Inter',sans-serif;backgroun
     <div class="sb">
       <div class="sb-sec">Overview</div>
       <div class="sb-item active" id="nav-dashboard" onclick="nav('dashboard')">
-        <span class="sb-ico">&#9783;</span>Dashboard
+        <span class="sb-ico"><span style="display:inline-block;position:relative;width:16px;height:16px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><path d="M4 21V6l8-4 8 4v15"/><path d="M9 21v-6h6v6M9 10h.01M9 14h.01M15 10h.01M15 14h.01"/></svg></span></span>Dashboard
       </div>
       <div class="sb-item" id="nav-analytics" onclick="nav('analytics')">
-        <span class="sb-ico">&#128200;</span>Analytics
+        <span class="sb-ico"><span style="display:inline-block;position:relative;width:16px;height:16px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><path d="M4 20V10M12 20V4M20 20v-7"/></svg></span></span>Analytics
       </div>
       <div class="sb-item" id="nav-visitors" onclick="nav('visitors')">
-        <span class="sb-ico">&#127760;</span>Visitors
+        <span class="sb-ico"><span style="display:inline-block;position:relative;width:16px;height:16px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 4 5.5 4 9s-1.5 6.5-4 9c-2.5-2.5-4-5.5-4-9s1.5-6.5 4-9z"/></svg></span></span>Visitors
       </div>
       <div class="sb-item" id="nav-hero" onclick="nav('hero')">
-        <span class="sb-ico">&#127968;</span>Homepage Editor
+        <span class="sb-ico"><span style="display:inline-block;position:relative;width:16px;height:16px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></span></span>Homepage Editor
       </div>
       <div class="sb-item" id="nav-vendors" onclick="nav('vendors')">
-        <span class="sb-ico">&#127970;</span>Vendors
+        <span class="sb-ico"><span style="display:inline-block;position:relative;width:16px;height:16px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><path d="M4 21V6l8-4 8 4v15"/><path d="M9 21v-6h6v6M9 10h.01M9 14h.01M15 10h.01M15 14h.01"/></svg></span></span>Vendors
         <span class="sb-badge" id="vendors-badge"></span>
       </div>
       <div class="sb-item" id="nav-wallet-issues" onclick="nav('wallet-issues')">
-        <span class="sb-ico">&#127890;</span>Wallet Issues
+        <span class="sb-ico"><span style="display:inline-block;position:relative;width:16px;height:16px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><path d="M3 8a2 2 0 000 4v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 000-4V6a2 2 0 00-2-2H5a2 2 0 00-2 2z"/></svg></span></span>Wallet Issues
         <span class="sb-badge" id="wallet-issues-badge"></span>
       </div>
       <div class="sb-item" id="nav-staff" onclick="nav('staff')">
-        <span class="sb-ico">&#128101;</span>Staff &amp; Roles
+        <span class="sb-ico"><span style="display:inline-block;position:relative;width:16px;height:16px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></span></span>Staff &amp; Roles
         <span class="sb-badge" id="staff-badge"></span>
       </div>
       <div class="sb-item" id="nav-investors" onclick="nav('investors')">
-        <span class="sb-ico">&#128176;</span>Investors
+        <span class="sb-ico"><span style="display:inline-block;position:relative;width:16px;height:16px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><rect x="2" y="7" width="20" height="10" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 7v10M18 7v10"/></svg></span></span>Investors
         <span class="sb-badge" id="investors-badge"></span>
       </div>
       <div class="sb-item" id="nav-riders" onclick="nav('riders')">
-        <span class="sb-ico">&#127957;</span>Dispatch Riders
+        <span class="sb-ico"><span style="display:inline-block;position:relative;width:16px;height:16px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M6 17l4-8h4l3 8M10 9l3 4h5"/></svg></span></span>Dispatch Riders
         <span class="sb-badge" id="riders-badge"></span>
       </div>
       <div class="sb-item" id="nav-bundles" onclick="nav('bundles')">
-        <span class="sb-ico">&#127873;</span>Bundle Deals
+        <span class="sb-ico"><span style="display:inline-block;position:relative;width:16px;height:16px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><path d="M20 12v9H4v-9"/><path d="M2 7h20v5H2zM12 7v14"/><path d="M12 7c-1.5 0-3-1-3-2.5S10.5 2 12 3c1.5-1 3.5-.5 3.5 1S13.5 7 12 7zM12 7c1.5 0 3-1 3-2.5"/></svg></span></span>Bundle Deals
       </div>
       <div class="sb-item" id="nav-promos" onclick="nav('promos')">
-        <span class="sb-ico">&#127881;</span>Seasonal Promos
+        <span class="sb-ico"><span style="display:inline-block;position:relative;width:16px;height:16px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><path d="M4 20l4-12 8 8-12 4z"/><path d="M14 3l1.5 3M19 6l2 1.5M17 10l3 .5"/></svg></span></span>Seasonal Promos
       </div>
       <div class="sb-item" id="nav-orders" onclick="nav('orders')">
-        <span class="sb-ico">&#9744;</span>Orders
+        <span class="sb-ico"><span style="display:inline-block;position:relative;width:16px;height:16px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M3 7l9 5 9-5M12 12v9"/></svg></span></span>Orders
         <span class="sb-badge" id="orders-badge"></span>
       </div>
       <div class="sb-sec">Catalogue</div>
       <div class="sb-item" id="nav-products" onclick="nav('products')">
-        <span class="sb-ico">&#9635;</span>Products
+        <span class="sb-ico"><span style="display:inline-block;position:relative;width:16px;height:16px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg></span></span>Products
       </div>
       <div class="sb-item" id="nav-categories" onclick="nav('categories')">
-        <span class="sb-ico">&#9783;</span>Categories
+        <span class="sb-ico"><span style="display:inline-block;position:relative;width:16px;height:16px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><path d="M3 6a1 1 0 011-1h5l2 2h9a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1z"/></svg></span></span>Categories
       </div>
       <div class="sb-item" id="nav-coupons" onclick="nav('coupons')">
-        <span class="sb-ico">&#9678;</span>Coupons
+        <span class="sb-ico"><span style="display:inline-block;position:relative;width:16px;height:16px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><path d="M20 12l-8 8-10-10V4h6z"/><circle cx="7" cy="7" r="1.3"/></svg></span></span>Coupons
       </div>
       <div class="sb-sec">Operations</div>
       <div class="sb-item" id="nav-delivery" onclick="nav('delivery')">
-        <span class="sb-ico">&#9654;</span>Delivery Fees
+        <span class="sb-ico"><span style="display:inline-block;position:relative;width:16px;height:16px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><path d="M1 3h13v13H1zM14 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="1.5"/><circle cx="17.5" cy="18.5" r="1.5"/></svg></span></span>Delivery Fees
       </div>
       <div class="sb-item" id="nav-pod" onclick="nav('pod')">
-        <span class="sb-ico">&#128179;</span>Pay on Delivery
+        <span class="sb-ico"><span style="display:inline-block;position:relative;width:16px;height:16px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 9h20"/></svg></span></span>Pay on Delivery
       </div>
       <div class="sb-item" id="nav-reviews" onclick="nav('reviews')">
-        <span class="sb-ico">&#11088;</span>Reviews
+        <span class="sb-ico"><span style="display:inline-block;position:relative;width:16px;height:16px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1z"/></svg></span></span>Reviews
       </div>
       <div class="sb-item" id="nav-customers" onclick="nav('customers')">
-        <span class="sb-ico">&#9786;</span>Customers
+        <span class="sb-ico"><span style="display:inline-block;position:relative;width:16px;height:16px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></span></span>Customers
       </div>
       <div class="sb-item" id="nav-newsletter" onclick="nav('newsletter')">
-        <span class="sb-ico">&#9993;</span>Newsletter
+        <span class="sb-ico"><span style="display:inline-block;position:relative;width:16px;height:16px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><path d="M3 5h18v14H3z"/><path d="M3 6l9 7 9-7"/></svg></span></span>Newsletter
       </div>
       <div class="sb-item" id="nav-chat" onclick="nav('chat')">
-        <span class="sb-ico">&#9998;</span>Messages
+        <span class="sb-ico"><span style="display:inline-block;position:relative;width:16px;height:16px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><path d="M21 12a8 8 0 11-3.5-6.6L21 4l-1 4.5A7.9 7.9 0 0121 12z"/></svg></span></span>Messages
         <span class="sb-badge" id="chat-badge"></span>
       </div>
       <div class="sb-item" id="nav-notifications" onclick="nav('notifications')">
-        <span class="sb-ico">&#9740;</span>Notifications
+        <span class="sb-ico"><span style="display:inline-block;position:relative;width:16px;height:16px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg></span></span>Notifications
         <span class="sb-badge" id="notif-sb-badge"></span>
       </div>
       <div class="sb-sec">Admin</div>
       <div class="sb-item" id="nav-customiser" onclick="nav('customiser')">
-        <span class="sb-ico">&#127912;</span>Site Customiser
+        <span class="sb-ico"><span style="display:inline-block;position:relative;width:16px;height:16px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><path d="M12 3a9 8 0 100 16c1 0 1.5-.5 1.5-1.2 0-.3-.1-.6-.3-.8-.2-.3-.1-.7.3-.8H15a4 4 0 004-4c0-4.4-3.6-9.2-7-9.2z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="10.5" cy="7.5" r="1"/><circle cx="14.5" cy="8" r="1"/><circle cx="16.5" cy="11.5" r="1"/></svg></span></span>Site Customiser
       </div>
       <div class="sb-item" id="nav-settings" onclick="nav('settings')">
-        <span class="sb-ico">&#9881;</span>Settings
+        <span class="sb-ico"><span style="display:inline-block;position:relative;width:16px;height:16px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.9 7.9 0 000-2l2-1.5-2-3.5-2.4 1a8 8 0 00-1.7-1L15 3h-4l-.3 2.5a8 8 0 00-1.7 1l-2.4-1-2 3.5L6.6 11a7.9 7.9 0 000 2l-2 1.5 2 3.5 2.4-1a8 8 0 001.7 1L11 21h4l.3-2.5a8 8 0 001.7-1l2.4 1 2-3.5z"/></svg></span></span>Settings
       </div>
     </div>
 
@@ -771,6 +771,52 @@ function custActivityBadge(lastSeen){
 }
 function svgIconPaths(name){
   var icons={
+    'bell':'<path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/>',
+'eyeoff':'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/><path d="M3 3l18 18"/>',
+'chart':'<path d="M4 20V10M12 20V4M20 20v-7"/>',
+    'palette':'<path d="M12 3a9 8 0 100 16c1 0 1.5-.5 1.5-1.2 0-.3-.1-.6-.3-.8-.2-.3-.1-.7.3-.8H15a4 4 0 004-4c0-4.4-3.6-9.2-7-9.2z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="10.5" cy="7.5" r="1"/><circle cx="14.5" cy="8" r="1"/><circle cx="16.5" cy="11.5" r="1"/>',
+'bank':'<path d="M3 10l9-6 9 6"/><path d="M4 10v9M9 10v9M15 10v9M20 10v9"/><path d="M2 21h20"/>',
+    'bike':'<circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M6 17l4-8h4l3 8M10 9l3 4h5"/>',
+    'camera':'<path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+    'car':'<path d="M3 13l2-6h14l2 6"/><path d="M3 13h18v5H3z"/><circle cx="7.5" cy="18" r="1.5"/><circle cx="16.5" cy="18" r="1.5"/>',
+    'card':'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 9h20"/>',
+    'cash':'<rect x="2" y="7" width="20" height="10" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 7v10M18 7v10"/>',
+    'chat':'<path d="M21 12a8 8 0 11-3.5-6.6L21 4l-1 4.5A7.9 7.9 0 0121 12z"/>',
+    'check':'<path d="M20 6L9 17l-5-5"/>',
+    'close':'<path d="M18 6L6 18M6 6l12 12"/>',
+    'cloud':'<path d="M6.5 18a4 4 0 01-.4-8 5.5 5.5 0 0110.6-1.8A4.5 4.5 0 0117 18z"/>',
+    'document':'<path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h6M9 17h6"/>',
+    'envelope':'<path d="M3 5h18v14H3z"/><path d="M3 6l9 7 9-7"/>',
+    'eye':'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>',
+    'film':'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 4v16M17 4v16M2 9h5M17 9h5M2 15h5M17 15h5"/>',
+    'folder':'<path d="M3 6a1 1 0 011-1h5l2 2h9a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1z"/>',
+    'gear':'<circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.9 7.9 0 000-2l2-1.5-2-3.5-2.4 1a8 8 0 00-1.7-1L15 3h-4l-.3 2.5a8 8 0 00-1.7 1l-2.4-1-2 3.5L6.6 11a7.9 7.9 0 000 2l-2 1.5 2 3.5 2.4-1a8 8 0 001.7 1L11 21h4l.3-2.5a8 8 0 001.7-1l2.4 1 2-3.5z"/>',
+    'heart':'<path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0112 6a5.5 5.5 0 019.5 6c-2.5 4.5-9.5 9-9.5 9z"/>',
+    'image':'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 15l-5-5-9 9"/>',
+    'inbox':'<path d="M4 4h16l2 8v8H2v-8z"/><path d="M2 12h6l2 3h4l2-3h6"/>',
+    'key':'<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M14 9l2 2"/>',
+    'lock':'<path d="M6 11V7a6 6 0 0112 0v4M4 11h16v9H4z"/>',
+    'map':'<path d="M9 4L3 6v14l6-2m0-14l6 2m-6-2v14m6-12l6-2v14l-6 2m0-14v14"/>',
+    'megaphone':'<path d="M3 10v4h3l7 4V6l-7 4H3z"/><path d="M17 9a4 4 0 010 6"/>',
+    'noentry':'<circle cx="12" cy="12" r="9"/><path d="M5.5 12h13"/>',
+    'package':'<path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M3 7l9 5 9-5M12 12v9"/>',
+    'pin':'<path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.3"/>',
+    'rocket':'<path d="M12 2c3 2 5 6 5 10 0 2-1 4-2 5l-3-2-3 2c-1-1-2-3-2-5 0-4 2-8 5-10z"/><circle cx="12" cy="10" r="1.5"/>',
+    'save':'<path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3M7 21v-8h10v8"/>',
+    'search':'<circle cx="10" cy="10" r="6"/><path d="M20 20l-5-5"/>',
+    'shield':'<path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><path d="M9 12l2 2 4-4"/>',
+    'signal':'<path d="M4 20v-4M9 20v-8M14 20v-12M19 20V4"/>',
+    'sync':'<path d="M4 4v6h6"/><path d="M20 20v-6h-6"/><path d="M5.5 9A7 7 0 0119 8m-.5 7A7 7 0 015 16"/>',
+    'tag':'<path d="M20 12l-8 8-10-10V4h6z"/><circle cx="7" cy="7" r="1.3"/>',
+    'target':'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+    'ticket':'<path d="M3 8a2 2 0 000 4v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 000-4V6a2 2 0 00-2-2H5a2 2 0 00-2 2z"/>',
+    'trash':'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+    'trophy':'<path d="M8 4h8v6a4 4 0 01-8 0V4z"/><path d="M4 5h4v3a3 3 0 01-4-3zM20 5h-4v3a3 3 0 004-3z"/><path d="M10 14v3M14 14v3M8 21h8M9 21v-3.5h6V21"/>',
+    'truck':'<path d="M1 3h13v13H1zM14 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="1.5"/><circle cx="17.5" cy="18.5" r="1.5"/>',
+    'unlock':'<path d="M6 11V7a6 6 0 0111-3.6M4 11h16v9H4z"/>',
+    'wallet':'<path d="M3 7a2 2 0 012-2h13a2 2 0 012 2v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M16 12h3v3h-3a1.5 1.5 0 010-3z"/>',
+    'wrench':'<path d="M14.7 6.3a4 4 0 00-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 005.4-5.4l-2.8 2.8-2-2z"/>',
+
     money:'<path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>',
     box:'<path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/>',
     user:'<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>',
@@ -790,7 +836,7 @@ function svgIconPaths(name){
     note:'<path d="M4 3h16v18l-4-3H4z"/><path d="M8 8h8M8 12h5"/>',
     warning:'<path d="M12 2L2 20h20L12 2z"/><path d="M12 9v5M12 17h.01"/>',
     globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 4 5.5 4 9s-1.5 6.5-4 9c-2.5-2.5-4-5.5-4-9s1.5-6.5 4-9z"/>',
-    monitor:'<rect x="3" y="4" width="18" height="12" rx="1"/><path d="M8 20h8M12 16v4"/>'
+    monitor:'<rect x="3" y="4" width="18" height="12" rx="1"/><path d="M8 20h8M12 16v4"/>',
   };
   return icons[name]||icons.star;
 }
@@ -804,7 +850,7 @@ function iconBadge(name,size){
 function togglePw(id,btn){
   const el=document.getElementById(id);
   el.type=el.type==='password'?'text':'password';
-  btn.textContent=el.type==='password'?'\u{1F441}':'\u{1F648}';
+  btn.innerHTML=el.type==='password'?iconBadge('eye',18):iconBadge('eyeoff',18);
 }
 
 // ── LOGIN ──
@@ -1003,7 +1049,7 @@ async function renderPromos(c){
   const list=Object.entries(promos).map(function(e){return Object.assign({_id:e[0]},e[1]);}).sort(function(a,b){return new Date(b.startDate)-new Date(a.startDate);});
   var html='<div class="page-hdr" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;"><div><div class="page-hdr-title">Seasonal Promotions</div><div class="page-hdr-sub">Scheduled sitewide discounts for key dates, auto-activate and auto-expire</div></div><button class="btn btn-or btn-lg" onclick="openPromoForm(null)">+ New Campaign</button></div>';
   if(!list.length){
-    html+='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:36px;">🎉</div><div class="card-title" style="margin-top:12px;">No campaigns yet</div><div style="font-size:12px;color:var(--wh);font-weight:700;margin-top:6px;">Create a Black Friday, Christmas, or Valentine campaign, it goes live automatically on its start date.</div></div>';
+    html+='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:36px;">'+iconBadge('party',36)+'</div><div class="card-title" style="margin-top:12px;">No campaigns yet</div><div style="font-size:12px;color:var(--wh);font-weight:700;margin-top:6px;">Create a Black Friday, Christmas, or Valentine campaign, it goes live automatically on its start date.</div></div>';
   }else{
     html+=list.map(function(p){
       const isLive=promoIsActive(p);
@@ -1031,10 +1077,10 @@ async function openPromoForm(id){
       <div class="fg"><label class="lbl">End Date</label><input class="inp" type="date" id="pr-end" value="${p.endDate||''}"/></div>
     </div>
     <div class="fg"><label class="lbl">Sitewide Discount %</label><input class="inp" type="number" id="pr-pct" value="${p.discountPct||10}" placeholder="10"/></div>
-    <div class="fg"><label class="lbl">Banner Message</label><input class="inp" id="pr-banner" value="${p.bannerText||''}" placeholder="e.g. 🎉 Black Friday is here, 20% off everything!"/></div>
+    <div class="fg"><label class="lbl">Banner Message</label><input class="inp" id="pr-banner" value="${p.bannerText||''}" placeholder="e.g. ${iconBadge('party',14)} Black Friday is here, 20% off everything!"/></div>
     <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;margin-bottom:16px;"><input type="checkbox" id="pr-active" ${p.active!==false?'checked':''} style="accent-color:var(--or);width:16px;height:16px;"/> Active</label>
     <div style="display:flex;gap:10px;">
-      <button class="btn btn-or btn-lg" onclick="savePromo('${id||''}')">💾 ${id?'Update':'Save'} Campaign</button>
+      <button class="btn btn-or btn-lg" onclick="savePromo('${id||''}')">${iconBadge('save',14)} ${id?'Update':'Save'} Campaign</button>
       <button class="btn btn-lg" onclick="nav('promos',false)">Cancel</button>
     </div>
   </div>`;
@@ -1071,7 +1117,7 @@ async function renderBundles(c){
   const list=Object.entries(bundles).map(function(e){return Object.assign({_id:e[0]},e[1]);});
   var html='<div class="page-hdr" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;"><div><div class="page-hdr-title">Bundle Deals</div><div class="page-hdr-sub">'+list.length+' bundle(s) &middot; customers buying all items in a bundle get an automatic discount</div></div><button class="btn btn-or btn-lg" onclick="openBundleForm(null)">+ New Bundle</button></div>';
   if(!list.length){
-    html+='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:36px;">🎁</div><div class="card-title" style="margin-top:12px;">No bundles yet</div><div style="font-size:12px;color:var(--wh);font-weight:700;margin-top:6px;">Create a bundle to offer an automatic discount when customers buy related products together.</div></div>';
+    html+='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:36px;">'+iconBadge('gift',36)+'</div><div class="card-title" style="margin-top:12px;">No bundles yet</div><div style="font-size:12px;color:var(--wh);font-weight:700;margin-top:6px;">Create a bundle to offer an automatic discount when customers buy related products together.</div></div>';
   }else{
     html+=list.map(function(b){
       return '<div class="data-row" style="align-items:flex-start;">'
@@ -1106,7 +1152,7 @@ async function openBundleForm(id){
       <div style="max-height:320px;overflow-y:auto;border:1px solid var(--bdr);border-radius:8px;">${opts||'<div style="padding:12px;color:var(--wh);font-weight:700;font-size:12px;">No products found.</div>'}</div>
     </div>
     <div style="display:flex;gap:10px;">
-      <button class="btn btn-or btn-lg" onclick="saveBundle('${id||''}')">💾 ${id?'Update':'Save'} Bundle</button>
+      <button class="btn btn-or btn-lg" onclick="saveBundle('${id||''}')">${iconBadge('save',14)} ${id?'Update':'Save'} Bundle</button>
       <button class="btn btn-lg" onclick="nav('bundles',false)">Cancel</button>
     </div>
   </div>`;
@@ -1386,7 +1432,7 @@ async function renderStaffList(c){
   }
   html+='<div class="card-title" style="margin:16px 0 10px;">All Staff</div>';
   if(!active.length){
-    html+='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:36px;">👥</div><div class="card-title" style="margin-top:12px;">No staff yet</div></div>';
+    html+='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:36px;">'+iconBadge('user',36)+'</div><div class="card-title" style="margin-top:12px;">No staff yet</div></div>';
   }else{
     html+=active.map(function(s){return staffRow(s,allTasks[s._id]||{});}).join('');
   }
@@ -1397,10 +1443,10 @@ function pendingApplicationRow(s){
   return '<div class="card" style="margin-bottom:10px;">'
     +'<div style="font-weight:800;margin-bottom:6px;">'+s.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(255,106,0,0.12);color:var(--or);">Applying: '+roleLabel+'</span></div>'
     +'<div style="font-size:12px;color:var(--wh);font-weight:700;line-height:1.9;">'
-    +'📧 '+s.email+' &middot; 📞 '+s.phone+'<br>'
-    +'🏠 '+s.address+', '+(s.lga||'')+', '+(s.state||'')+', '+(s.country||'')+'<br>'
-    +'🎂 DOB: '+(s.dob||'N/A')+' &middot; Gender: '+(s.gender||'N/A')
-    +(s.note?'<br>📝 "'+s.note+'"':'')
+    +''+iconBadge('envelope',14)+' '+s.email+' &middot; '+iconBadge('phone',14)+' '+s.phone+'<br>'
+    +''+iconBadge('home',14)+' '+s.address+', '+(s.lga||'')+', '+(s.state||'')+', '+(s.country||'')+'<br>'
+    +''+iconBadge('cake',14)+' DOB: '+(s.dob||'N/A')+' &middot; Gender: '+(s.gender||'N/A')
+    +(s.note?'<br>'+iconBadge('edit',14)+' "'+s.note+'"':'')
     +'</div>'
     +'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'
     +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="approveStaffApplication(\''+s._id+'\',\''+escAttr(s.name)+'\')">Approve</button>'
@@ -1427,7 +1473,7 @@ async function approveStaffApplication(id,name){
     <div class="fg"><label class="lbl">Starting Monthly Salary (₦), optional, can set later</label><input class="inp" type="number" id="ap-confirm-salary" placeholder="0"/></div>
     <div class="fg"><label class="lbl">Set Their Password</label><input class="inp" id="ap-confirm-pass" value="${suggestedPass}"/><div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:4px;">A suggestion is pre-filled, change it to whatever you want, or keep it.</div></div>
     <div style="display:flex;gap:10px;">
-      <button class="btn btn-or btn-lg" onclick="finalizeApproveStaff('${id}','${escAttr(name)}','${s.email}')">✅ Approve Staff</button>
+      <button class="btn btn-or btn-lg" onclick="finalizeApproveStaff('${id}','${escAttr(name)}','${s.email}')">${iconBadge('check',14)} Approve Staff</button>
       <button class="btn btn-lg" onclick="staffNav('list')">Cancel</button>
     </div>
   </div>`;
@@ -1463,7 +1509,7 @@ async function finalizeApproveStaff(id,name,email){
   }
   await fbU('rn_mall_staff/'+id,update);
   logActivity('Approved staff application',name+' ('+role+'), '+staffNumber);
-  alert('✅ '+name+' approved as '+staffNumber+'!\n\nSend them these login details:\n\nEmail: '+email+'\nPassword: '+pass+'\n\n(There is no automatic email, please send this to them yourself via WhatsApp/email.)');
+  alert(''+iconBadge('check',14)+' '+name+' approved as '+staffNumber+'!\n\nSend them these login details:\n\nEmail: '+email+'\nPassword: '+pass+'\n\n(There is no automatic email, please send this to them yourself via WhatsApp/email.)');
   toast('Approved, credentials shown above');
   nav('staff',false);
 }
@@ -1487,31 +1533,31 @@ function staffRow(s,tasks){
   var strikes=s.strikes||0;
   return '<div class="data-row" style="align-items:flex-start;flex-direction:column;">'
     +'<div style="display:flex;justify-content:space-between;width:100%;flex-wrap:wrap;gap:8px;">'
-    +'<div><div class="row-name">'+s.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(255,106,0,0.12);color:var(--or);">'+role.label+'</span>'+(suspended?' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(244,63,94,0.12);color:var(--re);">SUSPENDED</span>':'')+(strikes>0?' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(244,63,94,0.12);color:var(--re);">⚠ '+strikes+'/3 STRIKES</span>':'')+'</div>'
+    +'<div><div class="row-name">'+s.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(255,106,0,0.12);color:var(--or);">'+role.label+'</span>'+(suspended?' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(244,63,94,0.12);color:var(--re);">SUSPENDED</span>':'')+(strikes>0?' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(244,63,94,0.12);color:var(--re);">'+iconBadge('warning',14)+' '+strikes+'/3 STRIKES</span>':'')+'</div>'
     +'<div class="row-meta">'+s.email+(s.staffNumber?' &middot; '+s.staffNumber:'')+'</div>'
-    +(extraPerms.length?'<div class="row-meta">🔓 Extra access: <strong style="color:var(--su);">'+extraPerms.join(', ')+'</strong></div>':'')
+    +(extraPerms.length?'<div class="row-meta">'+iconBadge('unlock',14)+' Extra access: <strong style="color:var(--su);">'+extraPerms.join(', ')+'</strong></div>':'')
     +'<div class="row-meta">Password: <span id="pw-'+s._id+'" style="font-family:monospace;letter-spacing:1px;">••••••••</span> <span onclick="togglePwView(\''+s._id+'\',\''+escAttr((s.password||''))+'\')" style="color:var(--or);cursor:pointer;font-weight:700;">show</span></div>'
-    +'<div class="row-meta">💰 Salary: <strong style="color:var(--wh);">'+fmt(s.salary||0)+'</strong>/mo, <span style="color:'+(s.salaryStatus==='paid'?'var(--su)':'var(--or)')+';">'+(s.salaryStatus||'pending')+'</span> &middot; ⭐ StaffPoints: <strong style="color:var(--or);">'+(s.points||0)+'</strong></div>'
-    +(s.workingHours?'<div class="row-meta">🕒 Hours: <strong style="color:var(--wh);">'+s.workingHours+'</strong></div>':'')
-    +(s.role==='ceo'?'<div class="row-meta">🖥️ Admin Panel Access: <strong style="color:'+(s.adminPanelAccess?'var(--su)':'var(--wh)')+';">'+(s.adminPanelAccess?'Granted':'Not granted')+'</strong></div>':'')
-    +'<div class="row-meta">✅ Tasks Done: <strong style="color:var(--su);">'+tasksDoneLive+'</strong> &middot; ⏳ Pending: <strong style="color:var(--or);">'+tasksPendingLive+'</strong></div>'
-    +(s.bankAcctNo?'<div class="row-meta">🏦 '+s.bankName+', '+s.bankAcctNo+' ('+s.bankAcctName+') '+(s.bankVerified?'<strong style="color:var(--su);">✔ Verified</strong>':'<strong style="color:var(--or);">Awaiting Verification</strong>')+'</div>':'')
+    +'<div class="row-meta">'+iconBadge('cash',14)+' Salary: <strong style="color:var(--wh);">'+fmt(s.salary||0)+'</strong>/mo, <span style="color:'+(s.salaryStatus==='paid'?'var(--su)':'var(--or)')+';">'+(s.salaryStatus||'pending')+'</span> &middot; '+iconBadge('star',14)+' StaffPoints: <strong style="color:var(--or);">'+(s.points||0)+'</strong></div>'
+    +(s.workingHours?'<div class="row-meta">'+iconBadge('clock',14)+' Hours: <strong style="color:var(--wh);">'+s.workingHours+'</strong></div>':'')
+    +(s.role==='ceo'?'<div class="row-meta">'+iconBadge('monitor',14)+' Admin Panel Access: <strong style="color:'+(s.adminPanelAccess?'var(--su)':'var(--wh)')+';">'+(s.adminPanelAccess?'Granted':'Not granted')+'</strong></div>':'')
+    +'<div class="row-meta">'+iconBadge('check',14)+' Tasks Done: <strong style="color:var(--su);">'+tasksDoneLive+'</strong> &middot; ⏳ Pending: <strong style="color:var(--or);">'+tasksPendingLive+'</strong></div>'
+    +(s.bankAcctNo?'<div class="row-meta">'+iconBadge('bank',14)+' '+s.bankName+', '+s.bankAcctNo+' ('+s.bankAcctName+') '+(s.bankVerified?'<strong style="color:var(--su);">✔ Verified</strong>':'<strong style="color:var(--or);">Awaiting Verification</strong>')+'</div>':'')
     +'</div>'
     +'<div class="row-actions">'
-    +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="openStaffAccessForm(\''+s._id+'\')">🔓 Manage Access</button>'
-    +(s.role==='ceo'?'<button class="btn '+(s.adminPanelAccess?'btn-re':'btn-gr')+'" style="font-size:10px;padding:5px 10px;" onclick="toggleCeoAdminAccess(\''+s._id+'\',\''+escAttr(s.name)+'\','+(!s.adminPanelAccess)+')">'+(s.adminPanelAccess?'🚫 Revoke Admin Panel Access':'🔑 Grant Admin Panel Access')+'</button>':'')
+    +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="openStaffAccessForm(\''+s._id+'\')">'+iconBadge('unlock',14)+' Manage Access</button>'
+    +(s.role==='ceo'?'<button class="btn '+(s.adminPanelAccess?'btn-re':'btn-gr')+'" style="font-size:10px;padding:5px 10px;" onclick="toggleCeoAdminAccess(\''+s._id+'\',\''+escAttr(s.name)+'\','+(!s.adminPanelAccess)+')">'+(s.adminPanelAccess?''+iconBadge('noentry',14)+' Revoke Admin Panel Access':''+iconBadge('key',14)+' Grant Admin Panel Access')+'</button>':'')
     +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="adjustStaffSalary(\''+s._id+'\',\''+escAttr(s.name)+'\',\''+(s.salary||0)+'\')">Set Salary</button>'
-    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="setStaffHours(\''+s._id+'\',\''+escAttr(s.name)+'\',\''+escAttr((s.workingHours||''))+'\')">🕒 Set Hours</button>'
+    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="setStaffHours(\''+s._id+'\',\''+escAttr(s.name)+'\',\''+escAttr((s.workingHours||''))+'\')">'+iconBadge('clock',14)+' Set Hours</button>'
     +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="markSalaryPaid(\''+s._id+'\',\''+escAttr(s.name)+'\')">Mark Salary Paid</button>'
     +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="awardStaffPoints(\''+s._id+'\',\''+escAttr(s.name)+'\')">Award Points</button>'
-    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="openSalaryRecords(\''+s._id+'\',\''+escAttr(s.name)+'\')">📋 Salary Records</button>'
+    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="openSalaryRecords(\''+s._id+'\',\''+escAttr(s.name)+'\')">'+iconBadge('document',14)+' Salary Records</button>'
     +'</div>'
     +'<div class="row-actions" style="margin-top:6px;">'
-    +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="assignStaffTask(\''+s._id+'\',\''+escAttr(s.name)+'\')">📋 Assign Task</button>'
+    +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="assignStaffTask(\''+s._id+'\',\''+escAttr(s.name)+'\')">'+iconBadge('document',14)+' Assign Task</button>'
     +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="viewStaffTasks(\''+s._id+'\',\''+escAttr(s.name)+'\')">View Tasks</button>'
     +'</div>'
     +'<div class="row-actions" style="margin-top:6px;">'
-    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="addStaffStrike(\''+s._id+'\',\''+escAttr(s.name)+'\')">⚠ Add Strike</button>'
+    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="addStaffStrike(\''+s._id+'\',\''+escAttr(s.name)+'\')">'+iconBadge('warning',14)+' Add Strike</button>'
     +(strikes>0?'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="removeStaffStrike(\''+s._id+'\',\''+escAttr(s.name)+'\')">Remove Strike</button>':'')
     +(s.bankAcctNo&&!s.bankVerified?'<button class="btn btn-gr" style="font-size:10px;padding:5px 10px;" onclick="verifyStaffBank(\''+s._id+'\',\''+escAttr(s.name)+'\')">✔ Verify Bank</button>':'')
     +'</div>'
@@ -1545,7 +1591,7 @@ async function openStaffForm(id){
     <div class="fg"><label class="lbl">Monthly Salary (₦)</label><input class="inp" type="number" id="sf-salary" value="${s.salary||''}" placeholder="0"/></div>
     <div class="fg"><label class="lbl">Working Hours</label><input class="inp" id="sf-hours" value="${s.workingHours||''}" placeholder="e.g. 9:00 AM – 5:00 PM, Mon–Fri"/></div>
     <div style="display:flex;gap:10px;">
-      <button class="btn btn-or btn-lg" onclick="saveStaff('${id||''}')">💾 ${id?'Update':'Add'} Staff</button>
+      <button class="btn btn-or btn-lg" onclick="saveStaff('${id||''}')">${iconBadge('save',14)} ${id?'Update':'Add'} Staff</button>
       <button class="btn btn-lg" onclick="staffNav('list')">Cancel</button>
     </div>
   </div>`;
@@ -1604,7 +1650,7 @@ async function markSalaryPaid(id,name){
     <div class="fg"><label class="lbl">Expected Arrival Date</label><input class="inp" type="date" id="sp-date"/></div>
     <div class="fg"><label class="lbl">Message to Staff</label><textarea class="ta" id="sp-msg" rows="3">${defaultMsg}</textarea><div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:4px;">This becomes your default message for next time too, edit it here whenever you want to change the wording.</div></div>
     <div style="display:flex;gap:10px;">
-      <button class="btn btn-or btn-lg" onclick="finalizeSalaryPaid('${id}','${escAttr(name)}')">💰 Mark Paid &amp; Notify</button>
+      <button class="btn btn-or btn-lg" onclick="finalizeSalaryPaid('${id}','${escAttr(name)}')">${iconBadge('cash',14)} Mark Paid &amp; Notify</button>
       <button class="btn btn-lg" onclick="nav('staff',false)">Cancel</button>
     </div>
   </div>`;
@@ -1653,7 +1699,7 @@ async function openStaffAccessForm(id){
   <div class="page-hdr"><div class="page-hdr-title">Manage Access, ${s.name}</div><div class="page-hdr-sub">Their role (${(STAFF_ROLES.find(function(r){return r.id===s.role;})||{}).label||s.role}) already grants some access, turn any of these ON to give them extra access beyond their role, regardless of title. Turn OFF anytime.</div></div>
   <div class="card">
     ${EXTRA_PERMISSIONS.map(function(p){return '<label style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--bdr);cursor:pointer;"><span style="font-size:13px;color:var(--wh);font-weight:700;">'+p.label+'</span><input type="checkbox" id="perm-'+p.id+'" '+(perms[p.id]?'checked':'')+' style="width:20px;height:20px;accent-color:var(--or);"/></label>';}).join('')}
-    <button class="btn btn-or btn-lg" style="margin-top:16px;" onclick="saveStaffAccess('${id}','${escAttr(s.name)}')">💾 Save Access</button>
+    <button class="btn btn-or btn-lg" style="margin-top:16px;" onclick="saveStaffAccess('${id}','${escAttr(s.name)}')">${iconBadge('save',14)} Save Access</button>
     <button class="btn btn-lg" style="margin-top:16px;margin-left:8px;" onclick="staffNav('list')">Cancel</button>
   </div>`;
 }
@@ -1722,11 +1768,11 @@ async function addStaffStrike(id,name){
   const newStrikes=(s.strikes||0)+1;
   const strikeLog=(s.strikeLog||[]).concat([{reason:reason.trim(),date:ds(),ts:Date.now()}]);
   const update={strikes:newStrikes,strikeLog:strikeLog};
-  let msg='⚠ You received a strike ('+newStrikes+'/3): '+reason.trim();
+  let msg=''+iconBadge('warning',14)+' You received a strike ('+newStrikes+'/3): '+reason.trim();
   if(newStrikes>=3){
     update.status='suspended';
     update.salaryStatus='pending'; // suspended staff are not paid until reinstated
-    msg='🚫 You have been automatically suspended after receiving 3 strikes, pending review by the General Manager. Your salary will not be processed until you are reinstated. Last strike: '+reason.trim();
+    msg=''+iconBadge('noentry',14)+' You have been automatically suspended after receiving 3 strikes, pending review by the General Manager. Your salary will not be processed until you are reinstated. Last strike: '+reason.trim();
   }
   await fbU('rn_mall_staff/'+id,update);
   await fbP('rn_mall_staff_notifications/'+id,{type:'strike',reason:reason.trim(),strikes:newStrikes,date:ds(),read:false,ts:Date.now()});
@@ -1824,7 +1870,7 @@ async function renderActivityLog(c){
   const log=entries.slice(0,100);
   var html='';
   if(pendingReview.length){
-    html+='<div class="card-title" style="margin-bottom:10px;color:var(--or);">⚠ CEO Actions Pending Your Review ('+pendingReview.length+')</div>';
+    html+='<div class="card-title" style="margin-bottom:10px;color:var(--or);">'+iconBadge('warning',14)+' CEO Actions Pending Your Review ('+pendingReview.length+')</div>';
     html+=pendingReview.map(function(l){
       return '<div class="data-row" style="border-color:rgba(255,106,0,0.35);"><div style="flex:1;"><div class="row-name">'+l.by+'</div><div class="row-meta">'+l.action+(l.detail?', '+l.detail:'')+'</div><div class="row-meta">'+l.date+'</div></div><button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="markCeoActionReviewed(\''+l._key+'\')">Mark Reviewed</button></div>';
     }).join('');
@@ -1849,7 +1895,7 @@ async function renderAnnouncements(c){
     const reads=(readsData||{})[a._id]||{};
     const readNames=Object.values(reads).map(function(r){return r.name;});
     return '<div class="data-row" style="align-items:flex-start;flex-direction:column;"><div style="width:100%;"><div style="font-size:12px;color:var(--wh);font-weight:700;">'+a.message+'</div><div class="row-meta">'+a.date+'</div>'
-      +'<div class="row-meta" style="margin-top:4px;" title="'+readNames.join(', ')+'">👁 Read by '+readNames.length+'/'+totalActiveStaff+' active staff'+(readNames.length?': '+readNames.slice(0,3).join(', ')+(readNames.length>3?' +'+(readNames.length-3)+' more':''):'')+'</div></div>'
+      +'<div class="row-meta" style="margin-top:4px;" title="'+readNames.join(', ')+'">'+iconBadge('eye',14)+' Read by '+readNames.length+'/'+totalActiveStaff+' active staff'+(readNames.length?': '+readNames.slice(0,3).join(', ')+(readNames.length>3?' +'+(readNames.length-3)+' more':''):'')+'</div></div>'
       +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;margin-top:6px;" onclick="deleteAnnouncement(\''+a._id+'\')">Delete</button></div>';
   }).join(''):'<div style="color:var(--wh);font-weight:700;font-size:12px;">No announcements yet.</div>';
 }
@@ -1966,7 +2012,7 @@ async function renderInvestorList(c){
       return '<div class="data-row" style="align-items:flex-start;flex-direction:column;">'
         +'<div style="width:100%;"><div class="row-name">'+v.name+'</div>'
         +'<div class="row-meta">'+(OPTION_LABELS_ADMIN[r.currentOption]||r.currentOption)+' → '+(OPTION_LABELS_ADMIN[r.option]||r.option)+(r.newAmount!==r.currentAmount?' &middot; '+fmt(r.currentAmount)+' → '+fmt(r.newAmount):'')+'</div>'
-        +(topUp>0?'<div class="row-meta">💰 Requires top-up payment of <strong style="color:var(--or);">'+fmt(topUp)+'</strong>, '+(r.paymentConfirmed?'<strong style="color:var(--su);">✔ '+(r.topUpPaymentRef?'Paid online (ref: '+r.topUpPaymentRef+')':'Payment Confirmed')+'</strong>':'<strong style="color:var(--re);">Not yet confirmed</strong>')+'</div>':'')
+        +(topUp>0?'<div class="row-meta">'+iconBadge('cash',14)+' Requires top-up payment of <strong style="color:var(--or);">'+fmt(topUp)+'</strong>, '+(r.paymentConfirmed?'<strong style="color:var(--su);">✔ '+(r.topUpPaymentRef?'Paid online (ref: '+r.topUpPaymentRef+')':'Payment Confirmed')+'</strong>':'<strong style="color:var(--re);">Not yet confirmed</strong>')+'</div>':'')
         +'</div>'
         +'<div class="row-actions" style="margin-top:8px;">'
         +(topUp>0&&!r.paymentConfirmed?'<button class="btn btn-gr" style="font-size:10px;padding:5px 10px;" onclick="confirmSwitchPayment(\''+v._id+'\')">✔ Confirm Payment Received</button>':'')
@@ -2052,7 +2098,7 @@ async function approveInvestor(id,name){
     update.password=trimmedPass;
   }
   await fbU('rn_mall_investors/'+id,update);
-  alert('✅ '+name+' approved as '+investorNumber+'!\n\nSend them these login details:\n\nEmail: '+v.email+'\nPassword: '+trimmedPass+'\n\n(There is no automatic email, please send this to them yourself via WhatsApp/email. Their signed agreement is already recorded digitally in the portal, no physical document needed.)');
+  alert(''+iconBadge('check',14)+' '+name+' approved as '+investorNumber+'!\n\nSend them these login details:\n\nEmail: '+v.email+'\nPassword: '+trimmedPass+'\n\n(There is no automatic email, please send this to them yourself via WhatsApp/email. Their signed agreement is already recorded digitally in the portal, no physical document needed.)');
   toast('Approved, credentials shown above');
   nav('investors',false);
 }
@@ -2073,14 +2119,14 @@ function investorRow(v,target){
     +'<div class="row-meta"><label class="lbl" style="display:inline;text-transform:none;font-weight:700;">Date of Birth:</label> '+(v.dob?new Date(v.dob).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}):'Not provided')+'</div>'
     +(equityPct!=null?'<div class="row-meta">Equity stake: <strong style="color:var(--or);">'+equityPct.toFixed(2)+'%</strong> of '+fmt(target||3000000)+' total capital = <strong style="color:var(--wh);">'+fmt(v.investmentAmount)+'</strong> invested</div>':'')
     +'<div class="row-meta">'+iconBadge('money',14)+' Total Paid Out: <strong style="color:var(--su);">'+fmt(v.totalPaid||0)+'</strong> &middot; '+iconBadge('cart',14)+' Wallet: <strong style="color:var(--su);">'+fmt(v.walletBalance||0)+'</strong>'+(v.investorNumber?' &middot; '+v.investorNumber:'')+'</div>'
-    +(v.bankAcctNo?'<div class="row-meta">🏦 '+v.bankName+', '+v.bankAcctNo+' ('+v.bankAcctName+') '+(v.bankVerified?'<strong style="color:var(--su);">✔ Verified</strong>':'<strong style="color:var(--or);">Awaiting Verification</strong>')+'</div>':'')
+    +(v.bankAcctNo?'<div class="row-meta">'+iconBadge('bank',14)+' '+v.bankName+', '+v.bankAcctNo+' ('+v.bankAcctName+') '+(v.bankVerified?'<strong style="color:var(--su);">✔ Verified</strong>':'<strong style="color:var(--or);">Awaiting Verification</strong>')+'</div>':'')
     +'<div class="row-meta">Password: <span id="pw-'+v._id+'" style="font-family:monospace;letter-spacing:1px;">••••••••</span> <span onclick="togglePwView(\''+v._id+'\',\''+escAttr((v.password||''))+'\')" style="color:var(--or);cursor:pointer;font-weight:700;">show</span></div>'
     +'</div></div></div>'
     +'<div class="row-actions" style="margin-top:6px;">'
     +'<input type="file" id="agree-file-'+v._id+'" accept="application/pdf,image/*" style="display:none;" onchange="uploadInvestorAgreement(\''+v._id+'\',this)">'
-    +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="recordInvestorPayout(\''+v._id+'\',\''+escAttr(v.name)+'\')">💰 Record Payout</button>'
+    +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="recordInvestorPayout(\''+v._id+'\',\''+escAttr(v.name)+'\')">'+iconBadge('cash',14)+' Record Payout</button>'
     +(v.bankAcctNo&&!v.bankVerified?'<button class="btn btn-gr" style="font-size:10px;padding:5px 10px;" onclick="verifyInvestorBank(\''+v._id+'\',\''+escAttr(v.name)+'\')">✔ Verify Bank</button>':'')
-    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="document.getElementById(\'agree-file-'+v._id+'\').click()">📄 '+(v.agreementDoc?'Replace':'Upload')+' Agreement (optional)</button>'
+    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="document.getElementById(\'agree-file-'+v._id+'\').click()">'+iconBadge('document',14)+' '+(v.agreementDoc?'Replace':'Upload')+' Agreement (optional)</button>'
     +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="openInvestorChat(\''+v._id+'\',\''+escAttr(v.name)+'\')">'+iconBadge('chat',12)+' Chat</button>'
     +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="openInvestorForm(\''+v._id+'\')">Edit</button>'
     +'<button class="btn '+(v.status==='suspended'?'btn-gr':'btn-or')+'" style="font-size:10px;padding:5px 10px;" onclick="toggleSuspendInvestor(\''+v._id+'\','+(v.status==='suspended')+')">'+(v.status==='suspended'?'Reactivate':'Suspend')+'</button>'
@@ -2099,7 +2145,7 @@ async function openInvestorForm(id){
     <div class="g2"><div class="fg"><label class="lbl">Local Government Area</label><input class="inp" id="iv-lga" value="${v.lga||''}"/></div><div class="fg"><label class="lbl">Country</label><input class="inp" id="iv-country" value="${v.country||''}"/></div></div>
     <div class="fg"><label class="lbl">Date of Birth</label><input class="inp" type="date" id="iv-dob" value="${v.dob||''}"/></div>
     <div class="fg"><label class="lbl">Bio</label><textarea class="ta" id="iv-bio" rows="4">${v.bio||''}</textarea></div>
-    <button class="btn btn-or btn-lg" onclick="saveInvestorEdit('${id}')">💾 Save Changes</button>
+    <button class="btn btn-or btn-lg" onclick="saveInvestorEdit('${id}')">${iconBadge('save',14)} Save Changes</button>
     <button class="btn btn-lg" style="margin-left:8px;" onclick="nav('investors',false)">Cancel</button>
   </div>`;
 }
@@ -2241,7 +2287,7 @@ async function recordInvestorPayout(id,name){
     <div class="fg"><label class="lbl">Expected Arrival Date</label><input class="inp" type="date" id="po-date"/></div>
     <div class="fg"><label class="lbl">Message to Investor</label><textarea class="ta" id="po-msg" rows="3">${defaultMsg}</textarea><div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:4px;">This becomes your default message for next time too, edit it here whenever you want to change the wording.</div></div>
     <div style="display:flex;gap:10px;">
-      <button class="btn btn-or btn-lg" onclick="finalizeInvestorPayout('${id}','${escAttr(name)}')">💰 Record &amp; Notify</button>
+      <button class="btn btn-or btn-lg" onclick="finalizeInvestorPayout('${id}','${escAttr(name)}')">${iconBadge('cash',14)} Record &amp; Notify</button>
       <button class="btn btn-lg" onclick="nav('investors',false)">Cancel</button>
     </div>
   </div>`;
@@ -2386,11 +2432,11 @@ async function renderRiderReportsComplaints(c){
   const urgent=allComplaints.filter(function(c){return c.urgent&&c.status!=='resolved';});
   var html='';
   if(urgent.length){
-    html+='<div class="card-title" style="color:var(--re);margin-bottom:10px;">🚨 Urgent, Needs Immediate Attention ('+urgent.length+')</div>';
+    html+='<div class="card-title" style="color:var(--re);margin-bottom:10px;">'+iconBadge('warning',14)+' Urgent, Needs Immediate Attention ('+urgent.length+')</div>';
     html+=urgent.map(function(cm){return '<div class="data-row" style="border-color:var(--re);background:rgba(244,63,94,0.06);"><div style="flex:1;"><div class="row-name">'+cm.riderName+'</div><div class="row-meta">'+cm.message+'</div><div class="row-meta">'+cm.date+'</div></div><button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="resolveRiderComplaint(\''+cm.riderId+'\',\''+cm._key+'\')">Resolve</button></div>';}).join('');
   }
   html+='<div class="card-title" style="margin:16px 0 10px;">All Complaints</div>';
-  html+=allComplaints.length?allComplaints.map(function(cm){return '<div class="data-row"><div style="flex:1;">'+(cm.urgent?'<span style="font-size:9px;font-weight:800;color:var(--re);">⚠ URGENT</span> ':'')+'<div class="row-name">'+cm.riderName+'</div><div class="row-meta">'+cm.message+'</div><div class="row-meta">'+cm.date+' &middot; '+(cm.status||'pending')+'</div></div>'+(cm.status!=='resolved'?'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="resolveRiderComplaint(\''+cm.riderId+'\',\''+cm._key+'\')">Mark Resolved</button>':'')+'</div>';}).join(''):'<div class="card" style="text-align:center;padding:30px;color:var(--wh);font-weight:700;">No complaints yet.</div>';
+  html+=allComplaints.length?allComplaints.map(function(cm){return '<div class="data-row"><div style="flex:1;">'+(cm.urgent?'<span style="font-size:9px;font-weight:800;color:var(--re);">'+iconBadge('warning',14)+' URGENT</span> ':'')+'<div class="row-name">'+cm.riderName+'</div><div class="row-meta">'+cm.message+'</div><div class="row-meta">'+cm.date+' &middot; '+(cm.status||'pending')+'</div></div>'+(cm.status!=='resolved'?'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="resolveRiderComplaint(\''+cm.riderId+'\',\''+cm._key+'\')">Mark Resolved</button>':'')+'</div>';}).join(''):'<div class="card" style="text-align:center;padding:30px;color:var(--wh);font-weight:700;">No complaints yet.</div>';
   html+='<div class="card-title" style="margin:16px 0 10px;">Reports</div>';
   html+=allReports.length?allReports.map(function(r){return '<div class="data-row"><div style="flex:1;"><div class="row-name">'+r.riderName+'</div><div class="row-meta">'+r.message+'</div><div class="row-meta">'+r.date+'</div></div></div>';}).join(''):'<div class="card" style="text-align:center;padding:30px;color:var(--wh);font-weight:700;">No reports yet.</div>';
   c.innerHTML=html;
@@ -2465,11 +2511,11 @@ function pendingRiderRow(r){
   return '<div class="card" style="margin-bottom:10px;">'
     +'<div style="font-weight:800;margin-bottom:6px;">'+r.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(255,106,0,0.12);color:var(--or);">'+(r.vehicleType||'')+'</span></div>'
     +'<div style="font-size:12px;color:var(--wh);font-weight:700;line-height:1.9;">'
-    +'📧 '+r.email+' &middot; 📞 '+r.phone+'<br>'
-    +'🏠 '+r.address+', '+(r.lga||'')+', '+(r.state||'')+', '+(r.country||'')+'<br>'
-    +'🎂 DOB: '+(r.dob||'N/A')+' &middot; Gender: '+(r.gender||'N/A')+'<br>'
-    +'🪪 ID: '+(r.idNumber||'N/A')
-    +(r.note?'<br>📝 "'+r.note+'"':'')
+    +''+iconBadge('envelope',14)+' '+r.email+' &middot; '+iconBadge('phone',14)+' '+r.phone+'<br>'
+    +''+iconBadge('home',14)+' '+r.address+', '+(r.lga||'')+', '+(r.state||'')+', '+(r.country||'')+'<br>'
+    +''+iconBadge('cake',14)+' DOB: '+(r.dob||'N/A')+' &middot; Gender: '+(r.gender||'N/A')+'<br>'
+    +''+iconBadge('card',14)+' ID: '+(r.idNumber||'N/A')
+    +(r.note?'<br>'+iconBadge('edit',14)+' "'+r.note+'"':'')
     +'</div>'
     +'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'
     +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="approveRider(\''+r._id+'\',\''+escAttr(r.name)+'\')">Approve</button>'
@@ -2503,7 +2549,7 @@ async function approveRider(id,name){
     update.password=trimmedPass;
   }
   await fbU('rn_mall_riders/'+id,update);
-  alert('✅ '+name+' approved as '+riderNumber+'!\n\nSend them these login details:\n\nEmail: '+r.email+'\nPassword: '+trimmedPass+'\n\n(There is no automatic email, please send this to them yourself via WhatsApp/email.)');
+  alert(''+iconBadge('check',14)+' '+name+' approved as '+riderNumber+'!\n\nSend them these login details:\n\nEmail: '+r.email+'\nPassword: '+trimmedPass+'\n\n(There is no automatic email, please send this to them yourself via WhatsApp/email.)');
   toast('Approved, credentials shown above');
   nav('riders',false);
 }
@@ -2521,16 +2567,16 @@ function riderRow(r){
   const avgRating=ratings.length?(ratings.reduce(function(s,x){return s+x;},0)/ratings.length).toFixed(1):null;
   return '<div class="data-row" style="align-items:flex-start;flex-direction:column;">'
     +'<div style="display:flex;justify-content:space-between;width:100%;flex-wrap:wrap;gap:8px;">'
-    +'<div><div class="row-name">'+r.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(255,106,0,0.12);color:var(--or);">'+(r.vehicleType||'')+'</span> <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:'+(online?'rgba(255,106,0,0.15)':'rgba(153,153,153,0.15)')+';color:'+(online?'var(--su)':'var(--wh)')+';">'+(online?'● ONLINE':'○ OFFLINE')+'</span>'+(suspended?' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(244,63,94,0.12);color:var(--re);">SUSPENDED</span>':'')+(strikes>0?' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(244,63,94,0.12);color:var(--re);">⚠ '+strikes+'/3 STRIKES</span>':'')+'</div>'
+    +'<div><div class="row-name">'+r.name+' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(255,106,0,0.12);color:var(--or);">'+(r.vehicleType||'')+'</span> <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:'+(online?'rgba(255,106,0,0.15)':'rgba(153,153,153,0.15)')+';color:'+(online?'var(--su)':'var(--wh)')+';">'+(online?'● ONLINE':'○ OFFLINE')+'</span>'+(suspended?' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(244,63,94,0.12);color:var(--re);">SUSPENDED</span>':'')+(strikes>0?' <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:rgba(244,63,94,0.12);color:var(--re);">'+iconBadge('warning',14)+' '+strikes+'/3 STRIKES</span>':'')+'</div>'
     +'<div class="row-meta">'+r.email+' &middot; '+r.phone+(r.riderNumber?' &middot; '+r.riderNumber:'')+' &middot; Pays: '+(r.payFrequency||'weekly')+'</div>'
-    +'<div class="row-meta">💰 Total Paid Out: <strong style="color:var(--su);">'+fmt(r.totalPaid||0)+'</strong>'+(avgRating?' &middot; ⭐ Rating: <strong style="color:var(--or);">'+avgRating+'/5</strong> ('+ratings.length+')':'')+'</div>'
-    +(r.bankAcctNo?'<div class="row-meta">🏦 '+r.bankName+', '+r.bankAcctNo+' ('+r.bankAcctName+') '+(r.bankVerified?'<strong style="color:var(--su);">✔ Verified</strong>':'<strong style="color:var(--or);">Awaiting Verification</strong>')+'</div>':'')
+    +'<div class="row-meta">'+iconBadge('cash',14)+' Total Paid Out: <strong style="color:var(--su);">'+fmt(r.totalPaid||0)+'</strong>'+(avgRating?' &middot; '+iconBadge('star',14)+' Rating: <strong style="color:var(--or);">'+avgRating+'/5</strong> ('+ratings.length+')':'')+'</div>'
+    +(r.bankAcctNo?'<div class="row-meta">'+iconBadge('bank',14)+' '+r.bankName+', '+r.bankAcctNo+' ('+r.bankAcctName+') '+(r.bankVerified?'<strong style="color:var(--su);">✔ Verified</strong>':'<strong style="color:var(--or);">Awaiting Verification</strong>')+'</div>':'')
     +'<div class="row-meta">Password: <span id="pw-'+r._id+'" style="font-family:monospace;letter-spacing:1px;">••••••••</span> <span onclick="togglePwView(\''+r._id+'\',\''+escAttr((r.password||''))+'\')" style="color:var(--or);cursor:pointer;font-weight:700;">show</span></div>'
     +'</div></div>'
     +'<div class="row-actions" style="margin-top:6px;">'
-    +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="recordRiderPayout(\''+r._id+'\',\''+escAttr(r.name)+'\')">💰 Record Payout</button>'
-    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="awardRiderPoints(\''+r._id+'\',\''+escAttr(r.name)+'\')">⭐ Award Points</button>'
-    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="addRiderStrike(\''+r._id+'\',\''+escAttr(r.name)+'\')">⚠ Add Strike</button>'
+    +'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="recordRiderPayout(\''+r._id+'\',\''+escAttr(r.name)+'\')">'+iconBadge('cash',14)+' Record Payout</button>'
+    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="awardRiderPoints(\''+r._id+'\',\''+escAttr(r.name)+'\')">'+iconBadge('star',14)+' Award Points</button>'
+    +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="addRiderStrike(\''+r._id+'\',\''+escAttr(r.name)+'\')">'+iconBadge('warning',14)+' Add Strike</button>'
     +(strikes>0?'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="removeRiderStrike(\''+r._id+'\',\''+escAttr(r.name)+'\')">Remove Strike</button>':'')
     +(r.bankAcctNo&&!r.bankVerified?'<button class="btn btn-gr" style="font-size:10px;padding:5px 10px;" onclick="verifyRiderBank(\''+r._id+'\',\''+escAttr(r.name)+'\')">✔ Verify Bank</button>':'')
     +'</div>'
@@ -2591,7 +2637,7 @@ async function recordRiderPayout(id,name){
     <div class="fg"><label class="lbl">Expected Arrival Date</label><input class="inp" type="date" id="rp-date"/></div>
     <div class="fg"><label class="lbl">Message to Rider</label><textarea class="ta" id="rp-msg" rows="3">${defaultMsg}</textarea></div>
     <div style="display:flex;gap:10px;">
-      <button class="btn btn-or btn-lg" onclick="finalizeRiderPayout('${id}','${escAttr(name)}')">💰 Record &amp; Notify</button>
+      <button class="btn btn-or btn-lg" onclick="finalizeRiderPayout('${id}','${escAttr(name)}')">${iconBadge('cash',14)} Record &amp; Notify</button>
       <button class="btn btn-lg" onclick="nav('riders',false)">Cancel</button>
     </div>
   </div>`;
@@ -2661,7 +2707,7 @@ async function renderWalletIssues(c){
   });
   var html='<div class="page-hdr"><div><div class="page-hdr-title">Wallet Issues</div><div class="page-hdr-sub">'+list.length+' report(s), refund requests, mistaken top-ups, and general issues</div></div></div>';
   if(!list.length){
-    html+='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:36px;">🎫</div><div class="card-title" style="margin-top:12px;">No reports yet</div></div>';
+    html+='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:36px;">'+iconBadge('ticket',36)+'</div><div class="card-title" style="margin-top:12px;">No reports yet</div></div>';
   }else{
     html+=list.map(walletIssueRow).join('');
   }
@@ -2769,7 +2815,7 @@ async function renderVendorMain(c){
     +'<button class="btn btn-or" onclick="saveVendorPayoutSchedule()">Save Schedule</button>'
     +'<div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:8px;">Current: '+describePayoutSchedule(schedule)+'</div></div>';
   if(!list.length){
-    html+='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:36px;">🏢</div><div class="card-title" style="margin-top:12px;">No vendor applications yet</div></div>';
+    html+='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:36px;">'+iconBadge('building',36)+'</div><div class="card-title" style="margin-top:12px;">No vendor applications yet</div></div>';
   }else{
     if(pending.length){
       html+='<div class="card-title" style="margin:10px 0;color:var(--or);">Pending Approval</div>';
@@ -2808,7 +2854,7 @@ function vendorRow(v){
     +(v.status==='approved'?'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="recordVendorPayout(\''+v._id+'\',\''+escAttr(v.storeName)+'\')">Record Payout</button>':'')
     +(v.status==='approved'&&v.bankAcctNo&&!v.bankVerified?'<button class="btn btn-gr" style="font-size:10px;padding:5px 10px;" onclick="verifyVendorBank(\''+v._id+'\',\''+escAttr(v.storeName)+'\')">Verify Bank</button>':'')
     +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="openVendorForm(\''+v._id+'\')">Edit</button>'
-    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="resetVendorPassword(\''+v._id+'\',\''+escAttr(v.storeName)+'\')">🔑 Reset Password</button>'
+    +'<button class="btn btn-dk" style="font-size:10px;padding:5px 10px;" onclick="resetVendorPassword(\''+v._id+'\',\''+escAttr(v.storeName)+'\')">'+iconBadge('key',14)+' Reset Password</button>'
     +(v.status==='approved'?'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="suspendVendor(\''+v._id+'\',\''+escAttr(v.storeName)+'\')">Suspend</button>':'')
     +(v.status==='suspended'?'<button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="approveVendor(\''+v._id+'\',\''+escAttr(v.storeName)+'\')">Reactivate</button>':'')
     +'<button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteVendor(\''+v._id+'\',\''+escAttr(v.storeName)+'\',this)">Delete</button>'
@@ -2903,7 +2949,7 @@ async function resetVendorPassword(id,name){
   if(pass===null)return;
   if(!pass.trim()||pass.trim().length<6){toast('Password must be at least 6 characters','err');return;}
   await fbU('rn_mall_vendors/'+id,{password:pass.trim()});
-  alert('✅ Password reset for '+name+'.\n\nNew password: '+pass.trim()+'\n\nSend this to them yourself, there is no automatic email.');
+  alert(''+iconBadge('check',14)+' Password reset for '+name+'.\n\nNew password: '+pass.trim()+'\n\nSend this to them yourself, there is no automatic email.');
   toast('Password reset, details shown above');
   nav('vendors',false);
 }
@@ -3152,7 +3198,7 @@ async function renderDash(c){
   <div class="page-hdr slide-up" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">
     <div><div class="page-hdr-title">Dashboard</div>
     <div class="page-hdr-sub">Welcome back. Here is your store overview.</div></div>
-    <button id="admin-refresh-btn" onclick="manualRefreshAdmin(this)" class="btn" style="font-size:11px;">🔄 Refresh</button>
+    <button id="admin-refresh-btn" onclick="manualRefreshAdmin(this)" class="btn" style="font-size:11px;">${iconBadge('sync',14)} Refresh</button>
   </div>
 
   <div class="stats-grid stagger">
@@ -3192,10 +3238,10 @@ async function renderDash(c){
     <div class="card-title">Recent Orders</div>
     <div class="card-sub">Latest orders across your store</div>
     <div class="stagger">
-      ${orders.length===0?`<div class="empty"><div class="empty-icon">&#128722;</div><div class="empty-title">No orders yet</div><div class="empty-sub">Add your first products and share your mall link to start receiving orders.</div></div>`:
+      ${orders.length===0?`<div class="empty"><div class="empty-icon">${iconBadge('cart',40)}</div><div class="empty-title">No orders yet</div><div class="empty-sub">Add your first products and share your mall link to start receiving orders.</div></div>`:
       orders.sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0)).slice(0,10).map(o=>`
         <div class="data-row clickable" onclick="openOrder('${o.tracking}')">
-          <div class="row-av" style="background:rgba(255,106,0,0.08);font-size:16px;">&#128230;</div>
+          <div class="row-av" style="background:rgba(255,106,0,0.08);font-size:16px;">${iconBadge('package',16)}</div>
           <div style="flex:1;">
             <div class="row-name">${o.tracking}</div>
             <div class="row-meta">${o.customer?.name||'Guest'} &middot; ${o.date} &middot; ${o.items?.length||0} item(s) &middot; ${o.payMethod==='pod'?'Pay on Delivery':'Paystack'}</div>
@@ -3221,11 +3267,11 @@ function renderProducts(c){
     <div><div class="page-hdr-title">Products</div>
     <div class="page-hdr-sub">${prods.length} product${prods.length!==1?'s':''} in your catalogue</div></div>
     <div class="page-hdr-actions">
-      <button class="btn btn-dk btn-lg" onclick="compressAllProductImages()" title="Shrinks any large/uncompressed photos already saved on your products, run this once to speed up product load time">🗜️ Compress Images</button>
-      <button class="btn btn-or btn-lg" onclick="migrateProductImagesToGithub()" title="Moves your EXISTING product photos out of the database and into Storage, this is what actually reduces your Firebase bandwidth usage, not just stops it growing">☁️ Move Images to Storage</button>
-      <button class="btn btn-or btn-lg" onclick="migrateEverythingElseToGithub()" title="Moves existing staff photos, vendor photos/logos/documents, investor photos, and rider photos into Storage too">☁️ Move Staff/Vendor/Investor/Rider Images</button>
-      <button class="btn btn-or btn-lg" onclick="migrateOrderImagesToGithub()" title="Orders freeze a snapshot of each item's image at checkout time, this moves those old frozen images (from before Storage hosting existed) into Storage too">☁️ Move Order Images to Storage</button>
-      <button class="btn btn-or btn-lg" onclick="migrateSettingsImagesToGithub()" title="Your hero banner, payment icons, and other site-wide images live in one settings record that loads on nearly every page, this moves any of those still stored as raw data into Storage">☁️ Move Hero Banner &amp; Site Images to Storage</button>
+      <button class="btn btn-dk btn-lg" onclick="compressAllProductImages()" title="Shrinks any large/uncompressed photos already saved on your products, run this once to speed up product load time">${iconBadge('box',14)} Compress Images</button>
+      <button class="btn btn-or btn-lg" onclick="migrateProductImagesToGithub()" title="Moves your EXISTING product photos out of the database and into Storage, this is what actually reduces your Firebase bandwidth usage, not just stops it growing">${iconBadge('cloud',14)} Move Images to Storage</button>
+      <button class="btn btn-or btn-lg" onclick="migrateEverythingElseToGithub()" title="Moves existing staff photos, vendor photos/logos/documents, investor photos, and rider photos into Storage too">${iconBadge('cloud',14)} Move Staff/Vendor/Investor/Rider Images</button>
+      <button class="btn btn-or btn-lg" onclick="migrateOrderImagesToGithub()" title="Orders freeze a snapshot of each item's image at checkout time, this moves those old frozen images (from before Storage hosting existed) into Storage too">${iconBadge('cloud',14)} Move Order Images to Storage</button>
+      <button class="btn btn-or btn-lg" onclick="migrateSettingsImagesToGithub()" title="Your hero banner, payment icons, and other site-wide images live in one settings record that loads on nearly every page, this moves any of those still stored as raw data into Storage">${iconBadge('cloud',14)} Move Hero Banner &amp; Site Images to Storage</button>
       <button class="btn btn-or btn-lg" onclick="openProdForm(null)">+ Add Product</button>
     </div>
   </div>
@@ -3237,7 +3283,7 @@ function renderProducts(c){
     }).join('')}
   </div>`:''}
   ${prods.length===0?`<div class="card fade-in"><div class="empty">
-    <div class="empty-icon">&#9635;</div>
+    <div class="empty-icon">${iconBadge('box',40)}</div>
     <div class="empty-title">No products yet</div>
     <div class="empty-sub">Add your first product to start selling on RichNation Mall.</div>
     <button class="btn btn-or" style="margin-top:16px;" onclick="openProdForm(null)">+ Add Your First Product</button>
@@ -3247,7 +3293,7 @@ function renderProducts(c){
       const price=p.salePrice&&p.salePrice<p.price?p.salePrice:p.price;
       return `<div class="data-row">
         <div class="row-av">
-          ${p.images?.[0]?`<img loading="lazy" decoding="async" src="${p.images[0]}" alt="${p.name}" onerror="this.parentElement.innerHTML='&#128230;'"/>`:'&#128230;'}
+          ${p.images?.[0]?`<img loading="lazy" decoding="async" src="${p.images[0]}" alt="${p.name}" onerror="this.parentElement.innerHTML=iconBadge('package',24)"/>`:iconBadge('package',24)}
         </div>
         <div style="flex:1;">
           <div class="row-name">${p.name}${p.vendorId?' <span style="font-size:9px;font-weight:700;color:var(--wh);">('+(p.vendorName||'Vendor')+')</span>':''}</div>
@@ -3353,12 +3399,12 @@ function renderOrders(c,filter=''){
     <div class="tab ${!filter?'active':''}" onclick="renderOrders(document.getElementById('content-inner'),'')">All</div>
     ${STATUSES.map(s=>`<div class="tab ${filter===s?'active':''}" onclick="renderOrders(document.getElementById('content-inner'),'${s}')">${s.charAt(0).toUpperCase()+s.slice(1)}</div>`).join('')}
   </div>
-  ${orders.length===0?`<div class="card"><div class="empty"><div class="empty-icon">&#128230;</div><div class="empty-title">No orders</div><div class="empty-sub">${filter?'No orders with status "'+filter+'"':'No orders placed yet'}</div></div></div>`:
+  ${orders.length===0?`<div class="card"><div class="empty"><div class="empty-icon">${iconBadge('package',40)}</div><div class="empty-title">No orders</div><div class="empty-sub">${filter?'No orders with status "'+filter+'"':'No orders placed yet'}</div></div></div>`:
   `<div class="stagger">
     ${orders.map(o=>`<div class="data-row clickable" onclick="openOrder('${o.tracking}')">
-      <div class="row-av" style="background:rgba(255,106,0,0.06);">&#128230;</div>
+      <div class="row-av" style="background:rgba(255,106,0,0.06);">${iconBadge('package',16)}</div>
       <div style="flex:1;">
-        <div class="row-name">${o.tracking}${o.activeIncident?' <span style="background:rgba(244,63,94,.15);color:#f43f5e;font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:0.3px;">⚠️ Issue</span>':''}</div>
+        <div class="row-name">${o.tracking}${o.activeIncident?' <span style="background:rgba(244,63,94,.15);color:#f43f5e;font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:0.3px;">'+iconBadge('warning',14)+' Issue</span>':''}</div>
         <div class="row-meta">${o.customer?.name||'Guest'} &middot; ${o.customer?.phone||''} &middot; ${o.date} &middot; ${o.items?.length||0} item(s)</div>
         <div class="row-meta">${o.customer?.city||''} ${o.customer?.country||''} &middot; ${o.payMethod==='pod'?'Pay on Delivery':'Paystack'}${o.deliveryMethod==='pickup'?' &middot; <span style="color:var(--or);">PICKUP</span>':''}</div>
       </div>
@@ -3405,11 +3451,11 @@ function renderCustomerStyleTracker(o){
   }).join('');
 }
 const INCIDENT_TYPES_ADMIN={
-  traffic:{emoji:'🚦',label:'Heavy Traffic'},
-  breakdown:{emoji:'🔧',label:'Vehicle Breakdown'},
-  road_closed:{emoji:'🚧',label:'Road Closed / Accident'},
-  weather:{emoji:'🌧️',label:'Bad Weather'},
-  other:{emoji:'⚠️',label:'Other Issue'}
+  traffic:{emoji:''+iconBadge('signal',14)+'',label:'Heavy Traffic'},
+  breakdown:{emoji:''+iconBadge('wrench',14)+'',label:'Vehicle Breakdown'},
+  road_closed:{emoji:''+iconBadge('warning',14)+'',label:'Road Closed / Accident'},
+  weather:{emoji:''+iconBadge('cloud',14)+'',label:'Bad Weather'},
+  other:{emoji:''+iconBadge('warning',14)+'',label:'Other Issue'}
 };
 function renderAdminIncidentBanner(inc,tracking){
   const t=INCIDENT_TYPES_ADMIN[inc.type]||INCIDENT_TYPES_ADMIN.other;
@@ -3431,7 +3477,7 @@ async function resolveIncident(tracking){
   openOrder(tracking);
 }
 let _adminDeliveryMapInstance=null;
-const VEHICLE_ICONS_ADMIN={motorcycle:'🏍️',bicycle:'🚲',car:'🚗','van/truck':'🚚','on foot':'🚶'};
+const VEHICLE_ICONS_ADMIN={motorcycle:''+iconBadge('bike',14)+'',bicycle:''+iconBadge('bike',14)+'',car:''+iconBadge('car',14)+'','van/truck':''+iconBadge('truck',14)+'','on foot':''+iconBadge('user',14)+''};
 const VEHICLE_AVG_SPEED_KMH_ADMIN={motorcycle:32,bicycle:15,car:26,'van/truck':22,'on foot':5};
 function estimateDeliveryTimeAdmin(pickup,dest,vehicleType){
   const R=6371,dLat=(dest.lat-pickup.lat)*Math.PI/180,dLng=(dest.lng-pickup.lng)*Math.PI/180;
@@ -3449,7 +3495,7 @@ function toggleAdminMapView(order){
 }
 function refreshAdminMapToggleBtn(){
   const btn=document.getElementById('admin-map-toggle-btn');
-  if(btn)btn.textContent=_adminMapViewMode==='satellite'?'🗺️ Street':'🛰️ Satellite';
+  if(btn)btn.textContent=_adminMapViewMode==='satellite'?''+iconBadge('map',14)+' Street':''+iconBadge('signal',14)+' Satellite';
 }
 // Google Maps is what real ride-hailing/delivery apps use, its tile and JS delivery
 // infrastructure is far more reliable than the free OpenStreetMap+Leaflet setup this
@@ -3481,7 +3527,7 @@ async function renderAdminDeliveryMap(order){
   await loadGoogleMapsIfNeededAdmin();
   const statusEl=document.getElementById('admin-delivery-map-status');
   if(!(window.google&&window.google.maps)){
-    el.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;padding:16px;text-align:center;font-size:12px;color:var(--wh);font-weight:700;">🗺️ Map couldn\'t load right now.</div>';
+    el.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;padding:16px;text-align:center;font-size:12px;color:var(--wh);font-weight:700;">'+iconBadge('map',14)+' Map couldn\'t load right now.</div>';
     return;
   }
   const pickup=settings.pickupLocation||{lat:6.5244,lng:3.3792};
@@ -3504,9 +3550,9 @@ async function renderAdminDeliveryMap(order){
   el.style.cssText='width:100%;height:260px;border-radius:9px;overflow:hidden;background:var(--card2);';
   const map=new google.maps.Map(el,{center:pickup,zoom:12,disableDefaultUI:true,zoomControl:true,mapTypeId:_adminMapViewMode==='satellite'?'hybrid':'roadmap',styles:DARK_MAP_STYLE_ADMIN});
   _adminDeliveryMapInstance=map;
-  const vehicleEmoji=VEHICLE_ICONS_ADMIN[(order.riderVehicleType||'motorcycle').toLowerCase()]||'🏍️';
-  new google.maps.Marker({position:pickup,map:map,icon:makeMarkerIconAdmin('#FF6A00',26),label:{text:'🏬',fontSize:'13px'},title:'RichNation Mall'});
-  new google.maps.Marker({position:dest,map:map,icon:makeMarkerIconAdmin('#fff',26,'#161616'),label:{text:'📍',fontSize:'13px'},title:order.customer?.name||'Delivery Address'});
+  const vehicleEmoji=VEHICLE_ICONS_ADMIN[(order.riderVehicleType||'motorcycle').toLowerCase()]||''+iconBadge('bike',14)+'';
+  new google.maps.Marker({position:pickup,map:map,icon:makeMarkerIconAdmin('#FF6A00',26),label:{text:''+iconBadge('building',14)+'',fontSize:'13px'},title:'RichNation Mall'});
+  new google.maps.Marker({position:dest,map:map,icon:makeMarkerIconAdmin('#fff',26,'#161616'),label:{text:''+iconBadge('pin',14)+'',fontSize:'13px'},title:order.customer?.name||'Delivery Address'});
   new google.maps.Marker({position:riderPos,map:map,icon:makeMarkerIconAdmin('#161616',30,isLive?'#FF6A00':'#83838A'),label:{text:vehicleEmoji,fontSize:'16px'},title:(order.riderName||'Rider')+(isLive?', live location':', approximate position')});
   new google.maps.Polyline({strokeColor:'#FF6A00',strokeOpacity:0,strokeWeight:3,icons:[{icon:{path:'M 0,-1 0,1',strokeOpacity:0.85,scale:3},offset:'0',repeat:'14px'}],path:[pickup,dest],map:map});
   const bounds=new google.maps.LatLngBounds();
@@ -3514,7 +3560,7 @@ async function renderAdminDeliveryMap(order){
   map.fitBounds(bounds,40);
   const toggleWrap=document.createElement('div');
   toggleWrap.style.cssText='position:absolute;top:8px;right:8px;z-index:2;';
-  toggleWrap.innerHTML='<button id="admin-map-toggle-btn" style="background:#161616;color:#fff;border:1px solid #FF6A00;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">'+(_adminMapViewMode==='satellite'?'🗺️ Street':'🛰️ Satellite')+'</button>';
+  toggleWrap.innerHTML='<button id="admin-map-toggle-btn" style="background:#161616;color:#fff;border:1px solid #FF6A00;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">'+(_adminMapViewMode==='satellite'?''+iconBadge('map',14)+' Street':''+iconBadge('signal',14)+' Satellite')+'</button>';
   toggleWrap.onclick=function(e){e.stopPropagation();toggleAdminMapView(order);};
   const wrap=el.parentElement;
   if(wrap){wrap.style.position='relative';wrap.appendChild(toggleWrap);}
@@ -3543,10 +3589,10 @@ async function openOrder(tracking){
         <div style="margin-top:12px;">
           ${(o.items||[]).map(i=>`<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--bdr);">
             <div style="width:44px;height:44px;background:#080808;border-radius:7px;flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:18px;">
-              ${i.image?`<img loading="lazy" decoding="async" src="${i.image}" style="width:100%;height:100%;object-fit:cover;" onerror="this.innerHTML='&#128230;'"/>`:'&#128230;'}
+              ${i.image?`<img loading="lazy" decoding="async" src="${i.image}" style="width:100%;height:100%;object-fit:cover;" onerror="this.innerHTML=iconBadge('package',24)"/>`:iconBadge('package',24)}
             </div>
             <div style="flex:1;"><div style="font-size:13px;font-weight:700;color:var(--wh);">${i.name}</div>
-            <div style="margin-top:4px;">${i.variant?`<span style="display:inline-block;background:rgba(255,106,0,0.15);border:1px solid rgba(255,106,0,0.4);color:var(--or);font-size:11px;font-weight:800;padding:3px 9px;border-radius:5px;">🏷️ ${i.variant}</span>`:'<span style="font-size:10px;color:var(--wh);font-weight:700;">No variant selected</span>'} <span style="font-size:11px;color:var(--wh);font-weight:700;">&times; ${i.qty}</span></div></div>
+            <div style="margin-top:4px;">${i.variant?`<span style="display:inline-block;background:rgba(255,106,0,0.15);border:1px solid rgba(255,106,0,0.4);color:var(--or);font-size:11px;font-weight:800;padding:3px 9px;border-radius:5px;">${iconBadge('tag',14)} ${i.variant}</span>`:'<span style="font-size:10px;color:var(--wh);font-weight:700;">No variant selected</span>'} <span style="font-size:11px;color:var(--wh);font-weight:700;">&times; ${i.qty}</span></div></div>
             <div style="font-size:13px;font-weight:800;color:var(--or);flex-shrink:0;">${fmt(i.price*i.qty)}</div>
           </div>`).join('')||'<div style="color:var(--wh);font-weight:700;font-size:12px;">No items</div>'}
         </div>
@@ -3566,7 +3612,7 @@ async function openOrder(tracking){
           <div style="color:var(--wh);font-weight:700;">${o.customer?.phone||'N/A'}</div>
         </div>
         <div style="margin-top:12px;padding:12px;background:var(--card2);border-radius:8px;border:1px solid var(--bdr);">
-          <div style="font-size:10px;font-weight:800;color:var(--or);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">📍 ${o.deliveryMethod==='pickup'?'Pickup Contact (Not a delivery address)':'Delivery Destination'}</div>
+          <div style="font-size:10px;font-weight:800;color:var(--or);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">${iconBadge('pin',14)} ${o.deliveryMethod==='pickup'?'Pickup Contact (Not a delivery address)':'Delivery Destination'}</div>
           <div style="font-size:13px;color:var(--wh);line-height:1.8;">
             ${o.customer?.address||'N/A'}<br>
             ${[o.customer?.lga,o.customer?.city].filter(Boolean).join(', ')}${o.customer?.city||o.customer?.lga?', ':''}${o.customer?.state||''}<br>
@@ -3605,7 +3651,7 @@ async function openOrder(tracking){
     <div>
       <div class="card fade-in">
         <div class="card-title">Update Status</div>
-        ${o.riderId&&o.deliveryStage!=='delivered'?`<div style="font-size:11px;color:var(--or);margin-bottom:10px;">🏍️ ${o.riderName} is handling delivery for this order, shipping/delivery statuses are controlled by the rider's own updates to keep the timeline in order.</div>`:''}
+        ${o.riderId&&o.deliveryStage!=='delivered'?`<div style="font-size:11px;color:var(--or);margin-bottom:10px;">${iconBadge('bike',14)} ${o.riderName} is handling delivery for this order, shipping/delivery statuses are controlled by the rider's own updates to keep the timeline in order.</div>`:''}
         <div class="status-btns">
           ${(o.riderId&&o.deliveryStage!=='delivered'?['pending','confirmed','packed','cancelled']:STATUSES).map(s=>`<div class="status-opt ${o.status===s||(s==='delivered'&&o.status==='delivered confirmed')?'active':''} ${s==='delivered'?'delivered':s==='cancelled'?'cancelled':''}"
             onclick="setOrderStatus('${tracking}','${s}',this)">${s.charAt(0).toUpperCase()+s.slice(1)}</div>`).join('')}
@@ -3614,10 +3660,10 @@ async function openOrder(tracking){
           <input class="inp" id="od-note" placeholder="e.g. Dispatched via DHL, waybill 789456" value="${o.courierNote||''}"/>
         </div>
         <button class="btn btn-or" style="width:100%;padding:12px;" onclick="saveOrderStatus('${tracking}')">Update Order Status</button>
-        ${o.status!=='delivered'&&o.status!=='delivered confirmed'&&o.status!=='cancelled'&&o.status!=='deleted'?`<button class="btn btn-dk" style="width:100%;padding:12px;margin-top:8px;" onclick="addLocationUpdate('${tracking}')">📍 Post Location Update</button>`:''}
-        ${o.deliveryMethod!=='pickup'&&o.status!=='delivered'&&o.status!=='delivered confirmed'&&o.status!=='cancelled'&&o.status!=='deleted'?`<button class="btn btn-dk" style="width:100%;padding:12px;margin-top:8px;" onclick="assignRiderToOrder('${tracking}')">🏍️ ${o.riderName?'Reassign Rider (currently: '+o.riderName+')':'Assign Dispatch Rider'}</button>`:''}
+        ${o.status!=='delivered'&&o.status!=='delivered confirmed'&&o.status!=='cancelled'&&o.status!=='deleted'?`<button class="btn btn-dk" style="width:100%;padding:12px;margin-top:8px;" onclick="addLocationUpdate('${tracking}')">${iconBadge('pin',14)} Post Location Update</button>`:''}
+        ${o.deliveryMethod!=='pickup'&&o.status!=='delivered'&&o.status!=='delivered confirmed'&&o.status!=='cancelled'&&o.status!=='deleted'?`<button class="btn btn-dk" style="width:100%;padding:12px;margin-top:8px;" onclick="assignRiderToOrder('${tracking}')">${iconBadge('bike',14)} ${o.riderName?'Reassign Rider (currently: '+o.riderName+')':'Assign Dispatch Rider'}</button>`:''}
         ${o.riderId&&o.deliveryStage!=='delivered'?`<div style="position:relative;margin-top:10px;"><div id="admin-delivery-map" style="width:100%;height:260px;border-radius:9px;overflow:hidden;background:var(--card2);"></div></div><div id="admin-delivery-map-status" style="font-size:11px;color:var(--wh);font-weight:700;margin-top:6px;">Loading location…</div>`:''}
-        ${o.deliveryMethod==='pickup'&&o.status!=='ready_for_pickup'&&o.status!=='delivered'&&o.status!=='delivered confirmed'?`<button class="btn btn-or" style="width:100%;padding:12px;margin-top:8px;" onclick="markReadyForPickup('${tracking}')">📍 Mark Ready for Pickup</button>`:''}
+        ${o.deliveryMethod==='pickup'&&o.status!=='ready_for_pickup'&&o.status!=='delivered'&&o.status!=='delivered confirmed'?`<button class="btn btn-or" style="width:100%;padding:12px;margin-top:8px;" onclick="markReadyForPickup('${tracking}')">${iconBadge('pin',14)} Mark Ready for Pickup</button>`:''}
         ${o.deliveryMethod==='pickup'&&o.status==='ready_for_pickup'?`<button class="btn btn-gr" style="width:100%;padding:12px;margin-top:8px;" onclick="markPickedUp('${tracking}')">Mark as Picked Up</button>`:''}
         ${o.deliveryConfirmation?`<button class="btn btn-dk" style="width:100%;padding:12px;margin-top:8px;" onclick="showDeliverySigAdmin('${tracking}')">View Delivery Signature</button>`:o.status==='delivered confirmed'?`<div style="margin-top:8px;font-size:11px;color:var(--su);">Delivered, customer signature confirmed.</div>`:''}
       </div>
@@ -3902,7 +3948,7 @@ function computeTopCustomers(){
 }
 function renderTopCustomersCard(){
   var top=computeTopCustomers();
-  var MEDALS=['🥇','🥈','🥉','4.','5.'];
+  var MEDALS=[''+iconBadge('trophy',14)+'',''+iconBadge('trophy',14)+'',''+iconBadge('trophy',14)+'','4.','5.'];
   function col(title,list){
     return '<div><div style="font-size:11px;font-weight:800;color:var(--wh);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">'+title+'</div>'
       +(list.length?list.map(function(x,i){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;'+(i<list.length-1?'border-bottom:1px solid var(--bdr);':'')+'"><div style="display:flex;align-items:center;gap:8px;min-width:0;"><span style="font-size:13px;flex-shrink:0;">'+MEDALS[i]+'</span><span style="font-size:12.5px;font-weight:700;color:var(--wh);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+x.name+'</span></div><span style="font-size:12px;font-weight:800;color:var(--or);flex-shrink:0;">'+fmt(x.total)+'</span></div>';}).join('')
@@ -3924,16 +3970,16 @@ async function renderCustomers(c){
     <div class="page-hdr-sub">${custs.length} registered customer${custs.length!==1?'s':''}</div></div>
   </div>
   ${renderTopCustomersCard()}
-  ${custs.length===0?`<div class="card fade-in"><div class="empty"><div class="empty-icon">&#9786;</div><div class="empty-title">No customers yet</div><div class="empty-sub">Registered customers will appear here.</div></div></div>`:
+  ${custs.length===0?`<div class="card fade-in"><div class="empty"><div class="empty-icon">${iconBadge('user',40)}</div><div class="empty-title">No customers yet</div><div class="empty-sub">Registered customers will appear here.</div></div></div>`:
   `<div class="stagger">
     ${custs.map(cu=>{const ab=custActivityBadge(cu.lastSeen);return `<div class="data-row" style="flex-wrap:wrap;">
       <div class="row-av">${ini(cu.fname+' '+cu.lname)}</div>
       <div style="flex:1;min-width:180px;">
-        <div class="row-name">${cu.fname} ${cu.lname} ${cu.id===topAllTimeId?'<span title="All-time top customer">👑</span>':''} ${cu.accountStatus==='suspended'||cu.accountStatus==='blocked'?'<span style="color:var(--re);font-size:10px;font-weight:800;">('+(cu.suspendReason==='failed_attempts'?'AUTO-LOCKED: 3 FAILED LOGINS':'SUSPENDED')+')</span>':''} <span style="background:${ab.color}22;color:${ab.color};font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:99px;margin-left:6px;text-transform:uppercase;letter-spacing:0.3px;">${ab.label}</span></div>
+        <div class="row-name">${cu.fname} ${cu.lname} ${cu.id===topAllTimeId?'<span title="All-time top customer">'+iconBadge('trophy',14)+'</span>':''} ${cu.accountStatus==='suspended'||cu.accountStatus==='blocked'?'<span style="color:var(--re);font-size:10px;font-weight:800;">('+(cu.suspendReason==='failed_attempts'?'AUTO-LOCKED: 3 FAILED LOGINS':'SUSPENDED')+')</span>':''} <span style="background:${ab.color}22;color:${ab.color};font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:99px;margin-left:6px;text-transform:uppercase;letter-spacing:0.3px;">${ab.label}</span></div>
         <div class="row-meta">${cu.email} &middot; ${cu.phone||'No phone'} &middot; Joined ${cu.joinDate||'N/A'}</div>
         <div class="row-meta" style="margin-top:3px;">Last seen: <strong style="color:var(--wh);">${timeAgo(cu.lastSeen)}</strong>${cu.activeDayCount?' &middot; Active on '+cu.activeDayCount+' day'+(cu.activeDayCount===1?'':'s'):''}</div>
         <div class="row-meta" style="margin-top:3px;">Password: <span id="pw-${cu.id}" style="font-family:monospace;letter-spacing:1px;">••••••••</span> <span onclick="togglePwView('${cu.id}','${escAttr((cu.password||''))}')" style="color:var(--or);cursor:pointer;font-weight:700;">show</span></div>
-        <div class="row-meta" style="margin-top:3px;">⭐ RichPoints: <strong style="color:var(--or);">${(cu.points||0).toLocaleString()}</strong> &middot; 👛 Wallet: <strong style="color:var(--su);">₦${(cu.walletBalance||0).toLocaleString()}</strong>${cu.wholesaleStatus?' &middot; Wholesale: <strong style="color:'+(cu.wholesaleStatus==='approved'?'var(--su)':'var(--or)')+';">'+cu.wholesaleStatus+'</strong>'+(cu.wholesaleBusiness?' ('+cu.wholesaleBusiness+')':''):''}</div>
+        <div class="row-meta" style="margin-top:3px;">${iconBadge('star',14)} RichPoints: <strong style="color:var(--or);">${(cu.points||0).toLocaleString()}</strong> &middot; ${iconBadge('wallet',14)} Wallet: <strong style="color:var(--su);">₦${(cu.walletBalance||0).toLocaleString()}</strong>${cu.wholesaleStatus?' &middot; Wholesale: <strong style="color:'+(cu.wholesaleStatus==='approved'?'var(--su)':'var(--or)')+';">'+cu.wholesaleStatus+'</strong>'+(cu.wholesaleBusiness?' ('+cu.wholesaleBusiness+')':''):''}</div>
       </div>
       <div class="row-actions">
         ${cu.phone?`<a href="https://wa.me/${(cu.phone||'').replace(/\D/g,'')}" target="_blank" style="text-decoration:none;"><button class="btn btn-gr" style="font-size:10px;padding:5px 10px;">WhatsApp</button></a>`:''}
@@ -4010,7 +4056,7 @@ async function renderCoupons(c){
     <div class="page-hdr-actions"><button class="btn btn-or" onclick="showCouponForm()">+ Create Coupon</button></div>
   </div>
   <div id="coupon-form-area"></div>
-  ${list.length===0?`<div class="card fade-in"><div class="empty"><div class="empty-icon">&#9678;</div><div class="empty-title">No coupons yet</div><div class="empty-sub">Create discount codes to drive sales and reward customers.</div></div></div>`:
+  ${list.length===0?`<div class="card fade-in"><div class="empty"><div class="empty-icon">${iconBadge('tag',40)}</div><div class="empty-title">No coupons yet</div><div class="empty-sub">Create discount codes to drive sales and reward customers.</div></div></div>`:
   `<div class="stagger">
     ${list.map(cp=>`<div class="data-row">
       <div class="row-av" style="background:rgba(212,160,23,0.1);color:var(--gold);font-size:16px;">%</div>
@@ -4085,7 +4131,7 @@ async function renderCategories(c){
       var safeId=escAttr(cat.id);
       var safeName=escAttr(cat.name);
       return `<div class="data-row">
-      <div class="row-av" style="font-size:20px;background:rgba(255,106,0,0.06);">${cat.icon||'&#128230;'}</div>
+      <div class="row-av" style="font-size:20px;background:rgba(255,106,0,0.06);">${cat.icon||iconBadge('package',20)}</div>
       <div style="flex:1;"><div class="row-name">${cat.name}</div><div class="row-meta">ID: ${cat.id} &middot; Order: ${cat.order||0}</div></div>
       <button class="btn ${cat.visible!==false?'btn-gr':'btn-re'}" style="font-size:10px;padding:5px 10px;" onclick="toggleCatVisible('${safeId}')">${cat.visible!==false?'Shown':'Hidden'}</button>
       <button class="btn btn-re" style="font-size:10px;padding:5px 10px;" onclick="deleteCat('${safeId}','${safeName}',this)">Remove</button>
@@ -4143,7 +4189,7 @@ async function renderNewsletter(c){
     +'<div style="font-size:12px;color:var(--wh);font-weight:700;margin:8px 0 12px;line-height:1.7;">There\'s no automated email sender wired up yet, so this opens your own email app with every subscriber address filled in as BCC. Write your update and hit send from there. Large lists are split into batches of 80 so no single email link gets too long for your email app to open.</div>'
     +(subs.length?'<button class="btn btn-or btn-lg" onclick="composeNewsletterEmail()">Compose Newsletter</button>':'<div style="font-size:12px;color:var(--wh);font-weight:700;">No subscribers yet, nothing to send to.</div>')
     +'</div>'
-    +(subs.length===0?'<div class="card fade-in"><div class="empty"><div class="empty-icon">&#9993;</div><div class="empty-title">No subscribers yet</div><div class="empty-sub">Newsletter sign-ups from the mall homepage will appear here.</div></div></div>':
+    +(subs.length===0?'<div class="card fade-in"><div class="empty"><div class="empty-icon">'+iconBadge('envelope',40)+'</div><div class="empty-title">No subscribers yet</div><div class="empty-sub">Newsletter sign-ups from the mall homepage will appear here.</div></div></div>':
     '<div class="stagger">'+subs.slice().sort(function(a,b){return (b.ts||0)-(a.ts||0);}).map(function(s){
       return '<div class="data-row"><div class="row-av">'+ini(s.name||'?')+'</div><div style="flex:1;min-width:180px;"><div class="row-name">'+(s.name||'Unnamed')+'</div><div class="row-meta">'+s.email+' &middot; Subscribed '+(s.date||'')+'</div></div></div>';
     }).join('')+'</div>');
@@ -4191,7 +4237,7 @@ async function renderChat(c){
     <div><div class="page-hdr-title">Customer Messages</div>
     <div class="page-hdr-sub">${threads.length} conversation${threads.length!==1?'s':''}, includes general inquiries, not just order-linked chats</div></div>
   </div>
-  ${threads.length===0?`<div class="card fade-in"><div class="empty"><div class="empty-icon">&#9998;</div><div class="empty-title">No messages yet</div><div class="empty-sub">Chat threads appear here when customers place orders or send any message via the chat widget.</div></div></div>`:
+  ${threads.length===0?`<div class="card fade-in"><div class="empty"><div class="empty-icon">${iconBadge('chat',40)}</div><div class="empty-title">No messages yet</div><div class="empty-sub">Chat threads appear here when customers place orders or send any message via the chat widget.</div></div></div>`:
   `<div class="stagger">
     ${threads.map(t=>`<div class="data-row clickable" onclick="${t.type==='order'?`openOrder('${t.key}')`:`openGeneralChat('${t.key}','${escAttr(t.name)}')`}" style="${t.unread?'border-color:rgba(255,106,0,0.5);background:rgba(255,106,0,0.04);':''}">
       <div class="row-av">${ini(t.name)}</div>
@@ -4236,26 +4282,26 @@ async function renderNotifs(c){
     <div><div class="page-hdr-title">Notifications</div>
     <div class="page-hdr-sub">${list.filter(([k,v])=>!v.read).length} unread notification${list.filter(([k,v])=>!v.read).length!==1?'s':''}</div></div>
   </div>
-  ${list.length===0?`<div class="card fade-in"><div class="empty"><div class="empty-icon">&#9740;</div><div class="empty-title">No notifications</div><div class="empty-sub">New orders, messages and alerts will appear here.</div></div></div>`:
+  ${list.length===0?`<div class="card fade-in"><div class="empty"><div class="empty-icon">${iconBadge('bell',40)}</div><div class="empty-title">No notifications</div><div class="empty-sub">New orders, messages and alerts will appear here.</div></div></div>`:
   `<div class="card fade-in"><div class="stagger">
     ${list.slice(0,40).map(([k,n2])=>{
-      const ico=n2.type==='new_order'?'&#128722;':n2.type==='chat'?'&#9998;':n2.type==='delivery_confirmed'?'&#9989;':n2.type==='password_reset_request'?'&#128273;':n2.type==='account_locked'?'&#128274;':n2.type==='wallet_topup_request'?'&#128179;':n2.type==='wholesale_application'?'&#128230;':n2.type==='new_vendor_signup'?'&#127970;':n2.type==='wallet_issue'?'&#127890;':n2.type==='wallet_refund_ready'?'&#127974;':n2.type==='new_investor_application'?'&#128176;':n2.type==='investor_chat'?'&#9998;':n2.type==='new_rider_application'?'&#127957;':n2.type==='delivery_incident'?'&#9888;':n2.type==='rider_message'?'&#127957;':n2.type==='vendor_message'?'&#127970;':'&#128230;';
+      const ico=iconBadge(n2.type==='new_order'?'cart':n2.type==='chat'?'chat':n2.type==='delivery_confirmed'?'check':n2.type==='password_reset_request'?'key':n2.type==='account_locked'?'lock':n2.type==='wallet_topup_request'?'card':n2.type==='wholesale_application'?'package':n2.type==='new_vendor_signup'?'building':n2.type==='wallet_issue'?'ticket':n2.type==='wallet_refund_ready'?'bank':n2.type==='new_investor_application'?'cash':n2.type==='investor_chat'?'chat':n2.type==='new_rider_application'?'bike':n2.type==='delivery_incident'?'warning':n2.type==='rider_message'?'bike':n2.type==='vendor_message'?'building':'package',20);
       const msg=n2.type==='new_order'?`New order from ${n2.customer}, ${fmt(n2.total)} &middot; ${n2.items||0} item(s)`:
-        n2.type==='delivery_incident'?`⚠️ ${n2.riderName} reported "${n2.incidentLabel}" on order ${n2.orderId}${n2.note?': "'+n2.note+'"':''}`:
+        n2.type==='delivery_incident'?`${iconBadge('warning',14)} ${n2.riderName} reported "${n2.incidentLabel}" on order ${n2.orderId}${n2.note?': "'+n2.note+'"':''}`:
         n2.type==='chat'?`Message from ${n2.from}: "${n2.preview}"`:
         n2.type==='delivery_confirmed'?`Delivery confirmed for ${n2.orderId||n2.tracking}, signed by ${n2.receivedBy||n2.receiver||'customer'}`:
         n2.type==='password_reset_request'?`Password reset requested by ${n2.email}`:
-        n2.type==='account_locked'?`⚠️ ${n2.name} (${n2.email}) was auto-locked after 3 failed sign-in attempts`:
-        n2.type==='wallet_topup_request'?`💰 ${n2.name} sent a bank transfer of ${fmt(n2.amount)} (ref: ${n2.ref}), verify and use Adjust Wallet to credit`:
+        n2.type==='account_locked'?`${iconBadge('warning',14)} ${n2.name} (${n2.email}) was auto-locked after 3 failed sign-in attempts`:
+        n2.type==='wallet_topup_request'?`${iconBadge('cash',14)} ${n2.name} sent a bank transfer of ${fmt(n2.amount)} (ref: ${n2.ref}), verify and use Adjust Wallet to credit`:
         n2.type==='wholesale_application'?`${n2.name} applied for wholesale pricing (${n2.business}), review in Customers`:
         n2.type==='new_vendor_signup'?`${n2.name} applied to become a vendor (owner: ${n2.owner}), review in Vendors`:
-        n2.type==='wallet_issue'?`🎫 ${n2.name} reported a wallet issue (${n2.issueType}): "${n2.message}", review in Wallet Issues`:
-        n2.type==='wallet_refund_ready'?`🏦 ${n2.name} submitted bank details for a ${fmt(n2.amount)} refund payout, mark as paid in Wallet Issues once sent`:
-        n2.type==='new_investor_application'?`💰 ${n2.name} applied to invest ${fmt(n2.amount)} (${n2.option}), review in Investors`:
+        n2.type==='wallet_issue'?`${iconBadge('ticket',14)} ${n2.name} reported a wallet issue (${n2.issueType}): "${n2.message}", review in Wallet Issues`:
+        n2.type==='wallet_refund_ready'?`${iconBadge('bank',14)} ${n2.name} submitted bank details for a ${fmt(n2.amount)} refund payout, mark as paid in Wallet Issues once sent`:
+        n2.type==='new_investor_application'?`${iconBadge('cash',14)} ${n2.name} applied to invest ${fmt(n2.amount)} (${n2.option}), review in Investors`:
         n2.type==='investor_chat'?`Investor message from ${n2.name}: "${n2.preview}"`:
-        n2.type==='new_rider_application'?`🏍️ ${n2.name} applied as a dispatch rider (${n2.vehicleType}), review in Dispatch Riders`:
-        n2.type==='rider_message'?`🏍️ Message from rider ${n2.riderName}: "${n2.preview}", reply in Dispatch Riders → Messages`:
-        n2.type==='vendor_message'?`🏢 Message from vendor ${n2.vendorName}: "${n2.preview}", reply in Vendors → Messages`:n2.type;
+        n2.type==='new_rider_application'?`${iconBadge('bike',14)} ${n2.name} applied as a dispatch rider (${n2.vehicleType}), review in Dispatch Riders`:
+        n2.type==='rider_message'?`${iconBadge('bike',14)} Message from rider ${n2.riderName}: "${n2.preview}", reply in Dispatch Riders → Messages`:
+        n2.type==='vendor_message'?`${iconBadge('building',14)} Message from vendor ${n2.vendorName}: "${n2.preview}", reply in Vendors → Messages`:n2.type;
       fbU('rn_mall_notifications/'+k,{read:true});
       if(n2.type==='password_reset_request'){
         const resetPageUrl=settings.resetPageUrl||settings.siteUrl||'';
@@ -4269,7 +4315,7 @@ async function renderNotifs(c){
             <span class="bdg ${n2.read?'bdg-mu':'bdg-or'}">${n2.read?'Read':'New'}</span>
           </div>
           <div style="margin-top:8px;margin-left:32px;display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="navigator.clipboard.writeText(${JSON.stringify(emailMsg)}).then(()=>toast('Reset email message copied, paste into your email client')).catch(()=>toast('Could not copy, your browser blocked clipboard access. Use Open in Email App instead','err'))">📋 Copy Reset Email</button>
+            <button class="btn btn-or" style="font-size:10px;padding:5px 10px;" onclick="navigator.clipboard.writeText(${JSON.stringify(emailMsg)}).then(()=>toast('Reset email message copied, paste into your email client')).catch(()=>toast('Could not copy, your browser blocked clipboard access. Use Open in Email App instead','err'))">${iconBadge('document',14)} Copy Reset Email</button>
             <a href="mailto:${n2.email}?subject=${encodeURIComponent('Reset your RichNation Mall password')}&body=${encodeURIComponent(emailMsg)}" style="text-decoration:none;"><button class="btn btn-dk" style="font-size:10px;padding:5px 10px;">✉️ Open in Email App</button></a>
           </div>
         </div>`;
@@ -4380,18 +4426,18 @@ function renderSettings(c){
     <div class="card-sub">Either password below signs you in. Edit and save either one at any time, you don't need to know the current value first.</div>
     <div class="fg"><label class="lbl">Password 1</label>
       <div class="pw-wrap2"><input class="inp" id="adm-pw1" type="password" value="${((settings.adminPasswords||[])[0])||''}"/>
-      <button class="pw-eye2" onclick="togglePw('adm-pw1',this)">&#128065;</button></div>
+      <button class="pw-eye2" onclick="togglePw('adm-pw1',this)"><span style="display:inline-block;position:relative;width:18px;height:18px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></span></button></div>
     </div>
     <div class="fg"><label class="lbl">Password 2</label>
       <div class="pw-wrap2"><input class="inp" id="adm-pw2" type="password" value="${((settings.adminPasswords||[])[1])||''}"/>
-      <button class="pw-eye2" onclick="togglePw('adm-pw2',this)">&#128065;</button></div>
+      <button class="pw-eye2" onclick="togglePw('adm-pw2',this)"><span style="display:inline-block;position:relative;width:18px;height:18px;vertical-align:middle;"><span style="position:absolute;inset:-5px;background:radial-gradient(circle,rgba(255,106,0,0.35),transparent 70%);border-radius:50%;"></span><svg class="icon-color-cycle" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></span></button></div>
     </div>
     <button class="btn btn-or" onclick="saveAdminPasswords()">Save Passwords</button>
     <div id="pw-msg" style="font-size:11px;margin-top:10px;display:none;padding:8px 12px;border-radius:6px;"></div>
   </div>
 
   <div class="card fade-in">
-    <div class="card-title">🔒 Account Security Migration</div>
+    <div class="card-title">${iconBadge('lock',14)} Account Security Migration</div>
     <div class="card-sub">Every login already upgrades an account to a real sign-in the moment that person logs in, this is only for accounts that haven't logged in since that was added, and are still sitting with an old-style password.</div>
     <div class="info-box">
       Checks customers, staff, vendors, riders and investors for any account still on the old system, and gives each one a real sign-in account using their existing password, no separate reset needed, then removes the old password field for good. Safe to run more than once, already-upgraded accounts are skipped automatically. This can take a few minutes for a large customer base, and can't be undone, so don't close this tab while it runs.
@@ -4534,7 +4580,7 @@ async function migrateAllLegacyAccounts(){
   logEl.innerHTML='';
   function log(msg){logEl.innerHTML+=msg+'<br>';logEl.scrollTop=logEl.scrollHeight;}
   const ready=await ensureFirebaseAuthReady();
-  if(!ready){log('❌ Could not load Firebase Auth right now, please try again.');btn.disabled=false;return;}
+  if(!ready){log(''+iconBadge('close',14)+' Could not load Firebase Auth right now, please try again.');btn.disabled=false;return;}
   const collections=[
     {path:'rn_mall_customers',byUid:'rn_mall_customers_by_uid',label:'Customers'},
     {path:'rn_mall_staff',byUid:'rn_mall_staff_by_uid',label:'Staff'},
@@ -4572,13 +4618,13 @@ async function migrateAllLegacyAccounts(){
         await fbS(col.byUid+'/'+uid,id);
         try{await firebase.auth().signOut();}catch(soErr){}
         migrated++;
-        log('&nbsp;&nbsp;✅ '+rec.email);
+        log('&nbsp;&nbsp;'+iconBadge('check',14)+' '+rec.email);
       }catch(migrateErr){
         failed++;
         if(migrateErr.code==='auth/wrong-password'||migrateErr.code==='auth/invalid-credential'){
-          log('&nbsp;&nbsp;⚠️ '+rec.email+' — already has a different account with a DIFFERENT password under this email, needs manual review');
+          log('&nbsp;&nbsp;'+iconBadge('warning',14)+' '+rec.email+' — already has a different account with a DIFFERENT password under this email, needs manual review');
         }else{
-          log('&nbsp;&nbsp;⚠️ '+rec.email+' — '+(migrateErr.code||migrateErr.message));
+          log('&nbsp;&nbsp;'+iconBadge('warning',14)+' '+rec.email+' — '+(migrateErr.code||migrateErr.message));
         }
       }
       // Small pause between account creations, Firebase Auth rate-limits rapid
@@ -4703,7 +4749,7 @@ async function refreshData(){
 function renderSiteCustomiser(c){
   var th=settings.theme||{};
   var hc=settings.heroConfig||{};
-  var ems=settings.mallEmojis||{trust_secure:'🔒',trust_returns:'↩️',trust_delivery:'🚚',trust_chat:'💬',trust_guarantee:'✅',trust_price:'🔄',why_price:'💰',why_range:'📦',why_security:'🔒',why_verified:'✅',why_fast:'🚀',why_support:'💬',guarantee_order:'✅',guarantee_delivery:'🚚',guarantee_returns:'↩️',guarantee_price:'💲',guarantee_payment:'🔐',guarantee_privacy:'🛡️',account_orders:'📦',account_pay:'💳',account_ship:'🚚',account_receive:'📬',account_refunds:'↩️',account_vouchers:'🎟️',account_addresses:'📍',account_profile:'👤'};
+  var ems=settings.mallEmojis||{trust_secure:''+iconBadge('lock',14)+'',trust_returns:'↩️',trust_delivery:''+iconBadge('truck',14)+'',trust_chat:''+iconBadge('chat',14)+'',trust_guarantee:''+iconBadge('check',14)+'',trust_price:''+iconBadge('sync',14)+'',why_price:''+iconBadge('cash',14)+'',why_range:''+iconBadge('package',14)+'',why_security:''+iconBadge('lock',14)+'',why_verified:''+iconBadge('check',14)+'',why_fast:''+iconBadge('rocket',14)+'',why_support:''+iconBadge('chat',14)+'',guarantee_order:''+iconBadge('check',14)+'',guarantee_delivery:''+iconBadge('truck',14)+'',guarantee_returns:'↩️',guarantee_price:''+iconBadge('cash',14)+'',guarantee_payment:''+iconBadge('lock',14)+'',guarantee_privacy:''+iconBadge('shield',14)+'',account_orders:''+iconBadge('package',14)+'',account_pay:''+iconBadge('card',14)+'',account_ship:''+iconBadge('truck',14)+'',account_receive:''+iconBadge('inbox',14)+'',account_refunds:'↩️',account_vouchers:''+iconBadge('ticket',14)+'',account_addresses:''+iconBadge('pin',14)+'',account_profile:''+iconBadge('user',14)+''};
   function eb(key,lbl){return '<div onclick="editEmoji(\''+key+'\')" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(255,106,0,0.12),rgba(255,167,51,0.06));border:1px solid rgba(255,106,0,0.35);border-radius:8px;padding:6px 12px;cursor:pointer;margin:3px;transition:border-color .15s;" onmouseover="this.style.borderColor=\'var(--or)\'" onmouseout="this.style.borderColor=\'rgba(255,106,0,0.35)\'"><span id="em-'+key+'" style="font-size:20px;">'+(ems[key]||'•')+'</span><span style="font-size:10px;color:var(--wh);font-weight:700;">'+lbl+'</span></div>';}
   var html = '<div class="page-hdr"><div><div class="page-hdr-title">Site Customiser</div><div class="page-hdr-sub">Full control over the customer mall</div></div><div class="page-hdr-actions"><button class="btn btn-dk" onclick="refreshData()">↻ Refresh</button></div></div>';
   html += '<div class="cs-section" style="border-color:'+(settings.maintenanceMode?'rgba(244,63,94,0.5)':'rgba(255,106,0,0.35)')+';background:'+(settings.maintenanceMode?'rgba(244,63,94,0.06)':'transparent')+';">';
@@ -4743,7 +4789,7 @@ function renderSiteCustomiser(c){
   html += '<div class="fg"><label class="lbl">Border Colour</label><div style="display:flex;gap:8px;"><input type="color" id="th-bdr" value="'+(th.bdr||'#2a2a2a')+'" style="width:44px;height:38px;border:none;cursor:pointer;border-radius:6px;"/><input class="inp" id="th-bdr-hex" value="'+(th.bdr||'#2a2a2a')+'" oninput="document.getElementById(\'th-bdr\').value=this.value" style="flex:1;"/></div></div>';
   html += '</div>';
   html += '<div style="display:flex;gap:8px;margin-top:12px;"><button class="btn btn-or" onclick="saveTheme()">Save All Colours</button><button class="btn btn-dk" onclick="resetTheme()">Reset to Default</button></div></div>';
-  html += '<div class="cs-section"><div class="cs-section-title">🏪 Store Information</div>';
+  html += '<div class="cs-section"><div class="cs-section-title">'+iconBadge('building',14)+' Store Information</div>';
   html += '<div class="g2"><div class="fg"><label class="lbl">Store Name</label><input class="inp" id="cs-sn" value="'+(settings.storeName||'RichNation Mall')+'"/></div>';
   html += '<div class="fg"><label class="lbl">Tagline</label><input class="inp" id="cs-tl" value="'+(settings.tagline||'')+'"/></div></div>';
   html += '<div class="g2"><div class="fg"><label class="lbl">Contact Email</label><input class="inp" id="cs-em" value="'+(settings.contactEmail||'rnm.office@richnationmall.com')+'"/></div>';
@@ -4753,11 +4799,11 @@ function renderSiteCustomiser(c){
   html += '<button class="btn btn-or" style="margin-bottom:16px;" onclick="saveStoreInfo()">Save Store Information</button>';
   html += '<div class="fg"><label class="lbl">Pickup Location</label><div style="font-size:11px;color:var(--wh);font-weight:700;margin-bottom:8px;">Drag the pin to your exact store/warehouse location, this is what the delivery map uses for every order.</div>';
   html += '<div id="cs-pickup-map" style="width:100%;height:260px;border-radius:9px;overflow:hidden;background:var(--card2);margin-bottom:8px;"></div>';
-  html += '<button class="btn btn-or" style="margin-bottom:6px;" onclick="useMyCurrentLocationForPickup()">🎯 Use My Current Location</button> <button class="btn" style="margin-bottom:6px;" onclick="searchPickupAddress()">🔍 Search an Address</button>';
+  html += '<button class="btn btn-or" style="margin-bottom:6px;" onclick="useMyCurrentLocationForPickup()">'+iconBadge('target',14)+' Use My Current Location</button> <button class="btn" style="margin-bottom:6px;" onclick="searchPickupAddress()">'+iconBadge('search',14)+' Search an Address</button>';
   html += '<input class="inp" id="cs-pickup-search" placeholder="Type an address and press Enter..." style="margin-bottom:8px;" onkeydown="if(event.key===\'Enter\'){event.preventDefault();searchPickupAddress();}"/>';
   html += '<div id="cs-pickup-status" style="font-size:11px;color:var(--wh);font-weight:700;margin-bottom:8px;">'+((settings.pickupLocation||{}).lat!=null?'✔ Currently set'+((settings.pickupLocation||{}).address?', '+(settings.pickupLocation||{}).address:'')+'. Drag the pin and hit Save to change it.':'Not set yet, drag the pin to your location, or use one of the buttons above, then Save.')+'</div>';
-  html += '<button class="btn btn-or" onclick="savePickupPinPosition()">💾 Save Pickup Location</button></div>';
-  html += '<div class="cs-section"><div class="cs-section-title">🏠 Hero Section</div>';
+  html += '<button class="btn btn-or" onclick="savePickupPinPosition()">'+iconBadge('save',14)+' Save Pickup Location</button></div>';
+  html += '<div class="cs-section"><div class="cs-section-title">'+iconBadge('home',14)+' Hero Section</div>';
   html += '<div class="fg"><label class="lbl">Eyebrow</label><input class="inp" id="cs-ey" value="'+(hc.eyebrow||'Delivering Across Nigeria and The World')+'"/></div>';
   html += '<div class="g2"><div class="fg"><label class="lbl">Title Line 1 (white)</label><input class="inp" id="cs-t1" value="'+(hc.title1||'Shop Smart.')+'"/></div>';
   html += '<div class="fg"><label class="lbl">Title Line 2 (accent)</label><input class="inp" id="cs-t2" value="'+(hc.title2||'Billionaire Lifestyle.')+'"/></div></div>';
@@ -4768,10 +4814,10 @@ function renderSiteCustomiser(c){
   html += '<div class="fg"><label class="lbl">Hero Gradient, End Colour</label><div style="display:flex;gap:8px;"><input type="color" id="hc-c2" value="'+(hc.color2||'#FFA733')+'" style="width:44px;height:38px;border:none;cursor:pointer;border-radius:6px;"/><input class="inp" id="hc-c2-hex" value="'+(hc.color2||'#FFA733')+'" oninput="document.getElementById(\'hc-c2\').value=this.value" style="flex:1;"/></div></div></div>';
   html += '<div class="fg"><label class="lbl">Highlight Word Colour (the accent word in Title Line 2)</label><div style="display:flex;gap:8px;max-width:200px;"><input type="color" id="hc-hl" value="'+(hc.highlightColor||'#FFE066')+'" style="width:44px;height:38px;border:none;cursor:pointer;border-radius:6px;"/><input class="inp" id="hc-hl-hex" value="'+(hc.highlightColor||'#FFE066')+'" oninput="document.getElementById(\'hc-hl\').value=this.value" style="flex:1;"/></div></div>';
   html += '<button class="btn btn-or" onclick="saveHeroText()">Save Hero Text &amp; Colours</button></div>';
-  html += '<div class="cs-section"><div class="cs-section-title">📢 Announcement Bar</div>';
+  html += '<div class="cs-section"><div class="cs-section-title">'+iconBadge('megaphone',14)+' Announcement Bar</div>';
   html += '<div class="fg"><input class="inp" id="cs-ann" value="'+(settings.announcement||'')+'" placeholder="e.g. FREE delivery on orders above ₦50,000!"/></div>';
   html += '<button class="btn btn-or" onclick="saveAnn()">Save Announcement</button></div>';
-  html += '<div class="cs-section"><div class="cs-section-title">⚙️ Store Settings</div>';
+  html += '<div class="cs-section"><div class="cs-section-title">'+iconBadge('gear',14)+' Store Settings</div>';
   html += '<div style="display:flex;flex-direction:column;gap:12px;">';
   html += '<label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--wh);cursor:pointer;"><input type="checkbox" id="cs-fs" '+(settings.freeShippingAll?'checked':'')+' style="accent-color:var(--or);width:18px;height:18px;"/> Free Shipping on ALL orders</label>';
   html += '<label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--wh);cursor:pointer;"><input type="checkbox" id="cs-pod" '+(settings.podEnabled!==false?'checked':'')+' style="accent-color:var(--or);width:18px;height:18px;"/> Allow Pay on Delivery</label>';
@@ -4779,18 +4825,18 @@ function renderSiteCustomiser(c){
   html += '<label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--wh);cursor:pointer;"><input type="checkbox" id="cs-chat" '+(settings.chatEnabled!==false?'checked':'')+' style="accent-color:var(--or);width:18px;height:18px;"/> Show Live Chat Widget</label>';
   html += '<label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--wh);cursor:pointer;"><input type="checkbox" id="cs-vendor-cta" '+(settings.showVendorCta!==false?'checked':'')+' style="accent-color:var(--or);width:18px;height:18px;"/> Show "Become a Vendor" section on homepage</label>';
   html += '</div><button class="btn btn-or" onclick="saveStoreSettings()" style="margin-top:14px;">Save Settings</button></div>';
-  html += '<div class="cs-section"><div class="cs-section-title">🕒 Business Hours</div>';
+  html += '<div class="cs-section"><div class="cs-section-title">'+iconBadge('clock',14)+' Business Hours</div>';
   html += '<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">Outside these hours, the chat widget greets customers with an automatic assistant offering quick answers, instead of leaving them waiting for a reply.</div>';
   var bh=settings.businessHours||{start:8,end:20};
   html += '<div class="g2">';
   html += '<div class="fg"><label class="lbl">Opens at (24h)</label><input class="inp" type="number" min="0" max="23" id="bh-start" value="'+(bh.start!=null?bh.start:8)+'" placeholder="8"/></div>';
   html += '<div class="fg"><label class="lbl">Closes at (24h)</label><input class="inp" type="number" min="0" max="23" id="bh-end" value="'+(bh.end!=null?bh.end:20)+'" placeholder="20"/></div>';
   html += '</div><button class="btn btn-or" onclick="saveBusinessHours()">Save Business Hours</button></div>';
-  html += '<div class="cs-section"><div class="cs-section-title">💳 Payment Method Icons</div>';
+  html += '<div class="cs-section"><div class="cs-section-title">'+iconBadge('card',14)+' Payment Method Icons</div>';
   html += '<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">Upload the actual logo files for each payment method (as the merchant, you can source these directly from Visa/Mastercard/Paystack\'s own brand pages). Once uploaded, the real logo shows at checkout instead of a text badge. Leave any slot empty to keep the text badge for that one.</div>';
   html += '<div id="pf-payicons-list"></div>';
   html += '<button class="btn btn-or" onclick="savePayIcons()" style="margin-top:10px;">Save Payment Icons</button></div>';
-  html += '<div class="cs-section"><div class="cs-section-title">🏦 Wallet Bank Transfer Details</div>';
+  html += '<div class="cs-section"><div class="cs-section-title">'+iconBadge('bank',14)+' Wallet Bank Transfer Details</div>';
   html += '<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">Up to 3 accounts, all shown to customers on the "Top Up via Bank Transfer" screen so they can pick whichever is easiest for them to send to. Leave an account\'s fields blank to not show it.</div>';
   // Older sites only ever had one account, saved as settings.bankDetails. Read
   // it as slot 1 if the newer bankAccounts array hasn't been saved yet, so
@@ -4808,7 +4854,7 @@ function renderSiteCustomiser(c){
     html += '</div>';
   }
   html += '<button class="btn btn-or" onclick="saveBankDetails()">Save Bank Details</button></div>';
-  html += '<div class="cs-section"><div class="cs-section-title">⭐ RichPoints Loyalty Programme</div>';
+  html += '<div class="cs-section"><div class="cs-section-title">'+iconBadge('star',14)+' RichPoints Loyalty Programme</div>';
   html += '<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">Control how many points customers earn for each action, and how much a point is worth when redeemed.</div>';
   var rp=settings.richPoints||{};
   html += '<div class="g2">';
@@ -4823,7 +4869,7 @@ function renderSiteCustomiser(c){
   html += '<div class="fg"><label class="lbl">Bonus points on registration</label><input class="inp" type="number" id="rp-register" value="'+(rp.register!=null?rp.register:500)+'" placeholder="500"/></div>';
   html += '<div class="fg"><label class="lbl">Bonus points for newsletter signup</label><input class="inp" type="number" id="rp-newsletter" value="'+(rp.newsletter!=null?rp.newsletter:400)+'" placeholder="400"/></div>';
   html += '</div><button class="btn btn-or" onclick="saveRichPoints()">Save RichPoints Settings</button></div>';
-  html += '<div class="cs-section"><div class="cs-section-title">🏆 Loyalty Tiers</div>';
+  html += '<div class="cs-section"><div class="cs-section-title">'+iconBadge('trophy',14)+' Loyalty Tiers</div>';
   html += '<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">Permanent percentage discounts customers unlock based on their lifetime spend, the more they spend over time, the less they pay per order, automatically at checkout.</div>';
   var tiers=settings.loyaltyTiers||[{name:'Bronze',min:0,pct:0},{name:'Silver',min:50000,pct:3},{name:'Gold',min:150000,pct:5},{name:'Platinum',min:350000,pct:8}];
   tiers.forEach(function(t,i){
@@ -4833,14 +4879,14 @@ function renderSiteCustomiser(c){
     html += '</div>';
   });
   html += '<button class="btn btn-or" onclick="saveLoyaltyTiers()" style="margin-top:6px;">Save Loyalty Tiers</button></div>';
-  html += '<div class="cs-section"><div class="cs-section-title">📄 Policy Pages</div>';
+  html += '<div class="cs-section"><div class="cs-section-title">'+iconBadge('document',14)+' Policy Pages</div>';
   html += '<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">Write custom content for any page below, it will replace the default text shown to customers. Leave blank and save to restore the default.</div>';
   html += '<div class="fg"><label class="lbl">Choose Page to Edit</label><select class="inp" id="cs-policy-sel" onchange="loadPolicyEditor()">';
   html += '<option value="about">About Us</option><option value="faq">FAQ</option><option value="returns">Returns &amp; Refund Policy</option><option value="shipping">Shipping &amp; Delivery</option><option value="privacy">Privacy Policy</option><option value="terms">Terms of Use</option><option value="contact">Contact Us</option>';
   html += '</select></div>';
   html += '<textarea class="ta" id="cs-policy-text" rows="10" placeholder="Leave blank to use the default page content..." style="font-family:inherit;">'+((settings.policyOverrides||{}).about||'')+'</textarea>';
   html += '<div style="display:flex;gap:8px;margin-top:10px;"><button class="btn btn-or" onclick="savePolicyText()">Save This Page</button><button class="btn btn-dk" onclick="resetPolicyText()">Restore Default</button></div></div>';
-  html += '<div class="cs-section"><div class="cs-section-title">😊 Emoji Customiser</div>';
+  html += '<div class="cs-section"><div class="cs-section-title">'+iconBadge('heart',14)+' Emoji Customiser</div>';
   html += '<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">The Trust Strip, Why Choose Us, Guarantees, and Account Tabs sections on the site now use a fixed set of clean orange/white line icons (1688-style) instead of colourful emoji, for a more consistent brand look. This editor is kept for reference/legacy use but no longer changes those icons.</div>';
   html += '<div style="margin-bottom:10px;"><div style="font-size:10px;font-weight:700;color:var(--or);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Trust Strip</div>';
   html += eb('trust_secure','Secure')+eb('trust_returns','Returns')+eb('trust_delivery','Delivery')+eb('trust_chat','Chat')+eb('trust_guarantee','Guarantee')+eb('trust_price','Price Adj');
@@ -4889,7 +4935,7 @@ async function initPickupLocationMap(){
   if(!el)return;
   await loadGoogleMapsIfNeededAdmin();
   if(!(window.google&&window.google.maps)){
-    el.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;padding:16px;text-align:center;font-size:12px;color:var(--wh);font-weight:700;">🗺️ Map couldn\'t load. Try refreshing the page, or check your connection.</div>';
+    el.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;padding:16px;text-align:center;font-size:12px;color:var(--wh);font-weight:700;">'+iconBadge('map',14)+' Map couldn\'t load. Try refreshing the page, or check your connection.</div>';
     return;
   }
   const saved=settings.pickupLocation;
@@ -4898,19 +4944,19 @@ async function initPickupLocationMap(){
   el.style.cssText='width:100%;height:260px;border-radius:9px;overflow:hidden;background:var(--card2);margin-bottom:8px;position:relative;';
   const map=new google.maps.Map(el,{center:start,zoom:saved&&saved.lat!=null?15:6,disableDefaultUI:true,zoomControl:true,mapTypeId:_pickupMapViewMode==='satellite'?'hybrid':'roadmap',styles:DARK_MAP_STYLE_ADMIN});
   _pickupMapInstance=map;
-  _pickupMapMarker=new google.maps.Marker({position:start,map:map,icon:makeMarkerIconAdmin('#FF6A00',30),label:{text:'🏬',fontSize:'15px'},draggable:true});
+  _pickupMapMarker=new google.maps.Marker({position:start,map:map,icon:makeMarkerIconAdmin('#FF6A00',30),label:{text:''+iconBadge('building',14)+'',fontSize:'15px'},draggable:true});
   _pickupMapMarker.addListener('dragend',function(){
     const statusEl=document.getElementById('cs-pickup-status');
-    if(statusEl){statusEl.textContent='📍 Pin moved, click Save to confirm this as your pickup location.';statusEl.style.color='var(--or)';}
+    if(statusEl){statusEl.textContent=''+iconBadge('pin',14)+' Pin moved, click Save to confirm this as your pickup location.';statusEl.style.color='var(--or)';}
   });
   map.addListener('click',function(e){
     _pickupMapMarker.setPosition(e.latLng);
     const statusEl=document.getElementById('cs-pickup-status');
-    if(statusEl){statusEl.textContent='📍 Pin moved, click Save to confirm this as your pickup location.';statusEl.style.color='var(--or)';}
+    if(statusEl){statusEl.textContent=''+iconBadge('pin',14)+' Pin moved, click Save to confirm this as your pickup location.';statusEl.style.color='var(--or)';}
   });
   const toggleWrap=document.createElement('div');
   toggleWrap.style.cssText='position:absolute;top:8px;right:8px;z-index:2;';
-  toggleWrap.innerHTML='<button id="pickup-map-toggle-btn" style="background:#161616;color:#fff;border:1px solid #FF6A00;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">'+(_pickupMapViewMode==='satellite'?'🗺️ Street':'🛰️ Satellite')+'</button>';
+  toggleWrap.innerHTML='<button id="pickup-map-toggle-btn" style="background:#161616;color:#fff;border:1px solid #FF6A00;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">'+(_pickupMapViewMode==='satellite'?''+iconBadge('map',14)+' Street':''+iconBadge('signal',14)+' Satellite')+'</button>';
   toggleWrap.onclick=function(e){e.stopPropagation();togglePickupMapView();};
   el.appendChild(toggleWrap);
 }
@@ -4919,12 +4965,12 @@ function togglePickupMapView(){
   localStorage.setItem('rnm_map_view',_pickupMapViewMode);
   if(_pickupMapInstance)_pickupMapInstance.setMapTypeId(_pickupMapViewMode==='satellite'?'hybrid':'roadmap');
   const btn=document.getElementById('pickup-map-toggle-btn');
-  if(btn)btn.textContent=_pickupMapViewMode==='satellite'?'🗺️ Street':'🛰️ Satellite';
+  if(btn)btn.textContent=_pickupMapViewMode==='satellite'?''+iconBadge('map',14)+' Street':''+iconBadge('signal',14)+' Satellite';
 }
 function useMyCurrentLocationForPickup(){
   const statusEl=document.getElementById('cs-pickup-status');
   if(!navigator.geolocation){if(statusEl){statusEl.textContent='Your browser doesn\'t support location detection, drag the pin manually instead.';statusEl.style.color='var(--re)';}return;}
-  if(statusEl){statusEl.textContent='📍 Detecting your current location…';statusEl.style.color='var(--wh);'}
+  if(statusEl){statusEl.textContent=''+iconBadge('pin',14)+' Detecting your current location…';statusEl.style.color='var(--wh);'}
   navigator.geolocation.getCurrentPosition(
     function(pos){
       const lat=pos.coords.latitude,lng=pos.coords.longitude;
@@ -4933,10 +4979,10 @@ function useMyCurrentLocationForPickup(){
         _pickupMapInstance.setCenter({lat,lng});
         _pickupMapInstance.setZoom(16);
       }
-      if(statusEl){statusEl.textContent='📍 Pin moved to your current location, click Save to confirm.';statusEl.style.color='var(--or)';}
+      if(statusEl){statusEl.textContent=''+iconBadge('pin',14)+' Pin moved to your current location, click Save to confirm.';statusEl.style.color='var(--or)';}
     },
     function(err){
-      if(statusEl){statusEl.textContent='⚠ Could not access your location, check your browser\'s location permission, or drag the pin manually.';statusEl.style.color='var(--re)';}
+      if(statusEl){statusEl.textContent=''+iconBadge('warning',14)+' Could not access your location, check your browser\'s location permission, or drag the pin manually.';statusEl.style.color='var(--re)';}
     },
     {enableHighAccuracy:true,timeout:15000}
   );
@@ -4945,19 +4991,19 @@ async function searchPickupAddress(){
   const statusEl=document.getElementById('cs-pickup-status');
   const query=((document.getElementById('cs-pickup-search')||{}).value||'').trim();
   if(!query){if(statusEl){statusEl.textContent='Type an address to search first.';statusEl.style.color='var(--or)';}return;}
-  if(statusEl){statusEl.textContent='🔍 Searching…';statusEl.style.color='var(--wh);'}
+  if(statusEl){statusEl.textContent=''+iconBadge('search',14)+' Searching…';statusEl.style.color='var(--wh);'}
   try{
     const res=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ng&email=rnm.office@richnationmall.com&q='+encodeURIComponent(query+', Nigeria'));
     const data=await res.json();
     if(data&&data[0]){
       const lat=parseFloat(data[0].lat),lng=parseFloat(data[0].lon);
       if(_pickupMapInstance&&_pickupMapMarker){_pickupMapMarker.setPosition({lat,lng});_pickupMapInstance.setCenter({lat,lng});_pickupMapInstance.setZoom(16);}
-      if(statusEl){statusEl.textContent='📍 Found it, click Save to confirm this as your pickup location.';statusEl.style.color='var(--or)';}
+      if(statusEl){statusEl.textContent=''+iconBadge('pin',14)+' Found it, click Save to confirm this as your pickup location.';statusEl.style.color='var(--or)';}
     }else{
-      if(statusEl){statusEl.textContent='⚠ Could not find that address, try a different search, or drag the pin manually.';statusEl.style.color='var(--re)';}
+      if(statusEl){statusEl.textContent=''+iconBadge('warning',14)+' Could not find that address, try a different search, or drag the pin manually.';statusEl.style.color='var(--re)';}
     }
   }catch(e){
-    if(statusEl){statusEl.textContent='⚠ Search failed, check your connection, or drag the pin manually.';statusEl.style.color='var(--re)';}
+    if(statusEl){statusEl.textContent=''+iconBadge('warning',14)+' Search failed, check your connection, or drag the pin manually.';statusEl.style.color='var(--re)';}
   }
 }
 async function savePickupPinPosition(){
@@ -5070,7 +5116,7 @@ async function resetEmojis(){
 function renderHeroEditor(c){
   var hc=settings.heroConfig||{};
   var html='<div class="page-hdr"><div><div class="page-hdr-title">Homepage Editor</div></div></div>';
-  html+='<div class="cs-section"><div class="cs-section-title">🏠 Hero Text</div>';
+  html+='<div class="cs-section"><div class="cs-section-title">'+iconBadge('home',14)+' Hero Text</div>';
   html+='<div class="fg"><label class="lbl">Eyebrow</label><input class="inp" id="he-ey" value="'+(hc.eyebrow||'Delivering Across Nigeria and The World')+'"/></div>';
   html+='<div class="g2"><div class="fg"><label class="lbl">Title 1</label><input class="inp" id="he-t1" value="'+(hc.title1||'Shop Smart.')+'"/></div>';
   html+='<div class="fg"><label class="lbl">Title 2</label><input class="inp" id="he-t2" value="'+(hc.title2||'Billionaire Lifestyle.')+'"/></div></div>';
@@ -5084,13 +5130,13 @@ function renderHeroEditor(c){
   html+='<div class="cs-section"><div class="cs-section-title">'+iconBadge('chat',14)+' Promo Ads (Photos &amp; Videos), optional</div>';
   html+='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">Up to 7 promo ad tiles, shown as a grid beside the hero banner, like Konga\'s homepage ads. Each can be a photo or a video, plays natively in the tile (autoplay, muted, no YouTube branding), paste a direct video link or upload a short clip, with an optional link (a URL, or a category name to jump to) and a short caption shown over it.</div>';
   html+='<div id="promo-ads-list"></div>';
-  html+='<div class="cs-section"><div class="cs-section-title">🖼️ Custom Banner, optional</div>';
+  html+='<div class="cs-section"><div class="cs-section-title">'+iconBadge('image',14)+' Custom Banner, optional</div>';
   html+='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">One full-width banner image (like an awards/certifications strip), placed wherever you choose on the homepage below.</div>';
   html+='<div id="custom-banner-editor"></div>';
-  html+='<div class="cs-section"><div class="cs-section-title">🎬 Video Gallery, optional</div>';
+  html+='<div class="cs-section"><div class="cs-section-title">'+iconBadge('film',14)+' Video Gallery, optional</div>';
   html+='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">A scrollable row of brand/product videos (paste YouTube links), shown with a title you choose, placed wherever you choose on the homepage.</div>';
   html+='<div id="video-gallery-editor"></div>';
-  html+='<div class="cs-section"><div class="cs-section-title">📢 Announcement Bar</div>';
+  html+='<div class="cs-section"><div class="cs-section-title">'+iconBadge('megaphone',14)+' Announcement Bar</div>';
   html+='<div class="fg"><input class="inp" id="he-ann" value="'+(settings.announcement||'')+'" placeholder="e.g. FREE delivery this week!"/></div>';
   html+='<button class="btn btn-or" onclick="saveAnnEditor()">Save</button></div>';
   c.innerHTML=html;
@@ -5123,8 +5169,8 @@ function renderCustomBannerEditor(){
     +'</div>'
     +'<div class="fg"><label class="lbl">Position on homepage</label>'+contentSlotSelect('cb-position',cb.position||'after-why-choose')+'</div>'
     +'<div style="display:flex;gap:8px;">'
-    +'<button type="button" class="btn btn-or" onclick="saveCustomBanner()">💾 Save Banner</button>'
-    +(cb.image?'<button type="button" class="btn btn-re" onclick="removeCustomBanner()">🗑 Remove</button>':'')
+    +'<button type="button" class="btn btn-or" onclick="saveCustomBanner()">'+iconBadge('save',14)+' Save Banner</button>'
+    +(cb.image?'<button type="button" class="btn btn-re" onclick="removeCustomBanner()">'+iconBadge('trash',14)+' Remove</button>':'')
     +'</div>';
 }
 async function uploadCustomBannerImage(inp){
@@ -5161,14 +5207,14 @@ function renderVideoGalleryEditor(){
   var rows=vids.map(function(v,i){
     return '<div class="g2" style="margin-bottom:8px;align-items:end;">'
       +'<div class="fg" style="margin-bottom:0;"><label class="lbl">Video '+(i+1)+' Link</label><input class="inp" id="vg-url-'+i+'" value="'+(v.url||'')+'" placeholder="YouTube link"></div>'
-      +'<div class="fg" style="margin-bottom:0;display:flex;gap:6px;align-items:end;"><div style="flex:1;"><label class="lbl">Title, optional</label><input class="inp" id="vg-title-'+i+'" value="'+(v.title||'')+'" placeholder="Video title"></div><button type="button" class="btn btn-re" style="padding:10px 12px;" onclick="removeVideoGalleryItem('+i+')">🗑</button></div>'
+      +'<div class="fg" style="margin-bottom:0;display:flex;gap:6px;align-items:end;"><div style="flex:1;"><label class="lbl">Title, optional</label><input class="inp" id="vg-title-'+i+'" value="'+(v.title||'')+'" placeholder="Video title"></div><button type="button" class="btn btn-re" style="padding:10px 12px;" onclick="removeVideoGalleryItem('+i+')">'+iconBadge('trash',22)+'</button></div>'
       +'</div>';
   }).join('')||'<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:8px;">No videos added yet.</div>';
   wrap.innerHTML=rows
     +(vids.length<6?'<button type="button" class="btn btn-dk" onclick="addVideoGalleryItem()">+ Add Video</button>':'')
     +'<div class="fg" style="margin-top:12px;"><label class="lbl">Gallery Title</label><input class="inp" id="vg-title-header" value="'+(vg.title||'Brand Gallery')+'"></div>'
     +'<div class="fg"><label class="lbl">Position on homepage</label>'+contentSlotSelect('vg-position',vg.position||'before-footer')+'</div>'
-    +'<button type="button" class="btn btn-or" onclick="saveVideoGallery()">💾 Save Video Gallery</button>';
+    +'<button type="button" class="btn btn-or" onclick="saveVideoGallery()">'+iconBadge('save',14)+' Save Video Gallery</button>';
 }
 function addVideoGalleryItem(){
   settings.videoGallery=settings.videoGallery||{};
@@ -5214,7 +5260,7 @@ function renderHeroBannerRows(){
       +'<input type="file" id="hero-banner-file-'+i+'" accept="image/*" style="display:none;" onchange="uploadHeroBanner('+i+',this)">'
       +'<div style="flex:1;font-size:12px;color:var(--wh);font-weight:700;">Design '+(i+1)+(img?'':', empty')+(isActive?' <span style="background:rgba(255,106,0,.15);color:var(--or);font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:0.3px;">'+iconBadge('star',10)+' Live on site</span>':'')+'</div>'
       +(img&&!isActive?'<button type="button" onclick="setActiveHeroBanner('+i+')" style="background:rgba(255,106,0,0.1);border:1px solid rgba(255,106,0,0.3);color:var(--or);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:11px;font-weight:700;white-space:nowrap;">Show This</button>':'')
-      +(img?'<button type="button" onclick="removeHeroBanner('+i+')" style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);color:var(--re);border-radius:6px;padding:6px 10px;cursor:pointer;">🗑</button>':'')
+      +(img?'<button type="button" onclick="removeHeroBanner('+i+')" style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);color:var(--re);border-radius:6px;padding:6px 10px;cursor:pointer;">'+iconBadge('trash',22)+'</button>':'')
       +'</div>';
   }
   wrap.innerHTML='<div style="font-size:11px;color:var(--wh);font-weight:700;margin-bottom:10px;">Only the design marked "Live on site" shows to customers, no automatic rotating between them. Upload a new one to make it live immediately, or use "Show This" to switch back to one you kept on file.</div>'+rows;
@@ -5287,18 +5333,18 @@ function renderPromoAdRows(){
     rows+='<div style="background:var(--card2);padding:12px;border-radius:8px;margin-bottom:10px;">'
       +'<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;">'
       +'<div onclick="'+(isVideo?'':'document.getElementById(\'promo-ad-file-'+i+'\').click()')+'" title="'+(isVideo?'Video preview':'Click to upload photo')+'" style="width:100px;height:60px;border-radius:6px;overflow:hidden;background:var(--bg);flex-shrink:0;cursor:'+(isVideo?'default':'pointer')+';display:flex;align-items:center;justify-content:center;border:1px solid var(--bdr);">'
-      +(isVideo?(ad.videoUrl?'<span style="font-size:20px;">🎬</span>':'<span style="font-size:9px;color:var(--wh);font-weight:700;">Video '+(i+1)+'</span>'):(ad.image?'<img src="'+ad.image+'" style="width:100%;height:100%;object-fit:cover;">':'<span style="font-size:9px;color:var(--wh);font-weight:700;">Ad '+(i+1)+'</span>'))
+      +(isVideo?(ad.videoUrl?'<span style="font-size:20px;">'+iconBadge('film',20)+'</span>':'<span style="font-size:9px;color:var(--wh);font-weight:700;">Video '+(i+1)+'</span>'):(ad.image?'<img src="'+ad.image+'" style="width:100%;height:100%;object-fit:cover;">':'<span style="font-size:9px;color:var(--wh);font-weight:700;">Ad '+(i+1)+'</span>'))
       +'</div>'
       +'<input type="file" id="promo-ad-file-'+i+'" accept="image/*" style="display:none;" onchange="uploadPromoAdImage('+i+',this)">'
       +'<div style="flex:1;">'
       +'<div style="display:flex;gap:6px;margin-bottom:8px;">'
-      +'<button type="button" class="btn '+(!isVideo?'btn-or':'btn-dk')+'" style="font-size:10px;padding:5px 10px;" onclick="setPromoAdType('+i+',\'image\')">📷 Photo</button>'
-      +'<button type="button" class="btn '+(isVideo?'btn-or':'btn-dk')+'" style="font-size:10px;padding:5px 10px;" onclick="setPromoAdType('+i+',\'video\')">🎬 Video</button>'
-      +(hasMedia?'<button type="button" class="btn btn-re" style="font-size:10px;padding:5px 10px;margin-left:auto;" onclick="removePromoAd('+i+')">🗑 Remove</button>':'')
+      +'<button type="button" class="btn '+(!isVideo?'btn-or':'btn-dk')+'" style="font-size:10px;padding:5px 10px;" onclick="setPromoAdType('+i+',\'image\')">'+iconBadge('camera',14)+' Photo</button>'
+      +'<button type="button" class="btn '+(isVideo?'btn-or':'btn-dk')+'" style="font-size:10px;padding:5px 10px;" onclick="setPromoAdType('+i+',\'video\')">'+iconBadge('film',14)+' Video</button>'
+      +(hasMedia?'<button type="button" class="btn btn-re" style="font-size:10px;padding:5px 10px;margin-left:auto;" onclick="removePromoAd('+i+')">'+iconBadge('trash',14)+' Remove</button>':'')
       +'</div>'
       +(isVideo?'<input class="inp" id="promo-ad-video-'+i+'" value="'+(ad.videoUrl||'')+'" placeholder="Direct video link (.mp4 or hosted video URL), plays natively, no YouTube branding" style="margin-bottom:8px;">'
         +'<input type="file" id="promo-ad-vidfile-'+i+'" accept="video/*" style="display:none;" onchange="uploadPromoAdVideo('+i+',this)">'
-        +'<button type="button" class="btn btn-dk" style="font-size:10px;padding:5px 10px;margin-bottom:8px;" onclick="document.getElementById(\'promo-ad-vidfile-'+i+'\').click()">📁 Or Upload a Video File (max 15MB)</button>'
+        +'<button type="button" class="btn btn-dk" style="font-size:10px;padding:5px 10px;margin-bottom:8px;" onclick="document.getElementById(\'promo-ad-vidfile-'+i+'\').click()">'+iconBadge('folder',14)+' Or Upload a Video File (max 15MB)</button>'
         :'')
       +'<div class="g2" style="margin-bottom:0;">'
       +'<input class="inp" id="promo-ad-link-'+i+'" value="'+(ad.link||'')+'" placeholder="Link when tapped (URL or category name), optional">'
@@ -5309,7 +5355,7 @@ function renderPromoAdRows(){
       +PROMO_AD_RATIOS.map(function(r){return '<option value="'+r[0]+'"'+((ad.aspectRatio||'auto')===r[0]?' selected':'')+'>'+r[1]+'</option>';}).join('')
       +'</select></div>'
       +'</div></div>'
-      +'<button type="button" class="btn btn-or" style="font-size:11px;padding:6px 12px;" onclick="savePromoAdMeta('+i+')">💾 Save Tile '+(i+1)+'</button>'
+      +'<button type="button" class="btn btn-or" style="font-size:11px;padding:6px 12px;" onclick="savePromoAdMeta('+i+')">'+iconBadge('save',14)+' Save Tile '+(i+1)+'</button>'
       +'</div>';
   }
   wrap.innerHTML=rows;
@@ -5382,7 +5428,7 @@ async function renderPreOrders(c){
   var orders=await fbG('rn_mall_orders')||{};
   var pre=Object.values(orders).filter(function(o){return o.preOrder||o.payMethod==='preorder';}).sort(function(a,b){return new Date(b.createdAt||0)-new Date(a.createdAt||0);});
   var html='<div class="page-hdr"><div><div class="page-hdr-title">Pre-Orders</div><div class="page-hdr-sub">'+pre.length+' pre-order(s)</div></div></div>';
-  if(!pre.length){html+='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:36px;">📋</div><div class="card-title" style="margin-top:12px;">No pre-orders yet</div></div>';c.innerHTML=html;return;}
+  if(!pre.length){html+='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:36px;">'+iconBadge('document',36)+'</div><div class="card-title" style="margin-top:12px;">No pre-orders yet</div></div>';c.innerHTML=html;return;}
   html+=pre.map(function(o){return '<div class="card" style="margin-bottom:10px;"><div style="font-weight:700;color:var(--or);">'+o.tracking+'</div><div style="font-size:12px;color:var(--wh);font-weight:700;">'+(o.date||'')+' · '+((o.customer||{}).name||'')+'</div>'+(o.items||[]).map(function(i){return '<div style="font-size:12px;">'+i.name+' x'+i.qty+'</div>';}).join('')+'<div style="display:flex;gap:8px;margin-top:10px;"><button class="btn btn-or" style="font-size:11px;padding:6px 12px;" onclick="openOrder(\''+o.tracking+'\')">View Order</button></div></div>';}).join('');
   c.innerHTML=html;
 }
@@ -5397,7 +5443,7 @@ async function renderReviews(c){
   pids.forEach(function(pid,i){var revs=revResults[i]||{};for(var rid in revs){all.push(Object.assign({},revs[rid],{id:rid,productName:prods[pid].name,productId:pid}));}});
   all.sort(function(a,b){return new Date(b.date||0)-new Date(a.date||0);});
   var html='<div class="page-hdr"><div><div class="page-hdr-title">Reviews</div><div class="page-hdr-sub">'+all.length+' review(s)</div></div></div>';
-  if(!all.length){html+='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:36px;">⭐</div><div class="card-title" style="margin-top:12px;">No reviews yet</div></div>';c.innerHTML=html;return;}
+  if(!all.length){html+='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:36px;">'+iconBadge('star',36)+'</div><div class="card-title" style="margin-top:12px;">No reviews yet</div></div>';c.innerHTML=html;return;}
   html+=all.map(function(r){return '<div class="card" style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;gap:12px;"><div style="flex:1;"><div style="font-size:12px;font-weight:700;color:var(--or);">'+(r.productName||'')+'</div><div style="color:#FF6A00;font-size:14px;">'+'★'.repeat(r.rating||5)+'☆'.repeat(5-(r.rating||5))+'</div><div style="font-size:12px;font-weight:700;">'+(r.name||'Anonymous')+'</div><div style="font-size:13px;color:var(--wh);font-weight:700;line-height:1.7;">'+(r.review||'')+'</div></div><button onclick="deleteReview(\''+r.productId+'\',\''+r.id+'\')" class="btn btn-re" style="font-size:10px;padding:4px 8px;height:fit-content;flex-shrink:0;">Delete</button></div></div>';}).join('');
   c.innerHTML=html;
 }
@@ -5409,8 +5455,8 @@ async function renderPODApproval(c){
   var orders=await fbG('rn_mall_orders')||{};
   var pods=Object.values(orders).filter(function(o){return o.payMethod==='pod'&&o.status==='pending_pod';});
   var html='<div class="page-hdr"><div><div class="page-hdr-title">Pay on Delivery Approval Queue</div><div class="page-hdr-sub">'+pods.length+' pending</div></div></div>';
-  if(!pods.length){html+='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:36px;">✅</div><div class="card-title" style="margin-top:12px;">No pending Pay on Delivery orders</div></div>';c.innerHTML=html;return;}
-  html+=pods.map(function(o){var custName=escAttr((o.customer||{}).name||o.tracking);return '<div class="card" style="margin-bottom:10px;"><div style="font-weight:700;color:var(--or);">'+o.tracking+'</div><div style="font-size:12px;color:var(--wh);font-weight:700;">'+(o.date||'')+' · '+((o.customer||{}).name||'')+' · '+((o.customer||{}).phone||'')+'</div>'+((o.items||[]).map(function(i){return '<div style="font-size:12px;">'+i.name+' x'+i.qty+'</div>';}).join(''))+'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;"><button class="btn btn-gr" onclick="approvePOD(\''+o.tracking+'\')">✅ Approve</button><button class="btn btn-re" onclick="declinePOD(\''+o.tracking+'\')">❌ Decline</button><button class="btn btn-dk" onclick="cancelOrder(\''+o.tracking+'\',\''+custName+'\')">🚫 Cancel</button><button class="btn btn-re" style="background:#7a1414;" onclick="deleteOrder(\''+o.tracking+'\',\''+custName+'\')">🗑 Delete</button></div></div>';}).join('');
+  if(!pods.length){html+='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:36px;">'+iconBadge('check',36)+'</div><div class="card-title" style="margin-top:12px;">No pending Pay on Delivery orders</div></div>';c.innerHTML=html;return;}
+  html+=pods.map(function(o){var custName=escAttr((o.customer||{}).name||o.tracking);return '<div class="card" style="margin-bottom:10px;"><div style="font-weight:700;color:var(--or);">'+o.tracking+'</div><div style="font-size:12px;color:var(--wh);font-weight:700;">'+(o.date||'')+' · '+((o.customer||{}).name||'')+' · '+((o.customer||{}).phone||'')+'</div>'+((o.items||[]).map(function(i){return '<div style="font-size:12px;">'+i.name+' x'+i.qty+'</div>';}).join(''))+'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;"><button class="btn btn-gr" onclick="approvePOD(\''+o.tracking+'\')">'+iconBadge('check',14)+' Approve</button><button class="btn btn-re" onclick="declinePOD(\''+o.tracking+'\')">'+iconBadge('close',14)+' Decline</button><button class="btn btn-dk" onclick="cancelOrder(\''+o.tracking+'\',\''+custName+'\')">'+iconBadge('noentry',14)+' Cancel</button><button class="btn btn-re" style="background:#7a1414;" onclick="deleteOrder(\''+o.tracking+'\',\''+custName+'\')">'+iconBadge('trash',14)+' Delete</button></div></div>';}).join('');
   c.innerHTML=html;
 }
 async function approvePOD(id){
@@ -5963,7 +6009,7 @@ function renderColorRows(){
       +'</div>'
       +'<input type="file" id="clr-file-'+i+'" accept="image/*" style="display:none;" onchange="colorImgChange('+i+',this)">'
       +'<input class="inp" style="flex:1;" placeholder="Colour name e.g. White" value="'+(c.name||'').replace(/"/g,'&quot;')+'" oninput="window._pfColors['+i+'].name=this.value">'
-      +'<button type="button" onclick="removeColorRow('+i+')" style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);color:var(--re);border-radius:6px;padding:8px 10px;cursor:pointer;flex-shrink:0;">🗑</button>'
+      +'<button type="button" onclick="removeColorRow('+i+')" style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);color:var(--re);border-radius:6px;padding:8px 10px;cursor:pointer;flex-shrink:0;">'+iconBadge('trash',22)+'</button>'
       +'</div>';
   }).join('')||'<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:8px;">No colours added yet.</div>';
 }
@@ -5985,7 +6031,7 @@ function renderSizeRows(){
     return '<div style="display:flex;gap:10px;align-items:center;margin-bottom:8px;">'
       +'<input class="inp" style="flex:1;" placeholder="Size e.g. S, M, 42" value="'+(s.name||'').replace(/"/g,'&quot;')+'" oninput="window._pfSizes['+i+'].name=this.value">'
       +'<input class="inp" type="number" min="0" style="width:110px;" placeholder="Stock" value="'+(s.stock!=null?s.stock:'')+'" oninput="window._pfSizes['+i+'].stock=parseInt(this.value)||0">'
-      +'<button type="button" onclick="removeSizeRow('+i+')" style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);color:var(--re);border-radius:6px;padding:8px 10px;cursor:pointer;flex-shrink:0;">🗑</button>'
+      +'<button type="button" onclick="removeSizeRow('+i+')" style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);color:var(--re);border-radius:6px;padding:8px 10px;cursor:pointer;flex-shrink:0;">'+iconBadge('trash',22)+'</button>'
       +'</div>';
   }).join('')||'<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:8px;">No sizes added yet.</div>';
 }
@@ -6005,7 +6051,7 @@ function renderPayIconRows(){
       +'</div>'
       +'<input type="file" id="payicon-file-'+s.key+'" accept="image/*" style="display:none;" onchange="payIconChange(\''+s.key+'\',this)">'
       +'<div style="flex:1;font-size:13px;font-weight:700;color:var(--wh);">'+s.label+'</div>'
-      +(img?'<button type="button" onclick="removePayIcon(\''+s.key+'\')" style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);color:var(--re);border-radius:6px;padding:6px 10px;cursor:pointer;">🗑</button>':'')
+      +(img?'<button type="button" onclick="removePayIcon(\''+s.key+'\')" style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);color:var(--re);border-radius:6px;padding:6px 10px;cursor:pointer;">'+iconBadge('trash',22)+'</button>':'')
       +'</div>';
   }).join('');
 }
@@ -6081,14 +6127,14 @@ function openProdForm(id){
     +'<div class="fg"><label class="lbl">Product Name</label><input class="inp" id="pf-name" value="'+(p.name||'')+'" placeholder="e.g. iPhone 15 Pro Max"/></div>'
     +'<div class="fg"><label class="lbl">Category</label><select class="inp" id="pf-cat">'+catOpts+'</select></div>'
     +'</div>'
-    +'<div class="fg"><label class="lbl">Product Code (SKU)</label><div style="display:flex;gap:8px;"><input class="inp" id="pf-code" value="'+(p.code||(!id?genProdCode():''))+'" placeholder="e.g. RNM-7F3A2" style="flex:1;"/><button type="button" class="btn btn-dk" onclick="document.getElementById(\'pf-code\').value=genProdCode()">🔄 Generate</button></div></div>'
+    +'<div class="fg"><label class="lbl">Product Code (SKU)</label><div style="display:flex;gap:8px;"><input class="inp" id="pf-code" value="'+(p.code||(!id?genProdCode():''))+'" placeholder="e.g. RNM-7F3A2" style="flex:1;"/><button type="button" class="btn btn-dk" onclick="document.getElementById(\'pf-code\').value=genProdCode()">'+iconBadge('sync',14)+' Generate</button></div></div>'
     +'<div class="fg"><label class="lbl">Description</label><textarea class="ta" id="pf-desc" rows="6" placeholder="Describe the product...">'+(p.description||'')+'</textarea><div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:5px;line-height:1.6;">Leave a blank line between paragraphs to separate them. Start a line with <code>#</code> (e.g. <code># Materials</code>) to make it a bold section heading.</div></div>'
 
     +'<div class="sec-hdr">Pricing & Stock</div>'
     +'<div style="background:rgba(255,106,0,0.06);border:1px solid rgba(255,106,0,0.2);border-radius:9px;padding:12px;margin-bottom:14px;">'
     +'<label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;color:var(--wh);">'
     +'<input type="checkbox" id="pf-free" '+(p.price===0?'checked':'')+' style="accent-color:var(--or);width:18px;height:18px;" onchange="toggleFreeProduct(this)"> '
-    +'<span>🎁 <strong>Free Product</strong>, Sets price to ₦0, shows FREE badge & "Get Free" button</span></label>'
+    +'<span>'+iconBadge('gift',22)+' <strong>Free Product</strong>, Sets price to ₦0, shows FREE badge & "Get Free" button</span></label>'
     +'</div>'
     +'<div class="g3" id="pf-price-row"'+(p.price===0?' style="opacity:.4;pointer-events:none;"':'')+'>'
     +'<div class="fg"><label class="lbl">Price (NGN)</label><input class="inp" type="number" id="pf-price" value="'+(p.price||'')+'" placeholder="e.g. 25000"/></div>'
@@ -6108,21 +6154,21 @@ function openProdForm(id){
     +(existImgs?'<div id="pf-existing-imgs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">'+existImgs+'</div>':'<div id="pf-existing-imgs"></div>')
     +'<input type="file" id="pf-img-upload" accept="image/*" multiple style="display:none;" onchange="previewImages()">'
     +'<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">'
-    +'<button class="btn btn-dk" onclick="document.getElementById(\'pf-img-upload\').click()">📁 Choose Images</button>'
+    +'<button class="btn btn-dk" onclick="document.getElementById(\'pf-img-upload\').click()">'+iconBadge('folder',14)+' Choose Images</button>'
     +'<span style="font-size:11px;color:var(--wh);font-weight:700;">JPG, PNG, WebP, max 15 files</span></div>'
     +'<div id="pf-img-preview" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;"></div>'
     +'<div class="fg" style="margin-top:8px;"><label class="lbl">Or paste image URLs (one per line)</label>'
     +'<textarea class="ta" id="pf-imgs" rows="3" placeholder="https://example.com/image.jpg, only for ADDING new image links; existing images above are kept automatically"></textarea></div>'
 
     +'<div class="sec-hdr">Product Video, optional</div>'
-    +'<div id="pf-existing-vid">'+(p.videos&&p.videos[0]?'<div style="margin-bottom:10px;">'+videoPreviewHTML(p.videos[0])+'<button type="button" onclick="deleteProdVideo()" style="margin-top:8px;font-size:11px;font-weight:700;padding:6px 12px;border-radius:7px;background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.25);color:var(--re);cursor:pointer;">🗑 Delete Video</button></div>':'')+'</div>'
+    +'<div id="pf-existing-vid">'+(p.videos&&p.videos[0]?'<div style="margin-bottom:10px;">'+videoPreviewHTML(p.videos[0])+'<button type="button" onclick="deleteProdVideo()" style="margin-top:8px;font-size:11px;font-weight:700;padding:6px 12px;border-radius:7px;background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.25);color:var(--re);cursor:pointer;">'+iconBadge('trash',14)+' Delete Video</button></div>':'')+'</div>'
     +'<div class="fg"><label class="lbl">Video Link (recommended)</label>'
     +'<input class="inp" id="pf-video-url" value="'+(p.videos&&p.videos[0]&&p.videos[0].startsWith('http')?p.videos[0]:'')+'" placeholder="https://youtube.com/watch?v=... or a direct .mp4 link" oninput="_videoRemoved=false;"/>'
     +'<div style="font-size:11px;color:var(--wh);font-weight:700;margin-top:5px;line-height:1.6;">Upload your video to YouTube (can be Unlisted), Google Drive, or any video host, then paste the link here. This is the most reliable way to add a video.</div></div>'
     +'<div style="font-size:11px;color:var(--wh);font-weight:700;margin:12px 0 6px;">Or, for a very short clip only:</div>'
     +'<input type="file" id="pf-vid-upload" accept="video/*" style="display:none;" onchange="previewVideo()">'
     +'<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">'
-    +'<button class="btn btn-dk" onclick="document.getElementById(\'pf-vid-upload\').click()">🎬 Upload Short Clip</button>'
+    +'<button class="btn btn-dk" onclick="document.getElementById(\'pf-vid-upload\').click()">'+iconBadge('film',14)+' Upload Short Clip</button>'
     +'<span style="font-size:11px;color:var(--re);">Max 1.5MB, most phone videos are bigger. Use the link above if unsure.</span></div>'
     +'<div id="pf-vid-preview"></div>'
 
@@ -6178,7 +6224,7 @@ function openProdForm(id){
     +'</div>'
 
     +'<div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">'
-    +'<button class="btn btn-or btn-lg" onclick="saveProd(\''+( id||'')+'\')">💾 '+(id?'Update':'Save')+' Product</button>'
+    +'<button class="btn btn-or btn-lg" onclick="saveProd(\''+( id||'')+'\')">'+iconBadge('save',14)+' '+(id?'Update':'Save')+' Product</button>'
     +'<button class="btn btn-dk btn-lg" onclick="nav(\'products\',false)">Cancel</button>'
     +'</div></div>';
 
