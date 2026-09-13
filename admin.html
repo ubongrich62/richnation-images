@@ -4385,6 +4385,16 @@ function renderSettings(c){
   </div>
 
   <div class="card fade-in">
+    <div class="card-title">🔒 Account Security Migration</div>
+    <div class="card-sub">Every login already upgrades an account to a real sign-in the moment that person logs in, this is only for accounts that haven't logged in since that was added, and are still sitting with an old-style password.</div>
+    <div class="info-box">
+      Checks customers, staff, vendors, riders and investors for any account still on the old system, and gives each one a real sign-in account using their existing password, no separate reset needed, then removes the old password field for good. Safe to run more than once, already-upgraded accounts are skipped automatically. This can take a few minutes for a large customer base, and can't be undone, so don't close this tab while it runs.
+    </div>
+    <button class="btn btn-or" id="migrate-btn" onclick="migrateAllLegacyAccounts()">Run Security Migration</button>
+    <div id="migrate-log" style="display:none;margin-top:12px;max-height:260px;overflow-y:auto;background:var(--card2);border:1px solid var(--bdr);border-radius:8px;padding:12px;font-size:11px;font-family:monospace;color:var(--wh);line-height:1.7;"></div>
+  </div>
+
+  <div class="card fade-in">
     <div class="card-title">Currency & Exchange Rate</div>
     <div class="card-sub">Set the USD to NGN exchange rate. This controls all dollar price displays on the mall.</div>
     <div class="fg"><label class="lbl">Exchange Rate (1 USD = ? NGN)</label>
@@ -4500,6 +4510,58 @@ async function saveAdminPasswords(){
   localStorage.setItem('rnm_admin_passwords',JSON.stringify(list));
   showPwMsg('Passwords saved! Either one can be used to sign in.','ok');
   toast('Admin passwords updated!');
+}
+// One-time (repeatable, self-skipping) sweep that finishes what each login flow
+// already does opportunistically: any account that hasn't signed in since the
+// Firebase Auth migration was added is still sitting with a plaintext password
+// field in a collection that has to stay list-readable for the old login check
+// to work at all (see firebase-database.rules.json). This creates a real
+// Firebase Auth record for every such account using its existing password (no
+// separate reset needed) and clears the plaintext field, the same way a real
+// login would, without waiting for that person to log in again.
+async function migrateAllLegacyAccounts(){
+  if(!confirm('This creates real sign-in accounts for every customer/staff/vendor/rider/investor still on the old password system, using their existing password, then removes that old password field for good. This can take several minutes and cannot be undone. Continue?'))return;
+  const btn=document.getElementById('migrate-btn');
+  const logEl=document.getElementById('migrate-log');
+  btn.disabled=true;
+  logEl.style.display='block';
+  logEl.innerHTML='';
+  function log(msg){logEl.innerHTML+=msg+'<br>';logEl.scrollTop=logEl.scrollHeight;}
+  const ready=await ensureFirebaseAuthReady();
+  if(!ready){log('❌ Could not load Firebase Auth right now, please try again.');btn.disabled=false;return;}
+  const collections=[
+    {path:'rn_mall_customers',byUid:'rn_mall_customers_by_uid',label:'Customers'},
+    {path:'rn_mall_staff',byUid:'rn_mall_staff_by_uid',label:'Staff'},
+    {path:'rn_mall_vendors',byUid:'rn_mall_vendors_by_uid',label:'Vendors'},
+    {path:'rn_mall_riders',byUid:'rn_mall_riders_by_uid',label:'Riders'},
+    {path:'rn_mall_investors',byUid:'rn_mall_investors_by_uid',label:'Investors'}
+  ];
+  let migrated=0,failed=0;
+  for(const col of collections){
+    const all=await fbG(col.path)||{};
+    const pending=Object.entries(all).filter(function(e){return e[1]&&e[1].password&&e[1].email;});
+    log('<b>'+col.label+'</b>: '+pending.length+' account(s) still on the old system.');
+    for(const [id,rec] of pending){
+      try{
+        const cred=await firebase.auth().createUserWithEmailAndPassword(rec.email,rec.password);
+        const uid=cred.user.uid;
+        await fbU(col.path+'/'+id,{authUid:uid,password:null});
+        await fbS(col.byUid+'/'+uid,id);
+        try{await firebase.auth().signOut();}catch(soErr){}
+        migrated++;
+        log('&nbsp;&nbsp;✅ '+rec.email);
+      }catch(migrateErr){
+        failed++;
+        log('&nbsp;&nbsp;⚠️ '+rec.email+' — '+(migrateErr.code||migrateErr.message));
+      }
+      // Small pause between account creations, Firebase Auth rate-limits rapid
+      // signups from the same browser session.
+      await new Promise(function(r){setTimeout(r,400);});
+    }
+  }
+  log('<b>Done.</b> '+migrated+' migrated, '+failed+' failed.');
+  btn.disabled=false;
+  toast('Migration finished: '+migrated+' migrated, '+failed+' failed');
 }
 function showPwMsg(text,type){
   const el=document.getElementById('pw-msg');if(!el)return;
