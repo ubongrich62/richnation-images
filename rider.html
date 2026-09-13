@@ -1063,6 +1063,15 @@ async function showDeliveryMapModal(tracking){
       route.path.forEach(function(p){bounds.extend(p);});
       map.fitBounds(bounds,40);
       if(etaStatusEl)etaStatusEl.innerHTML='~'+route.durationText+' to customer, '+route.distanceText+(route.hasTraffic?' <span style="color:var(--or);">(traffic-adjusted)</span>':'');
+      // Pay on Delivery orders still owing a balance need the customer's OWN app to
+      // know how close the rider actually is, so it can prompt them to pay the
+      // balance online before the rider arrives, this is the one place a real,
+      // Directions-based ETA for this order gets computed, so it's also the one
+      // place that writes it back for the customer side to read cheaply (a plain
+      // field read, no extra Directions API calls on their end).
+      if(order.payMethod==='pod'&&order.podBalanceDue>0&&!order.podBalanceCollected&&route.durationSec!=null){
+        fbU('rn_mall_orders/'+tracking,{riderEtaSeconds:route.durationSec,riderEtaUpdatedAt:Date.now()});
+      }
       if(stepsEl&&route.steps&&route.steps.length){
         // Nearest upcoming step to where the rider actually is right now,
         // highlighted as "current", a light-touch stand-in for full

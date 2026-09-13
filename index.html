@@ -3740,7 +3740,8 @@ async function trackOrder(silentNum){
         </div>`;
       }).join('')||'<div style="color:var(--wh);font-weight:700;font-size:12px;">No timeline yet</div>'}
     </div>
-    ${(order.status==='shipped'||order.status==='out for delivery')&&order.deliveryMethod!=='pickup'&&!order.deliveryConfirmed?`<button onclick="showDeliveryConfirm('${num}')" style="width:100%;background:linear-gradient(135deg,var(--or),var(--or-dk));color:#fff;border:none;padding:12px;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:13px;cursor:pointer;margin-bottom:10px;">CONFIRM DELIVERY, Sign to Confirm Receipt</button>`:''}
+    ${(order.status==='shipped'||order.status==='out for delivery')&&order.deliveryMethod!=='pickup'&&!order.deliveryConfirmed&&(!isPOD||!(order.podBalanceDue>0)||order.podBalanceCollected)?`<button onclick="showDeliveryConfirm('${num}')" style="width:100%;background:linear-gradient(135deg,var(--or),var(--or-dk));color:#fff;border:none;padding:12px;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:13px;cursor:pointer;margin-bottom:10px;">CONFIRM DELIVERY, Sign to Confirm Receipt</button>`:''}
+    ${isPOD&&order.podBalanceDue>0&&!order.podBalanceCollected&&(order.status==='shipped'||order.status==='out for delivery')&&order.deliveryMethod!=='pickup'?`<div style="font-size:11px;color:var(--or);font-weight:700;margin-bottom:10px;">${iconBadge('lock',12)} Pay the remaining ${fmt(order.podBalanceDue)} balance to unlock delivery confirmation.</div>`:''}
     <button style="width:100%;background:#FF6A00;color:#fff;border:none;padding:12px;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:13px;cursor:pointer;margin-top:8px;" onclick="window.open('https://wa.me/${WA_NUM}?text='+encodeURIComponent('Hi RichNation Mall! My tracking number is ${num}. Please update me.'),'_blank')">WhatsApp Update</button>
   </div>`;
   if(preservedMapWrap){
@@ -4230,7 +4231,97 @@ async function signInWithGoogle(){
     toast('Google Sign-In failed ('+(e.code||e.message||'unknown error')+'), please try again or use email/password','err');
   }
 }
-function updateAuthUI(){document.getElementById('auth-btns').style.display=currUser?'none':'flex';document.getElementById('user-menu').style.display=currUser?'block':'none';if(currUser){loadCustNotifs();trackCustomerActivity();}else{const b=document.getElementById('cnotif-badge');if(b)b.style.display='none';}}
+function updateAuthUI(){document.getElementById('auth-btns').style.display=currUser?'none':'flex';document.getElementById('user-menu').style.display=currUser?'block':'none';if(currUser){loadCustNotifs();trackCustomerActivity();startPodLockWatcher();}else{const b=document.getElementById('cnotif-badge');if(b)b.style.display='none';stopPodLockWatcher();}}
+// ── PAY ON DELIVERY, PROXIMITY PAYMENT LOCK ──
+// A Pay-on-Delivery order only ever collects 50% upfront, the other 50% used to
+// just be cash/transfer to the rider on arrival, on trust. This closes that gap:
+// once the rider's own live route puts them within ~10 minutes (a real
+// Directions-based ETA the rider's app already computes and writes onto the
+// order, see rider.html's placeSelfMarker, not recomputed here to avoid a second
+// set of Directions API calls), the customer is shown a full-screen, unclosable
+// prompt to pay the remaining balance online right now, wherever they are in the
+// app, not just on the tracking page. Nothing else in the app is usable until
+// they pay, since without it there is nothing stopping someone from taking the
+// delivery and never settling the balance.
+let _podLockTimer=null,_podLockActiveTracking=null;
+function startPodLockWatcher(){
+  if(_podLockTimer)return;
+  checkPodLock();
+  _podLockTimer=setInterval(checkPodLock,20000);
+}
+function stopPodLockWatcher(){
+  if(_podLockTimer){clearInterval(_podLockTimer);_podLockTimer=null;}
+  hidePodPaymentLock();
+}
+async function checkPodLock(){
+  if(!currUser)return;
+  try{
+    const orderIdx=await fbG('rn_mall_customer_orders/'+currUser.id)||{};
+    const trackings=Object.values(orderIdx).map(function(o){return o.orderId;}).filter(Boolean);
+    // Newest first, and only worth checking a handful, an order this old
+    // waiting on a PoD balance would already be resolved or cancelled.
+    const recent=trackings.slice(-8).reverse();
+    for(const tr of recent){
+      const o=await fbG('rn_mall_orders/'+tr);
+      if(!o||o.payMethod!=='pod'||!(o.podBalanceDue>0)||o.podBalanceCollected)continue;
+      if(o.status==='delivered'||o.status==='delivered confirmed'||o.status==='cancelled'||o.status==='deleted')continue;
+      if(o.riderEtaSeconds==null||o.riderEtaSeconds>600)continue;
+      showPodPaymentLock(o);
+      return;
+    }
+    hidePodPaymentLock();
+  }catch(e){console.warn('POD lock check failed:',e.message);}
+}
+function hidePodPaymentLock(){
+  _podLockActiveTracking=null;
+  const el=document.getElementById('pod-lock-overlay');
+  if(el)el.remove();
+}
+function showPodPaymentLock(order){
+  if(_podLockActiveTracking===order.tracking&&document.getElementById('pod-lock-overlay'))return;
+  _podLockActiveTracking=order.tracking;
+  hidePodPaymentLock();
+  _podLockActiveTracking=order.tracking;
+  const overlay=document.createElement('div');
+  overlay.id='pod-lock-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  overlay.innerHTML=`<div style="background:var(--card,#161616);border:1px solid rgba(255,106,0,0.4);border-radius:14px;max-width:420px;width:100%;padding:26px 22px;text-align:center;">
+    <div style="font-size:40px;margin-bottom:12px;">${iconBadge('bike',40)}</div>
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:18px;color:#fff;">Your rider is almost there!</div>
+    <div style="font-size:13px;color:#ccc;font-weight:600;margin-top:10px;line-height:1.6;">Order <strong style="color:var(--or,#FF6A00);">${order.tracking}</strong> has a remaining balance of <strong style="color:var(--or,#FF6A00);">${fmt(order.podBalanceDue)}</strong>. Complete payment now so your rider can hand over your order the moment they arrive.</div>
+    <button id="pod-lock-pay-btn" onclick="payPodBalance('${order.tracking}')" style="width:100%;background:linear-gradient(135deg,#FF6A00,#cc5500);color:#fff;border:none;padding:14px;border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:14px;cursor:pointer;margin-top:20px;">Complete Payment, ${fmt(order.podBalanceDue)}</button>
+    <div style="font-size:11px;color:#888;font-weight:600;margin-top:12px;">You won't be able to use the app until this is paid.</div>
+  </div>`;
+  document.body.appendChild(overlay);
+}
+async function payPodBalance(tracking){
+  const order=await fbG('rn_mall_orders/'+tracking);
+  if(!order){toast('Could not load that order, please try again','err');return;}
+  if(typeof PaystackPop==='undefined'){toast('Payment isn\'t available right now, please check your connection and try again','err');return;}
+  const btn=document.getElementById('pod-lock-pay-btn');
+  if(btn){btn.disabled=true;btn.textContent='Opening secure payment…';}
+  const handler=PaystackPop.setup({
+    key:PAYSTACK_KEY,email:order.customer.email,amount:Math.round(order.podBalanceDue)*100,currency:'NGN',ref:tracking+'-BAL-'+Date.now(),
+    metadata:{order_id:tracking,customer:order.customer.name,type:'pod_balance'},
+    callback:function(response){
+      (async function(){
+        const tl=(order.timeline||[]).concat([{status:'Balance Paid Online',time:new Date().toISOString(),note:'Remaining '+fmt(order.podBalanceDue)+' paid online, ref '+response.reference+'.'}]);
+        await fbU('rn_mall_orders/'+tracking,{podBalanceCollected:true,podBalancePaidOnline:true,podBalancePaidRef:response.reference,podBalancePaidAt:Date.now(),timeline:tl});
+        if(order.riderId){
+          const riderTokens=(await fbG('rn_mall_riders/'+order.riderId+'/fcmTokens'))||{};
+          sendPushToTokens(Object.keys(riderTokens),'Balance Paid','Customer for order '+tracking+' has paid the remaining balance online, no need to collect cash.',{tracking:tracking},'rider.html');
+        }
+        hidePodPaymentLock();
+        toast('Payment received, thank you!');
+        if(currentPage==='track')trackOrder(tracking);
+      })();
+    },
+    onClose:function(){
+      if(btn){btn.disabled=false;btn.textContent='Complete Payment, '+fmt(order.podBalanceDue);}
+    }
+  });
+  handler.openIframe();
+}
 // Lets admin see how active each customer actually is (Customers page: Last
 // Seen, days/weeks/months/years, Active Days), on top of the anonymous,
 // site-wide Visitors dashboard, this is per real account instead. Only
