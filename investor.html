@@ -227,7 +227,7 @@ button{font-family:inherit;}
         <button class="curr-btn" data-curr="EUR" onclick="setCurr('EUR')">€</button>
         <button class="curr-btn" data-curr="GBP" onclick="setCurr('GBP')">£</button>
       </div>
-      <button class="tb-btn" style="position:relative;" onclick="toggleInvestorNotifPanel()">${iconBadge('bell',14)}<span id="inv-notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--re);color:#fff;font-size:9px;font-weight:800;min-width:15px;height:15px;border-radius:99px;align-items:center;justify-content:center;padding:0 3px;">0</span></button>
+      <button class="tb-btn" style="position:relative;" onclick="toggleInvestorNotifPanel()"><span style="display:inline-block;position:relative;width:14px;height:14px;vertical-align:middle;"><svg class="icon-color-cycle" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg></span><span id="inv-notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--re);color:#fff;font-size:9px;font-weight:800;min-width:15px;height:15px;border-radius:99px;align-items:center;justify-content:center;padding:0 3px;">0</span></button>
       <div id="inv-notif-panel" style="display:none;position:absolute;top:44px;right:0;width:300px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--bdr);border-radius:10px;box-shadow:var(--sh-lg);z-index:500;padding:8px;"></div>
       <button class="tb-btn" onclick="investorLogout()">Sign Out</button>
     </div>

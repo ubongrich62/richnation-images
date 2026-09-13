@@ -194,7 +194,7 @@ button{font-family:inherit;}
     <div class="tb-left">
       <button id="mob-btn" onclick="toggleSidebar()">&#9776;</button>
       <div class="tb-logo"><picture><source srcset="images/branding/richnation-logo-v3.webp" type="image/webp"><img src="images/branding/richnation-logo-v3.png" alt="RichNation Mall" style="height:24px;object-fit:contain;display:block;"></picture></div>
-      <div class="tb-status">${iconBadge('bike',14)} Rider</div>
+      <div class="tb-status"><span style="display:inline-block;position:relative;width:14px;height:14px;vertical-align:middle;"><span style="position:absolute;inset:-4px;background:radial-gradient(circle,rgba(255,140,0,0.35),transparent 70%);border-radius:50%;"></span><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M6 17l4-8h4l3 8M10 9l3 4h5"/></svg></span> Rider</div>
     </div>
     <div class="curr-row" id="curr-row">
       <button class="curr-btn active" data-curr="NGN" onclick="setCurr('NGN')">₦</button>
@@ -203,7 +203,7 @@ button{font-family:inherit;}
       <button class="curr-btn" data-curr="GBP" onclick="setCurr('GBP')">£</button>
     </div>
     <div style="display:flex;align-items:center;gap:10px;position:relative;">
-      <button class="tb-btn" style="position:relative;" onclick="toggleRiderNotifPanel()">${iconBadge('bell',14)}<span id="rider-notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--re);color:#fff;font-size:9px;font-weight:800;min-width:15px;height:15px;border-radius:99px;align-items:center;justify-content:center;padding:0 3px;">0</span></button>
+      <button class="tb-btn" style="position:relative;" onclick="toggleRiderNotifPanel()"><span style="display:inline-block;position:relative;width:14px;height:14px;vertical-align:middle;"><span style="position:absolute;inset:-4px;background:radial-gradient(circle,rgba(255,140,0,0.35),transparent 70%);border-radius:50%;"></span><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:relative;"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg></span><span id="rider-notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--re);color:#fff;font-size:9px;font-weight:800;min-width:15px;height:15px;border-radius:99px;align-items:center;justify-content:center;padding:0 3px;">0</span></button>
       <div id="rider-notif-panel" style="display:none;position:absolute;top:44px;right:0;width:280px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--bdr);border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,0.6);z-index:500;padding:8px;"></div>
       <button class="tb-btn" onclick="riderLogout()">Sign Out</button>
     </div>
@@ -300,9 +300,20 @@ function loadGoogleMapsIfNeededRider(){
   });
   return window._gmapsLoadPromise;
 }
-function makeMarkerIconRider(bg,size,border){
-  const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'"><circle cx="'+(size/2)+'" cy="'+(size/2)+'" r="'+(size/2-2)+'" fill="'+bg+'" stroke="'+(border||'white')+'" stroke-width="2"/></svg>';
-  return {url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg),scaledSize:new google.maps.Size(size,size),labelOrigin:new google.maps.Point(size/2,size/2)};
+// heading (compass degrees, 0=north, clockwise), when known, draws a small
+// pointer on the circle's edge rotated to face that direction, this is the
+// "which way are they facing" cue real delivery apps show, not a rotating
+// 3D vehicle model (Maps markers can't render one), a directional pointer
+// on a marker whose color the rider/admin control is the real equivalent.
+function makeMarkerIconRider(bg,size,border,heading){
+  const pad=heading!=null?10:0,canvas=size+pad*2,cx=canvas/2,cy=canvas/2,r=size/2-2;
+  let pointer='';
+  if(heading!=null){
+    const tipY=cy-r-8,baseY=cy-r+1;
+    pointer='<polygon points="'+cx+','+tipY+' '+(cx-5)+','+baseY+' '+(cx+5)+','+baseY+'" fill="'+bg+'" stroke="'+(border||'white')+'" stroke-width="1" stroke-linejoin="round" transform="rotate('+heading+' '+cx+' '+cy+')"/>';
+  }
+  const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+canvas+'" height="'+canvas+'"><circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+bg+'" stroke="'+(border||'white')+'" stroke-width="2"/>'+pointer+'</svg>';
+  return {url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg),scaledSize:new google.maps.Size(canvas,canvas),anchor:new google.maps.Point(cx,cy),labelOrigin:new google.maps.Point(cx,cy)};
 }
 loadGoogleMapsIfNeededRider();
 let rider=null;
@@ -650,7 +661,11 @@ function startLiveLocationSharing(){
       // often than we need; updating every ~15s is plenty for a delivery map.
       if(Date.now()-_lastLocationWriteTs<15000)return;
       _lastLocationWriteTs=Date.now();
-      fbU('rn_mall_riders/'+rider._id,{liveLat:pos.coords.latitude,liveLng:pos.coords.longitude,liveTs:Date.now()});
+      // heading is compass degrees (0=north, clockwise) the device reports
+      // while actually moving, null when stationary or unsupported, drives
+      // the small directional pointer on the rider's marker everywhere it's
+      // shown, admin/customer/rider's own map alike.
+      fbU('rn_mall_riders/'+rider._id,{liveLat:pos.coords.latitude,liveLng:pos.coords.longitude,liveHeading:pos.coords.heading!=null&&!isNaN(pos.coords.heading)?pos.coords.heading:null,liveTs:Date.now()});
       const b=document.getElementById('live-loc-badge');if(b)b.style.display='flex';
     },
     function(err){
@@ -958,9 +973,10 @@ async function showDeliveryMapModal(tracking){
   // where the rider actually is a straight pickup-to-destination line isn't
   // the useful thing to show anymore, the route FROM the rider TO the
   // customer is.
-  async function placeSelfMarker(lat,lng){
+  async function placeSelfMarker(lat,lng,heading){
     const vehicleEmoji=VEHICLE_ICONS_RIDER_SELF[(rider.vehicleType||'motorcycle').toLowerCase()]||'🏍️';
-    new google.maps.Marker({position:{lat:lat,lng:lng},map:map,icon:makeMarkerIconRider('#FF6A00',30),label:{text:vehicleEmoji,fontSize:'16px'},title:'You',zIndex:2});
+    const myColor=rider.markerColor||settings.mapMarkerColor||'#FF6A00';
+    new google.maps.Marker({position:{lat:lat,lng:lng},map:map,icon:makeMarkerIconRider(myColor,30,null,heading!=null?heading:null),label:{text:vehicleEmoji,fontSize:'16px'},title:'You',zIndex:2});
     const selfPos={lat:lat,lng:lng};
     const route=await getRoadRouteRider(selfPos,dest,rider.vehicleType);
     const etaStatusEl=document.getElementById('rider-map-eta-status');
@@ -997,12 +1013,12 @@ async function showDeliveryMapModal(tracking){
   }
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(
-      function(pos){placeSelfMarker(pos.coords.latitude,pos.coords.longitude);},
-      function(){if(rider.liveLat!=null)placeSelfMarker(rider.liveLat,rider.liveLng);},
+      function(pos){placeSelfMarker(pos.coords.latitude,pos.coords.longitude,pos.coords.heading!=null&&!isNaN(pos.coords.heading)?pos.coords.heading:null);},
+      function(){if(rider.liveLat!=null)placeSelfMarker(rider.liveLat,rider.liveLng,rider.liveHeading);},
       {enableHighAccuracy:true,timeout:8000}
     );
   }else if(rider.liveLat!=null){
-    placeSelfMarker(rider.liveLat,rider.liveLng);
+    placeSelfMarker(rider.liveLat,rider.liveLng,rider.liveHeading);
   }
   const pinHint=document.getElementById('rider-map-pin-hint');
   deliveryMarker.addListener('dragstart',function(){if(pinHint)pinHint.style.display='block';});
@@ -1189,6 +1205,13 @@ function renderProfile(c){
     <div style="font-size:11px;color:var(--wh);font-weight:700;text-transform:uppercase;margin-bottom:6px;">Phone</div><input class="fi" id="pf-phone" value="${rider.phone||''}"/>
     <div style="font-size:11px;color:var(--wh);font-weight:700;text-transform:uppercase;margin-bottom:6px;">Vehicle Type</div>
     <select class="fi" id="pf-vehicle"><option value="Motorcycle" ${rider.vehicleType==='Motorcycle'?'selected':''}>Motorcycle</option><option value="Bicycle" ${rider.vehicleType==='Bicycle'?'selected':''}>Bicycle</option><option value="Car" ${rider.vehicleType==='Car'?'selected':''}>Car</option><option value="Van/Truck" ${rider.vehicleType==='Van/Truck'?'selected':''}>Van/Truck</option><option value="On Foot" ${rider.vehicleType==='On Foot'?'selected':''}>On Foot</option></select>
+    <div style="font-size:11px;color:var(--wh);font-weight:700;text-transform:uppercase;margin-bottom:6px;">Your Marker Colour on the Live Map</div>
+    <div style="font-size:11px;color:var(--mu);margin-bottom:8px;">This is the colour of your marker on the delivery map, for the admin and for customers you're delivering to. Leave as the default to use whatever the mall has set.</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+      <input type="color" id="pf-marker-color" value="${rider.markerColor||'#FF6A00'}" style="width:44px;height:36px;border-radius:8px;border:1px solid var(--bdr);background:none;cursor:pointer;padding:2px;"/>
+      <button type="button" class="btn" style="font-size:11px;padding:8px 12px;" onclick="document.getElementById('pf-marker-color').value='#FF6A00';document.getElementById('pf-marker-color-custom').checked=false;">Reset to Default</button>
+      <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--wh);font-weight:700;cursor:pointer;"><input type="checkbox" id="pf-marker-color-custom" ${rider.markerColor?'checked':''}/> Use my own colour</label>
+    </div>
     <div style="font-size:11px;color:var(--wh);font-weight:700;text-transform:uppercase;margin-bottom:6px;">New Password (leave blank to keep current)</div><div style="position:relative;"><input class="fi" id="pf-pass" type="password" placeholder="New password" style="padding-right:56px;"/><span onclick="togglePwVisibility('pf-pass',this)" style="position:absolute;right:12px;top:12px;font-size:11px;color:var(--or);cursor:pointer;font-weight:700;">Show</span></div>
     <button class="btn btn-or btn-lg" onclick="saveRiderProfile()">Save Changes</button>
   </div>
@@ -1298,7 +1321,8 @@ async function saveRiderBankDetails(){
   toast('Bank details saved!');
 }
 async function saveRiderProfile(){
-  const u={name:document.getElementById('pf-name').value.trim(),email:document.getElementById('pf-email').value.trim().toLowerCase(),phone:document.getElementById('pf-phone').value.trim(),vehicleType:document.getElementById('pf-vehicle').value};
+  const useCustomColor=document.getElementById('pf-marker-color-custom').checked;
+  const u={name:document.getElementById('pf-name').value.trim(),email:document.getElementById('pf-email').value.trim().toLowerCase(),phone:document.getElementById('pf-phone').value.trim(),vehicleType:document.getElementById('pf-vehicle').value,markerColor:useCustomColor?document.getElementById('pf-marker-color').value:null};
   const pw=document.getElementById('pf-pass').value.trim();
   if(pw&&pw.length>=6){
     if(rider.authUid&&typeof firebase!=='undefined'&&firebase.auth&&firebase.auth().currentUser){

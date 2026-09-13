@@ -3481,9 +3481,20 @@ function loadGoogleMapsIfNeeded(){
   });
   return window._gmapsLoadPromise;
 }
-function makeMarkerIcon(bg,size){
-  const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'"><circle cx="'+(size/2)+'" cy="'+(size/2)+'" r="'+(size/2-2)+'" fill="'+bg+'" stroke="white" stroke-width="2"/></svg>';
-  return {url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg),scaledSize:new google.maps.Size(size,size),labelOrigin:new google.maps.Point(size/2,size/2)};
+// heading (compass degrees, 0=north, clockwise), when known, draws a small
+// pointer on the circle's edge rotated to face that direction, this is the
+// "which way are they facing" cue real delivery apps show, not a rotating
+// 3D vehicle model (Maps markers can't render one), a directional pointer
+// on a marker whose color the rider/admin control is the real equivalent.
+function makeMarkerIcon(bg,size,heading){
+  const pad=heading!=null?10:0,canvas=size+pad*2,cx=canvas/2,cy=canvas/2,r=size/2-2;
+  let pointer='';
+  if(heading!=null){
+    const tipY=cy-r-8,baseY=cy-r+1;
+    pointer='<polygon points="'+cx+','+tipY+' '+(cx-5)+','+baseY+' '+(cx+5)+','+baseY+'" fill="'+bg+'" stroke="white" stroke-width="1" stroke-linejoin="round" transform="rotate('+heading+' '+cx+' '+cy+')"/>';
+  }
+  const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+canvas+'" height="'+canvas+'"><circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+bg+'" stroke="white" stroke-width="2"/>'+pointer+'</svg>';
+  return {url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg),scaledSize:new google.maps.Size(canvas,canvas),anchor:new google.maps.Point(cx,cy),labelOrigin:new google.maps.Point(cx,cy)};
 }
 // Smoothly glides a marker to its new position over `duration`ms instead of
 // snapping there instantly, this is what makes a live rider marker feel like
@@ -3518,12 +3529,16 @@ async function renderDeliveryMap(order){
     el.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;padding:16px;text-align:center;font-size:12px;color:var(--wh);font-weight:700;">'+iconBadge('map',14)+' Map couldn\'t load right now. <span style="color:var(--or);cursor:pointer;text-decoration:underline;" onclick="renderDeliveryMap(window._lastTrackedOrder)">Try again</span></div>';
     return;
   }
-  let riderPos=null,isLive=false;
+  let riderPos=null,isLive=false,riderMarkerColor=null,riderHeading=null;
   if(order.riderId){
     const riderRec=await fbG('rn_mall_riders/'+order.riderId);
     if(riderRec&&riderRec.liveLat!=null&&riderRec.liveTs&&(Date.now()-riderRec.liveTs)<2*60*1000){
       riderPos={lat:riderRec.liveLat,lng:riderRec.liveLng};isLive=true;
+      riderHeading=riderRec.liveHeading!=null?riderRec.liveHeading:null;
     }
+    // A rider's own chosen colour (Profile) always wins over the mall-wide
+    // default, that's the whole point of letting them personalise it.
+    riderMarkerColor=(riderRec&&riderRec.markerColor)||settings.mapMarkerColor||'#FF6A00';
   }
   let dest=order.deliveryLat!=null?{lat:order.deliveryLat,lng:order.deliveryLng}:null;
   if(!dest&&order.customer?.address){
@@ -3552,7 +3567,7 @@ async function renderDeliveryMap(order){
     el.style.cssText='width:100%;height:340px;border-radius:9px 9px 0 0;overflow:hidden;background:var(--card2);';
     _deliveryMapInstance=new google.maps.Map(el,{center:centerPos,zoom:14,disableDefaultUI:true,zoomControl:true,styles:DARK_MAP_STYLE});
     _deliveryHomeMarker=dest?new google.maps.Marker({position:dest,map:_deliveryMapInstance,icon:makeMarkerIcon('#15151A',26),label:{text:'📍',fontSize:'13px'},title:'Delivery Address (You)',zIndex:1}):null;
-    _deliveryRiderMarker=new google.maps.Marker({position:isLive?riderPos:centerPos,map:_deliveryMapInstance,icon:makeMarkerIcon('#FF6A00',34),label:{text:vehicleEmoji,fontSize:'16px'},opacity:isLive?1:0,title:(order.riderName||'Your rider')+', live location',zIndex:2});
+    _deliveryRiderMarker=new google.maps.Marker({position:isLive?riderPos:centerPos,map:_deliveryMapInstance,icon:makeMarkerIcon(riderMarkerColor||'#FF6A00',34,riderHeading),label:{text:vehicleEmoji,fontSize:'16px'},opacity:isLive?1:0,title:(order.riderName||'Your rider')+', live location',zIndex:2});
     // A route line between rider and destination, the same "here's the path"
     // cue Bolt/Uber show. Starts as a plain dashed straight line (below,
     // setPath fills in the real routed shape once Directions responds), so
@@ -3565,7 +3580,7 @@ async function renderDeliveryMap(order){
       Array.prototype.forEach.call(toggleEl.children,function(b){b.classList.toggle('active',b.dataset.type==='roadmap');});
     }
   }else{
-    if(isLive&&_deliveryRiderMarker){animateMarkerTo(_deliveryRiderMarker,riderPos,1500);_deliveryRiderMarker.setOpacity(1);}
+    if(isLive&&_deliveryRiderMarker){animateMarkerTo(_deliveryRiderMarker,riderPos,1500);_deliveryRiderMarker.setOpacity(1);_deliveryRiderMarker.setIcon(makeMarkerIcon(riderMarkerColor||'#FF6A00',34,riderHeading));}
     else if(_deliveryRiderMarker)_deliveryRiderMarker.setOpacity(0);
   }
   let route=null;

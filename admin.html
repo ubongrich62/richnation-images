@@ -3602,9 +3602,20 @@ function loadGoogleMapsIfNeededAdmin(){
   });
   return window._gmapsLoadPromise;
 }
-function makeMarkerIconAdmin(bg,size,border){
-  const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'"><circle cx="'+(size/2)+'" cy="'+(size/2)+'" r="'+(size/2-2)+'" fill="'+bg+'" stroke="'+(border||'white')+'" stroke-width="2"/></svg>';
-  return {url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg),scaledSize:new google.maps.Size(size,size),labelOrigin:new google.maps.Point(size/2,size/2)};
+// heading (compass degrees, 0=north, clockwise), when known, draws a small
+// pointer on the circle's edge rotated to face that direction, this is the
+// "which way are they facing" cue real delivery apps show, not a rotating
+// 3D vehicle model (Maps markers can't render one), a directional pointer
+// on a marker whose color the rider/admin control is the real equivalent.
+function makeMarkerIconAdmin(bg,size,border,heading){
+  const pad=heading!=null?10:0,canvas=size+pad*2,cx=canvas/2,cy=canvas/2,r=size/2-2;
+  let pointer='';
+  if(heading!=null){
+    const tipY=cy-r-8,baseY=cy-r+1;
+    pointer='<polygon points="'+cx+','+tipY+' '+(cx-5)+','+baseY+' '+(cx+5)+','+baseY+'" fill="'+bg+'" stroke="'+(border||'white')+'" stroke-width="1" stroke-linejoin="round" transform="rotate('+heading+' '+cx+' '+cy+')"/>';
+  }
+  const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+canvas+'" height="'+canvas+'"><circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+bg+'" stroke="'+(border||'white')+'" stroke-width="2"/>'+pointer+'</svg>';
+  return {url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg),scaledSize:new google.maps.Size(canvas,canvas),anchor:new google.maps.Point(cx,cy),labelOrigin:new google.maps.Point(cx,cy)};
 }
 async function renderAdminDeliveryMap(order){
   const el=document.getElementById('admin-delivery-map');if(!el)return;
@@ -3624,10 +3635,16 @@ async function renderAdminDeliveryMap(order){
     }catch(e){}
   }
   if(!dest)return;
-  let riderPos=null,isLive=false;
+  let riderPos=null,isLive=false,riderMarkerColor=null,riderHeading=null;
   if(order.riderId){
     const riderRec=await fbG('rn_mall_riders/'+order.riderId);
-    if(riderRec&&riderRec.liveLat!=null&&riderRec.liveTs&&(Date.now()-riderRec.liveTs)<2*60*1000){riderPos={lat:riderRec.liveLat,lng:riderRec.liveLng};isLive=true;}
+    if(riderRec&&riderRec.liveLat!=null&&riderRec.liveTs&&(Date.now()-riderRec.liveTs)<2*60*1000){
+      riderPos={lat:riderRec.liveLat,lng:riderRec.liveLng};isLive=true;
+      riderHeading=riderRec.liveHeading!=null?riderRec.liveHeading:null;
+    }
+    // A rider's own chosen colour (their Profile) always wins over the
+    // mall-wide default, that's the point of letting them personalise it.
+    riderMarkerColor=(riderRec&&riderRec.markerColor)||settings.mapMarkerColor||'#FF6A00';
   }
   if(!riderPos)riderPos={lat:(pickup.lat+dest.lat)/2,lng:(pickup.lng+dest.lng)/2};
   el.innerHTML='';
@@ -3637,7 +3654,7 @@ async function renderAdminDeliveryMap(order){
   const vehicleEmoji=VEHICLE_ICONS_ADMIN[(order.riderVehicleType||'motorcycle').toLowerCase()]||'🏍️';
   new google.maps.Marker({position:pickup,map:map,icon:makeMarkerIconAdmin('#FF6A00',26),label:{text:'🏢',fontSize:'13px'},title:'RichNation Mall'});
   new google.maps.Marker({position:dest,map:map,icon:makeMarkerIconAdmin('#fff',26,'#161616'),label:{text:'📍',fontSize:'13px'},title:order.customer?.name||'Delivery Address'});
-  new google.maps.Marker({position:riderPos,map:map,icon:makeMarkerIconAdmin('#161616',30,isLive?'#FF6A00':'#83838A'),label:{text:vehicleEmoji,fontSize:'16px'},title:(order.riderName||'Rider')+(isLive?', live location':', approximate position')});
+  new google.maps.Marker({position:riderPos,map:map,icon:makeMarkerIconAdmin('#161616',30,isLive?riderMarkerColor:'#83838A',riderHeading),label:{text:vehicleEmoji,fontSize:'16px'},title:(order.riderName||'Rider')+(isLive?', live location':', approximate position')});
   new google.maps.TrafficLayer().setMap(map);
   // Real routed path (rider's current position to the customer) when live,
   // this is what actually reflects a "fastest route" instead of a guess.
@@ -5020,6 +5037,9 @@ function renderSiteCustomiser(c){
   html += '<input class="inp" id="cs-pickup-search" placeholder="Type an address and press Enter..." style="margin-bottom:8px;" onkeydown="if(event.key===\'Enter\'){event.preventDefault();searchPickupAddress();}"/>';
   html += '<div id="cs-pickup-status" style="font-size:11px;color:var(--wh);font-weight:700;margin-bottom:8px;">'+((settings.pickupLocation||{}).lat!=null?'✔ Currently set'+((settings.pickupLocation||{}).address?', '+(settings.pickupLocation||{}).address:'')+'. Drag the pin and hit Save to change it.':'Not set yet, drag the pin to your location, or use one of the buttons above, then Save.')+'</div>';
   html += '<button class="btn btn-or" onclick="savePickupPinPosition()">'+iconBadge('save',14)+' Save Pickup Location</button></div>';
+  html += '<div class="fg" style="margin-top:16px;"><label class="lbl">Delivery Map Marker Colour</label>';
+  html += '<div style="font-size:11px;color:var(--wh);font-weight:700;margin-bottom:8px;">The default colour of a rider\'s marker on the live delivery map, for admin, riders, and customers. Any rider can set their own colour in their Profile, which takes priority over this default.</div>';
+  html += '<div style="display:flex;align-items:center;gap:10px;"><input type="color" id="cs-marker-color" value="'+(settings.mapMarkerColor||'#FF6A00')+'" style="width:44px;height:38px;border-radius:8px;border:1px solid var(--bdr);background:none;cursor:pointer;padding:2px;"/><button class="btn btn-or" onclick="saveMapMarkerColor()">Save Marker Colour</button></div></div>';
   html += '<div class="cs-section"><div class="cs-section-title">'+iconBadge('home',14)+' Hero Section</div>';
   html += '<div class="fg"><label class="lbl">Eyebrow</label><input class="inp" id="cs-ey" value="'+(hc.eyebrow||'Delivering Across Nigeria and The World')+'"/></div>';
   html += '<div class="g2"><div class="fg"><label class="lbl">Title Line 1 (white)</label><input class="inp" id="cs-t1" value="'+(hc.title1||'Shop Smart.')+'"/></div>';
@@ -5242,6 +5262,12 @@ async function searchPickupAddress(){
   }catch(e){
     if(statusEl){statusEl.innerHTML=''+iconBadge('warning',14)+' Search failed, check your connection, or drag the pin manually.';statusEl.style.color='var(--re)';}
   }
+}
+async function saveMapMarkerColor(){
+  const color=document.getElementById('cs-marker-color').value;
+  settings.mapMarkerColor=color;
+  await fbU('rn_mall_settings',{mapMarkerColor:color});
+  toast('Default marker colour saved!');
 }
 async function savePickupPinPosition(){
   const statusEl=document.getElementById('cs-pickup-status');
