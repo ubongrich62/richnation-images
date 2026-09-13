@@ -2068,7 +2068,13 @@ function showPopupAd(pa){
   // min() combines the admin's own cap with a viewport-relative one, so even a
   // very large number typed into Max Height can never push the flyer taller
   // than the screen itself on a small phone.
-  const imgStyle='width:100%;display:block;max-height:min('+(isBanner?'40vh':'80vh')+','+maxHeight+'px);object-fit:'+(isBanner?'cover':'contain')+';';
+  // 'auto' (the default) leaves the image its natural shape, letterboxed to fit
+  // inside the width/height caps without cropping. Any explicit ratio admin picks
+  // boxes the flyer to that exact shape instead, filling it (cropping to fit),
+  // same convention as the Promo Ads tiles use.
+  const ratio=pa.aspectRatio&&pa.aspectRatio!=='auto'?pa.aspectRatio.replace(':','/'):null;
+  const imgStyle='width:100%;display:block;max-height:min('+(isBanner?'40vh':'80vh')+','+maxHeight+'px);'
+    +(ratio?'aspect-ratio:'+ratio+';height:auto;object-fit:cover;':'object-fit:'+(isBanner?'cover':'contain')+';');
   overlay.innerHTML='<div style="'+cardStyle+'">'
     +'<img src="'+pa.image+'" alt="'+escHtml(pa.caption||'Promotion')+'"'+imgClick+' style="'+imgStyle+'"/>'
     +(pa.caption?'<div style="padding:10px 14px;font-size:12px;font-weight:700;color:var(--wh,#ccc);text-align:center;">'+escHtml(pa.caption)+'</div>':'')

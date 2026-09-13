@@ -5663,6 +5663,13 @@ const POPUP_AD_PLACEMENTS=[
   ['bottom-banner','Full-width bar, bottom of the screen'],
   ['top-banner','Full-width bar, top of the screen']
 ];
+const POPUP_AD_RATIOS=[
+  ['auto','Auto, whatever shape the image naturally is (default)'],
+  ['1:1','Square 1:1'],
+  ['16:9','Widescreen 16:9'],
+  ['9:16','Vertical 9:16, good for a phone-shaped flyer'],
+  ['4:3','Classic 4:3 photo']
+];
 const POPUP_AD_FREQUENCIES=[
   ['always','Every page load'],
   ['session','Once per visit (until they close the tab)'],
@@ -5701,6 +5708,7 @@ function renderPopupAdEditor(){
       +'<div class="fg"><label class="lbl">Width (px), ignored for full-width bars</label><input class="inp" type="number" id="pa-width-'+i+'" value="'+(pa.widthPx||360)+'" placeholder="360"></div>'
       +'<div class="fg"><label class="lbl">Max Height (px), keeps a tall image from taking over the screen</label><input class="inp" type="number" id="pa-maxheight-'+i+'" value="'+(pa.maxHeightPx||defaultMaxHeight)+'" placeholder="'+defaultMaxHeight+'"></div>'
       +'</div>'
+      +'<div class="fg"><label class="lbl">Aspect Ratio, boxes the flyer to this shape instead of whatever the uploaded image happens to be</label><select class="inp" id="pa-ratio-'+i+'">'+POPUP_AD_RATIOS.map(function(o){return '<option value="'+o[0]+'"'+((pa.aspectRatio||'auto')===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select></div>'
       +'<div class="g2">'
       +'<div class="fg"><label class="lbl">Delay before it appears (seconds)</label><input class="inp" type="number" id="pa-delay-'+i+'" value="'+(pa.delaySec!=null?pa.delaySec:3)+'" placeholder="3"></div>'
       +'</div>'
@@ -5741,10 +5749,11 @@ async function savePopupAd(idx){
   var frequency=(document.getElementById('pa-frequency-'+idx)||{}).value||'session';
   var widthPx=parseInt((document.getElementById('pa-width-'+idx)||{}).value)||360;
   var maxHeightPx=parseInt((document.getElementById('pa-maxheight-'+idx)||{}).value)||(placement==='top-banner'||placement==='bottom-banner'?140:480);
+  var aspectRatio=(document.getElementById('pa-ratio-'+idx)||{}).value||'auto';
   var delaySec=parseInt((document.getElementById('pa-delay-'+idx)||{}).value);if(isNaN(delaySec)||delaySec<0)delaySec=3;
   var enabled=!!(document.getElementById('pa-enabled-'+idx)||{}).checked;
   if(enabled&&!(list[idx]||{}).image){toast('Upload a flyer image first','err');return;}
-  list[idx]=Object.assign({},list[idx]||{},{link:link.trim(),caption:caption.trim(),placement:placement,frequency:frequency,widthPx:widthPx,maxHeightPx:maxHeightPx,delaySec:delaySec,enabled:enabled});
+  list[idx]=Object.assign({},list[idx]||{},{link:link.trim(),caption:caption.trim(),placement:placement,frequency:frequency,widthPx:widthPx,maxHeightPx:maxHeightPx,aspectRatio:aspectRatio,delaySec:delaySec,enabled:enabled});
   settings.popupAds=list;
   await fbU('rn_mall_settings',{popupAds:list});
   toast('Pop-up ad saved!');
