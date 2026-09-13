@@ -2935,6 +2935,8 @@ function renderCheckout(isPreorder=false){
   updateCOSummary();
   // Default to Nigeria and load states
   const cc=document.getElementById('co-country');if(cc){cc.value='NG';onCountry();}
+  window._checkoutAddrLatLng=null;
+  initCheckoutAddressAutocomplete();
 }
 
 function setDeliveryMethod(m){
@@ -3041,6 +3043,10 @@ async function placeOrder(isPreorder=false){
       note:isPreorder?'Pre-order received.':isPod?('Pay on Delivery selected, 50% deposit of '+fmt(depositAmt)+' required to confirm.'):(deliveryMethod==='pickup'?'Order received, customer will collect in person.':'Order received and being processed.')}],
     createdAt:new Date().toISOString(),date:ds(),currency,userId:currUser.id,
   };
+  if(window._checkoutAddrLatLng&&window._checkoutAddrLatLng.forAddr===addr){
+    order.deliveryLat=window._checkoutAddrLatLng.lat;
+    order.deliveryLng=window._checkoutAddrLatLng.lng;
+  }
   if(document.getElementById('save-addr')?.checked){
     const addrUpdate={address:addr,city,state:state||'',country,phone,zip:zip||''};
     await fbU('rn_mall_customers/'+currUser.id,addrUpdate);
@@ -3333,6 +3339,108 @@ async function geocodeAddress(address){
   }catch(e){}
   return null;
 }
+// ── ADDRESS AUTOCOMPLETE (Google Places) ──
+// Breaks a picked place into the same fields the address forms already use
+// (street/city/state/country/zip) plus its exact coordinates, so an order
+// can be pinned to precisely where the customer picked it rather than
+// waiting until the tracking map first opens and guessing coordinates from
+// a freeform address string via the free Nominatim service.
+function parsePlaceAddressComponents(place){
+  const comps=place.address_components||[];
+  function get(type){return comps.find(function(c){return c.types.includes(type);})||null;}
+  const streetNumber=get('street_number'),route=get('route');
+  const locality=get('locality')||get('postal_town')||get('sublocality')||get('administrative_area_level_2');
+  const state=get('administrative_area_level_1');
+  const country=get('country');
+  const postal=get('postal_code');
+  const street=[streetNumber?streetNumber.long_name:'',route?route.long_name:''].filter(Boolean).join(' ')||place.name||'';
+  const loc=place.geometry&&place.geometry.location;
+  return {
+    street:street,
+    city:locality?locality.long_name:'',
+    stateName:state?state.long_name:'',
+    countryCode:country?country.short_name:'',
+    zip:postal?postal.long_name:'',
+    lat:loc?loc.lat():null,
+    lng:loc?loc.lng():null
+  };
+}
+// Our own state lists use free-form display names (e.g. "FCT Abuja"), not
+// the exact strings Google returns (e.g. "Federal Capital Territory"), so
+// this matches loosely rather than forcing a selection that might be wrong.
+function findMatchingStateOption(selectEl,stateName){
+  if(!selectEl||!stateName)return false;
+  function norm(s){return (s||'').toLowerCase().replace(/\s*state\s*$/,'').trim();}
+  const target=norm(stateName);
+  for(const opt of selectEl.options){
+    const optNorm=norm(opt.value);
+    if(optNorm&&(optNorm===target||optNorm.includes(target)||target.includes(optNorm))){
+      selectEl.value=opt.value;
+      return true;
+    }
+  }
+  return false;
+}
+function attachAddressAutocomplete(inputId,onPlace){
+  const input=document.getElementById(inputId);
+  if(!input||!window.google||!google.maps||!google.maps.places)return null;
+  const autocomplete=new google.maps.places.Autocomplete(input,{
+    componentRestrictions:{country:['ng','gh','ke','za','gb','us','ca','de','fr']},
+    fields:['address_components','geometry','name']
+  });
+  autocomplete.addListener('place_changed',function(){
+    const place=autocomplete.getPlace();
+    if(!place||!place.address_components)return;
+    onPlace(parsePlaceAddressComponents(place));
+  });
+  return autocomplete;
+}
+window._checkoutAddrLatLng=null;
+async function initCheckoutAddressAutocomplete(){
+  await loadGoogleMapsIfNeeded();
+  const addrInput=document.getElementById('co-addr');
+  attachAddressAutocomplete('co-addr',function(parsed){
+    if(addrInput&&parsed.street)addrInput.value=parsed.street;
+    const cityInput=document.getElementById('co-city');
+    if(cityInput&&parsed.city)cityInput.value=parsed.city;
+    const zipInput=document.getElementById('co-zip');
+    if(zipInput&&parsed.zip)zipInput.value=parsed.zip;
+    const countrySel=document.getElementById('co-country');
+    if(countrySel&&parsed.countryCode&&Array.prototype.some.call(countrySel.options,function(o){return o.value===parsed.countryCode;})){
+      countrySel.value=parsed.countryCode;onCountry();
+    }
+    const stateSel=document.getElementById('co-state');
+    if(stateSel&&parsed.stateName)findMatchingStateOption(stateSel,parsed.stateName);
+    if(parsed.lat!=null&&parsed.lng!=null){
+      window._checkoutAddrLatLng={lat:parsed.lat,lng:parsed.lng,forAddr:addrInput?addrInput.value:''};
+    }
+    calcDel();
+  });
+  // If the customer edits the address after picking a suggestion, the
+  // captured coordinates no longer match what they typed, drop them rather
+  // than silently saving a stale pin against a changed address.
+  if(addrInput)addrInput.addEventListener('input',function(){
+    if(window._checkoutAddrLatLng&&window._checkoutAddrLatLng.forAddr!==addrInput.value)window._checkoutAddrLatLng=null;
+  });
+}
+async function initAccountAddressAutocomplete(){
+  await loadGoogleMapsIfNeeded();
+  attachAddressAutocomplete('addr-addr',function(parsed){
+    const addrInput=document.getElementById('addr-addr');
+    if(addrInput&&parsed.street)addrInput.value=parsed.street;
+    const cityInput=document.getElementById('addr-city');
+    if(cityInput&&parsed.city)cityInput.value=parsed.city;
+    const zipInput=document.getElementById('addr-zip');
+    if(zipInput&&parsed.zip)zipInput.value=parsed.zip;
+    const countrySel=document.getElementById('addr-country');
+    if(countrySel&&parsed.countryCode&&Array.prototype.some.call(countrySel.options,function(o){return o.value===parsed.countryCode;})){
+      countrySel.value=parsed.countryCode;onAddrCountry();
+    }
+    const stateSel=document.getElementById('addr-state');
+    if(stateSel&&parsed.stateName)findMatchingStateOption(stateSel,parsed.stateName);
+    if(parsed.lat!=null&&parsed.lng!=null)window._accountAddrLatLng={lat:parsed.lat,lng:parsed.lng};
+  });
+}
 // ── LIVE DELIVERY MAP, Google Maps ──
 // Google Maps is what real ride-hailing/delivery apps use, its tile and JS delivery
 // infrastructure is far more reliable than the free OpenStreetMap+Leaflet setup this
@@ -3367,7 +3475,7 @@ function loadGoogleMapsIfNeeded(){
     var timer=setTimeout(function(){if(!settled){settled=true;console.warn('[GoogleMaps] Script did not load within 10s, giving up for now.');resolve();}},10000);
     window._gmapsReady=function(){if(!settled){settled=true;clearTimeout(timer);resolve();}};
     const script=document.createElement('script');
-    script.src='https://maps.googleapis.com/maps/api/js?key='+GOOGLE_MAPS_API_KEY+'&callback=_gmapsReady&loading=async';
+    script.src='https://maps.googleapis.com/maps/api/js?key='+GOOGLE_MAPS_API_KEY+'&libraries=places&callback=_gmapsReady&loading=async';
     script.onerror=function(){if(!settled){settled=true;clearTimeout(timer);resolve();}};
     document.head.appendChild(script);
   });
@@ -4527,6 +4635,8 @@ async function accTab(tab,el,silent){
     <datalist id="city-suggestions-acc">${['Lagos','Ikeja','Lekki','Victoria Island','Ajah','Abuja','Kano','Ibadan','Port Harcourt','Benin City','Kaduna','Enugu','Aba','Onitsha','Warri','Jos','Ilorin','Owerri','Uyo','Abeokuta','Calabar','Akure','Osogbo','Makurdi','Minna','Sokoto','Maiduguri','Bauchi','Yola','Gombe','Asaba','Awka','Umuahia','Lokoja','Ado Ekiti'].map(ct=>`<option value="${ct}">`).join('')}</datalist>
     <button class="auth-btn" style="max-width:180px;" onclick="saveAddress()">Save Address</button></div>`;
     setTimeout(()=>{if(currUser.country)onAddrCountry(currUser.state);},50);
+    window._accountAddrLatLng=null;
+    initAccountAddressAutocomplete();
   }
   else if(tab==='profile'){c.innerHTML=`<div style="max-width:480px;"><div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;margin-bottom:14px;">My Profile</div><div class="g2"><div class="fg"><label class="lbl">First Name</label><input class="inp" id="pf-fn" value="${currUser.fname||''}"/></div><div class="fg"><label class="lbl">Last Name</label><input class="inp" id="pf-ln" value="${currUser.lname||''}"/></div></div><div class="fg"><label class="lbl">Email</label><input class="inp" type="email" id="pf-em" value="${currUser.email||''}"/></div><div class="fg"><label class="lbl">Phone</label><input class="inp" id="pf-ph" value="${currUser.phone||''}"/></div><div class="fg"><label class="lbl">New Password (leave blank to keep current)</label><div class="pw-wrap"><input class="inp" id="pf-pw" type="password" placeholder="New password" style="margin-bottom:0;"/><button class="pw-eye" onclick="this.previousElementSibling.type=this.previousElementSibling.type==='password'?'text':'password'">Show</button></div></div><button class="auth-btn" style="max-width:180px;" onclick="saveProfile()">Save Profile</button>
     <div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:16px;margin-top:20px;">
@@ -4583,7 +4693,7 @@ function onAddrState(){
     lw.style.display='block';
   }else if(lw){lw.style.display='none';}
 }
-async function saveAddress(){const u={address:document.getElementById('addr-addr')?.value.trim(),city:document.getElementById('addr-city')?.value.trim(),state:document.getElementById('addr-state')?.value.trim(),lga:document.getElementById('addr-lga')?.value.trim()||'',country:document.getElementById('addr-country')?.value.trim(),zip:document.getElementById('addr-zip')?.value.trim()};await fbU('rn_mall_customers/'+currUser.id,u);currUser={...currUser,...u};localStorage.setItem('rnm_user',JSON.stringify(currUser));toast('Address saved!');}
+async function saveAddress(){const u={address:document.getElementById('addr-addr')?.value.trim(),city:document.getElementById('addr-city')?.value.trim(),state:document.getElementById('addr-state')?.value.trim(),lga:document.getElementById('addr-lga')?.value.trim()||'',country:document.getElementById('addr-country')?.value.trim(),zip:document.getElementById('addr-zip')?.value.trim()};if(window._accountAddrLatLng){u.lat=window._accountAddrLatLng.lat;u.lng=window._accountAddrLatLng.lng;}await fbU('rn_mall_customers/'+currUser.id,u);currUser={...currUser,...u};localStorage.setItem('rnm_user',JSON.stringify(currUser));toast('Address saved!');}
 async function cancelMyOrder(trackingNum){
   const order=await fbG('rn_mall_orders/'+trackingNum);if(!order)return;
   const willRefund=order.payMethod!=='pod';

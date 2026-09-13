@@ -3596,7 +3596,7 @@ function loadGoogleMapsIfNeededAdmin(){
     var timer=setTimeout(function(){if(!settled){settled=true;resolve();}},10000);
     window._gmapsReady=function(){if(!settled){settled=true;clearTimeout(timer);resolve();}};
     const script=document.createElement('script');
-    script.src='https://maps.googleapis.com/maps/api/js?key='+GOOGLE_MAPS_API_KEY_ADMIN+'&callback=_gmapsReady&loading=async';
+    script.src='https://maps.googleapis.com/maps/api/js?key='+GOOGLE_MAPS_API_KEY_ADMIN+'&libraries=places&callback=_gmapsReady&loading=async';
     script.onerror=function(){if(!settled){settled=true;clearTimeout(timer);resolve();}};
     document.head.appendChild(script);
   });
@@ -5176,6 +5176,26 @@ async function initPickupLocationMap(){
   toggleWrap.innerHTML='<button id="pickup-map-toggle-btn" style="background:#161616;color:#fff;border:1px solid #FF6A00;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">'+(_pickupMapViewMode==='satellite'?''+iconBadge('map',14)+' Street':''+iconBadge('signal',14)+' Satellite')+'</button>';
   toggleWrap.onclick=function(e){e.stopPropagation();togglePickupMapView();};
   el.appendChild(toggleWrap);
+  // Live address suggestions as admin types, selecting one jumps the pin
+  // straight there using Places' own coordinates, no separate geocoding
+  // call needed. Typing a full address and hitting Enter without picking a
+  // suggestion still falls back to searchPickupAddress()'s Nominatim lookup.
+  const searchInput=document.getElementById('cs-pickup-search');
+  if(searchInput&&window.google&&google.maps.places){
+    const autocomplete=new google.maps.places.Autocomplete(searchInput,{
+      componentRestrictions:{country:['ng','gh','ke','za','gb','us','ca','de','fr']},
+      fields:['geometry']
+    });
+    autocomplete.addListener('place_changed',function(){
+      const place=autocomplete.getPlace();
+      const loc=place&&place.geometry&&place.geometry.location;
+      if(!loc)return;
+      const lat=loc.lat(),lng=loc.lng();
+      if(_pickupMapInstance&&_pickupMapMarker){_pickupMapMarker.setPosition({lat,lng});_pickupMapInstance.setCenter({lat,lng});_pickupMapInstance.setZoom(16);}
+      const statusEl=document.getElementById('cs-pickup-status');
+      if(statusEl){statusEl.innerHTML=''+iconBadge('pin',14)+' Found it, click Save to confirm this as your pickup location.';statusEl.style.color='var(--or)';}
+    });
+  }
 }
 function togglePickupMapView(){
   _pickupMapViewMode=_pickupMapViewMode==='street'?'satellite':'street';
