@@ -4878,6 +4878,13 @@ const STORAGE_CLEANUP_FOLDERS=[
   'reviews','staff-photos','staff-products','investor-photos','rider-photos',
   'task-files','submissions','promo-ad-videos'
 ];
+async function fbStorageGetMetadata(name){
+  try{
+    const res=await fbFetchTimeout('https://firebasestorage.googleapis.com/v0/b/'+FIREBASE_STORAGE_BUCKET+'/o/'+encodeURIComponent(name),null,10000);
+    if(!res||!res.ok)return null;
+    return await res.json();
+  }catch(e){return null;}
+}
 async function fbStorageListAll(prefix){
   let items=[],pageToken;
   do{
@@ -4889,7 +4896,20 @@ async function fbStorageListAll(prefix){
     items=items.concat(data.items||[]);
     pageToken=data.nextPageToken;
   }while(pageToken);
-  return items;
+  // Firebase Storage's list endpoint (above) only ever returns name/bucket, never
+  // size/contentType/timeCreated, that's why every file used to show "0 B" and
+  // fall back to a generic document icon regardless of what it actually was. Each
+  // file's real metadata needs its own separate request, done here in capped
+  // batches (20 at a time) rather than all at once, so a folder with hundreds of
+  // files doesn't try to open hundreds of connections simultaneously.
+  const withMeta=new Array(items.length);
+  const BATCH=20;
+  for(let i=0;i<items.length;i+=BATCH){
+    const chunk=items.slice(i,i+BATCH);
+    const metas=await Promise.all(chunk.map(function(it){return fbStorageGetMetadata(it.name);}));
+    metas.forEach(function(meta,j){withMeta[i+j]=meta||chunk[j];});
+  }
+  return withMeta;
 }
 function fmtBytes(n){
   if(n<1024)return n+' B';
@@ -4901,7 +4921,7 @@ async function scanStorageFolders(){
   const resultsEl=document.getElementById('storage-scan-results');
   btn.disabled=true;btn.textContent='Scanning…';
   resultsEl.style.display='block';
-  resultsEl.innerHTML='<div style="font-size:12px;color:var(--wh);font-weight:700;">Scanning '+STORAGE_CLEANUP_FOLDERS.length+' folders, this can take a moment…</div>';
+  resultsEl.innerHTML='<div style="font-size:12px;color:var(--wh);font-weight:700;">Scanning '+STORAGE_CLEANUP_FOLDERS.length+' folders, this fetches full details for every file so it can take a little while on a large bucket…</div>';
   const rows=[];
   for(const folder of STORAGE_CLEANUP_FOLDERS){
     const items=await fbStorageListAll(folder+'/');
