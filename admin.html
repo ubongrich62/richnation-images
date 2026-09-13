@@ -1542,7 +1542,7 @@ async function finalizeApproveStaff(id,name,email){
   }
   await fbU('rn_mall_staff/'+id,update);
   logActivity('Approved staff application',name+' ('+role+'), '+staffNumber);
-  alert(''+iconBadge('check',14)+' '+name+' approved as '+staffNumber+'!\n\nSend them these login details:\n\nEmail: '+email+'\nPassword: '+pass+'\n\n(There is no automatic email, please send this to them yourself via WhatsApp/email.)');
+  alert('✅ '+name+' approved as '+staffNumber+'!\n\nSend them these login details:\n\nEmail: '+email+'\nPassword: '+pass+'\n\n(There is no automatic email, please send this to them yourself via WhatsApp/email.)');
   toast('Approved, credentials shown above');
   nav('staff',false);
 }
@@ -2131,7 +2131,7 @@ async function approveInvestor(id,name){
     update.password=trimmedPass;
   }
   await fbU('rn_mall_investors/'+id,update);
-  alert(''+iconBadge('check',14)+' '+name+' approved as '+investorNumber+'!\n\nSend them these login details:\n\nEmail: '+v.email+'\nPassword: '+trimmedPass+'\n\n(There is no automatic email, please send this to them yourself via WhatsApp/email. Their signed agreement is already recorded digitally in the portal, no physical document needed.)');
+  alert('✅ '+name+' approved as '+investorNumber+'!\n\nSend them these login details:\n\nEmail: '+v.email+'\nPassword: '+trimmedPass+'\n\n(There is no automatic email, please send this to them yourself via WhatsApp/email. Their signed agreement is already recorded digitally in the portal, no physical document needed.)');
   toast('Approved, credentials shown above');
   nav('investors',false);
 }
@@ -2582,7 +2582,7 @@ async function approveRider(id,name){
     update.password=trimmedPass;
   }
   await fbU('rn_mall_riders/'+id,update);
-  alert(''+iconBadge('check',14)+' '+name+' approved as '+riderNumber+'!\n\nSend them these login details:\n\nEmail: '+r.email+'\nPassword: '+trimmedPass+'\n\n(There is no automatic email, please send this to them yourself via WhatsApp/email.)');
+  alert('✅ '+name+' approved as '+riderNumber+'!\n\nSend them these login details:\n\nEmail: '+r.email+'\nPassword: '+trimmedPass+'\n\n(There is no automatic email, please send this to them yourself via WhatsApp/email.)');
   toast('Approved, credentials shown above');
   nav('riders',false);
 }
@@ -2982,7 +2982,7 @@ async function resetVendorPassword(id,name){
   if(pass===null)return;
   if(!pass.trim()||pass.trim().length<6){toast('Password must be at least 6 characters','err');return;}
   await fbU('rn_mall_vendors/'+id,{password:pass.trim()});
-  alert(''+iconBadge('check',14)+' Password reset for '+name+'.\n\nNew password: '+pass.trim()+'\n\nSend this to them yourself, there is no automatic email.');
+  alert('✅ Password reset for '+name+'.\n\nNew password: '+pass.trim()+'\n\nSend this to them yourself, there is no automatic email.');
   toast('Password reset, details shown above');
   nav('vendors',false);
 }
@@ -3510,7 +3510,10 @@ async function resolveIncident(tracking){
   openOrder(tracking);
 }
 let _adminDeliveryMapInstance=null;
-const VEHICLE_ICONS_ADMIN={motorcycle:''+iconBadge('bike',14)+'',bicycle:''+iconBadge('bike',14)+'',car:''+iconBadge('car',14)+'','van/truck':''+iconBadge('truck',14)+'','on foot':''+iconBadge('user',14)+''};
+// Plain emoji, deliberately not iconBadge()'s SVG here, this map only ever
+// feeds a Google Maps marker label, which renders label.text as literal
+// text and cannot display HTML/SVG at all.
+const VEHICLE_ICONS_ADMIN={motorcycle:'🏍️',bicycle:'🚲',car:'🚗','van/truck':'🚚','on foot':'🚶'};
 const VEHICLE_AVG_SPEED_KMH_ADMIN={motorcycle:32,bicycle:15,car:26,'van/truck':22,'on foot':5};
 function estimateDeliveryTimeAdmin(pickup,dest,vehicleType){
   const R=6371,dLat=(dest.lat-pickup.lat)*Math.PI/180,dLng=(dest.lng-pickup.lng)*Math.PI/180;
@@ -3528,7 +3531,7 @@ function toggleAdminMapView(order){
 }
 function refreshAdminMapToggleBtn(){
   const btn=document.getElementById('admin-map-toggle-btn');
-  if(btn)btn.textContent=_adminMapViewMode==='satellite'?''+iconBadge('map',14)+' Street':''+iconBadge('signal',14)+' Satellite';
+  if(btn)btn.innerHTML=_adminMapViewMode==='satellite'?''+iconBadge('map',14)+' Street':''+iconBadge('signal',14)+' Satellite';
 }
 // Google Maps is what real ride-hailing/delivery apps use, its tile and JS delivery
 // infrastructure is far more reliable than the free OpenStreetMap+Leaflet setup this
@@ -3583,9 +3586,9 @@ async function renderAdminDeliveryMap(order){
   el.style.cssText='width:100%;height:260px;border-radius:9px;overflow:hidden;background:var(--card2);';
   const map=new google.maps.Map(el,{center:pickup,zoom:12,disableDefaultUI:true,zoomControl:true,mapTypeId:_adminMapViewMode==='satellite'?'hybrid':'roadmap',styles:DARK_MAP_STYLE_ADMIN});
   _adminDeliveryMapInstance=map;
-  const vehicleEmoji=VEHICLE_ICONS_ADMIN[(order.riderVehicleType||'motorcycle').toLowerCase()]||''+iconBadge('bike',14)+'';
-  new google.maps.Marker({position:pickup,map:map,icon:makeMarkerIconAdmin('#FF6A00',26),label:{text:''+iconBadge('building',14)+'',fontSize:'13px'},title:'RichNation Mall'});
-  new google.maps.Marker({position:dest,map:map,icon:makeMarkerIconAdmin('#fff',26,'#161616'),label:{text:''+iconBadge('pin',14)+'',fontSize:'13px'},title:order.customer?.name||'Delivery Address'});
+  const vehicleEmoji=VEHICLE_ICONS_ADMIN[(order.riderVehicleType||'motorcycle').toLowerCase()]||'🏍️';
+  new google.maps.Marker({position:pickup,map:map,icon:makeMarkerIconAdmin('#FF6A00',26),label:{text:'🏢',fontSize:'13px'},title:'RichNation Mall'});
+  new google.maps.Marker({position:dest,map:map,icon:makeMarkerIconAdmin('#fff',26,'#161616'),label:{text:'📍',fontSize:'13px'},title:order.customer?.name||'Delivery Address'});
   new google.maps.Marker({position:riderPos,map:map,icon:makeMarkerIconAdmin('#161616',30,isLive?'#FF6A00':'#83838A'),label:{text:vehicleEmoji,fontSize:'16px'},title:(order.riderName||'Rider')+(isLive?', live location':', approximate position')});
   new google.maps.Polyline({strokeColor:'#FF6A00',strokeOpacity:0,strokeWeight:3,icons:[{icon:{path:'M 0,-1 0,1',strokeOpacity:0.85,scale:3},offset:'0',repeat:'14px'}],path:[pickup,dest],map:map});
   const bounds=new google.maps.LatLngBounds();
@@ -5102,15 +5105,15 @@ async function initPickupLocationMap(){
   el.style.cssText='width:100%;height:260px;border-radius:9px;overflow:hidden;background:var(--card2);margin-bottom:8px;position:relative;';
   const map=new google.maps.Map(el,{center:start,zoom:saved&&saved.lat!=null?15:6,disableDefaultUI:true,zoomControl:true,mapTypeId:_pickupMapViewMode==='satellite'?'hybrid':'roadmap',styles:DARK_MAP_STYLE_ADMIN});
   _pickupMapInstance=map;
-  _pickupMapMarker=new google.maps.Marker({position:start,map:map,icon:makeMarkerIconAdmin('#FF6A00',30),label:{text:''+iconBadge('building',14)+'',fontSize:'15px'},draggable:true});
+  _pickupMapMarker=new google.maps.Marker({position:start,map:map,icon:makeMarkerIconAdmin('#FF6A00',30),label:{text:'🏢',fontSize:'15px'},draggable:true});
   _pickupMapMarker.addListener('dragend',function(){
     const statusEl=document.getElementById('cs-pickup-status');
-    if(statusEl){statusEl.textContent=''+iconBadge('pin',14)+' Pin moved, click Save to confirm this as your pickup location.';statusEl.style.color='var(--or)';}
+    if(statusEl){statusEl.innerHTML=''+iconBadge('pin',14)+' Pin moved, click Save to confirm this as your pickup location.';statusEl.style.color='var(--or)';}
   });
   map.addListener('click',function(e){
     _pickupMapMarker.setPosition(e.latLng);
     const statusEl=document.getElementById('cs-pickup-status');
-    if(statusEl){statusEl.textContent=''+iconBadge('pin',14)+' Pin moved, click Save to confirm this as your pickup location.';statusEl.style.color='var(--or)';}
+    if(statusEl){statusEl.innerHTML=''+iconBadge('pin',14)+' Pin moved, click Save to confirm this as your pickup location.';statusEl.style.color='var(--or)';}
   });
   const toggleWrap=document.createElement('div');
   toggleWrap.style.cssText='position:absolute;top:8px;right:8px;z-index:2;';
@@ -5123,12 +5126,12 @@ function togglePickupMapView(){
   localStorage.setItem('rnm_map_view',_pickupMapViewMode);
   if(_pickupMapInstance)_pickupMapInstance.setMapTypeId(_pickupMapViewMode==='satellite'?'hybrid':'roadmap');
   const btn=document.getElementById('pickup-map-toggle-btn');
-  if(btn)btn.textContent=_pickupMapViewMode==='satellite'?''+iconBadge('map',14)+' Street':''+iconBadge('signal',14)+' Satellite';
+  if(btn)btn.innerHTML=_pickupMapViewMode==='satellite'?''+iconBadge('map',14)+' Street':''+iconBadge('signal',14)+' Satellite';
 }
 function useMyCurrentLocationForPickup(){
   const statusEl=document.getElementById('cs-pickup-status');
   if(!navigator.geolocation){if(statusEl){statusEl.textContent='Your browser doesn\'t support location detection, drag the pin manually instead.';statusEl.style.color='var(--re)';}return;}
-  if(statusEl){statusEl.textContent=''+iconBadge('pin',14)+' Detecting your current location…';statusEl.style.color='var(--wh);'}
+  if(statusEl){statusEl.innerHTML=''+iconBadge('pin',14)+' Detecting your current location…';statusEl.style.color='var(--wh);'}
   navigator.geolocation.getCurrentPosition(
     function(pos){
       const lat=pos.coords.latitude,lng=pos.coords.longitude;
@@ -5137,10 +5140,10 @@ function useMyCurrentLocationForPickup(){
         _pickupMapInstance.setCenter({lat,lng});
         _pickupMapInstance.setZoom(16);
       }
-      if(statusEl){statusEl.textContent=''+iconBadge('pin',14)+' Pin moved to your current location, click Save to confirm.';statusEl.style.color='var(--or)';}
+      if(statusEl){statusEl.innerHTML=''+iconBadge('pin',14)+' Pin moved to your current location, click Save to confirm.';statusEl.style.color='var(--or)';}
     },
     function(err){
-      if(statusEl){statusEl.textContent=''+iconBadge('warning',14)+' Could not access your location, check your browser\'s location permission, or drag the pin manually.';statusEl.style.color='var(--re)';}
+      if(statusEl){statusEl.innerHTML=''+iconBadge('warning',14)+' Could not access your location, check your browser\'s location permission, or drag the pin manually.';statusEl.style.color='var(--re)';}
     },
     {enableHighAccuracy:true,timeout:15000}
   );
@@ -5149,19 +5152,19 @@ async function searchPickupAddress(){
   const statusEl=document.getElementById('cs-pickup-status');
   const query=((document.getElementById('cs-pickup-search')||{}).value||'').trim();
   if(!query){if(statusEl){statusEl.textContent='Type an address to search first.';statusEl.style.color='var(--or)';}return;}
-  if(statusEl){statusEl.textContent=''+iconBadge('search',14)+' Searching…';statusEl.style.color='var(--wh);'}
+  if(statusEl){statusEl.innerHTML=''+iconBadge('search',14)+' Searching…';statusEl.style.color='var(--wh);'}
   try{
     const res=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ng&email=rnm.office@richnationmall.com&q='+encodeURIComponent(query+', Nigeria'));
     const data=await res.json();
     if(data&&data[0]){
       const lat=parseFloat(data[0].lat),lng=parseFloat(data[0].lon);
       if(_pickupMapInstance&&_pickupMapMarker){_pickupMapMarker.setPosition({lat,lng});_pickupMapInstance.setCenter({lat,lng});_pickupMapInstance.setZoom(16);}
-      if(statusEl){statusEl.textContent=''+iconBadge('pin',14)+' Found it, click Save to confirm this as your pickup location.';statusEl.style.color='var(--or)';}
+      if(statusEl){statusEl.innerHTML=''+iconBadge('pin',14)+' Found it, click Save to confirm this as your pickup location.';statusEl.style.color='var(--or)';}
     }else{
-      if(statusEl){statusEl.textContent=''+iconBadge('warning',14)+' Could not find that address, try a different search, or drag the pin manually.';statusEl.style.color='var(--re)';}
+      if(statusEl){statusEl.innerHTML=''+iconBadge('warning',14)+' Could not find that address, try a different search, or drag the pin manually.';statusEl.style.color='var(--re)';}
     }
   }catch(e){
-    if(statusEl){statusEl.textContent=''+iconBadge('warning',14)+' Search failed, check your connection, or drag the pin manually.';statusEl.style.color='var(--re)';}
+    if(statusEl){statusEl.innerHTML=''+iconBadge('warning',14)+' Search failed, check your connection, or drag the pin manually.';statusEl.style.color='var(--re)';}
   }
 }
 async function savePickupPinPosition(){

@@ -654,7 +654,7 @@ function startLiveLocationSharing(){
       const b=document.getElementById('live-loc-badge');if(b)b.style.display='flex';
     },
     function(err){
-      const b=document.getElementById('live-loc-badge');if(b){b.style.display='flex';b.style.color='var(--re)';b.textContent=''+iconBadge('warning',14)+' Location access needed for live tracking';}
+      const b=document.getElementById('live-loc-badge');if(b){b.style.display='flex';b.style.color='var(--re)';b.innerHTML=''+iconBadge('warning',14)+' Location access needed for live tracking';}
     },
     {enableHighAccuracy:true,maximumAge:15000,timeout:20000}
   );
@@ -852,7 +852,10 @@ async function saveDeliveryPinPosition(tracking,lat,lng){
   if(hint){hint.innerHTML='✔ Saved! The delivery location has been updated.';hint.style.color='var(--su)';}
   toast('Delivery location corrected!');
 }
-const VEHICLE_ICONS_RIDER_SELF={motorcycle:''+iconBadge('bike',14)+'',bicycle:''+iconBadge('bike',14)+'',car:''+iconBadge('car',14)+'','van/truck':''+iconBadge('truck',14)+'','on foot':''+iconBadge('user',14)+''};
+// Plain emoji, deliberately not iconBadge()'s SVG here, this map only ever
+// feeds a Google Maps marker label, which renders label.text as literal
+// text and cannot display HTML/SVG at all.
+const VEHICLE_ICONS_RIDER_SELF={motorcycle:'🏍️',bicycle:'🚲',car:'🚗','van/truck':'🚚','on foot':'🚶'};
 async function showDeliveryMapModal(tracking){
   const order=await fbG('rn_mall_orders/'+tracking);if(!order)return;
   const overlay=document.createElement('div');
@@ -883,12 +886,12 @@ async function showDeliveryMapModal(tracking){
   let riderMapViewMode=localStorage.getItem('rnm_map_view')||'street';
   const map=new google.maps.Map(el,{center:pickup,zoom:12,disableDefaultUI:true,zoomControl:true,mapTypeId:riderMapViewMode==='satellite'?'hybrid':'roadmap',styles:DARK_MAP_STYLE_RIDER});
   _riderMapInstance=map;
-  new google.maps.Marker({position:pickup,map:map,icon:makeMarkerIconRider('#FF6A00',26),label:{text:''+iconBadge('building',14)+'',fontSize:'13px'},title:'RichNation Mall'});
-  const deliveryMarker=new google.maps.Marker({position:dest,map:map,icon:makeMarkerIconRider('#15151A',26),label:{text:''+iconBadge('pin',14)+'',fontSize:'13px'},title:order.customer?.name||'Delivery Address',draggable:true,zIndex:2});
+  new google.maps.Marker({position:pickup,map:map,icon:makeMarkerIconRider('#FF6A00',26),label:{text:'🏢',fontSize:'13px'},title:'RichNation Mall'});
+  const deliveryMarker=new google.maps.Marker({position:dest,map:map,icon:makeMarkerIconRider('#15151A',26),label:{text:'📍',fontSize:'13px'},title:order.customer?.name||'Delivery Address',draggable:true,zIndex:2});
   // Show the rider's own position too, prefer a fresh device reading, fall back to
   // their last-shared live location so they can always see themselves on the map.
   function placeSelfMarker(lat,lng){
-    const vehicleEmoji=VEHICLE_ICONS_RIDER_SELF[(rider.vehicleType||'motorcycle').toLowerCase()]||''+iconBadge('bike',14)+'';
+    const vehicleEmoji=VEHICLE_ICONS_RIDER_SELF[(rider.vehicleType||'motorcycle').toLowerCase()]||'🏍️';
     new google.maps.Marker({position:{lat:lat,lng:lng},map:map,icon:makeMarkerIconRider('#FF6A00',30),label:{text:vehicleEmoji,fontSize:'16px'},title:'You',zIndex:2});
   }
   if(navigator.geolocation){
@@ -910,7 +913,7 @@ async function showDeliveryMapModal(tracking){
   const toggleWrap=document.createElement('div');
   toggleWrap.style.cssText='position:absolute;top:8px;right:8px;z-index:2;';
   toggleWrap.innerHTML='<button style="background:#161616;color:#fff;border:1px solid #FF6A00;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">'+(riderMapViewMode==='satellite'?''+iconBadge('map',14)+' Street':''+iconBadge('signal',14)+' Satellite')+'</button>';
-  toggleWrap.onclick=function(e){e.stopPropagation();riderMapViewMode=riderMapViewMode==='street'?'satellite':'street';localStorage.setItem('rnm_map_view',riderMapViewMode);map.setMapTypeId(riderMapViewMode==='satellite'?'hybrid':'roadmap');toggleWrap.querySelector('button').textContent=riderMapViewMode==='satellite'?''+iconBadge('map',14)+' Street':''+iconBadge('signal',14)+' Satellite';};
+  toggleWrap.onclick=function(e){e.stopPropagation();riderMapViewMode=riderMapViewMode==='street'?'satellite':'street';localStorage.setItem('rnm_map_view',riderMapViewMode);map.setMapTypeId(riderMapViewMode==='satellite'?'hybrid':'roadmap');toggleWrap.querySelector('button').innerHTML=riderMapViewMode==='satellite'?''+iconBadge('map',14)+' Street':''+iconBadge('signal',14)+' Satellite';};
   if(el&&el.parentElement)el.parentElement.appendChild(toggleWrap);
   const bounds=new google.maps.LatLngBounds();
   bounds.extend(pickup);bounds.extend(dest);
