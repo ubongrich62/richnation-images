@@ -856,6 +856,36 @@ async function saveDeliveryPinPosition(tracking,lat,lng){
 // feeds a Google Maps marker label, which renders label.text as literal
 // text and cannot display HTML/SVG at all.
 const VEHICLE_ICONS_RIDER_SELF={motorcycle:'🏍️',bicycle:'🚲',car:'🚗','van/truck':'🚚','on foot':'🚶'};
+function travelModeForVehicleRider(vehicleType){
+  const v=(vehicleType||'motorcycle').toLowerCase();
+  if(v==='bicycle')return 'BICYCLING';
+  if(v==='on foot')return 'WALKING';
+  return 'DRIVING';
+}
+// Real road route + ETA (with live traffic for driving trips) via the
+// Directions API, so the rider sees the same real route/ETA admin and the
+// customer see, not just two pins with a straight line between them.
+let _directionsServiceRider=null;
+async function getRoadRouteRider(origin,dest,vehicleType){
+  if(!window.google||!google.maps||!google.maps.DirectionsService)return null;
+  if(!_directionsServiceRider)_directionsServiceRider=new google.maps.DirectionsService();
+  const mode=travelModeForVehicleRider(vehicleType);
+  try{
+    const req={origin:origin,destination:dest,travelMode:google.maps.TravelMode[mode]};
+    if(mode==='DRIVING')req.drivingOptions={departureTime:new Date(),trafficModel:'bestguess'};
+    const result=await _directionsServiceRider.route(req);
+    const leg=result.routes[0].legs[0];
+    const durationField=leg.duration_in_traffic||leg.duration;
+    return {
+      path:result.routes[0].overview_path.map(function(p){return {lat:p.lat(),lng:p.lng()};}),
+      distanceText:leg.distance.text,durationText:durationField.text,durationSec:durationField.value,
+      hasTraffic:!!leg.duration_in_traffic
+    };
+  }catch(e){
+    console.warn('[Directions] rider route lookup failed, falling back to straight-line:',e);
+    return null;
+  }
+}
 async function showDeliveryMapModal(tracking){
   const order=await fbG('rn_mall_orders/'+tracking);if(!order)return;
   const overlay=document.createElement('div');
@@ -864,6 +894,7 @@ async function showDeliveryMapModal(tracking){
   overlay.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;width:100%;max-width:480px;padding:16px;">'
     +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div style="font-weight:800;">'+tracking+'</div><span onclick="document.getElementById(\'rider-map-overlay\').remove()" style="cursor:pointer;font-size:20px;color:var(--wh);font-weight:700;">&times;</span></div>'
     +'<div style="position:relative;"><div id="rider-delivery-map" style="width:100%;height:280px;border-radius:9px;overflow:hidden;background:var(--card2);"></div></div>'
+    +'<div id="rider-map-eta-status" style="font-size:11px;color:var(--wh);font-weight:700;margin-top:8px;">Locating you…</div>'
     +'<div style="font-size:10px;color:var(--wh);font-weight:700;margin-top:6px;">'+iconBadge('pin',14)+' Tip: if the black pin isn\'t in the right spot, drag it to the correct location.</div>'
     +'<div id="rider-map-pin-hint" style="display:none;font-size:11px;color:var(--or);margin-top:6px;"></div>'
     +'</div>';
@@ -888,11 +919,30 @@ async function showDeliveryMapModal(tracking){
   _riderMapInstance=map;
   new google.maps.Marker({position:pickup,map:map,icon:makeMarkerIconRider('#FF6A00',26),label:{text:'🏢',fontSize:'13px'},title:'RichNation Mall'});
   const deliveryMarker=new google.maps.Marker({position:dest,map:map,icon:makeMarkerIconRider('#15151A',26),label:{text:'📍',fontSize:'13px'},title:order.customer?.name||'Delivery Address',draggable:true,zIndex:2});
+  new google.maps.TrafficLayer().setMap(map);
+  const routePolyline=new google.maps.Polyline({strokeColor:'#FF6A00',strokeOpacity:0,strokeWeight:3,icons:[{icon:{path:'M 0,-1 0,1',strokeOpacity:0.85,scale:3},offset:'0',repeat:'14px'}],path:[pickup,dest],map:map});
   // Show the rider's own position too, prefer a fresh device reading, fall back to
   // their last-shared live location so they can always see themselves on the map.
-  function placeSelfMarker(lat,lng){
+  // Also this is what the real routed path/ETA is drawn from, once we know
+  // where the rider actually is a straight pickup-to-destination line isn't
+  // the useful thing to show anymore, the route FROM the rider TO the
+  // customer is.
+  async function placeSelfMarker(lat,lng){
     const vehicleEmoji=VEHICLE_ICONS_RIDER_SELF[(rider.vehicleType||'motorcycle').toLowerCase()]||'🏍️';
     new google.maps.Marker({position:{lat:lat,lng:lng},map:map,icon:makeMarkerIconRider('#FF6A00',30),label:{text:vehicleEmoji,fontSize:'16px'},title:'You',zIndex:2});
+    const selfPos={lat:lat,lng:lng};
+    const route=await getRoadRouteRider(selfPos,dest,rider.vehicleType);
+    const etaStatusEl=document.getElementById('rider-map-eta-status');
+    if(route&&route.path.length){
+      routePolyline.setPath(route.path);
+      const bounds=new google.maps.LatLngBounds();
+      route.path.forEach(function(p){bounds.extend(p);});
+      map.fitBounds(bounds,40);
+      if(etaStatusEl)etaStatusEl.innerHTML='~'+route.durationText+' to customer, '+route.distanceText+(route.hasTraffic?' <span style="color:var(--or);">(traffic-adjusted)</span>':'');
+    }else{
+      routePolyline.setPath([selfPos,dest]);
+      if(etaStatusEl)etaStatusEl.textContent='Could not calculate a live route right now.';
+    }
   }
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(
@@ -909,7 +959,6 @@ async function showDeliveryMapModal(tracking){
     const pos=e.latLng;
     if(pinHint)pinHint.innerHTML=''+iconBadge('pin',14)+' Pin moved, <button onclick="saveDeliveryPinPosition(\''+tracking+'\','+pos.lat()+','+pos.lng()+')" style="background:var(--or);border:none;color:#000;font-weight:800;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;">Save New Location</button>';
   });
-  new google.maps.Polyline({strokeColor:'#FF6A00',strokeOpacity:0,strokeWeight:3,icons:[{icon:{path:'M 0,-1 0,1',strokeOpacity:0.85,scale:3},offset:'0',repeat:'14px'}],path:[pickup,dest],map:map});
   const toggleWrap=document.createElement('div');
   toggleWrap.style.cssText='position:absolute;top:8px;right:8px;z-index:2;';
   toggleWrap.innerHTML='<button style="background:#161616;color:#fff;border:1px solid #FF6A00;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">'+(riderMapViewMode==='satellite'?''+iconBadge('map',14)+' Street':''+iconBadge('signal',14)+' Satellite')+'</button>';

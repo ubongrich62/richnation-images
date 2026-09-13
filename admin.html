@@ -3516,11 +3516,59 @@ let _adminDeliveryMapInstance=null;
 const VEHICLE_ICONS_ADMIN={motorcycle:'🏍️',bicycle:'🚲',car:'🚗','van/truck':'🚚','on foot':'🚶'};
 const VEHICLE_AVG_SPEED_KMH_ADMIN={motorcycle:32,bicycle:15,car:26,'van/truck':22,'on foot':5};
 function estimateDeliveryTimeAdmin(pickup,dest,vehicleType){
+  // Straight-line fallback only, used when a real route (getRoadRouteAdmin
+  // below) isn't available yet or the Directions API call failed.
   const R=6371,dLat=(dest.lat-pickup.lat)*Math.PI/180,dLng=(dest.lng-pickup.lng)*Math.PI/180;
   const a=Math.sin(dLat/2)**2+Math.cos(pickup.lat*Math.PI/180)*Math.cos(dest.lat*Math.PI/180)*Math.sin(dLng/2)**2;
   const distKm=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
   const speed=VEHICLE_AVG_SPEED_KMH_ADMIN[(vehicleType||'motorcycle').toLowerCase()]||30;
   return {distKm:distKm,mins:Math.round((distKm/speed)*60*1.3)};
+}
+function travelModeForVehicleAdmin(vehicleType){
+  const v=(vehicleType||'motorcycle').toLowerCase();
+  if(v==='bicycle')return 'BICYCLING';
+  if(v==='on foot')return 'WALKING';
+  return 'DRIVING';
+}
+function haversineMetersAdmin(a,b){
+  const R=6371000,dLat=(b.lat-a.lat)*Math.PI/180,dLng=(b.lng-a.lng)*Math.PI/180;
+  const s=Math.sin(dLat/2)**2+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(s),Math.sqrt(1-s));
+}
+// Real road route + ETA (with live traffic for driving trips) via the
+// Directions API. Admin's map only renders once per order page open (not
+// polled), but the cache/cooldown is kept for consistency and in case this
+// gets called again for the same order without a full page reload.
+const _routeCacheAdmin={};
+let _directionsServiceAdmin=null;
+async function getRoadRouteAdmin(cacheKey,origin,dest,vehicleType){
+  const cached=_routeCacheAdmin[cacheKey];
+  const now=Date.now();
+  if(cached&&(now-cached.computedAt)<45000&&haversineMetersAdmin(cached.computedFrom,origin)<150){
+    return cached;
+  }
+  if(!window.google||!google.maps||!google.maps.DirectionsService)return null;
+  if(!_directionsServiceAdmin)_directionsServiceAdmin=new google.maps.DirectionsService();
+  const mode=travelModeForVehicleAdmin(vehicleType);
+  try{
+    const req={origin:origin,destination:dest,travelMode:google.maps.TravelMode[mode]};
+    if(mode==='DRIVING')req.drivingOptions={departureTime:new Date(),trafficModel:'bestguess'};
+    const result=await _directionsServiceAdmin.route(req);
+    const leg=result.routes[0].legs[0];
+    const durationField=leg.duration_in_traffic||leg.duration;
+    const fresh={
+      path:result.routes[0].overview_path.map(function(p){return {lat:p.lat(),lng:p.lng()};}),
+      distanceText:leg.distance.text,distanceMeters:leg.distance.value,
+      durationText:durationField.text,durationSec:durationField.value,
+      hasTraffic:!!leg.duration_in_traffic,
+      computedAt:now,computedFrom:origin
+    };
+    _routeCacheAdmin[cacheKey]=fresh;
+    return fresh;
+  }catch(e){
+    console.warn('[Directions] admin route lookup failed, falling back to straight-line estimate:',e);
+    return null;
+  }
 }
 let _adminMapViewMode=localStorage.getItem('rnm_map_view')||'street';
 function toggleAdminMapView(order){
@@ -3590,9 +3638,17 @@ async function renderAdminDeliveryMap(order){
   new google.maps.Marker({position:pickup,map:map,icon:makeMarkerIconAdmin('#FF6A00',26),label:{text:'🏢',fontSize:'13px'},title:'RichNation Mall'});
   new google.maps.Marker({position:dest,map:map,icon:makeMarkerIconAdmin('#fff',26,'#161616'),label:{text:'📍',fontSize:'13px'},title:order.customer?.name||'Delivery Address'});
   new google.maps.Marker({position:riderPos,map:map,icon:makeMarkerIconAdmin('#161616',30,isLive?'#FF6A00':'#83838A'),label:{text:vehicleEmoji,fontSize:'16px'},title:(order.riderName||'Rider')+(isLive?', live location':', approximate position')});
-  new google.maps.Polyline({strokeColor:'#FF6A00',strokeOpacity:0,strokeWeight:3,icons:[{icon:{path:'M 0,-1 0,1',strokeOpacity:0.85,scale:3},offset:'0',repeat:'14px'}],path:[pickup,dest],map:map});
+  new google.maps.TrafficLayer().setMap(map);
+  // Real routed path (rider's current position to the customer) when live,
+  // this is what actually reflects a "fastest route" instead of a guess.
+  // Without a live position there's nothing real to route from yet, so this
+  // keeps the original straight pickup-to-destination line as a placeholder.
+  const route=isLive?await getRoadRouteAdmin(order.tracking,riderPos,dest,order.riderVehicleType):null;
+  const routePath=(route&&route.path.length)?route.path:(isLive?[riderPos,dest]:[pickup,dest]);
+  new google.maps.Polyline({strokeColor:'#FF6A00',strokeOpacity:0,strokeWeight:3,icons:[{icon:{path:'M 0,-1 0,1',strokeOpacity:0.85,scale:3},offset:'0',repeat:'14px'}],path:routePath,map:map});
   const bounds=new google.maps.LatLngBounds();
-  bounds.extend(pickup);bounds.extend(dest);bounds.extend(riderPos);
+  if(route&&route.path.length)route.path.forEach(function(p){bounds.extend(p);});
+  else{bounds.extend(pickup);bounds.extend(dest);bounds.extend(riderPos);}
   map.fitBounds(bounds,40);
   const toggleWrap=document.createElement('div');
   toggleWrap.style.cssText='position:absolute;top:8px;right:8px;z-index:2;';
@@ -3600,8 +3656,8 @@ async function renderAdminDeliveryMap(order){
   toggleWrap.onclick=function(e){e.stopPropagation();toggleAdminMapView(order);};
   const wrap=el.parentElement;
   if(wrap){wrap.style.position='relative';wrap.appendChild(toggleWrap);}
-  const adminEta=estimateDeliveryTimeAdmin(riderPos,dest,order.riderVehicleType);
-  const adminEtaText=' &middot; ~'+(adminEta.mins<1?'<1':adminEta.mins)+' min'+(adminEta.mins===1?'':'s')+' away';
+  const etaMins=route?Math.round(route.durationSec/60):estimateDeliveryTimeAdmin(riderPos,dest,order.riderVehicleType).mins;
+  const adminEtaText=' &middot; ~'+(etaMins<1?'<1':etaMins)+' min'+(etaMins===1?'':'s')+' away'+(route?', '+route.distanceText:'')+(route&&route.hasTraffic?' <span style="color:var(--or);">(traffic-adjusted)</span>':'');
   if(statusEl)statusEl.innerHTML=(isLive?'<span style="color:var(--su);">● Live</span>, rider location updating in real time':'<span style="color:var(--wh);font-weight:700;">○ Approximate</span>, waiting for rider\'s live location')+adminEtaText;
 }
 async function openOrder(tracking){

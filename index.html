@@ -3262,12 +3262,65 @@ const VEHICLE_AVG_SPEED_KMH={motorcycle:32,bicycle:15,car:26,'van/truck':22,'on 
 function estimateDeliveryTime(pickup,dest,vehicleType){
   // Straight-line (haversine) distance, a real route will run longer than this since
   // roads aren't straight lines, so we pad the estimate to keep it realistic.
+  // Only used as a fallback now, when a real road route (getRoadRoute below)
+  // isn't available yet or the Directions API call failed.
   const R=6371,dLat=(dest.lat-pickup.lat)*Math.PI/180,dLng=(dest.lng-pickup.lng)*Math.PI/180;
   const a=Math.sin(dLat/2)**2+Math.cos(pickup.lat*Math.PI/180)*Math.cos(dest.lat*Math.PI/180)*Math.sin(dLng/2)**2;
   const distKm=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
   const speed=VEHICLE_AVG_SPEED_KMH[(vehicleType||'motorcycle').toLowerCase()]||30;
   const mins=Math.round((distKm/speed)*60*1.3); // +30% padding for real road routes vs straight-line
   return {distKm:distKm,mins:mins};
+}
+function travelModeForVehicle(vehicleType){
+  const v=(vehicleType||'motorcycle').toLowerCase();
+  if(v==='bicycle')return 'BICYCLING';
+  if(v==='on foot')return 'WALKING';
+  return 'DRIVING'; // motorcycle, car, van/truck all travel by road
+}
+function haversineMeters(a,b){
+  const R=6371000,dLat=(b.lat-a.lat)*Math.PI/180,dLng=(b.lng-a.lng)*Math.PI/180;
+  const s=Math.sin(dLat/2)**2+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(s),Math.sqrt(1-s));
+}
+// Real road route + ETA via the Directions API, this is what actually turns
+// the dashed straight line into a route that follows real streets, and the
+// ETA into real drive time (with live traffic, for driving trips) instead of
+// a straight-line guess. Caching + a cooldown here matter: the tracking page
+// polls every 8s, calling Directions that often would rack up a Directions
+// API bill fast for no real benefit, a route doesn't meaningfully change
+// that often. Only re-requests when the rider has moved a meaningful
+// distance from where the cached route started, or the cache is stale.
+const _routeCache={};
+const ROUTE_RECOMPUTE_COOLDOWN_MS=45000,ROUTE_RECOMPUTE_MIN_MOVE_M=150;
+let _directionsService=null;
+async function getRoadRoute(cacheKey,origin,dest,vehicleType){
+  const cached=_routeCache[cacheKey];
+  const now=Date.now();
+  if(cached&&(now-cached.computedAt)<ROUTE_RECOMPUTE_COOLDOWN_MS&&haversineMeters(cached.computedFrom,origin)<ROUTE_RECOMPUTE_MIN_MOVE_M){
+    return cached;
+  }
+  if(!window.google||!google.maps||!google.maps.DirectionsService)return null;
+  if(!_directionsService)_directionsService=new google.maps.DirectionsService();
+  const mode=travelModeForVehicle(vehicleType);
+  try{
+    const req={origin:origin,destination:dest,travelMode:google.maps.TravelMode[mode]};
+    if(mode==='DRIVING')req.drivingOptions={departureTime:new Date(),trafficModel:'bestguess'};
+    const result=await _directionsService.route(req);
+    const leg=result.routes[0].legs[0];
+    const durationField=leg.duration_in_traffic||leg.duration;
+    const fresh={
+      path:result.routes[0].overview_path.map(function(p){return {lat:p.lat(),lng:p.lng()};}),
+      distanceText:leg.distance.text,distanceMeters:leg.distance.value,
+      durationText:durationField.text,durationSec:durationField.value,
+      hasTraffic:!!leg.duration_in_traffic,
+      computedAt:now,computedFrom:origin
+    };
+    _routeCache[cacheKey]=fresh;
+    return fresh;
+  }catch(e){
+    console.warn('[Directions] route lookup failed, falling back to straight-line estimate:',e);
+    return null;
+  }
 }
 async function geocodeAddress(address){
   try{
@@ -3393,10 +3446,11 @@ async function renderDeliveryMap(order){
     _deliveryHomeMarker=dest?new google.maps.Marker({position:dest,map:_deliveryMapInstance,icon:makeMarkerIcon('#15151A',26),label:{text:'📍',fontSize:'13px'},title:'Delivery Address (You)',zIndex:1}):null;
     _deliveryRiderMarker=new google.maps.Marker({position:isLive?riderPos:centerPos,map:_deliveryMapInstance,icon:makeMarkerIcon('#FF6A00',34),label:{text:vehicleEmoji,fontSize:'16px'},opacity:isLive?1:0,title:(order.riderName||'Your rider')+', live location',zIndex:2});
     // A route line between rider and destination, the same "here's the path"
-    // cue Bolt/Uber show, a straight line rather than a real routed path
-    // since drawing an actual road route needs the separate, billed
-    // Directions API, this needs only what's already loaded.
+    // cue Bolt/Uber show. Starts as a plain dashed straight line (below,
+    // setPath fills in the real routed shape once Directions responds), so
+    // there's still something on screen immediately rather than nothing.
     _deliveryRoutePolyline=new google.maps.Polyline({strokeColor:'#FF6A00',strokeOpacity:0,strokeWeight:3,icons:[{icon:{path:'M 0,-1 0,1',strokeOpacity:0.85,scale:3},offset:'0',repeat:'14px'}],map:_deliveryMapInstance});
+    new google.maps.TrafficLayer().setMap(_deliveryMapInstance);
     const toggleEl=document.getElementById('delivery-map-typetoggle');
     if(toggleEl){
       toggleEl.style.display='flex';
@@ -3406,26 +3460,34 @@ async function renderDeliveryMap(order){
     if(isLive&&_deliveryRiderMarker){animateMarkerTo(_deliveryRiderMarker,riderPos,1500);_deliveryRiderMarker.setOpacity(1);}
     else if(_deliveryRiderMarker)_deliveryRiderMarker.setOpacity(0);
   }
+  let route=null;
+  if(isLive&&dest)route=await getRoadRoute(order.tracking,riderPos,dest,order.riderVehicleType);
   if(_deliveryRoutePolyline){
     // The dashed look comes entirely from the repeated icon set on this
     // polyline at creation, strokeOpacity 0 there hides the underlying solid
     // line while the dash icons still render along whatever path is set.
     // An empty path here is what actually hides the line when there's
-    // nothing live to connect, not another opacity toggle.
-    _deliveryRoutePolyline.setPath((isLive&&dest)?[riderPos,dest]:[]);
+    // nothing live to connect, not another opacity toggle. Prefer the real
+    // routed shape from Directions, fall back to a straight line only if
+    // that lookup failed (offline, quota, etc.).
+    const path=(isLive&&dest)?((route&&route.path.length)?route.path:[riderPos,dest]):[];
+    _deliveryRoutePolyline.setPath(path);
   }
   if(isLive&&dest){
     const bounds=new google.maps.LatLngBounds();
-    bounds.extend(riderPos);bounds.extend(dest);
+    if(route&&route.path.length)route.path.forEach(function(p){bounds.extend(p);});
+    else{bounds.extend(riderPos);bounds.extend(dest);}
     _deliveryMapInstance.fitBounds(bounds,70);
   }
-  const etaMins=(isLive&&dest)?estimateDeliveryTime(riderPos,dest,order.riderVehicleType).mins:null;
+  const etaMins=route?Math.round(route.durationSec/60):((isLive&&dest)?estimateDeliveryTime(riderPos,dest,order.riderVehicleType).mins:null);
   const etaShort=etaMins!=null?(etaMins<1?'<1':etaMins)+' min'+(etaMins===1?'':'s')+' away':null;
   if(badgeEl&&badgeTextEl){
     if(etaShort){badgeTextEl.textContent=etaShort;badgeEl.style.display='flex';}
     else badgeEl.style.display='none';
   }
-  if(statusEl)statusEl.innerHTML='<span class="live-dot'+(isLive?' on':'')+'"></span> '+(isLive?'<strong style="color:var(--wh);">Live</strong> rider location updating in real time':'Waiting for rider\'s live location')+(!dest?' (still pinpointing your delivery address)':'');
+  const distText=route?', '+route.distanceText+' away':'';
+  const trafficNote=route&&route.hasTraffic?' <span style="color:var(--or);">(adjusted for current traffic)</span>':'';
+  if(statusEl)statusEl.innerHTML='<span class="live-dot'+(isLive?' on':'')+'"></span> '+(isLive?'<strong style="color:var(--wh);">Live</strong> rider location updating in real time'+distText+trafficNote:'Waiting for rider\'s live location')+(!dest?' (still pinpointing your delivery address)':'');
 }
 function setDeliveryMapType(type,btn){
   if(_deliveryMapInstance)_deliveryMapInstance.setMapTypeId(type==='satellite'?'hybrid':type);
