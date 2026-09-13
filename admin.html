@@ -1831,6 +1831,7 @@ async function assignStaffTask(id,name){
   const result=await fbP('rn_mall_staff_tasks/'+id,{description:description.trim(),dueDate:dueDate.trim(),assignedBy:sessionStorage.getItem('rnm_admin_ceo_name')||'Admin',status:'pending',date:ds(),ts:Date.now()});
   if(!result){toast('Could not save the task, check your connection and try again','err');return;}
   await fbP('rn_mall_staff_notifications/'+id,{type:'task_assigned',description:description.trim(),dueDate:dueDate.trim(),date:ds(),read:false,ts:Date.now()});
+  sendPushToTokens(s.fcmTokens?Object.keys(s.fcmTokens):[],'New Task Assigned',description.trim(),{},'staff.html');
   toast('Task assigned to '+name+'!');
   nav('staff',false);
 }
@@ -2126,10 +2127,12 @@ async function approveSwitchRequest(id,name,approve){
     await fbU('rn_mall_investors/'+id,{investmentOption:req.option,investmentAmount:req.newAmount,tier:tierFor(req.newAmount),planStartDate:Date.now(),pendingSwitchRequest:null});
     await fbP('rn_mall_investor_switch_log/'+id,{from:req.currentOption,to:req.option,fromAmount:req.currentAmount,toAmount:req.newAmount,date:ds(),ts:Date.now(),approvedByAdmin:true});
     await fbP('rn_mall_investor_notifications/'+id,{type:'switch_approved',option:req.option,date:ds(),read:false,ts:Date.now()});
+    sendPushToTokens(v.fcmTokens?Object.keys(v.fcmTokens):[],'Switch Approved','You are now on '+OPTION_LABELS_ADMIN[req.option]+'.',{},'investor.html');
     toast('Switch approved, '+name+' is now on '+OPTION_LABELS_ADMIN[req.option]);
   }else{
     await fbU('rn_mall_investors/'+id,{pendingSwitchRequest:null});
     await fbP('rn_mall_investor_notifications/'+id,{type:'switch_denied',date:ds(),read:false,ts:Date.now()});
+    sendPushToTokens(v.fcmTokens?Object.keys(v.fcmTokens):[],'Switch Request Denied','Your plan switch request was not approved.',{},'investor.html');
     toast('Switch request denied');
   }
   nav('investors',false);
@@ -2420,6 +2423,8 @@ async function sendInvestorChatMsg(id){
   const inp=document.getElementById('inv-chat-input');const text=(inp.value||'').trim();if(!text)return;
   await fbP('rn_mall_investor_chat_'+id,{text,isAdmin:true,ts:Date.now(),date:ds()});
   await fbPNotify('rn_mall_investor_notifications/'+id,{type:'investor_chat_reply',preview:text.slice(0,80),date:ds(),read:false,ts:Date.now()});
+  const invFcmTokens=await fbG('rn_mall_investors/'+id+'/fcmTokens');
+  sendPushToTokens(invFcmTokens?Object.keys(invFcmTokens):[],'RichNation Mall',text.slice(0,120),{},'investor.html');
   inp.value='';await loadInvestorChatAdmin(id);
 }
 async function renderInvestorUpdatesAdmin(c){
@@ -2978,6 +2983,8 @@ async function sendVendorAdminReply(vendorId){
   const senderName=sessionStorage.getItem('rnm_admin_ceo_name')||'RichNation Mall';
   await fbP(key,{senderId:'admin',senderName:senderName,senderRole:sessionStorage.getItem('rnm_admin_is_ceo')==='1'?'ceo':null,text:text,isAdmin:true,ts:Date.now(),date:ds()});
   await fbP('rn_mall_vendor_notifications/'+vendorId,{type:'admin_reply',from:senderName,preview:text.slice(0,60),date:ds(),read:false,ts:Date.now()});
+  const vendorFcmTokens=await fbG('rn_mall_vendors/'+vendorId+'/fcmTokens');
+  sendPushToTokens(vendorFcmTokens?Object.keys(vendorFcmTokens):[],senderName,text.slice(0,120),{},'vendor.html');
   inp.value='';await loadVendorAdminMsgs(vendorId);
 }
 async function openVendorForm(id){
@@ -3402,7 +3409,11 @@ function renderProducts(c){
 async function approveVendorProduct(id){
   await fbU('rn_mall_products/'+id,{visible:true,approvalStatus:'approved',rejectionReason:null});
   const p=await fbG('rn_mall_products/'+id);
-  if(p&&p.vendorId)await fbP('rn_mall_vendor_notifications/'+p.vendorId,{type:'product_approved',productName:p.name,date:ds(),read:false,ts:Date.now()});
+  if(p&&p.vendorId){
+    await fbP('rn_mall_vendor_notifications/'+p.vendorId,{type:'product_approved',productName:p.name,date:ds(),read:false,ts:Date.now()});
+    const vFcmTokens=await fbG('rn_mall_vendors/'+p.vendorId+'/fcmTokens');
+    sendPushToTokens(vFcmTokens?Object.keys(vFcmTokens):[],'Product Approved',p.name+' is now live on RichNation Mall!',{},'vendor.html');
+  }
   toast('Product approved, now live on RichNation Mall!');
   nav('products',false);
 }
@@ -3412,7 +3423,11 @@ async function rejectVendorProduct(id,name){
   if(!reason.trim()){toast('A reason is required','err');return;}
   await fbU('rn_mall_products/'+id,{visible:false,approvalStatus:'rejected',rejectionReason:reason.trim()});
   const p=await fbG('rn_mall_products/'+id);
-  if(p&&p.vendorId)await fbP('rn_mall_vendor_notifications/'+p.vendorId,{type:'product_rejected',productName:name,reason:reason.trim(),date:ds(),read:false,ts:Date.now()});
+  if(p&&p.vendorId){
+    await fbP('rn_mall_vendor_notifications/'+p.vendorId,{type:'product_rejected',productName:name,reason:reason.trim(),date:ds(),read:false,ts:Date.now()});
+    const vFcmTokens2=await fbG('rn_mall_vendors/'+p.vendorId+'/fcmTokens');
+    sendPushToTokens(vFcmTokens2?Object.keys(vFcmTokens2):[],'Product Rejected',name+': '+reason.trim(),{},'vendor.html');
+  }
   toast('Product rejected, vendor notified');
   nav('products',false);
 }
