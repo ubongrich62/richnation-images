@@ -134,24 +134,30 @@ async function dbGet(dbUrl, path, accessToken){
   if (!r.ok) return null;
   return await r.json();
 }
+// These three return {ok, status, text} instead of a bare boolean, so a
+// failed write can tell you WHY (Firebase's own error text, e.g. a
+// permission-denied reason or a validation failure) instead of just "it
+// didn't work" — the difference between debugging this in five seconds
+// versus guessing blind.
 async function dbPatch(dbUrl, path, data, accessToken){
   const r = await fetch(dbUrl.replace(/\/+$/,'') + '/' + path + '.json?access_token=' + accessToken, {
     method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)
   });
-  return r.ok;
+  return {ok:r.ok, status:r.status, text: r.ok ? '' : await r.text()};
 }
 async function dbPut(dbUrl, path, data, accessToken){
   const r = await fetch(dbUrl.replace(/\/+$/,'') + '/' + path + '.json?access_token=' + accessToken, {
     method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)
   });
-  return r.ok;
+  return {ok:r.ok, status:r.status, text: r.ok ? '' : await r.text()};
 }
 async function dbPost(dbUrl, path, data, accessToken){
   const r = await fetch(dbUrl.replace(/\/+$/,'') + '/' + path + '.json?access_token=' + accessToken, {
     method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)
   });
-  return r.ok;
+  return {ok:r.ok, status:r.status, text: r.ok ? '' : await r.text()};
 }
+function dbErr(res){ return res.status + (res.text ? ': '+res.text : ''); }
 
 // RichPoints rates, mirrored from index.html's rpRates() so this Worker can
 // compute the CORRECT amount for a given reason itself instead of trusting
@@ -217,8 +223,8 @@ export default {
       if (current < amount) return json({error:'Insufficient balance', currentBalance: current}, 402);
       const newBalance = current - amount;
       const update = {}; update[field] = newBalance;
-      const ok = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, update, accessToken);
-      if (!ok) return json({error:'Could not update balance'},502);
+      const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, update, accessToken);
+      if (!res1.ok) return json({error:'Could not update balance ('+dbErr(res1)+')'},502);
       if (field === 'walletBalance') {
         await dbPost(payload.dbUrl, 'rn_mall_wallet_transactions/'+customerId, {type:'debit',amount:amount,description:description||('Order payment'+(orderId?' ('+orderId+')':'')),date:new Date().toISOString().slice(0,10),ts:Date.now()}, accessToken);
       }
@@ -245,8 +251,8 @@ export default {
         if (amount <= 0) return json({ok:true, amount:0});
         const newVal = (cust.points||0) + amount;
         const update = {points:newVal}; update[oneTime.flagField] = true;
-        const ok = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, update, accessToken);
-        if (!ok) return json({error:'Could not credit bonus'},502);
+        const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, update, accessToken);
+        if (!res1.ok) return json({error:'Could not credit bonus ('+dbErr(res1)+')'},502);
         return json({ok:true, amount:amount, newBalance:newVal});
       }
 
@@ -259,9 +265,10 @@ export default {
         const amount = Math.floor((order.total||0)/perNaira);
         if (amount <= 0) return json({ok:true, amount:0});
         const newVal = (cust.points||0) + amount;
-        const ok = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {points:newVal}, accessToken)
-          && await dbPatch(payload.dbUrl, 'rn_mall_orders/'+orderId, {pointsAwarded:true}, accessToken);
-        if (!ok) return json({error:'Could not credit purchase points'},502);
+        const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {points:newVal}, accessToken);
+        if (!res1.ok) return json({error:'Could not credit purchase points ('+dbErr(res1)+')'},502);
+        const res2 = await dbPatch(payload.dbUrl, 'rn_mall_orders/'+orderId, {pointsAwarded:true}, accessToken);
+        if (!res2.ok) return json({error:'Credited points but could not mark order ('+dbErr(res2)+')'},502);
         return json({ok:true, amount:amount, newBalance:newVal});
       }
 
@@ -276,9 +283,10 @@ export default {
         const amount = pointsRate(settings,'referral');
         if (amount <= 0) return json({ok:true, amount:0});
         const newVal = (cust.points||0) + amount;
-        const ok = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {points:newVal}, accessToken)
-          && await dbPatch(payload.dbUrl, 'rn_mall_orders/'+orderId, {referralAwarded:true}, accessToken);
-        if (!ok) return json({error:'Could not credit referral points'},502);
+        const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {points:newVal}, accessToken);
+        if (!res1.ok) return json({error:'Could not credit referral points ('+dbErr(res1)+')'},502);
+        const res2 = await dbPatch(payload.dbUrl, 'rn_mall_orders/'+orderId, {referralAwarded:true}, accessToken);
+        if (!res2.ok) return json({error:'Credited points but could not mark order ('+dbErr(res2)+')'},502);
         return json({ok:true, amount:amount, newBalance:newVal});
       }
 
@@ -294,9 +302,10 @@ export default {
         const amount = pointsRate(settings,'review');
         if (amount <= 0) return json({ok:true, amount:0});
         const newVal = (cust.points||0) + amount;
-        const ok = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {points:newVal}, accessToken)
-          && await dbPatch(payload.dbUrl, 'rn_mall_reviews/'+productId+'/'+reviewKey, {pointsAwarded:true}, accessToken);
-        if (!ok) return json({error:'Could not credit review points'},502);
+        const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {points:newVal}, accessToken);
+        if (!res1.ok) return json({error:'Could not credit review points ('+dbErr(res1)+')'},502);
+        const res2 = await dbPatch(payload.dbUrl, 'rn_mall_reviews/'+productId+'/'+reviewKey, {pointsAwarded:true}, accessToken);
+        if (!res2.ok) return json({error:'Credited points but could not mark review ('+dbErr(res2)+')'},502);
         return json({ok:true, amount:amount, newBalance:newVal});
       }
 
@@ -304,8 +313,8 @@ export default {
         const amount = pointsRate(settings, reason);
         if (amount <= 0) return json({ok:true, amount:0});
         const newVal = (cust.points||0) + amount;
-        const ok = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {points:newVal}, accessToken);
-        if (!ok) return json({error:'Could not credit points'},502);
+        const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {points:newVal}, accessToken);
+        if (!res1.ok) return json({error:'Could not credit points ('+dbErr(res1)+')'},502);
         return json({ok:true, amount:amount, newBalance:newVal});
       }
 
@@ -344,8 +353,8 @@ export default {
       const cust2 = await dbGet(payload.dbUrl, 'rn_mall_customers/'+customerId, accessToken);
       if (!cust2) return json({error:'Customer not found'},404);
       const newBalance = (cust2.walletBalance||0) + amount;
-      const ok = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {walletBalance:newBalance}, accessToken);
-      if (!ok) return json({error:'Could not credit wallet'},502);
+      const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {walletBalance:newBalance}, accessToken);
+      if (!res1.ok) return json({error:'Could not credit wallet ('+dbErr(res1)+')'},502);
       await dbPut(payload.dbUrl, 'rn_mall_processed_topups/'+reference, {customerId:customerId, amount:amount, ts:Date.now()}, accessToken);
       await dbPost(payload.dbUrl, 'rn_mall_wallet_transactions/'+customerId, {type:'credit',amount:amount,description:'Card top-up (Ref: '+reference+')',date:new Date().toISOString().slice(0,10),ts:Date.now()}, accessToken);
       return json({ok:true, amount:amount, newBalance:newBalance});
@@ -370,9 +379,10 @@ export default {
       const cust = await dbGet(payload.dbUrl, 'rn_mall_customers/'+customerId, accessToken);
       if (!cust) return json({error:'Customer not found'},404);
       const newBalance = (cust.walletBalance||0) + amount;
-      const ok = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {walletBalance:newBalance}, accessToken)
-        && await dbPatch(payload.dbUrl, 'rn_mall_orders/'+orderId, {refunded:true}, accessToken);
-      if (!ok) return json({error:'Could not process refund'},502);
+      const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {walletBalance:newBalance}, accessToken);
+      if (!res1.ok) return json({error:'Could not process refund ('+dbErr(res1)+')'},502);
+      const res2 = await dbPatch(payload.dbUrl, 'rn_mall_orders/'+orderId, {refunded:true}, accessToken);
+      if (!res2.ok) return json({error:'Refunded but could not mark order ('+dbErr(res2)+')'},502);
       await dbPost(payload.dbUrl, 'rn_mall_wallet_transactions/'+customerId, {type:'refund',amount:amount,description:'Refund for cancelled order '+orderId,date:new Date().toISOString().slice(0,10),ts:Date.now()}, accessToken);
       return json({ok:true, amount:amount, newBalance:newBalance});
     }
@@ -429,8 +439,8 @@ export default {
         newVal = current + (parseFloat(value)||0);
       }
       const update = {}; update[field] = newVal;
-      const ok = await dbPatch(payload.dbUrl, collection+'/'+id, update, accessToken);
-      if (!ok) return json({error:'Could not update record'},502);
+      const res1 = await dbPatch(payload.dbUrl, collection+'/'+id, update, accessToken);
+      if (!res1.ok) return json({error:'Could not update record ('+dbErr(res1)+')'},502);
       return json({ok:true, newValue:newVal});
     }
 
