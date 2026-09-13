@@ -4955,14 +4955,34 @@ function renderStorageFileRow(folder,item,idx){
   const isVideo=contentType.indexOf('video/')===0;
   const url='https://firebasestorage.googleapis.com/v0/b/'+FIREBASE_STORAGE_BUCKET+'/o/'+encodeURIComponent(item.name)+'?alt=media';
   const shortName=item.name.split('/').pop();
+  // A real thumbnail, big enough to actually recognise, not just a 40px
+  // smudge, and clickable to see it full-size before deleting anything.
+  // If the image genuinely fails to load, show a clear "can't preview" icon
+  // instead of silently hiding it, so an empty box never reads as "no file".
+  const clickPreview=isImage?' onclick="openStorageFilePreview(\''+escAttr(url)+'\',\''+escAttr(shortName)+'\',\''+folder+'\','+idx+')" style="cursor:pointer;"':(isVideo?' onclick="window.open(\''+escAttr(url)+'\',\'_blank\')" style="cursor:pointer;"':'');
   const preview=isImage
-    ?'<img src="'+url+'" loading="lazy" style="width:40px;height:40px;object-fit:cover;border-radius:5px;flex-shrink:0;background:var(--card2);" onerror="this.style.visibility=\'hidden\'"/>'
-    :'<div style="width:40px;height:40px;border-radius:5px;background:var(--card2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+iconBadge(isVideo?'film':'document',18)+'</div>';
+    ?'<div style="width:56px;height:56px;border-radius:7px;background:var(--card2);flex-shrink:0;overflow:hidden;position:relative;"'+clickPreview+'>'
+      +'<img src="'+url+'" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';"/>'
+      +'<div style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;">'+iconBadge('warning',20)+'</div>'
+    +'</div>'
+    :'<div style="width:56px;height:56px;border-radius:7px;background:var(--card2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"'+clickPreview+'>'+iconBadge(isVideo?'film':'document',24)+'</div>';
   return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0 7px 14px;border-top:1px solid var(--bdr);" id="sf-row-'+folder+'-'+idx+'">'
     +preview
     +'<div style="flex:1;min-width:0;"><div style="font-size:11px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+escAttr(shortName)+'">'+shortName+'</div><div style="font-size:10px;color:var(--mu);">'+fmtBytes(parseInt(item.size)||0)+(item.timeCreated?' &middot; '+new Date(item.timeCreated).toLocaleDateString('en-GB'):'')+'</div></div>'
     +'<button class="btn btn-re" style="font-size:9px;padding:5px 10px;flex-shrink:0;" onclick="deleteStorageFilePrompt(\''+folder+'\','+idx+')">Delete</button>'
   +'</div>';
+}
+function openStorageFilePreview(url,name,folder,idx){
+  document.getElementById('storage-preview-overlay')?.remove();
+  const overlay=document.createElement('div');
+  overlay.id='storage-preview-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  overlay.innerHTML='<div style="background:#111113;border:1px solid #242428;border-radius:14px;padding:16px;max-width:520px;width:100%;">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;"><div style="font-weight:800;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+escAttr(name)+'</div><span onclick="document.getElementById(\'storage-preview-overlay\').remove()" style="cursor:pointer;font-size:22px;color:#888;flex-shrink:0;line-height:1;">&times;</span></div>'
+    +'<img src="'+url+'" style="width:100%;max-height:65vh;object-fit:contain;border-radius:8px;background:#000;"/>'
+    +'<button class="btn btn-re btn-lg" style="width:100%;margin-top:14px;" onclick="document.getElementById(\'storage-preview-overlay\').remove();deleteStorageFilePrompt(\''+folder+'\','+idx+')">'+iconBadge('trash',14)+' Delete This File</button>'
+    +'</div>';
+  document.body.appendChild(overlay);
 }
 async function deleteStorageFilePrompt(folder,idx){
   const row=(window._storageScanRows||[]).find(function(r){return r.folder===folder;});
@@ -5508,13 +5528,13 @@ function renderHeroEditor(c){
   html+='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">Up to 7 promo ad tiles, shown as a grid beside the hero banner, like Konga\'s homepage ads. Each can be a photo or a video, plays natively in the tile (autoplay, muted, no YouTube branding), paste a direct video link or upload a short clip, with an optional link (a URL, or a category name to jump to) and a short caption shown over it.</div>';
   html+='<div id="promo-ads-list"></div>';
   html+='<div class="cs-section"><div class="cs-section-title">'+iconBadge('image',14)+' Custom Banner, optional</div>';
-  html+='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">One full-width banner image (like an awards/certifications strip), placed wherever you choose on the homepage below.</div>';
+  html+='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">Full-width banner images (like an awards/certifications strip), add as many as you like, each placed wherever you choose on the homepage below.</div>';
   html+='<div id="custom-banner-editor"></div>';
   html+='<div class="cs-section"><div class="cs-section-title">'+iconBadge('film',14)+' Video Gallery, optional</div>';
   html+='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">A scrollable row of brand/product videos (paste YouTube links), shown with a title you choose, placed wherever you choose on the homepage.</div>';
   html+='<div id="video-gallery-editor"></div>';
   html+='<div class="cs-section"><div class="cs-section-title">'+iconBadge('megaphone',14)+' Pop-Up Ad / Flyer, optional</div>';
-  html+='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">A promotional flyer that pops up over the site, like Jumia/Konga, for a sale, an announcement, anything you want front and centre. Full control over size, shape, where it appears, and how often.</div>';
+  html+='<div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;line-height:1.6;">Promotional flyers that pop up over the site, like Jumia/Konga, for a sale, an announcement, anything you want front and centre. Add as many as you like, full control over each one\'s size, shape, where it appears, and how often.</div>';
   html+='<div id="popup-ad-editor"></div>';
   html+='<div class="cs-section"><div class="cs-section-title">'+iconBadge('megaphone',14)+' Announcement Bar</div>';
   html+='<div class="fg"><input class="inp" id="he-ann" value="'+(settings.announcement||'')+'" placeholder="e.g. FREE delivery this week!"/></div>';
@@ -5536,51 +5556,74 @@ const CONTENT_SLOT_OPTIONS=[
 function contentSlotSelect(id,current){
   return '<select class="inp" id="'+id+'">'+CONTENT_SLOT_OPTIONS.map(function(o){return '<option value="'+o[0]+'"'+(current===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>';
 }
+// Add as many banners as needed, not capped to one, each with its own image,
+// link, caption, and homepage position. settings.customBanners is the array;
+// a site that still has the old single-banner shape (settings.customBanner)
+// gets it folded into the array here so nothing already configured is lost.
+function customBannersList(){
+  if(Array.isArray(settings.customBanners))return settings.customBanners;
+  if(settings.customBanner&&settings.customBanner.image)return[settings.customBanner];
+  return[];
+}
 function renderCustomBannerEditor(){
   var wrap=document.getElementById('custom-banner-editor');if(!wrap)return;
-  var cb=settings.customBanner||{};
-  wrap.innerHTML=''
-    +'<div style="width:100%;max-width:320px;height:80px;border-radius:6px;overflow:hidden;background:var(--bg);margin-bottom:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid var(--bdr);" onclick="document.getElementById(\'cb-file\').click()">'
-    +(cb.image?'<img src="'+cb.image+'" style="width:100%;height:100%;object-fit:cover;">':'<span style="font-size:10px;color:var(--wh);font-weight:700;">Click to upload banner image</span>')
-    +'</div>'
-    +'<input type="file" id="cb-file" accept="image/*" style="display:none;" onchange="uploadCustomBannerImage(this)">'
-    +'<div class="g2">'
-    +'<input class="inp" id="cb-link" value="'+(cb.link||'')+'" placeholder="Link when tapped, optional">'
-    +'<input class="inp" id="cb-caption" value="'+(cb.caption||'')+'" placeholder="Caption text, optional">'
-    +'</div>'
-    +'<div class="fg"><label class="lbl">Position on homepage</label>'+contentSlotSelect('cb-position',cb.position||'after-why-choose')+'</div>'
-    +'<div style="display:flex;gap:8px;">'
-    +'<button type="button" class="btn btn-or" onclick="saveCustomBanner()">'+iconBadge('save',14)+' Save Banner</button>'
-    +(cb.image?'<button type="button" class="btn btn-re" onclick="removeCustomBanner()">'+iconBadge('trash',14)+' Remove</button>':'')
-    +'</div>';
+  var list=customBannersList();
+  var rows=list.map(function(cb,i){
+    return '<div style="background:var(--card2);padding:12px;border-radius:8px;margin-bottom:10px;">'
+      +'<div onclick="document.getElementById(\'cb-file-'+i+'\').click()" style="width:100%;max-width:320px;height:80px;border-radius:6px;overflow:hidden;background:var(--bg);margin-bottom:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid var(--bdr);">'
+      +(cb.image?'<img src="'+cb.image+'" style="width:100%;height:100%;object-fit:cover;">':'<span style="font-size:10px;color:var(--wh);font-weight:700;">Click to upload banner image</span>')
+      +'</div>'
+      +'<input type="file" id="cb-file-'+i+'" accept="image/*" style="display:none;" onchange="uploadCustomBannerImage('+i+',this)">'
+      +'<div class="g2">'
+      +'<input class="inp" id="cb-link-'+i+'" value="'+(cb.link||'')+'" placeholder="Link when tapped, optional">'
+      +'<input class="inp" id="cb-caption-'+i+'" value="'+(cb.caption||'')+'" placeholder="Caption text, optional">'
+      +'</div>'
+      +'<div class="fg"><label class="lbl">Position on homepage</label>'+contentSlotSelect('cb-position-'+i,cb.position||'after-why-choose')+'</div>'
+      +'<div style="display:flex;gap:8px;">'
+      +'<button type="button" class="btn btn-or" onclick="saveCustomBanner('+i+')">'+iconBadge('save',14)+' Save Banner '+(i+1)+'</button>'
+      +'<button type="button" class="btn btn-re" onclick="removeCustomBanner('+i+')">'+iconBadge('trash',14)+' Remove</button>'
+      +'</div></div>';
+  }).join('');
+  wrap.innerHTML=rows+'<button type="button" class="btn btn-dk" onclick="addCustomBanner()">+ Add Another Banner</button>';
 }
-async function uploadCustomBannerImage(inp){
+function addCustomBanner(){
+  settings.customBanners=customBannersList().concat([{}]);
+  renderCustomBannerEditor();
+}
+async function uploadCustomBannerImage(idx,inp){
   if(!inp||!inp.files||!inp.files[0])return;
   toast('Uploading banner…');
-  var oldUrl=(settings.customBanner||{}).image;
+  var list=customBannersList().slice();
+  var oldUrl=(list[idx]||{}).image;
   var b64=await compressImage(inp.files[0],1600,0.85);
   if(!b64){toast('Upload failed, try a different image','err');return;}
   var url=isGithubConfigured()?await uploadDataUrlToGithub(b64,'banners'):null;
   if(!url){toast('Banner NOT saved, '+(window._lastStorageError||'Storage upload failed'),'err');return;}
-  settings.customBanner=Object.assign({},settings.customBanner||{},{image:url});
-  await fbU('rn_mall_settings',{customBanner:settings.customBanner});
+  list[idx]=Object.assign({},list[idx]||{},{image:url});
+  settings.customBanners=list;
+  delete settings.customBanner; // fully migrated away from the old single-banner field
+  await fbU('rn_mall_settings',{customBanners:list,customBanner:null});
   if(oldUrl&&oldUrl!==url)deleteStorageFile(oldUrl);
   toast('Banner image saved!');
   renderCustomBannerEditor();
 }
-async function saveCustomBanner(){
-  var link=(document.getElementById('cb-link')||{}).value||'';
-  var caption=(document.getElementById('cb-caption')||{}).value||'';
-  var position=(document.getElementById('cb-position')||{}).value||'after-why-choose';
-  settings.customBanner=Object.assign({},settings.customBanner||{},{link:link.trim(),caption:caption.trim(),position:position});
-  await fbU('rn_mall_settings',{customBanner:settings.customBanner});
+async function saveCustomBanner(idx){
+  var list=customBannersList().slice();
+  var link=(document.getElementById('cb-link-'+idx)||{}).value||'';
+  var caption=(document.getElementById('cb-caption-'+idx)||{}).value||'';
+  var position=(document.getElementById('cb-position-'+idx)||{}).value||'after-why-choose';
+  list[idx]=Object.assign({},list[idx]||{},{link:link.trim(),caption:caption.trim(),position:position});
+  settings.customBanners=list;
+  await fbU('rn_mall_settings',{customBanners:list});
   toast('Banner saved!');
 }
-async function removeCustomBanner(){
-  if(!confirm('Remove the custom banner?'))return;
-  var oldUrl=(settings.customBanner||{}).image;
-  settings.customBanner=null;
-  await fbD('rn_mall_settings/customBanner');
+async function removeCustomBanner(idx){
+  if(!confirm('Remove this banner?'))return;
+  var list=customBannersList().slice();
+  var oldUrl=(list[idx]||{}).image;
+  list.splice(idx,1);
+  settings.customBanners=list;
+  await fbU('rn_mall_settings',{customBanners:list,customBanner:null});
   if(oldUrl)deleteStorageFile(oldUrl);
   toast('Banner removed.');
   renderCustomBannerEditor();
@@ -5596,64 +5639,88 @@ const POPUP_AD_FREQUENCIES=[
   ['session','Once per visit (until they close the tab)'],
   ['daily','Once per day']
 ];
+// Add as many pop-ups as needed, not capped to one. Each is fully independent
+// (own image, placement, timing, frequency); the site shows whichever eligible
+// one comes first that a given visitor hasn't already seen (see index.html's
+// initPopupAd). settings.popupAds is the array; a site still on the old
+// single-popup shape (settings.popupAd) gets it folded in here.
+function popupAdsList(){
+  if(Array.isArray(settings.popupAds))return settings.popupAds;
+  if(settings.popupAd&&settings.popupAd.image)return[settings.popupAd];
+  return[];
+}
 function renderPopupAdEditor(){
   var wrap=document.getElementById('popup-ad-editor');if(!wrap)return;
-  var pa=settings.popupAd||{};
-  wrap.innerHTML=''
-    +'<div style="width:100%;max-width:320px;height:120px;border-radius:6px;overflow:hidden;background:var(--bg);margin-bottom:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid var(--bdr);" onclick="document.getElementById(\'pa-file\').click()">'
-    +(pa.image?'<img src="'+pa.image+'" style="width:100%;height:100%;object-fit:contain;">':'<span style="font-size:10px;color:var(--wh);font-weight:700;">Click to upload flyer image</span>')
-    +'</div>'
-    +'<input type="file" id="pa-file" accept="image/*" style="display:none;" onchange="uploadPopupAdImage(this)">'
-    +'<div class="g2">'
-    +'<input class="inp" id="pa-link" value="'+(pa.link||'')+'" placeholder="Link when tapped, optional">'
-    +'<input class="inp" id="pa-caption" value="'+(pa.caption||'')+'" placeholder="Caption text, optional">'
-    +'</div>'
-    +'<div class="g2">'
-    +'<div class="fg"><label class="lbl">Placement</label><select class="inp" id="pa-placement">'+POPUP_AD_PLACEMENTS.map(function(o){return '<option value="'+o[0]+'"'+((pa.placement||'center')===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select></div>'
-    +'<div class="fg"><label class="lbl">How often it shows</label><select class="inp" id="pa-frequency">'+POPUP_AD_FREQUENCIES.map(function(o){return '<option value="'+o[0]+'"'+((pa.frequency||'session')===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select></div>'
-    +'</div>'
-    +'<div class="g2">'
-    +'<div class="fg"><label class="lbl">Width (px), ignored for full-width bars</label><input class="inp" type="number" id="pa-width" value="'+(pa.widthPx||360)+'" placeholder="360"></div>'
-    +'<div class="fg"><label class="lbl">Delay before it appears (seconds)</label><input class="inp" type="number" id="pa-delay" value="'+(pa.delaySec!=null?pa.delaySec:3)+'" placeholder="3"></div>'
-    +'</div>'
-    +'<label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;cursor:pointer;"><input type="checkbox" id="pa-enabled" '+(pa.enabled?'checked':'')+'/> Show this pop-up on the site</label>'
-    +'<div style="display:flex;gap:8px;">'
-    +'<button type="button" class="btn btn-or" onclick="savePopupAd()">'+iconBadge('save',14)+' Save Pop-Up Ad</button>'
-    +(pa.image?'<button type="button" class="btn btn-re" onclick="removePopupAd()">'+iconBadge('trash',14)+' Remove</button>':'')
-    +'</div>';
+  var list=popupAdsList();
+  var rows=list.map(function(pa,i){
+    return '<div style="background:var(--card2);padding:12px;border-radius:8px;margin-bottom:10px;">'
+      +'<div onclick="document.getElementById(\'pa-file-'+i+'\').click()" style="width:100%;max-width:320px;height:120px;border-radius:6px;overflow:hidden;background:var(--bg);margin-bottom:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid var(--bdr);">'
+      +(pa.image?'<img src="'+pa.image+'" style="width:100%;height:100%;object-fit:contain;">':'<span style="font-size:10px;color:var(--wh);font-weight:700;">Click to upload flyer image</span>')
+      +'</div>'
+      +'<input type="file" id="pa-file-'+i+'" accept="image/*" style="display:none;" onchange="uploadPopupAdImage('+i+',this)">'
+      +'<div class="g2">'
+      +'<input class="inp" id="pa-link-'+i+'" value="'+(pa.link||'')+'" placeholder="Link when tapped, optional">'
+      +'<input class="inp" id="pa-caption-'+i+'" value="'+(pa.caption||'')+'" placeholder="Caption text, optional">'
+      +'</div>'
+      +'<div class="g2">'
+      +'<div class="fg"><label class="lbl">Placement</label><select class="inp" id="pa-placement-'+i+'">'+POPUP_AD_PLACEMENTS.map(function(o){return '<option value="'+o[0]+'"'+((pa.placement||'center')===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select></div>'
+      +'<div class="fg"><label class="lbl">How often it shows</label><select class="inp" id="pa-frequency-'+i+'">'+POPUP_AD_FREQUENCIES.map(function(o){return '<option value="'+o[0]+'"'+((pa.frequency||'session')===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select></div>'
+      +'</div>'
+      +'<div class="g2">'
+      +'<div class="fg"><label class="lbl">Width (px), ignored for full-width bars</label><input class="inp" type="number" id="pa-width-'+i+'" value="'+(pa.widthPx||360)+'" placeholder="360"></div>'
+      +'<div class="fg"><label class="lbl">Delay before it appears (seconds)</label><input class="inp" type="number" id="pa-delay-'+i+'" value="'+(pa.delaySec!=null?pa.delaySec:3)+'" placeholder="3"></div>'
+      +'</div>'
+      +'<label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--wh);font-weight:700;margin-bottom:12px;cursor:pointer;"><input type="checkbox" id="pa-enabled-'+i+'" '+(pa.enabled?'checked':'')+'/> Show this pop-up on the site</label>'
+      +'<div style="display:flex;gap:8px;">'
+      +'<button type="button" class="btn btn-or" onclick="savePopupAd('+i+')">'+iconBadge('save',14)+' Save Pop-Up '+(i+1)+'</button>'
+      +'<button type="button" class="btn btn-re" onclick="removePopupAd('+i+')">'+iconBadge('trash',14)+' Remove</button>'
+      +'</div></div>';
+  }).join('');
+  wrap.innerHTML=rows+'<button type="button" class="btn btn-dk" onclick="addPopupAd()">+ Add Another Pop-Up</button>';
 }
-async function uploadPopupAdImage(inp){
+function addPopupAd(){
+  settings.popupAds=popupAdsList().concat([{}]);
+  renderPopupAdEditor();
+}
+async function uploadPopupAdImage(idx,inp){
   if(!inp||!inp.files||!inp.files[0])return;
   toast('Uploading flyer…');
-  var oldUrl=(settings.popupAd||{}).image;
+  var list=popupAdsList().slice();
+  var oldUrl=(list[idx]||{}).image;
   var b64=await compressImage(inp.files[0],1400,0.85);
   if(!b64){toast('Upload failed, try a different image','err');return;}
   var url=isGithubConfigured()?await uploadDataUrlToGithub(b64,'popup-ads'):null;
   if(!url){toast('Flyer NOT saved, '+(window._lastStorageError||'Storage upload failed'),'err');return;}
-  settings.popupAd=Object.assign({},settings.popupAd||{},{image:url});
-  await fbU('rn_mall_settings',{popupAd:settings.popupAd});
+  list[idx]=Object.assign({},list[idx]||{},{image:url});
+  settings.popupAds=list;
+  delete settings.popupAd; // fully migrated away from the old single-pop-up field
+  await fbU('rn_mall_settings',{popupAds:list,popupAd:null});
   if(oldUrl&&oldUrl!==url)deleteStorageFile(oldUrl);
   toast('Flyer image saved!');
   renderPopupAdEditor();
 }
-async function savePopupAd(){
-  var link=(document.getElementById('pa-link')||{}).value||'';
-  var caption=(document.getElementById('pa-caption')||{}).value||'';
-  var placement=(document.getElementById('pa-placement')||{}).value||'center';
-  var frequency=(document.getElementById('pa-frequency')||{}).value||'session';
-  var widthPx=parseInt((document.getElementById('pa-width')||{}).value)||360;
-  var delaySec=parseInt((document.getElementById('pa-delay')||{}).value);if(isNaN(delaySec)||delaySec<0)delaySec=3;
-  var enabled=!!(document.getElementById('pa-enabled')||{}).checked;
-  if(enabled&&!(settings.popupAd||{}).image){toast('Upload a flyer image first','err');return;}
-  settings.popupAd=Object.assign({},settings.popupAd||{},{link:link.trim(),caption:caption.trim(),placement:placement,frequency:frequency,widthPx:widthPx,delaySec:delaySec,enabled:enabled});
-  await fbU('rn_mall_settings',{popupAd:settings.popupAd});
+async function savePopupAd(idx){
+  var list=popupAdsList().slice();
+  var link=(document.getElementById('pa-link-'+idx)||{}).value||'';
+  var caption=(document.getElementById('pa-caption-'+idx)||{}).value||'';
+  var placement=(document.getElementById('pa-placement-'+idx)||{}).value||'center';
+  var frequency=(document.getElementById('pa-frequency-'+idx)||{}).value||'session';
+  var widthPx=parseInt((document.getElementById('pa-width-'+idx)||{}).value)||360;
+  var delaySec=parseInt((document.getElementById('pa-delay-'+idx)||{}).value);if(isNaN(delaySec)||delaySec<0)delaySec=3;
+  var enabled=!!(document.getElementById('pa-enabled-'+idx)||{}).checked;
+  if(enabled&&!(list[idx]||{}).image){toast('Upload a flyer image first','err');return;}
+  list[idx]=Object.assign({},list[idx]||{},{link:link.trim(),caption:caption.trim(),placement:placement,frequency:frequency,widthPx:widthPx,delaySec:delaySec,enabled:enabled});
+  settings.popupAds=list;
+  await fbU('rn_mall_settings',{popupAds:list});
   toast('Pop-up ad saved!');
 }
-async function removePopupAd(){
-  if(!confirm('Remove the pop-up ad?'))return;
-  var oldUrl=(settings.popupAd||{}).image;
-  settings.popupAd=null;
-  await fbD('rn_mall_settings/popupAd');
+async function removePopupAd(idx){
+  if(!confirm('Remove this pop-up ad?'))return;
+  var list=popupAdsList().slice();
+  var oldUrl=(list[idx]||{}).image;
+  list.splice(idx,1);
+  settings.popupAds=list;
+  await fbU('rn_mall_settings',{popupAds:list,popupAd:null});
   if(oldUrl)deleteStorageFile(oldUrl);
   toast('Pop-up ad removed.');
   renderPopupAdEditor();

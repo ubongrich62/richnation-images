@@ -1966,16 +1966,20 @@ function goPromoAdLink(link){
 }
 function renderCustomBannerBlock(sett){
   document.querySelectorAll('[data-content-block="banner"]').forEach(e=>e.remove());
-  const cb=sett&&sett.customBanner;
-  if(!cb||!cb.image)return;
-  const slot=document.getElementById('content-slot-'+(cb.position||'after-why-choose'));
-  if(!slot)return;
-  const onclick=cb.link?' onclick="goPromoAdLink(\''+escJs(cb.link)+'\')" style="cursor:pointer;"':'';
-  const wrap=document.createElement('div');
-  wrap.dataset.contentBlock='banner';
-  wrap.innerHTML='<div class="custom-banner-block"><img src="'+cb.image+'" alt="'+escHtml(cb.caption||'')+'"'+onclick+' loading="lazy" decoding="async"/>'
-    +(cb.caption?'<div class="custom-banner-caption">'+escHtml(cb.caption)+'</div>':'')+'</div>';
-  slot.appendChild(wrap);
+  // Admin can add as many banners as they like, each one lands in whichever
+  // homepage slot it was assigned to, in the order they were added.
+  const list=Array.isArray(sett&&sett.customBanners)?sett.customBanners:(sett&&sett.customBanner&&sett.customBanner.image?[sett.customBanner]:[]);
+  list.forEach(function(cb){
+    if(!cb||!cb.image)return;
+    const slot=document.getElementById('content-slot-'+(cb.position||'after-why-choose'));
+    if(!slot)return;
+    const onclick=cb.link?' onclick="goPromoAdLink(\''+escJs(cb.link)+'\')" style="cursor:pointer;"':'';
+    const wrap=document.createElement('div');
+    wrap.dataset.contentBlock='banner';
+    wrap.innerHTML='<div class="custom-banner-block"><img src="'+cb.image+'" alt="'+escHtml(cb.caption||'')+'"'+onclick+' loading="lazy" decoding="async"/>'
+      +(cb.caption?'<div class="custom-banner-caption">'+escHtml(cb.caption)+'</div>':'')+'</div>';
+    slot.appendChild(wrap);
+  });
 }
 function playGalleryVideo(url,title){
   const yt=ytVideoId(url);
@@ -2028,10 +2032,13 @@ function markPopupAdSeen(pa){
   }catch(e){}
 }
 function initPopupAd(sett){
-  const pa=sett&&sett.popupAd;
   document.getElementById('popup-ad-overlay')?.remove();
-  if(!pa||!pa.enabled||!pa.image)return;
-  if(popupAdAlreadySeen(pa))return;
+  // Admin can add as many pop-ups as they like, show only one at a time (the
+  // first enabled one this visitor hasn't already seen, per its own frequency
+  // rule) rather than stacking several overlays on top of each other.
+  const list=Array.isArray(sett&&sett.popupAds)?sett.popupAds:(sett&&sett.popupAd&&sett.popupAd.image?[sett.popupAd]:[]);
+  const pa=list.find(function(p){return p&&p.enabled&&p.image&&!popupAdAlreadySeen(p);});
+  if(!pa)return;
   setTimeout(function(){showPopupAd(pa);},Math.max(0,(pa.delaySec||0))*1000);
 }
 function closePopupAd(){
