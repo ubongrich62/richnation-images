@@ -80,24 +80,18 @@ async function getAccessToken(serviceAccount){
   const header = {alg:'RS256', typ:'JWT'};
   const claims = {
     iss: serviceAccount.client_email,
-    // Both scopes on one token: messaging to actually send the push, and
-    // database so this Worker can look up the admin team's own device
-    // tokens itself (see notifyAdmins below) instead of trusting whatever
-    // tokens the caller's browser hands it. A request signed by this service
-    // account is automatically treated as a trusted admin request by
-    // Realtime Database Rules, the same way the Firebase Admin SDK is,
-    // regardless of what the rules say for ordinary (unauthenticated)
-    // requests, so this works even once rn_mall_admin_fcm_tokens denies
-    // public read.
-    // Both firebase.database AND userinfo.email are required together for
-    // Firebase to treat this token as a true admin-bypass credential (the
-    // same combination the Admin SDK's own token request uses under the
-    // hood) — firebase.database alone still authenticates fine but does NOT
-    // bypass Realtime Database Rules, it's just an ordinary authenticated
-    // request, so without userinfo.email this Worker's admin-token lookup
-    // below would get rejected once rn_mall_admin_fcm_tokens denies public
-    // read.
-    scope: 'https://www.googleapis.com/auth/firebase.messaging https://www.googleapis.com/auth/firebase.database https://www.googleapis.com/auth/userinfo.email',
+    // Only the messaging scope is needed here now — the admin-token lookup
+    // below (notifyAdmins) authenticates against Realtime Database
+    // separately, using a database secret (FIREBASE_DB_SECRET), not this
+    // OAuth2 token. An earlier version tried adding firebase.database (and
+    // then firebase.database + userinfo.email) to this same token so it
+    // could also bypass Realtime Database Rules for that lookup, on the
+    // assumption that a service-account OAuth2 token gets Admin-SDK-style
+    // rule bypass — in practice that never reliably worked once real
+    // .validate rules existed, so the database lookup now uses Firebase's
+    // own unambiguous bypass mechanism (a database secret) instead, see
+    // notifyAdmins below.
+    scope: 'https://www.googleapis.com/auth/firebase.messaging',
     aud: 'https://oauth2.googleapis.com/token',
     exp: now + 3600,
     iat: now
@@ -181,15 +175,18 @@ export default {
     // fake/phishing push notifications of their own.
     if (payload.notifyAdmins) {
       if (!payload.dbUrl) return json({error:'dbUrl is required for notifyAdmins'},400);
+      if (!env.FIREBASE_DB_SECRET) return json({error:'This Worker is not configured yet, the FIREBASE_DB_SECRET secret is missing.'},500);
       try {
         // Firebase Realtime Database's REST API authenticates via an "auth"
-        // QUERY PARAMETER for any credential type (legacy secret, ID token,
-        // or a service-account OAuth2 access token like this one), see
-        // https://firebase.google.com/docs/database/rest/auth. It does NOT
-        // recognize ?access_token= or an Authorization header, both
-        // conventions from OTHER Google APIs, those get silently treated
-        // as no credential at all.
-        const dbRes = await fetch(payload.dbUrl.replace(/\/+$/,'') + '/rn_mall_admin_fcm_tokens.json?auth=' + accessToken);
+        // QUERY PARAMETER, see https://firebase.google.com/docs/database/rest/auth.
+        // FIREBASE_DB_SECRET is a Realtime Database secret (Project Settings
+        // -> Service accounts -> Database secrets), Firebase's own
+        // unconditional bypass credential for the REST API — unlike a
+        // service-account OAuth2 access token (which this Worker's own
+        // getAccessToken() generates, but only for FCM sends), it is
+        // guaranteed to bypass every Realtime Database Rule, so this lookup
+        // still works once rn_mall_admin_fcm_tokens denies public read.
+        const dbRes = await fetch(payload.dbUrl.replace(/\/+$/,'') + '/rn_mall_admin_fcm_tokens.json?auth=' + env.FIREBASE_DB_SECRET);
         const dbData = dbRes.ok ? await dbRes.json() : null;
         tokens = dbData ? Object.keys(dbData) : [];
       } catch (e) { return json({error:'Could not look up admin tokens: ' + e.message},502); }
