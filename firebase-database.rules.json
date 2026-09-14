@@ -108,14 +108,14 @@
       ".read": true,
       "$id": {
         ".write": true,
-        ".validate": "newData.hasChildren(['email','id']) && (data.exists() ? newData.child('walletBalance').val() === data.child('walletBalance').val() : (!newData.hasChild('walletBalance') || newData.child('walletBalance').val() === 0)) && (data.exists() ? newData.child('points').val() === data.child('points').val() : (!newData.hasChild('points') || newData.child('points').val() === 0))"
+        ".validate": "newData.hasChildren(['email','id']) && (data.child('walletBalance').exists() ? newData.child('walletBalance').val() === data.child('walletBalance').val() : (!newData.hasChild('walletBalance') || newData.child('walletBalance').val() === 0)) && (data.child('points').exists() ? newData.child('points').val() === data.child('points').val() : (!newData.hasChild('points') || newData.child('points').val() === 0))"
       }
     },
     "rn_mall_staff": {
       ".read": true,
       "$id": {
         ".write": true,
-        ".validate": "newData.hasChildren(['email','id']) && (data.exists() ? newData.child('salary').val() === data.child('salary').val() : (!newData.hasChild('salary') || newData.child('salary').val() === 0)) && (data.exists() ? newData.child('points').val() === data.child('points').val() : (!newData.hasChild('points') || newData.child('points').val() === 0))"
+        ".validate": "newData.hasChildren(['email','id']) && (data.child('salary').exists() ? newData.child('salary').val() === data.child('salary').val() : (!newData.hasChild('salary') || newData.child('salary').val() === 0)) && (data.child('points').exists() ? newData.child('points').val() === data.child('points').val() : (!newData.hasChild('points') || newData.child('points').val() === 0))"
       }
     },
     "rn_mall_vendors": {
@@ -126,14 +126,14 @@
       ".read": true,
       "$id": {
         ".write": true,
-        ".validate": "newData.hasChildren(['email','id']) && (data.exists() ? newData.child('totalPaid').val() === data.child('totalPaid').val() : (!newData.hasChild('totalPaid') || newData.child('totalPaid').val() === 0)) && (data.exists() ? newData.child('points').val() === data.child('points').val() : (!newData.hasChild('points') || newData.child('points').val() === 0))"
+        ".validate": "newData.hasChildren(['email','id']) && (data.child('totalPaid').exists() ? newData.child('totalPaid').val() === data.child('totalPaid').val() : (!newData.hasChild('totalPaid') || newData.child('totalPaid').val() === 0)) && (data.child('points').exists() ? newData.child('points').val() === data.child('points').val() : (!newData.hasChild('points') || newData.child('points').val() === 0))"
       }
     },
     "rn_mall_investors": {
       ".read": true,
       "$id": {
         ".write": true,
-        ".validate": "newData.hasChildren(['email','id']) && (data.exists() ? newData.child('walletBalance').val() === data.child('walletBalance').val() : (!newData.hasChild('walletBalance') || newData.child('walletBalance').val() === 0)) && (data.exists() ? newData.child('totalPaid').val() === data.child('totalPaid').val() : (!newData.hasChild('totalPaid') || newData.child('totalPaid').val() === 0))"
+        ".validate": "newData.hasChildren(['email','id']) && (data.child('walletBalance').exists() ? newData.child('walletBalance').val() === data.child('walletBalance').val() : (!newData.hasChild('walletBalance') || newData.child('walletBalance').val() === 0)) && (data.child('totalPaid').exists() ? newData.child('totalPaid').val() === data.child('totalPaid').val() : (!newData.hasChild('totalPaid') || newData.child('totalPaid').val() === 0))"
       }
     },
 
