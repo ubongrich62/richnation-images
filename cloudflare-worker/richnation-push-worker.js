@@ -80,18 +80,24 @@ async function getAccessToken(serviceAccount){
   const header = {alg:'RS256', typ:'JWT'};
   const claims = {
     iss: serviceAccount.client_email,
-    // Only the messaging scope is needed here now — the admin-token lookup
-    // below (notifyAdmins) authenticates against Realtime Database
-    // separately, using a database secret (FIREBASE_DB_SECRET), not this
-    // OAuth2 token. An earlier version tried adding firebase.database (and
-    // then firebase.database + userinfo.email) to this same token so it
-    // could also bypass Realtime Database Rules for that lookup, on the
-    // assumption that a service-account OAuth2 token gets Admin-SDK-style
-    // rule bypass — in practice that never reliably worked once real
-    // .validate rules existed, so the database lookup now uses Firebase's
-    // own unambiguous bypass mechanism (a database secret) instead, see
-    // notifyAdmins below.
-    scope: 'https://www.googleapis.com/auth/firebase.messaging',
+    // This is the EXACT scope list Firebase's own Admin SDK requests for a
+    // service-account access token (see firebase-admin-node's
+    // credential-internal.ts, the SCOPES constant) — all five together.
+    // Earlier versions of this Worker guessed at smaller subsets (messaging
+    // alone; messaging+database; messaging+database+userinfo.email) for the
+    // notifyAdmins lookup below to also bypass Realtime Database Rules —
+    // none of those reliably got Admin-SDK-style bypass treatment once real
+    // .validate rules existed. This is the actual credential shape the
+    // Admin SDK itself uses, not a guess, and covers both this token's jobs:
+    // sending FCM messages, and (via notifyAdmins) reading
+    // rn_mall_admin_fcm_tokens once that collection denies public read.
+    scope: [
+      'https://www.googleapis.com/auth/cloud-platform',
+      'https://www.googleapis.com/auth/firebase.database',
+      'https://www.googleapis.com/auth/firebase.messaging',
+      'https://www.googleapis.com/auth/identitytoolkit',
+      'https://www.googleapis.com/auth/userinfo.email'
+    ].join(' '),
     aud: 'https://oauth2.googleapis.com/token',
     exp: now + 3600,
     iat: now
@@ -175,18 +181,12 @@ export default {
     // fake/phishing push notifications of their own.
     if (payload.notifyAdmins) {
       if (!payload.dbUrl) return json({error:'dbUrl is required for notifyAdmins'},400);
-      if (!env.FIREBASE_DB_SECRET) return json({error:'This Worker is not configured yet, the FIREBASE_DB_SECRET secret is missing.'},500);
       try {
         // Firebase Realtime Database's REST API authenticates via an "auth"
-        // QUERY PARAMETER, see https://firebase.google.com/docs/database/rest/auth.
-        // FIREBASE_DB_SECRET is a Realtime Database secret (Project Settings
-        // -> Service accounts -> Database secrets), Firebase's own
-        // unconditional bypass credential for the REST API — unlike a
-        // service-account OAuth2 access token (which this Worker's own
-        // getAccessToken() generates, but only for FCM sends), it is
-        // guaranteed to bypass every Realtime Database Rule, so this lookup
-        // still works once rn_mall_admin_fcm_tokens denies public read.
-        const dbRes = await fetch(payload.dbUrl.replace(/\/+$/,'') + '/rn_mall_admin_fcm_tokens.json?auth=' + env.FIREBASE_DB_SECRET);
+        // QUERY PARAMETER for any credential type (legacy secret, ID token,
+        // or a service-account OAuth2 access token like this one), see
+        // https://firebase.google.com/docs/database/rest/auth.
+        const dbRes = await fetch(payload.dbUrl.replace(/\/+$/,'') + '/rn_mall_admin_fcm_tokens.json?auth=' + accessToken);
         const dbData = dbRes.ok ? await dbRes.json() : null;
         tokens = dbData ? Object.keys(dbData) : [];
       } catch (e) { return json({error:'Could not look up admin tokens: ' + e.message},502); }
