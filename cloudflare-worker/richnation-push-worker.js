@@ -89,7 +89,15 @@ async function getAccessToken(serviceAccount){
     // regardless of what the rules say for ordinary (unauthenticated)
     // requests, so this works even once rn_mall_admin_fcm_tokens denies
     // public read.
-    scope: 'https://www.googleapis.com/auth/firebase.messaging https://www.googleapis.com/auth/firebase.database',
+    // Both firebase.database AND userinfo.email are required together for
+    // Firebase to treat this token as a true admin-bypass credential (the
+    // same combination the Admin SDK's own token request uses under the
+    // hood) — firebase.database alone still authenticates fine but does NOT
+    // bypass Realtime Database Rules, it's just an ordinary authenticated
+    // request, so without userinfo.email this Worker's admin-token lookup
+    // below would get rejected once rn_mall_admin_fcm_tokens denies public
+    // read.
+    scope: 'https://www.googleapis.com/auth/firebase.messaging https://www.googleapis.com/auth/firebase.database https://www.googleapis.com/auth/userinfo.email',
     aud: 'https://oauth2.googleapis.com/token',
     exp: now + 3600,
     iat: now

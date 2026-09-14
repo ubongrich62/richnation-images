@@ -98,8 +98,17 @@ async function getAccessToken(serviceAccount){
     // Grants this token the same trusted, rules-bypassing access the Admin
     // SDK has, exactly what lets this Worker read the TRUE current balance
     // and write the new one regardless of what the rules say for an
-    // ordinary (unauthenticated) browser request.
-    scope: 'https://www.googleapis.com/auth/firebase.database',
+    // ordinary (unauthenticated) browser request. BOTH scopes are required
+    // for that bypass: firebase.database alone still authenticates fine
+    // (writes succeed against permissive rules), but Firebase only grants
+    // full admin-style rule bypass when userinfo.email is paired with it,
+    // the same combination the Admin SDK's own token request uses under the
+    // hood. Missing userinfo.email is what caused this Worker's own writes
+    // to money fields to start getting rejected by the .validate rules the
+    // moment those rules were published, since without it the token is just
+    // an ordinary authenticated request, fully subject to the rules meant
+    // to exempt it.
+    scope: 'https://www.googleapis.com/auth/firebase.database https://www.googleapis.com/auth/userinfo.email',
     aud: 'https://oauth2.googleapis.com/token',
     exp: now + 3600,
     iat: now
