@@ -1648,16 +1648,23 @@ function topUpWalletCard(){
       // directly without ever paying. verify-topup asks Paystack itself
       // whether this exact reference was really paid before crediting
       // anything, this browser never gets to just declare its own success.
-      callback:async function(response){
+      // Paystack Inline v1 rejects an `async function` here (its callback
+      // validation isn't a plain typeof check, and fails on AsyncFunction)
+      // with a misleading "Attribute callback must be a valid function"
+      // error, even though it genuinely is a function — so this stays a
+      // plain function that kicks off the async verification without being
+      // async itself.
+      callback:function(response){
         toast('Confirming payment...');
-        const res=await callWalletWorker('verify-topup',{customerId:currUser.id,reference:response.reference});
-        if(res&&res.ok){
-          currUser.walletBalance=res.newBalance;localStorage.setItem('rnm_user',JSON.stringify(currUser));
-          toast('₦'+(res.amount||amt).toLocaleString()+' added to your wallet!');
-          accTab('wallet',null);
-        }else{
-          toast((res&&res.error)||'Could not confirm this payment, contact support with reference '+response.reference,'err');
-        }
+        callWalletWorker('verify-topup',{customerId:currUser.id,reference:response.reference}).then(function(res){
+          if(res&&res.ok){
+            currUser.walletBalance=res.newBalance;localStorage.setItem('rnm_user',JSON.stringify(currUser));
+            toast('₦'+(res.amount||amt).toLocaleString()+' added to your wallet!');
+            accTab('wallet',null);
+          }else{
+            toast((res&&res.error)||'Could not confirm this payment, contact support with reference '+response.reference,'err');
+          }
+        });
       },
       onClose:function(){toast('Payment window closed','warn');}
     });
@@ -3236,14 +3243,20 @@ async function placeOrder(isPreorder=false){
         metadata:{order_id:tracking,customer:fn+' '+ln,type:'pod_deposit'},
         // This callback firing is not proof a payment happened, it runs
         // purely in this browser. verify-payment asks Paystack itself
-        // before this order is ever marked as paid.
-        callback:async function(response){
+        // before this order is ever marked as paid. Paystack Inline v1
+        // rejects an `async function` here (its callback validation isn't a
+        // plain typeof check, and fails on AsyncFunction) with a misleading
+        // "Attribute callback must be a valid function" error, even though
+        // it genuinely is a function — so this stays a plain function that
+        // kicks off the async verification without being async itself.
+        callback:function(response){
           toast('Confirming payment...');
-          const res=await callWalletWorker('verify-payment',{reference:response.reference,expectedAmount:depositAmt});
-          if(!res||!res.ok){toast((res&&res.error)||'Could not confirm this payment, contact support with reference '+response.reference,'err');return;}
-          order.podDepositPaid=true;order.podDepositRef=response.reference;order.status='confirmed';
-          order.timeline.push({status:'Deposit Paid',time:new Date().toISOString(),note:'50% deposit of '+fmt(depositAmt)+' paid via Paystack. Reference: '+response.reference+'. Balance of '+fmt(tot-depositAmt)+' due on delivery.'});
-          saveOrder(order);
+          callWalletWorker('verify-payment',{reference:response.reference,expectedAmount:depositAmt}).then(function(res){
+            if(!res||!res.ok){toast((res&&res.error)||'Could not confirm this payment, contact support with reference '+response.reference,'err');return;}
+            order.podDepositPaid=true;order.podDepositRef=response.reference;order.status='confirmed';
+            order.timeline.push({status:'Deposit Paid',time:new Date().toISOString(),note:'50% deposit of '+fmt(depositAmt)+' paid via Paystack. Reference: '+response.reference+'. Balance of '+fmt(tot-depositAmt)+' due on delivery.'});
+            saveOrder(order);
+          });
         },
         onClose:function(){toast('Deposit payment window closed','warn');}
       });
@@ -3276,14 +3289,20 @@ async function placeOrder(isPreorder=false){
         metadata:{order_id:tracking,customer:fn+' '+ln},
         // Same reasoning as the POD deposit callback above: verify with
         // Paystack directly rather than trusting this browser's own report
-        // that the popup closed successfully.
-        callback:async function(response){
+        // that the popup closed successfully. Paystack Inline v1 rejects an
+        // `async function` here (its callback validation isn't a plain
+        // typeof check, and fails on AsyncFunction) with a misleading
+        // "Attribute callback must be a valid function" error, even though
+        // it genuinely is a function — so this stays a plain function that
+        // kicks off the async verification without being async itself.
+        callback:function(response){
           toast('Confirming payment...');
-          const res=await callWalletWorker('verify-payment',{reference:response.reference,expectedAmount:tot});
-          if(!res||!res.ok){toast((res&&res.error)||'Could not confirm this payment, contact support with reference '+response.reference,'err');return;}
-          order.payRef=response.reference;order.status='confirmed';
-          order.timeline.push({status:'Payment Confirmed',time:new Date().toISOString(),note:'Paid via Paystack. Reference: '+response.reference});
-          saveOrder(order);
+          callWalletWorker('verify-payment',{reference:response.reference,expectedAmount:tot}).then(function(res){
+            if(!res||!res.ok){toast((res&&res.error)||'Could not confirm this payment, contact support with reference '+response.reference,'err');return;}
+            order.payRef=response.reference;order.status='confirmed';
+            order.timeline.push({status:'Payment Confirmed',time:new Date().toISOString(),note:'Paid via Paystack. Reference: '+response.reference});
+            saveOrder(order);
+          });
         },
         onClose:function(){toast('Payment window closed','warn');}
       });
