@@ -4898,7 +4898,14 @@ async function silentlyRefreshAdminPushToken(){
     if(!messaging)return;
     const reg=await navigator.serviceWorker.register('sw.js');
     const token=await messaging.getToken({vapidKey:settings.pushVapidKey,serviceWorkerRegistration:reg});
-    if(token)await fbS('rn_mall_admin_fcm_tokens/'+token,{ts:Date.now()});
+    // A raw fetch here, not fbS(), on purpose: fbS always toasts a scary
+    // "blocked by Firebase permissions" error to the admin on failure, meant
+    // for a save the admin just asked for and needs to know didn't work.
+    // This runs automatically on every single page load with no admin
+    // action behind it, so if it ever fails, it should fail exactly as
+    // silently as its name says, not surface a confusing banner on a page
+    // the admin didn't even touch this for.
+    if(token)await fbFetchTimeout(FB+'/rn_mall_admin_fcm_tokens/'+token+'.json',{method:'PUT',body:JSON.stringify({ts:Date.now()})}).catch(function(){});
   }catch(e){console.warn('Silent admin push token refresh failed:',e.message);}
 }
 async function saveFlash(){
