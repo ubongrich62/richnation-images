@@ -42,15 +42,25 @@
 // than the token/title/body/data you're choosing to send, so it can't be
 // used to exfiltrate the service account key or sign arbitrary requests.
 
-function corsHeaders(){
+// Only these origins are allowed to read this Worker's responses from a
+// BROWSER — this blocks a malicious webpage running in a victim's browser
+// from quietly calling this Worker in the background. It does NOT stop a
+// direct script/curl call made outside a browser, since CORS is purely a
+// browser-enforced mechanism.
+const ALLOWED_ORIGINS = ['https://richnationmall.com', 'https://www.richnationmall.com'];
+function pickAllowOrigin(originHeader){
+  return ALLOWED_ORIGINS.includes(originHeader) ? originHeader : ALLOWED_ORIGINS[0];
+}
+function _corsHeaders(origin){
   return {
-    'Access-Control-Allow-Origin':'*',
+    'Access-Control-Allow-Origin': origin,
     'Access-Control-Allow-Methods':'POST,OPTIONS',
-    'Access-Control-Allow-Headers':'Content-Type'
+    'Access-Control-Allow-Headers':'Content-Type',
+    'Vary':'Origin'
   };
 }
-function json(body,status){
-  return new Response(JSON.stringify(body),{status:status||200,headers:Object.assign({'Content-Type':'application/json'},corsHeaders())});
+function _json(body,status,origin){
+  return new Response(JSON.stringify(body),{status:status||200,headers:Object.assign({'Content-Type':'application/json'},_corsHeaders(origin))});
 }
 
 function base64url(input){
@@ -153,6 +163,14 @@ async function sendOne(serviceAccount, accessToken, token, title, body, data, ur
 
 export default {
   async fetch(request, env){
+    // Shadows the module-level helpers above for the rest of this one
+    // request, so every existing corsHeaders()/json(...) call below
+    // automatically gets THIS request's real, safely-checked origin
+    // without needing to touch each of those call sites individually.
+    const allowOrigin = pickAllowOrigin(request.headers.get('Origin'));
+    function corsHeaders(){ return _corsHeaders(allowOrigin); }
+    function json(body,status){ return _json(body,status,allowOrigin); }
+
     if (request.method === 'OPTIONS') return new Response(null,{status:204,headers:corsHeaders()});
     if (request.method !== 'POST') return json({error:'Method not allowed'},405);
     if (!env.FIREBASE_SERVICE_ACCOUNT) return json({error:'This Worker is not configured yet, the FIREBASE_SERVICE_ACCOUNT secret is missing.'},500);

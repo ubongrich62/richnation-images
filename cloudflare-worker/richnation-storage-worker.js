@@ -62,15 +62,26 @@ const IMAGE_FOLDERS = new Set([
 ]);
 const ANY_FILE_FOLDERS = new Set(['task-files','submissions','promo-ad-videos']);
 
-function corsHeaders(){
+// Only these origins are allowed to read this Worker's responses from a
+// BROWSER — without this, any other website could silently use this
+// Worker's upload endpoint (which has no secret key, by original design)
+// as free file hosting for THEIR OWN content, off your R2 bucket. This
+// does NOT stop a direct script/curl call made outside a browser, CORS is
+// purely a browser-enforced mechanism.
+const ALLOWED_ORIGINS = ['https://richnationmall.com', 'https://www.richnationmall.com'];
+function pickAllowOrigin(originHeader){
+  return ALLOWED_ORIGINS.includes(originHeader) ? originHeader : ALLOWED_ORIGINS[0];
+}
+function _corsHeaders(origin){
   return {
-    'Access-Control-Allow-Origin':'*',
+    'Access-Control-Allow-Origin': origin,
     'Access-Control-Allow-Methods':'GET,POST,DELETE,OPTIONS',
-    'Access-Control-Allow-Headers':'Content-Type'
+    'Access-Control-Allow-Headers':'Content-Type',
+    'Vary':'Origin'
   };
 }
-function json(body,status){
-  return new Response(JSON.stringify(body),{status:status||200,headers:Object.assign({'Content-Type':'application/json'},corsHeaders())});
+function _json(body,status,origin){
+  return new Response(JSON.stringify(body),{status:status||200,headers:Object.assign({'Content-Type':'application/json'},_corsHeaders(origin))});
 }
 function folderOf(path){return (path.split('/')[0]||'');}
 
@@ -78,6 +89,13 @@ export default {
   async fetch(request, env){
     const url = new URL(request.url);
     const path = decodeURIComponent(url.pathname.slice(1)); // strip leading /
+    // Shadows the module-level helpers above for the rest of this one
+    // request, so every existing corsHeaders()/json(...) call below
+    // automatically gets THIS request's real, safely-checked origin
+    // without needing to touch each of those call sites individually.
+    const allowOrigin = pickAllowOrigin(request.headers.get('Origin'));
+    function corsHeaders(){ return _corsHeaders(allowOrigin); }
+    function json(body,status){ return _json(body,status,allowOrigin); }
 
     if(request.method === 'OPTIONS'){
       return new Response(null,{status:204,headers:corsHeaders()});
