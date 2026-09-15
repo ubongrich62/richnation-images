@@ -107,48 +107,19 @@
     // a specific $id so a request can't replace or wipe the whole table.
     //
     // MONEY FIELDS ARE LOCKED against direct writes from any of the six app
-    // pages, same as before (see the .validate expressions below, unchanged
-    // by this update) — the ONLY way those specific fields can actually
-    // change is through richnation-wallet-worker.js's trusted credential,
-    // which these rules automatically don't apply to.
-    //
-    // OWNERSHIP IS NOW ALSO ENFORCED on top of that, layered onto the SAME
-    // .write rule rather than replacing it (both must pass). The
-    // login/auth migration (every app's doLogin/doXLogin, plus admin.html's
-    // bulk "Account Security Migration" tool) has been quietly giving real
-    // Firebase Auth accounts to real people for a while now, each one
-    // stamped with an `authUid` field on their own record — until this
-    // change, that authUid was informational only, database rules never
-    // actually checked it, so anyone could still PATCH any record by id
-    // with no credential at all, migrated or not. The three-way OR below
-    // says a write is allowed if: (1) it comes from admin.html itself,
-    // recognised by the `admin` custom claim richnation-wallet-worker.js's
-    // /set-admin-claim stamps onto an admin's own Firebase Auth account at
-    // login (see that Worker and admin.html's ensureAdminClaim) — admin
-    // routinely edits OTHER people's records (approve, suspend, edit) and
-    // has no reason to have the SAME uid as whoever it's editing; or (2) a
-    // brand new record is being created and either doesn't claim an
-    // authUid at all (an unmigrated-style signup, same as before) or claims
-    // one that matches the real signed-in user (stops registering a record
-    // under someone else's UID); or (3) an existing record either has no
-    // authUid yet (not migrated, the legacy no-credential path stays open
-    // exactly as before so nobody gets locked out mid-migration) or the
-    // caller's own auth.uid matches that record's stored authUid.
+    // pages (see the .validate expressions below) — the ONLY way those
+    // specific fields can actually change is through
+    // richnation-wallet-worker.js's trusted service-account credential,
+    // which bypasses these .validate checks (proven working). Ownership
+    // (requiring auth.uid/an admin claim on ".write") was tried on top of
+    // this and reverted — see the top-of-file note — because the same
+    // trusted credential does NOT bypass a .write condition that checks
+    // auth in the same way, so it broke the Worker's own writes the moment
+    // it went live. ".write" stays unconditional true below until that's
+    // solved and proven safe.
     "rn_mall_customers": {
       ".read": true,
       "$id": {
-        // ".write" was briefly changed to require auth.uid/auth.token.admin
-        // here, then reverted: the wallet Worker's own trusted writes
-        // (Adjust Wallet, checkout, everything routed through
-        // richnation-wallet-worker.js) started failing with a genuine
-        // Firebase 401 the moment that went live, meaning its
-        // service-account credential does NOT actually satisfy an
-        // auth-based .write condition in practice, only .validate rules
-        // that don't reference auth at all (like the money-field lock
-        // right below, which has worked all along). Back to unconditional
-        // true until a safe, isolated way to let the Worker itself satisfy
-        // an ownership check is found and tested — see the money-field
-        // .validate below for what's still actually enforced here.
         ".write": true,
         ".validate": "newData.hasChildren(['email','id']) && (data.child('walletBalance').exists() ? newData.child('walletBalance').val() === data.child('walletBalance').val() : (!newData.hasChild('walletBalance') || newData.child('walletBalance').val() === 0)) && (data.child('points').exists() ? newData.child('points').val() === data.child('points').val() : (!newData.hasChild('points') || newData.child('points').val() === 0))"
       }
