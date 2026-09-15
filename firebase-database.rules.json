@@ -17,6 +17,26 @@
 // stop working, etc, until the Worker is live. Deploy the Worker first,
 // save its URL, THEN publish these rules.
 //
+// A SECOND, EQUALLY IMPORTANT DEPENDENCY as of this version: every
+// customer/staff/vendor/rider/investor/admin write below now also requires
+// either that record's own auth.uid (once it's been through the login
+// migration) or an `admin` custom claim on the caller's Firebase Auth
+// token. Two things must ALREADY be deployed and working before this is
+// published, or every write to these five collections (routine profile
+// edits, admin approving/suspending someone, everything) starts failing:
+//   1. richnation-wallet-worker.js's /set-admin-claim action (same
+//      redeploy as the money-field lockdown above).
+//   2. admin.html's own login must have ALREADY signed in at least once
+//      since this update (its new Firebase-Auth-first login flow stamps
+//      admin's own account with that custom claim) — log into admin.html
+//      once, confirm no errors, before publishing these rules.
+// All 6 apps' fbG/fbS/fbU/fbP/fbD helpers were also updated to attach the
+// signed-in user's ID token to every request (a fbAuthQS() addition) —
+// without that, `auth` would be null for every request regardless of
+// being signed in via firebase.auth() elsewhere on the page, and every
+// migrated user's own writes to their own record would fail too. Confirm
+// all 6 apps are deployed with that change before publishing.
+//
 // WHY THIS IS "INTERIM", NOT FINAL:
 // Every portal's login (doLogin/doStaffLogin/doVendorRegister/etc.) works by
 // downloading the ENTIRE customers/staff/vendors/riders/investors table into
@@ -89,50 +109,66 @@
     // login flow to work at all, see the note above. Writes are scoped to
     // a specific $id so a request can't replace or wipe the whole table.
     //
-    // MONEY FIELDS ARE NOW LOCKED against direct writes from any of the six
-    // app pages. Before this, a customer's own browser could PATCH its own
-    // walletBalance/points to any number it liked and immediately spend a
-    // fabricated balance on a real order, admin.html could do the same for
-    // staff salary/vendor/rider/investor payout totals, all with nothing
-    // checking that the new number made any sense. The pattern below says
-    // "this field may only stay exactly what it already was" for a normal
-    // client write; the ONLY way it can actually change now is through
-    // richnation-wallet-worker.js, which writes using a trusted credential
-    // that these rules automatically don't apply to (the same mechanism the
-    // Firebase Admin SDK uses), see that file's comments for the full
-    // explanation. A brand new record may only be created with these
-    // fields absent or zero, never a starting balance the browser made up,
-    // real starting bonuses are credited by that same Worker right after
-    // signup instead.
+    // MONEY FIELDS ARE LOCKED against direct writes from any of the six app
+    // pages, same as before (see the .validate expressions below, unchanged
+    // by this update) — the ONLY way those specific fields can actually
+    // change is through richnation-wallet-worker.js's trusted credential,
+    // which these rules automatically don't apply to.
+    //
+    // OWNERSHIP IS NOW ALSO ENFORCED on top of that, layered onto the SAME
+    // .write rule rather than replacing it (both must pass). The
+    // login/auth migration (every app's doLogin/doXLogin, plus admin.html's
+    // bulk "Account Security Migration" tool) has been quietly giving real
+    // Firebase Auth accounts to real people for a while now, each one
+    // stamped with an `authUid` field on their own record — until this
+    // change, that authUid was informational only, database rules never
+    // actually checked it, so anyone could still PATCH any record by id
+    // with no credential at all, migrated or not. The three-way OR below
+    // says a write is allowed if: (1) it comes from admin.html itself,
+    // recognised by the `admin` custom claim richnation-wallet-worker.js's
+    // /set-admin-claim stamps onto an admin's own Firebase Auth account at
+    // login (see that Worker and admin.html's ensureAdminClaim) — admin
+    // routinely edits OTHER people's records (approve, suspend, edit) and
+    // has no reason to have the SAME uid as whoever it's editing; or (2) a
+    // brand new record is being created and either doesn't claim an
+    // authUid at all (an unmigrated-style signup, same as before) or claims
+    // one that matches the real signed-in user (stops registering a record
+    // under someone else's UID); or (3) an existing record either has no
+    // authUid yet (not migrated, the legacy no-credential path stays open
+    // exactly as before so nobody gets locked out mid-migration) or the
+    // caller's own auth.uid matches that record's stored authUid.
     "rn_mall_customers": {
       ".read": true,
       "$id": {
-        ".write": true,
+        ".write": "(auth != null && auth.token.admin === true) || (!data.exists() && (!newData.hasChild('authUid') || (auth != null && auth.uid === newData.child('authUid').val()))) || (data.exists() && (!data.child('authUid').exists() || (auth != null && auth.uid === data.child('authUid').val())))",
         ".validate": "newData.hasChildren(['email','id']) && (data.child('walletBalance').exists() ? newData.child('walletBalance').val() === data.child('walletBalance').val() : (!newData.hasChild('walletBalance') || newData.child('walletBalance').val() === 0)) && (data.child('points').exists() ? newData.child('points').val() === data.child('points').val() : (!newData.hasChild('points') || newData.child('points').val() === 0))"
       }
     },
     "rn_mall_staff": {
       ".read": true,
       "$id": {
-        ".write": true,
+        ".write": "(auth != null && auth.token.admin === true) || (!data.exists() && (!newData.hasChild('authUid') || (auth != null && auth.uid === newData.child('authUid').val()))) || (data.exists() && (!data.child('authUid').exists() || (auth != null && auth.uid === data.child('authUid').val())))",
         ".validate": "newData.hasChildren(['email','id']) && (data.child('salary').exists() ? newData.child('salary').val() === data.child('salary').val() : (!newData.hasChild('salary') || newData.child('salary').val() === 0)) && (data.child('points').exists() ? newData.child('points').val() === data.child('points').val() : (!newData.hasChild('points') || newData.child('points').val() === 0))"
       }
     },
     "rn_mall_vendors": {
       ".read": true,
-      "$id": { ".write": true, ".validate": "newData.hasChildren(['email','id'])" }
+      "$id": {
+        ".write": "(auth != null && auth.token.admin === true) || (!data.exists() && (!newData.hasChild('authUid') || (auth != null && auth.uid === newData.child('authUid').val()))) || (data.exists() && (!data.child('authUid').exists() || (auth != null && auth.uid === data.child('authUid').val())))",
+        ".validate": "newData.hasChildren(['email','id'])"
+      }
     },
     "rn_mall_riders": {
       ".read": true,
       "$id": {
-        ".write": true,
+        ".write": "(auth != null && auth.token.admin === true) || (!data.exists() && (!newData.hasChild('authUid') || (auth != null && auth.uid === newData.child('authUid').val()))) || (data.exists() && (!data.child('authUid').exists() || (auth != null && auth.uid === data.child('authUid').val())))",
         ".validate": "newData.hasChildren(['email','id']) && (data.child('totalPaid').exists() ? newData.child('totalPaid').val() === data.child('totalPaid').val() : (!newData.hasChild('totalPaid') || newData.child('totalPaid').val() === 0)) && (data.child('points').exists() ? newData.child('points').val() === data.child('points').val() : (!newData.hasChild('points') || newData.child('points').val() === 0))"
       }
     },
     "rn_mall_investors": {
       ".read": true,
       "$id": {
-        ".write": true,
+        ".write": "(auth != null && auth.token.admin === true) || (!data.exists() && (!newData.hasChild('authUid') || (auth != null && auth.uid === newData.child('authUid').val()))) || (data.exists() && (!data.child('authUid').exists() || (auth != null && auth.uid === data.child('authUid').val())))",
         ".validate": "newData.hasChildren(['email','id']) && (data.child('walletBalance').exists() ? newData.child('walletBalance').val() === data.child('walletBalance').val() : (!newData.hasChild('walletBalance') || newData.child('walletBalance').val() === 0)) && (data.child('totalPaid').exists() ? newData.child('totalPaid').val() === data.child('totalPaid').val() : (!newData.hasChild('totalPaid') || newData.child('totalPaid').val() === 0))"
       }
     },

@@ -709,6 +709,24 @@ async function openDataDoc(uri){
     toast('Could not open this document','err');
   }
 }
+// Attaches the signed-in user's Firebase Auth ID token to REST calls, so
+// database rules that check auth.uid/auth.token can actually see who's
+// asking — being signed in via firebase.auth() does nothing by itself for
+// these plain fetch() calls, unlike the Firebase JS SDK's own realtime
+// methods, which attach it automatically. No token (not signed in, or an
+// account that hasn't been through the login migration yet) is normal, not
+// an error, that request is just treated as unauthenticated exactly like
+// every request before this existed, so nothing changes for anyone not yet
+// migrated.
+async function fbAuthQS(){
+  try{
+    if(typeof firebase!=='undefined'&&firebase.auth&&firebase.auth().currentUser){
+      const token=await firebase.auth().currentUser.getIdToken();
+      return '?auth='+token;
+    }
+  }catch(e){}
+  return '';
+}
 async function fbG(p,ms){
   // r.json() must be awaited HERE, inside the try, not just returned, otherwise
   // a response that arrives but fails to parse (a truncated body from a dropped
@@ -723,7 +741,8 @@ async function fbG(p,ms){
   // shaped like that, so it threw partway through rendering and left the page
   // stuck on its "Loading..." placeholder forever with no visible error at all.
   try{
-    const r=await fbFetchTimeout(FB+'/'+p+'.json',null,ms);
+    const qs=await fbAuthQS();
+    const r=await fbFetchTimeout(FB+'/'+p+'.json'+qs,null,ms);
     if(!r.ok){console.warn('fbG denied for',p,':',r.status);return null;}
     return await r.json();
   }
@@ -733,7 +752,8 @@ async function fbG(p,ms){
     for(let attempt=0;attempt<2;attempt++){
       try{
         await new Promise(res=>setTimeout(res,600));
-        const r2=await fbFetchTimeout(FB+'/'+p+'.json',null,ms);
+        const qs2=await fbAuthQS();
+        const r2=await fbFetchTimeout(FB+'/'+p+'.json'+qs2,null,ms);
         if(!r2.ok){console.warn('fbG denied for',p,':',r2.status);return null;}
         return await r2.json();
       }
@@ -750,7 +770,8 @@ async function fbSaveWithRetry(method,p,d){
   var lastReason=null;
   for(var attempt=0;attempt<3;attempt++){
     try{
-      const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:method,body:JSON.stringify(d)});
+      const qs=await fbAuthQS();
+      const r=await fbFetchTimeout(FB+'/'+p+'.json'+qs,{method:method,body:JSON.stringify(d)});
       if(r&&r.ok)return true;
       // Got an actual response, so this isn't a dropped connection, Firebase
       // is explicitly refusing the write (permission denied by the security
@@ -779,8 +800,8 @@ async function fbSaveWithRetry(method,p,d){
 async function fbS(p,d){return fbSaveWithRetry('PUT',p,d);}
 async function fbU(p,d){return fbSaveWithRetry('PATCH',p,d);}
 async function bumpCatalogUpdate(){try{await fbU('rn_mall_settings',{lastCatalogUpdate:Date.now()});if(typeof settings!=='undefined')settings.lastCatalogUpdate=Date.now();}catch(e){}}
-async function fbP(p,d){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'POST',body:JSON.stringify(d)});return await r.json();}catch{return null;}}
-async function fbD(p){try{const r=await fbFetchTimeout(FB+'/'+p+'.json',{method:'DELETE'},4000);return !!(r&&r.ok);}catch{return false;}}
+async function fbP(p,d){try{const qs=await fbAuthQS();const r=await fbFetchTimeout(FB+'/'+p+'.json'+qs,{method:'POST',body:JSON.stringify(d)});return await r.json();}catch{return null;}}
+async function fbD(p){try{const qs=await fbAuthQS();const r=await fbFetchTimeout(FB+'/'+p+'.json'+qs,{method:'DELETE'},4000);return !!(r&&r.ok);}catch{return false;}}
 function watchFirebaseCollection(path,onChange){
   // Was a persistent EventSource per collection, several open at once across
   // tabs/apps could exhaust the browser's per-origin connection limit and
@@ -981,7 +1002,7 @@ async function doLogin(){
   function clearAttempts(){
     if(attemptsKey&&attemptsRec)fbU('rn_mall_admin_login_attempts/'+attemptsKey,{count:0,lockedUntil:null});
   }
-  if(validList.includes(p)&&emailOk){
+  function enterAsOwner(){
     clearAttempts();
     sessionStorage.setItem('rnm_admin_session','1');
     sessionStorage.removeItem('rnm_admin_is_ceo');
@@ -990,21 +1011,53 @@ async function doLogin(){
     document.getElementById('app').style.display='flex';
     if(e)document.getElementById('tb-user').textContent=e.split('@')[0];
     initAdmin();
+  }
+  function enterAsCeo(name){
+    clearAttempts();
+    sessionStorage.setItem('rnm_admin_session','1');
+    sessionStorage.setItem('rnm_admin_is_ceo','1');
+    sessionStorage.setItem('rnm_admin_email',e);
+    sessionStorage.setItem('rnm_admin_ceo_name',name);
+    document.getElementById('login').style.display='none';
+    document.getElementById('app').style.display='flex';
+    document.getElementById('tb-user').textContent=name+' (CEO)';
+    initAdmin();
+  }
+  // Real sign-in first: admin.html's own login has always been a shared
+  // password checked against a list, not a per-person account, so database
+  // rules have nothing to check to tell "the admin panel" apart from anyone
+  // else. Once this account exists (created below, the first time this
+  // email's legacy password succeeds), its ID token carries a custom
+  // "admin" claim rules can check directly, letting this panel keep editing
+  // every OTHER person's record even once that record requires its own
+  // owner's auth.uid to match. Tried first so a CEO who already migrated
+  // via staff.html (their staff record's password field is now null) isn't
+  // permanently locked out of the legacy check below.
+  const ready=await ensureFirebaseAuthReady();
+  if(ready&&e){
+    try{
+      await firebase.auth().signInWithEmailAndPassword(e,p);
+      await ensureAdminClaim();
+      if(ceoMatch)enterAsCeo(ceoMatch.name);else enterAsOwner();
+      return;
+    }catch(authErr){
+      // No such account yet, or a Firebase Auth password that's since
+      // diverged from the shared list, falls through to the legacy checks
+      // below rather than failing immediately, those are what create/upgrade
+      // this account transparently.
+    }
+  }
+  if(validList.includes(p)&&emailOk){
+    if(ready&&e)await migrateAdminLogin(e,p);
+    enterAsOwner();
     return;
   }
   // Not the Owner password, check if this is a CEO staff member who has been
   // explicitly granted admin panel access. Without that grant, this path does nothing.
   if(e&&ceoMatch&&ceoMatch.password===p){
     if(ceoMatch.adminPanelAccess){
-      clearAttempts();
-      sessionStorage.setItem('rnm_admin_session','1');
-      sessionStorage.setItem('rnm_admin_is_ceo','1');
-      sessionStorage.setItem('rnm_admin_email',e);
-      sessionStorage.setItem('rnm_admin_ceo_name',ceoMatch.name);
-      document.getElementById('login').style.display='none';
-      document.getElementById('app').style.display='flex';
-      document.getElementById('tb-user').textContent=ceoMatch.name+' (CEO)';
-      initAdmin();
+      if(ready)await migrateAdminLogin(e,p);
+      enterAsCeo(ceoMatch.name);
       return;
     }
     err.textContent='Your CEO account hasn\'t been granted admin panel access yet, ask the Owner to enable it in Staff & Roles.';err.style.display='block';
@@ -1026,6 +1079,49 @@ async function doLogin(){
   }
   err.style.display='block';
   err.style.animation='none';void err.offsetWidth;err.style.animation='shake 0.4s ease';
+}
+// Stamps the currently-signed-in Firebase Auth account (the admin who just
+// logged in) with a custom "admin" claim via the Wallet Worker's
+// /set-admin-claim action, using the same trusted service-account
+// credential that already bypasses Realtime Database Rules for money
+// fields. Safe to call every login, not just the first: it's a no-op if
+// the claim is already set, and self-heals a login where an earlier
+// attempt to set it failed (network hiccup, Worker not configured yet).
+async function ensureAdminClaim(){
+  const user=firebase.auth().currentUser;
+  if(!user)return;
+  const url=(settings.walletWorkerUrl||'').replace(/\/+$/,'');
+  const key=localStorage.getItem('rnm_admin_wallet_key')||'';
+  if(!url||!key)return; // Not set up yet, login still works via the legacy fallback, just without the auth.token-based rule benefit until it is.
+  try{
+    await fetch(url+'/set-admin-claim',{
+      method:'POST',headers:{'Content-Type':'application/json','X-Admin-Key':key},
+      body:JSON.stringify({uid:user.uid})
+    });
+    // Custom claims only take effect on a FRESH ID token, Firebase caches the
+    // old one otherwise, force a refresh so this session's very first
+    // database write already carries the new claim.
+    await user.getIdToken(true);
+  }catch(e){console.warn('Could not set admin claim (will retry next login):',e.message);}
+}
+// Same shape as every other app's login-time migration (and the bulk
+// Account Security Migration tool above): the legacy password just typed
+// was confirmed correct, so create this admin's real sign-in account with
+// that exact password, no separate reset step needed. If an account under
+// this email already exists (most likely because this same person also
+// has a staff/customer/etc. record that migrated first under the same
+// email), sign into it instead, same end result. Never blocks the login
+// itself, either path continues on to enterAsOwner/enterAsCeo regardless.
+async function migrateAdminLogin(email,pass){
+  try{
+    try{
+      await firebase.auth().createUserWithEmailAndPassword(email,pass);
+    }catch(createErr){
+      if(createErr.code!=='auth/email-already-in-use')throw createErr;
+      await firebase.auth().signInWithEmailAndPassword(email,pass);
+    }
+    await ensureAdminClaim();
+  }catch(e){console.warn('Admin auth migration failed, will retry next login:',e.message);}
 }
 document.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&document.getElementById('login').style.display!=='none')doLogin();

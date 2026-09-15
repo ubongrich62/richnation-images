@@ -462,6 +462,36 @@ export default {
       return json({ok:true, newValue:newVal});
     }
 
-    return json({error:'Unknown action, expected /spend, /earn, /verify-topup, or /adjust'},404);
+    // ── /set-admin-claim: mark a Firebase Auth account as a real admin ──
+    // Part of the login/auth migration: admin.html's own login has always
+    // been a shared password checked against rn_mall_settings.adminPasswords,
+    // not a real per-person account, so there's nothing for Realtime
+    // Database Rules to check to tell "the admin panel" apart from anyone
+    // else. Once admin.html creates a real Firebase Auth account for an
+    // authorised admin email (same shape as every other app's login
+    // migration), this stamps that account with a custom claim
+    // (admin: true) baked into its ID token, which the database rules can
+    // then check directly (auth.token.admin === true) to let admin keep
+    // editing every OTHER person's record (approve, suspend, edit) even
+    // once that record itself requires its own owner's auth.uid to match.
+    // Gated the same way /adjust is, since this is exactly as sensitive,
+    // whoever holds this key can grant themselves admin-level database
+    // access.
+    if (action === 'set-admin-claim') {
+      if (!env.ADMIN_KEY) return json({error:'This Worker is not configured yet, the ADMIN_KEY secret is missing.'},500);
+      const suppliedKey = request.headers.get('X-Admin-Key') || payload.adminKey;
+      if (!suppliedKey || suppliedKey !== env.ADMIN_KEY) return json({error:'Invalid admin key'},401);
+      const {uid} = payload;
+      if (!uid) return json({error:'uid is required'},400);
+      const claimRes = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:update', {
+        method: 'POST',
+        headers: {'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json'},
+        body: JSON.stringify({ localId: uid, customAttributes: JSON.stringify({admin:true}) })
+      });
+      if (!claimRes.ok) return json({error:'Could not set admin claim ('+claimRes.status+': '+(await claimRes.text())+')'},502);
+      return json({ok:true});
+    }
+
+    return json({error:'Unknown action, expected /spend, /earn, /verify-topup, /adjust, or /set-admin-claim'},404);
   }
 };
