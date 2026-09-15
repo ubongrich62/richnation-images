@@ -238,6 +238,41 @@ async function dbPost(dbUrl, path, data, accessToken){
 }
 function dbErr(res){ return res.status + (res.text ? ': '+res.text : ''); }
 
+// ── Caller-identity verification for /spend and /refund-order ──
+// Both actions only ever act on the CALLING customer's own account
+// (index.html always passes customerId: currUser.id, never anyone else's),
+// but until now this Worker just trusted whatever customerId string showed
+// up in the request body, with nothing proving the request really came
+// from that customer's own browser. Since rn_mall_customers is fully
+// readable (the current login design needs that, see the rules file),
+// anyone could list every real customer id and call /spend or
+// /refund-order claiming to be them. This verifies the request's Firebase
+// ID token with Google directly (no separate library needed, the same
+// Identity Toolkit API this Worker already calls for /set-admin-claim),
+// then confirms the token's real uid actually matches the account being
+// acted on before either action is allowed to proceed. Account records
+// have two shapes depending on when they were created: a brand-new
+// signup's own id IS its authUid, but an older, migrated legacy account
+// keeps its original id and stores the real authUid in a separate field,
+// so both are checked.
+async function verifyOwnCustomer(dbUrl, customerId, idToken, accessToken){
+  if (!idToken) return {ok:false, status:401, error:'Please log in again to do this.'};
+  const lookupRes = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:lookup', {
+    method: 'POST',
+    headers: {'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json'},
+    body: JSON.stringify({ idToken: idToken })
+  });
+  const lookupData = await lookupRes.json();
+  const verifiedUid = lookupData && lookupData.users && lookupData.users[0] && lookupData.users[0].localId;
+  if (!lookupRes.ok || !verifiedUid) return {ok:false, status:401, error:'Your session has expired, please log in again.'};
+
+  const cust = await dbGet(dbUrl, 'rn_mall_customers/'+customerId, accessToken);
+  if (!cust) return {ok:false, status:404, error:'Customer not found'};
+  const owns = (customerId === verifiedUid) || (cust.authUid && cust.authUid === verifiedUid);
+  if (!owns) return {ok:false, status:403, error:'This is not your account.'};
+  return {ok:true};
+}
+
 // RichPoints rates, mirrored from index.html's rpRates() so this Worker can
 // compute the CORRECT amount for a given reason itself instead of trusting
 // whatever number the caller's browser sends. Falls back to the same
@@ -304,10 +339,12 @@ export default {
     // walletBalance/points directly in Firebase and spend the fabricated
     // amount on a real order.
     if (action === 'spend') {
-      const {customerId, field, amount, orderId, description} = payload;
+      const {customerId, field, amount, orderId, description, idToken} = payload;
       if (!customerId || !['walletBalance','points'].includes(field) || !(amount > 0)) {
         return json({error:'customerId, a valid field, and a positive amount are required'},400);
       }
+      const owns1 = await verifyOwnCustomer(payload.dbUrl, customerId, idToken, accessToken);
+      if (!owns1.ok) return json({error:owns1.error},owns1.status);
       const current = (await dbGet(payload.dbUrl, 'rn_mall_customers/'+customerId+'/'+field, accessToken)) || 0;
       if (current < amount) return json({error:'Insufficient balance', currentBalance: current}, 402);
       const newBalance = current - amount;
@@ -458,8 +495,10 @@ export default {
     // eligible for a refund, and hasn't already been refunded, before
     // crediting anything.
     if (action === 'refund-order') {
-      const {customerId, orderId} = payload;
+      const {customerId, orderId, idToken} = payload;
       if (!customerId || !orderId) return json({error:'customerId and orderId are required'},400);
+      const owns2 = await verifyOwnCustomer(payload.dbUrl, customerId, idToken, accessToken);
+      if (!owns2.ok) return json({error:owns2.error},owns2.status);
       const order = await dbGet(payload.dbUrl, 'rn_mall_orders/'+orderId, accessToken);
       if (!order || !order.customer || order.customer.id !== customerId) return json({error:'Order not found for this customer'},404);
       if (order.payMethod === 'pod') return json({error:'Pay on Delivery orders are not refunded to wallet'},400);

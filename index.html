@@ -1250,9 +1250,24 @@ async function sendPushToTokens(tokens,title,body,data,url){
 async function callWalletWorker(action,body){
   if(!settings.walletWorkerUrl)return null;
   try{
+    const payload=Object.assign({dbUrl:FB},body);
+    // /spend and /refund-order act on the caller's OWN wallet/order, and
+    // the Worker now verifies that with a real Firebase ID token instead
+    // of just trusting the customerId string in the request (see that
+    // file's verifyOwnCustomer for why this was necessary). Without a
+    // live Firebase Auth session, there's no token to send, the Worker
+    // will then correctly refuse with "please log in again" rather than
+    // silently trusting an unverifiable request.
+    if(action==='spend'||action==='refund-order'){
+      try{
+        const ready=await ensureFirebaseAuthReady();
+        const user=ready&&typeof firebase!=='undefined'&&firebase.auth?firebase.auth().currentUser:null;
+        if(user)payload.idToken=await user.getIdToken();
+      }catch(e){}
+    }
     const r=await fetch(settings.walletWorkerUrl.replace(/\/+$/,'')+'/'+action,{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(Object.assign({dbUrl:FB},body))
+      body:JSON.stringify(payload)
     });
     return await r.json();
   }catch(e){console.warn('Wallet worker call failed ('+action+'):',e.message);return null;}
