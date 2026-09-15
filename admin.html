@@ -841,13 +841,19 @@ async function renderCourses(){
     const saved=edits[c.id]||{};
     return`<div class="course-editor" id="ce-${c.id}">
       <div class="course-editor-hd" onclick="toggleEditor('${c.id}')">
-        <span style="color:${c.color};font-weight:900;font-size:12.5px;flex-shrink:0">${c.icon}</span>
+        <span style="color:${saved.color||c.color};font-weight:900;font-size:12.5px;flex-shrink:0">${c.icon}</span>
         <span style="font-weight:800;font-size:14.5px;flex:1">${saved.title||c.title}</span>
         <span style="color:#7d8088">${ICON_CHEV}</span>
       </div>
       <div class="course-editor-body" id="ceb-${c.id}">
         <div class="fld"><label>Course Title</label><input class="inp" id="ct-${c.id}" value="${esc(saved.title||c.title)}"></div>
         <div class="fld"><label>Course Subtitle</label><input class="inp" id="cs-${c.id}" value="${esc(saved.sub||c.sub)}"></div>
+        <div class="fld"><label>Accent Color (shown on the student portal)</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="color" id="cc-${c.id}" value="${esc(saved.color||c.color)}" oninput="document.getElementById('cch-${c.id}').value=this.value" style="width:48px;height:44px;padding:3px;border-radius:9px;border:1.5px solid var(--bdr-soft);background:var(--surf3);cursor:pointer;flex-shrink:0">
+            <input class="inp" id="cch-${c.id}" value="${esc(saved.color||c.color)}" oninput="if(/^#[0-9a-fA-F]{6}$/.test(this.value))document.getElementById('cc-${c.id}').value=this.value" style="flex:1;font-family:monospace">
+          </div>
+        </div>
         <div style="margin:14px 0 10px;font-size:11px;color:#7d8088;font-weight:800;text-transform:uppercase;letter-spacing:1px">Lessons</div>
         ${c.lessons.map((l,i)=>`<div class="lesson-editor-row">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
@@ -869,9 +875,10 @@ async function saveCourseEdits(cid){
   const c=COURSES.find(x=>x.id===cid);
   const title=(document.getElementById('ct-'+cid)?.value||'').trim();
   const sub=(document.getElementById('cs-'+cid)?.value||'').trim();
+  const color=(document.getElementById('cch-'+cid)?.value||c.color).trim();
   const lessons=c.lessons.map(l=>(document.getElementById('lt-'+l.id)?.value||'').trim());
   const lessonDurs=c.lessons.map(l=>(document.getElementById('ld-'+l.id)?.value||'').trim());
-  await fbU('rna_course_edits',{[cid]:{title,sub,lessons,lessonDurs,updatedAt:new Date().toISOString()}});
+  await fbU('rna_course_edits',{[cid]:{title,sub,color,lessons,lessonDurs,updatedAt:new Date().toISOString()}});
   const contentUpdates={};
   c.lessons.forEach(l=>{
     const val=(document.getElementById('lc-'+l.id)?.value||'').trim();
