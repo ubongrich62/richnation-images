@@ -483,12 +483,20 @@ function watchFirebaseCollection(path,onChange){
   // tabs/apps could exhaust the browser's per-origin connection limit and
   // starve every other Firebase call on the page (the actual cause of the
   // "stuck on Loading" reports), plain guarded polling avoids that entirely.
+  //
+  // Pauses while the tab is hidden/backgrounded: without this, every open
+  // tab re-downloads this ENTIRE collection every 20s forever, even sitting
+  // minimized or backgrounded, which is what was driving Firebase's daily
+  // bandwidth quota (and bill) far past the actual size of the data. Fetches
+  // once immediately on becoming visible again so the view isn't stale.
   var inFlight=false;
-  var timer=setInterval(function(){
-    if(inFlight)return;
+  function tick(){
+    if(document.hidden||inFlight)return;
     inFlight=true;
     fbG(path).then(function(data){inFlight=false;onChange(data);});
-  },20000);
+  }
+  var timer=setInterval(tick,20000);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)tick();});
   return {close:function(){clearInterval(timer);}};
 }
 
