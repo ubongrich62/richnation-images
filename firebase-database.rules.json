@@ -22,21 +22,27 @@
     "rn_mall_announcements":   { ".read": true, ".write": true },
 
     // Money fields (walletBalance/points/salary/totalPaid) can only ever
-    // move via richnation-wallet-worker.js's trusted credential, which
-    // bypasses these .validate checks. Any client write to these
-    // collections is rejected if it changes one of those fields.
+    // move via richnation-wallet-worker.js. That Worker signs itself in as
+    // a real Firebase Auth identity carrying a "worker: true" custom
+    // claim (see getWorkerIdToken in that file) and every check below
+    // explicitly trusts that claim, and ONLY that claim, to skip the
+    // frozen-value check for its own field. A raw service-account OAuth2
+    // token does NOT get this exception (confirmed by testing, contrary
+    // to what Firebase's docs on admin-token bypass implied) and neither
+    // does any other signed-in user, so this is a real, checkable grant,
+    // not a hopeful assumption about credential type.
     "rn_mall_customers": {
       ".read": true,
       "$id": {
         ".write": true,
-        ".validate": "newData.hasChildren(['email','id']) && (data.child('walletBalance').exists() ? newData.child('walletBalance').val() === data.child('walletBalance').val() : (!newData.hasChild('walletBalance') || newData.child('walletBalance').val() === 0)) && (data.child('points').exists() ? newData.child('points').val() === data.child('points').val() : (!newData.hasChild('points') || newData.child('points').val() === 0))"
+        ".validate": "newData.hasChildren(['email','id']) && ((auth != null && auth.token.worker === true) || (data.child('walletBalance').exists() ? newData.child('walletBalance').val() === data.child('walletBalance').val() : (!newData.hasChild('walletBalance') || newData.child('walletBalance').val() === 0))) && ((auth != null && auth.token.worker === true) || (data.child('points').exists() ? newData.child('points').val() === data.child('points').val() : (!newData.hasChild('points') || newData.child('points').val() === 0)))"
       }
     },
     "rn_mall_staff": {
       ".read": true,
       "$id": {
         ".write": true,
-        ".validate": "newData.hasChildren(['email','id']) && (data.child('salary').exists() ? newData.child('salary').val() === data.child('salary').val() : (!newData.hasChild('salary') || newData.child('salary').val() === 0)) && (data.child('points').exists() ? newData.child('points').val() === data.child('points').val() : (!newData.hasChild('points') || newData.child('points').val() === 0))"
+        ".validate": "newData.hasChildren(['email','id']) && ((auth != null && auth.token.worker === true) || (data.child('salary').exists() ? newData.child('salary').val() === data.child('salary').val() : (!newData.hasChild('salary') || newData.child('salary').val() === 0))) && ((auth != null && auth.token.worker === true) || (data.child('points').exists() ? newData.child('points').val() === data.child('points').val() : (!newData.hasChild('points') || newData.child('points').val() === 0)))"
       }
     },
     "rn_mall_vendors": {
@@ -47,21 +53,24 @@
       ".read": true,
       "$id": {
         ".write": true,
-        ".validate": "newData.hasChildren(['email','id']) && (data.child('totalPaid').exists() ? newData.child('totalPaid').val() === data.child('totalPaid').val() : (!newData.hasChild('totalPaid') || newData.child('totalPaid').val() === 0)) && (data.child('points').exists() ? newData.child('points').val() === data.child('points').val() : (!newData.hasChild('points') || newData.child('points').val() === 0))"
+        ".validate": "newData.hasChildren(['email','id']) && ((auth != null && auth.token.worker === true) || (data.child('totalPaid').exists() ? newData.child('totalPaid').val() === data.child('totalPaid').val() : (!newData.hasChild('totalPaid') || newData.child('totalPaid').val() === 0))) && ((auth != null && auth.token.worker === true) || (data.child('points').exists() ? newData.child('points').val() === data.child('points').val() : (!newData.hasChild('points') || newData.child('points').val() === 0)))"
       }
     },
     "rn_mall_investors": {
       ".read": true,
       "$id": {
         ".write": true,
-        ".validate": "newData.hasChildren(['email','id']) && (data.child('walletBalance').exists() ? newData.child('walletBalance').val() === data.child('walletBalance').val() : (!newData.hasChild('walletBalance') || newData.child('walletBalance').val() === 0)) && (data.child('totalPaid').exists() ? newData.child('totalPaid').val() === data.child('totalPaid').val() : (!newData.hasChild('totalPaid') || newData.child('totalPaid').val() === 0))"
+        ".validate": "newData.hasChildren(['email','id']) && ((auth != null && auth.token.worker === true) || (data.child('walletBalance').exists() ? newData.child('walletBalance').val() === data.child('walletBalance').val() : (!newData.hasChild('walletBalance') || newData.child('walletBalance').val() === 0))) && ((auth != null && auth.token.worker === true) || (data.child('totalPaid').exists() ? newData.child('totalPaid').val() === data.child('totalPaid').val() : (!newData.hasChild('totalPaid') || newData.child('totalPaid').val() === 0)))"
       }
     },
 
     "rn_mall_orders": { ".read": true, "$id": { ".write": true } },
     "rn_mall_customer_orders":              { "$id": { ".read": true, ".write": true } },
-    "rn_mall_processed_topups":             { "$id": { ".read": false, ".write": false } },
-    "rn_mall_processed_payments":           { "$id": { ".read": false, ".write": false } },
+    // Only the Worker (its own idempotency ledger, so a Paystack reference
+    // can never be replayed to double-credit) ever needs these, gated the
+    // same way the money-field exception above is.
+    "rn_mall_processed_topups":             { "$id": { ".read": "auth != null && auth.token.worker === true", ".write": "auth != null && auth.token.worker === true" } },
+    "rn_mall_processed_payments":           { "$id": { ".read": "auth != null && auth.token.worker === true", ".write": "auth != null && auth.token.worker === true" } },
     "rn_mall_wallet_transactions":          { "$id": { ".read": true, ".write": true } },
     "rn_mall_wallet_transactions_investor": { "$id": { ".read": true, ".write": true } },
     "rn_mall_wallet_issues": { ".read": true, "$id": { ".write": true } },

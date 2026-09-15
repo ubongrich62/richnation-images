@@ -20,14 +20,16 @@
 //
 // This Worker closes all of that the same way richnation-storage-worker.js
 // and richnation-push-worker.js already keep other privileged operations
-// out of public static HTML: it holds a trusted credential (a Firebase
-// service account) that Realtime Database Rules bypass, the same way the
-// Admin SDK does, so once the matching rule change (see
-// firebase-database.rules.json) is published, ONLY this Worker can change
-// these specific fields, no matter what a browser sends Firebase directly.
-// Every action below either verifies a real record (a real order, a real
-// Paystack transaction) before crediting, or requires a secret only the
-// admin panel knows before adjusting someone's money on request.
+// out of public static HTML: it holds a trusted Firebase service account,
+// and uses it to sign itself in as a real Firebase Auth identity carrying
+// an explicit "worker: true" custom claim (see getWorkerIdToken below).
+// The database rules (see firebase-database.rules.json) only let a token
+// actually carrying that claim change a locked money field, so once
+// published, ONLY this Worker can change these specific fields, no matter
+// what a browser sends Firebase directly. Every action below either
+// verifies a real record (a real order, a real Paystack transaction)
+// before crediting, or requires a secret only the admin panel knows
+// before adjusting someone's money on request.
 //
 // ── HOW TO DEPLOY (no command line needed) ──
 // 1. Firebase Console -> your project -> gear icon -> Project settings ->
@@ -140,6 +142,65 @@ async function getAccessToken(serviceAccount){
   return _cachedToken;
 }
 
+// The OAuth2 access token above was assumed to get automatic, blanket
+// "Admin SDK" bypass treatment from every Realtime Database Rule (this is
+// what Firebase's own docs describe for a service-account access token).
+// In practice here it reliably bypasses .write conditions and .validate
+// rules that don't reference auth at all, but does NOT reliably bypass a
+// .validate rule that checks the ACTUAL DATA being written (the
+// money-field freeze-unless-unchanged check below) — confirmed with a
+// disposable test record, not a guess. Rather than depend on that
+// undocumented gap closing itself, this Worker instead signs itself in as
+// a REAL Firebase Auth identity carrying an explicit custom claim
+// (worker: true), the same mechanism admin.html's own admin login uses
+// (see /set-admin-claim below and the auth.token.admin check in the
+// rules). The rules then grant the money-field exception ONLY to a token
+// actually carrying that claim, an explicit, checkable grant instead of
+// hoping a credential type gets silently waved through.
+let _cachedWorkerToken = null, _cachedWorkerTokenExp = 0;
+
+async function getWorkerIdToken(serviceAccount, accessToken){
+  const now = Math.floor(Date.now()/1000);
+  if (_cachedWorkerToken && _cachedWorkerTokenExp > now + 60) return _cachedWorkerToken;
+
+  const header = {alg:'RS256', typ:'JWT'};
+  const claims = {
+    iss: serviceAccount.client_email,
+    sub: serviceAccount.client_email,
+    aud: 'https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit',
+    iat: now,
+    exp: now + 3600,
+    // A fixed, made-up uid, this identity doesn't correspond to a real
+    // person and never signs into any app, it only ever exists to prove
+    // "this write came from the trusted Worker" to the database rules.
+    uid: 'richnation-wallet-worker',
+    claims: { worker: true }
+  };
+  const signingInput = base64url(JSON.stringify(header)) + '.' + base64url(JSON.stringify(claims));
+
+  const cryptoKey = await crypto.subtle.importKey(
+    'pkcs8',
+    pemToArrayBuffer(serviceAccount.private_key),
+    {name:'RSASSA-PKCS1-v1_5', hash:'SHA-256'},
+    false,
+    ['sign']
+  );
+  const signature = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', cryptoKey, new TextEncoder().encode(signingInput));
+  const customToken = signingInput + '.' + base64url(signature);
+
+  const signInRes = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken', {
+    method: 'POST',
+    headers: {'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json'},
+    body: JSON.stringify({ token: customToken, returnSecureToken: true })
+  });
+  const signInData = await signInRes.json();
+  if (!signInData.idToken) throw new Error('Could not sign in as the worker identity: ' + JSON.stringify(signInData));
+
+  _cachedWorkerToken = signInData.idToken;
+  _cachedWorkerTokenExp = now + (parseInt(signInData.expiresIn,10) || 3600);
+  return _cachedWorkerToken;
+}
+
 // Firebase Realtime Database's REST API authenticates via an "auth" QUERY
 // PARAMETER, whatever the credential type (legacy secret, a user's ID
 // token, or a service-account OAuth2 access token), see
@@ -223,6 +284,16 @@ export default {
     try { accessToken = await getAccessToken(serviceAccount); }
     catch (e) { return json({error:'Auth with Google failed: ' + e.message},502); }
 
+    // Lazily fetched (only the actions that actually touch a locked money
+    // field or the processed_topups/processed_payments ledgers pay for
+    // this extra round trip), then reused for every such call within this
+    // one request.
+    let _workerToken = null;
+    async function workerAuth(){
+      if (!_workerToken) _workerToken = await getWorkerIdToken(serviceAccount, accessToken);
+      return _workerToken;
+    }
+
     const action = url.pathname.replace(/^\/+/,'').split('/')[0] || payload.action;
 
     // ── /spend: checkout wallet payment OR points redemption ──
@@ -241,7 +312,7 @@ export default {
       if (current < amount) return json({error:'Insufficient balance', currentBalance: current}, 402);
       const newBalance = current - amount;
       const update = {}; update[field] = newBalance;
-      const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, update, accessToken);
+      const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, update, await workerAuth());
       if (!res1.ok) return json({error:'Could not update balance ('+dbErr(res1)+')'},502);
       if (field === 'walletBalance') {
         await dbPost(payload.dbUrl, 'rn_mall_wallet_transactions/'+customerId, {type:'debit',amount:amount,description:description||('Order payment'+(orderId?' ('+orderId+')':'')),date:new Date().toISOString().slice(0,10),ts:Date.now()}, accessToken);
@@ -269,7 +340,7 @@ export default {
         if (amount <= 0) return json({ok:true, amount:0});
         const newVal = (cust.points||0) + amount;
         const update = {points:newVal}; update[oneTime.flagField] = true;
-        const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, update, accessToken);
+        const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, update, await workerAuth());
         if (!res1.ok) return json({error:'Could not credit bonus ('+dbErr(res1)+')'},502);
         return json({ok:true, amount:amount, newBalance:newVal});
       }
@@ -283,7 +354,7 @@ export default {
         const amount = Math.floor((order.total||0)/perNaira);
         if (amount <= 0) return json({ok:true, amount:0});
         const newVal = (cust.points||0) + amount;
-        const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {points:newVal}, accessToken);
+        const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {points:newVal}, await workerAuth());
         if (!res1.ok) return json({error:'Could not credit purchase points ('+dbErr(res1)+')'},502);
         const res2 = await dbPatch(payload.dbUrl, 'rn_mall_orders/'+orderId, {pointsAwarded:true}, accessToken);
         if (!res2.ok) return json({error:'Credited points but could not mark order ('+dbErr(res2)+')'},502);
@@ -301,7 +372,7 @@ export default {
         const amount = pointsRate(settings,'referral');
         if (amount <= 0) return json({ok:true, amount:0});
         const newVal = (cust.points||0) + amount;
-        const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {points:newVal}, accessToken);
+        const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {points:newVal}, await workerAuth());
         if (!res1.ok) return json({error:'Could not credit referral points ('+dbErr(res1)+')'},502);
         const res2 = await dbPatch(payload.dbUrl, 'rn_mall_orders/'+orderId, {referralAwarded:true}, accessToken);
         if (!res2.ok) return json({error:'Credited points but could not mark order ('+dbErr(res2)+')'},502);
@@ -320,7 +391,7 @@ export default {
         const amount = pointsRate(settings,'review');
         if (amount <= 0) return json({ok:true, amount:0});
         const newVal = (cust.points||0) + amount;
-        const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {points:newVal}, accessToken);
+        const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {points:newVal}, await workerAuth());
         if (!res1.ok) return json({error:'Could not credit review points ('+dbErr(res1)+')'},502);
         const res2 = await dbPatch(payload.dbUrl, 'rn_mall_reviews/'+productId+'/'+reviewKey, {pointsAwarded:true}, accessToken);
         if (!res2.ok) return json({error:'Credited points but could not mark review ('+dbErr(res2)+')'},502);
@@ -331,7 +402,7 @@ export default {
         const amount = pointsRate(settings, reason);
         if (amount <= 0) return json({ok:true, amount:0});
         const newVal = (cust.points||0) + amount;
-        const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {points:newVal}, accessToken);
+        const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {points:newVal}, await workerAuth());
         if (!res1.ok) return json({error:'Could not credit points ('+dbErr(res1)+')'},502);
         return json({ok:true, amount:amount, newBalance:newVal});
       }
@@ -351,7 +422,7 @@ export default {
       if (!customerId || !reference) return json({error:'customerId and reference are required'},400);
       // Idempotency: a reference already recorded here was already credited,
       // refuse to pay out twice for a replayed/reused reference.
-      const already = await dbGet(payload.dbUrl, 'rn_mall_processed_topups/'+reference, accessToken);
+      const already = await dbGet(payload.dbUrl, 'rn_mall_processed_topups/'+reference, await workerAuth());
       if (already) return json({ok:true, alreadyCredited:true});
       let verifyRes, verifyData;
       try {
@@ -371,9 +442,10 @@ export default {
       const cust2 = await dbGet(payload.dbUrl, 'rn_mall_customers/'+customerId, accessToken);
       if (!cust2) return json({error:'Customer not found'},404);
       const newBalance = (cust2.walletBalance||0) + amount;
-      const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {walletBalance:newBalance}, accessToken);
+      const workerId = await workerAuth();
+      const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {walletBalance:newBalance}, workerId);
       if (!res1.ok) return json({error:'Could not credit wallet ('+dbErr(res1)+')'},502);
-      await dbPut(payload.dbUrl, 'rn_mall_processed_topups/'+reference, {customerId:customerId, amount:amount, ts:Date.now()}, accessToken);
+      await dbPut(payload.dbUrl, 'rn_mall_processed_topups/'+reference, {customerId:customerId, amount:amount, ts:Date.now()}, workerId);
       await dbPost(payload.dbUrl, 'rn_mall_wallet_transactions/'+customerId, {type:'credit',amount:amount,description:'Card top-up (Ref: '+reference+')',date:new Date().toISOString().slice(0,10),ts:Date.now()}, accessToken);
       return json({ok:true, amount:amount, newBalance:newBalance});
     }
@@ -397,7 +469,7 @@ export default {
       const cust = await dbGet(payload.dbUrl, 'rn_mall_customers/'+customerId, accessToken);
       if (!cust) return json({error:'Customer not found'},404);
       const newBalance = (cust.walletBalance||0) + amount;
-      const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {walletBalance:newBalance}, accessToken);
+      const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {walletBalance:newBalance}, await workerAuth());
       if (!res1.ok) return json({error:'Could not process refund ('+dbErr(res1)+')'},502);
       const res2 = await dbPatch(payload.dbUrl, 'rn_mall_orders/'+orderId, {refunded:true}, accessToken);
       if (!res2.ok) return json({error:'Refunded but could not mark order ('+dbErr(res2)+')'},502);
@@ -417,7 +489,7 @@ export default {
       if (!env.PAYSTACK_SECRET_KEY) return json({error:'This Worker is not configured yet, the PAYSTACK_SECRET_KEY secret is missing.'},500);
       const {reference, expectedAmount} = payload;
       if (!reference || !(expectedAmount > 0)) return json({error:'reference and expectedAmount are required'},400);
-      const already = await dbGet(payload.dbUrl, 'rn_mall_processed_payments/'+reference, accessToken);
+      const already = await dbGet(payload.dbUrl, 'rn_mall_processed_payments/'+reference, await workerAuth());
       if (already) return json({ok:true, alreadyVerified:true});
       let verifyRes, verifyData;
       try {
@@ -430,7 +502,7 @@ export default {
       if (!verifyRes.ok || !tx || tx.status !== 'success') return json({error:'Payment not verified as successful'},402);
       const paidAmount = Math.round((tx.amount||0)/100); // Paystack amounts are in kobo
       if (paidAmount < Math.round(expectedAmount)) return json({error:'Amount paid does not match the order total', paidAmount:paidAmount},400);
-      await dbPut(payload.dbUrl, 'rn_mall_processed_payments/'+reference, {amount:paidAmount, ts:Date.now()}, accessToken);
+      await dbPut(payload.dbUrl, 'rn_mall_processed_payments/'+reference, {amount:paidAmount, ts:Date.now()}, await workerAuth());
       return json({ok:true, amount:paidAmount});
     }
 
@@ -457,45 +529,9 @@ export default {
         newVal = current + (parseFloat(value)||0);
       }
       const update = {}; update[field] = newVal;
-      const res1 = await dbPatch(payload.dbUrl, collection+'/'+id, update, accessToken);
+      const res1 = await dbPatch(payload.dbUrl, collection+'/'+id, update, await workerAuth());
       if (!res1.ok) return json({error:'Could not update record ('+dbErr(res1)+')'},502);
       return json({ok:true, newValue:newVal});
-    }
-
-    // ── /debug-probe: TEMPORARY diagnostic, safe to remove once the 401
-    // mystery below is solved. Isolates exactly why this Worker's own
-    // writes are being rejected by Firebase, without touching any real
-    // customer/staff/vendor/rider/investor record. It runs three writes
-    // against a disposable test id (not a real account) and reports the
-    // raw Firebase response for each:
-    //   1. rootWrite    -> a path with NO matching rule at all, so it's
-    //                      only allowed if this credential gets full
-    //                      Admin-SDK-style bypass of every rule.
-    //   2. freshWrite   -> creating the disposable test record for the
-    //                      first time (walletBalance doesn't exist yet),
-    //                      which the money-field .validate lock allows
-    //                      for ANY writer, bypass or not.
-    //   3. valueChange  -> immediately changing that same test record's
-    //                      walletBalance to a different number, which the
-    //                      .validate lock only allows if this credential's
-    //                      bypass is real (exactly what /adjust needs to
-    //                      work for actual Adjust Wallet clicks).
-    // The test record is deleted again at the end either way.
-    if (action === 'debug-probe') {
-      if (!env.ADMIN_KEY) return json({error:'This Worker is not configured yet, the ADMIN_KEY secret is missing.'},500);
-      const suppliedKey = request.headers.get('X-Admin-Key') || payload.adminKey;
-      if (!suppliedKey || suppliedKey !== env.ADMIN_KEY) return json({error:'Invalid admin key'},401);
-      const testPath = 'rn_mall_customers/__debug_probe_test__';
-      const rootWrite = await dbPut(payload.dbUrl, '_debug_probe_root/test', {ok:true}, accessToken);
-      const freshWrite = await dbPut(payload.dbUrl, testPath, {email:'debug@test.local', id:'__debug_probe_test__', walletBalance: 1}, accessToken);
-      const valueChange = await dbPatch(payload.dbUrl, testPath, {walletBalance: 2}, accessToken);
-      await dbPut(payload.dbUrl, testPath, null, accessToken);
-      await dbPut(payload.dbUrl, '_debug_probe_root/test', null, accessToken);
-      return json({
-        rootWrite: {allowed: rootWrite.ok, status: rootWrite.status, body: rootWrite.text},
-        freshWrite: {allowed: freshWrite.ok, status: freshWrite.status, body: freshWrite.text},
-        valueChange: {allowed: valueChange.ok, status: valueChange.status, body: valueChange.text}
-      });
     }
 
     // ── /set-admin-claim: mark a Firebase Auth account as a real admin ──
