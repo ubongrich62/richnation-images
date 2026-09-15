@@ -438,7 +438,7 @@ async function fbG(p,ms){try{const qs=await fbAuthQS();const r=await fbFetchTime
 async function fbS(p,d){try{const qs=await fbAuthQS();await fbFetchTimeout(FB+'/'+p+'.json'+qs,{method:'PUT',body:JSON.stringify(d)});}catch(e){}}
 async function fbU(p,d){try{const qs=await fbAuthQS();await fbFetchTimeout(FB+'/'+p+'.json'+qs,{method:'PATCH',body:JSON.stringify(d)});}catch(e){}}
 async function fbP(p,d){try{const qs=await fbAuthQS();const r=await fbFetchTimeout(FB+'/'+p+'.json'+qs,{method:'POST',body:JSON.stringify(d)});return await r.json();}catch(e){return null;}}
-function watchFirebaseCollection(path,onChange){
+function watchFirebaseCollection(path,onChange,intervalMs){
   // Was a persistent EventSource per collection, several open at once across
   // tabs/apps could exhaust the browser's per-origin connection limit and
   // starve every other Firebase call on the page (the actual cause of the
@@ -455,7 +455,7 @@ function watchFirebaseCollection(path,onChange){
     inFlight=true;
     fbG(path).then(function(data){inFlight=false;onChange(data);});
   }
-  var timer=setInterval(tick,20000);
+  var timer=setInterval(tick,intervalMs||20000);
   document.addEventListener('visibilitychange',function(){if(!document.hidden)tick();});
   return {close:function(){clearInterval(timer);}};
 }
@@ -689,12 +689,15 @@ function startApp(){
   rnav(validPages.includes(lastPage)?lastPage:'dashboard');
   loadRiderNotifs();
   maybeShowRiderWelcomeSetup();
+  // 45s not the default 20s: this table only ever grows (orders are never
+  // deleted), so it's the single most expensive thing polled anywhere in
+  // the app — see the bandwidth incident writeup at watchFirebaseCollection.
   watchFirebaseCollection('rn_mall_orders',function(orders){
     if(curRNav==='deliveries'){
       var c=document.getElementById('content');
       if(c)renderDeliveries(c);
     }
-  });
+  },45000);
 }
 function maybeShowRiderWelcomeSetup(){
   const missing=[];

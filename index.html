@@ -1416,7 +1416,7 @@ async function fbS(p,d){try{var qs=await fbAuthQS();await fbFetchTimeout(FB+'/'+
 async function fbU(p,d){try{var qs=await fbAuthQS();await fbFetchTimeout(FB+'/'+p+'.json'+qs,{method:'PATCH',body:JSON.stringify(d)});}catch(e){console.warn('fbU failed for',p,':',e.message);}}
 // Periodic refresh for the handful of paths customers are actually looking at
 // while admin might be editing (products, categories, homepage settings).
-function watchFirebaseCollection(path,onChange){
+function watchFirebaseCollection(path,onChange,intervalMs){
   // Was a persistent EventSource per collection, on the customer site alone
   // that's 3 open per visitor tab, several open at once (many customers, or
   // several apps in different tabs) could exhaust the browser's per-origin
@@ -1435,7 +1435,7 @@ function watchFirebaseCollection(path,onChange){
     inFlight=true;
     fbG(path).then(function(data){inFlight=false;onChange(data);});
   }
-  var timer=setInterval(tick,20000);
+  var timer=setInterval(tick,intervalMs||20000);
   document.addEventListener('visibilitychange',function(){if(!document.hidden)tick();});
   return {close:function(){clearInterval(timer);}};
 }

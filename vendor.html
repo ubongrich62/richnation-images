@@ -478,7 +478,7 @@ async function fbU(p,d){try{const qs=await fbAuthQS();await fbFetchTimeout(FB+'/
 async function fbP(p,d){try{const qs=await fbAuthQS();const r=await fbFetchTimeout(FB+'/'+p+'.json'+qs,{method:'POST',body:JSON.stringify(d)});return await r.json();}catch(e){console.warn('fbP failed:',e.message);return null;}}
 async function fbD(p){try{const qs=await fbAuthQS();const r=await fbFetchTimeout(FB+'/'+p+'.json'+qs,{method:'DELETE'},4000);return !!(r&&r.ok);}catch{return false;}}
 
-function watchFirebaseCollection(path,onChange){
+function watchFirebaseCollection(path,onChange,intervalMs){
   // Was a persistent EventSource per collection, several open at once across
   // tabs/apps could exhaust the browser's per-origin connection limit and
   // starve every other Firebase call on the page (the actual cause of the
@@ -495,7 +495,7 @@ function watchFirebaseCollection(path,onChange){
     inFlight=true;
     fbG(path).then(function(data){inFlight=false;onChange(data);});
   }
-  var timer=setInterval(tick,20000);
+  var timer=setInterval(tick,intervalMs||20000);
   document.addEventListener('visibilitychange',function(){if(!document.hidden)tick();});
   return {close:function(){clearInterval(timer);}};
 }
@@ -870,12 +870,15 @@ async function startApp(){
       if(c)renderVProducts(c);
     }
   });
+  // 45s not the default 20s: this table only ever grows (orders are never
+  // deleted), so it's the single most expensive thing polled anywhere in
+  // the app — see the bandwidth incident writeup at watchFirebaseCollection.
   watchFirebaseCollection('rn_mall_orders',function(){
     if(curNav==='orders'){
       var c=document.getElementById('content');
       if(c)renderVOrders(c);
     }
-  });
+  },45000);
 }
 function populateSidebarIcons(){
   var map={dashboard:'home',products:'box',orders:'clock',payouts:'money',performance:'chart',reviews:'star',promotions:'fire',messages:'chat',notifications:'bell',profile:'user'};

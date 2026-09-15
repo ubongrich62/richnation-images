@@ -802,7 +802,7 @@ async function fbU(p,d){return fbSaveWithRetry('PATCH',p,d);}
 async function bumpCatalogUpdate(){try{await fbU('rn_mall_settings',{lastCatalogUpdate:Date.now()});if(typeof settings!=='undefined')settings.lastCatalogUpdate=Date.now();}catch(e){}}
 async function fbP(p,d){try{const qs=await fbAuthQS();const r=await fbFetchTimeout(FB+'/'+p+'.json'+qs,{method:'POST',body:JSON.stringify(d)});return await r.json();}catch{return null;}}
 async function fbD(p){try{const qs=await fbAuthQS();const r=await fbFetchTimeout(FB+'/'+p+'.json'+qs,{method:'DELETE'},4000);return !!(r&&r.ok);}catch{return false;}}
-function watchFirebaseCollection(path,onChange){
+function watchFirebaseCollection(path,onChange,intervalMs){
   // Was a persistent EventSource per collection, several open at once across
   // tabs/apps could exhaust the browser's per-origin connection limit and
   // starve every other Firebase call on the page (the actual cause of the
@@ -819,7 +819,7 @@ function watchFirebaseCollection(path,onChange){
     inFlight=true;
     fbG(path).then(function(data){inFlight=false;onChange(data);});
   }
-  var timer=setInterval(tick,20000);
+  var timer=setInterval(tick,intervalMs||20000);
   document.addEventListener('visibilitychange',function(){if(!document.hidden)tick();});
   return {close:function(){clearInterval(timer);}};
 }
@@ -1230,13 +1230,16 @@ async function initAdmin(){
     // shows up within about a second while the admin is looking at it, no
     // reload/re-navigate needed. If the admin is elsewhere, allOrders is still
     // kept in sync in the background so it's fresh whenever they do land on it.
+    // 45s not the default 20s: this table only ever grows (orders are never
+    // deleted), so it's the single most expensive thing polled anywhere in
+    // the app — see the bandwidth incident writeup at watchFirebaseCollection.
     watchFirebaseCollection('rn_mall_orders',function(orders){
       allOrders=orders||{};
       if(curNav==='orders'){
         var ci=document.getElementById('content-inner');
         if(ci)renderOrders(ci);
       }
-    });
+    },45000);
   }catch(e){
     // fbG() itself never rejects, so reaching here means something outside it
     // failed unexpectedly, without this the loading spinner above would be
