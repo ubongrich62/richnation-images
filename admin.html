@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="theme-color" content="#050506">
+<title>RichNation Academy — Admin Control Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800;900&family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#040405;--bg2:#0a0b0d;--surf:#111318;--surf2:#171a20;--surf3:#1d212a;
+  --bdr:rgba(255,138,0,.22);--bdr-soft:rgba(255,255,255,.10);
+  --or:#FF8A00;--or2:#FFB454;--or-dim:rgba(255,138,0,.16);--or-glow:rgba(255,138,0,.45);
+  --wh:#FFFFFF;--w2:#F2F2F2;--gr:#2FE6A6;--gr-dim:rgba(47,230,166,.16);
+  --rd:#FF4D6D;--rd-dim:rgba(255,77,109,.16);--bl:#4DA3FF;--bl-dim:rgba(77,163,255,.16);
+  --r-lg:20px;--r-md:14px;--r-sm:10px;
+  --safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px);
+}
+html,body{background:var(--bg);color:var(--w2);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100%;}
+body{font-size:16px;line-height:1.55;}
+h1,h2,h3,.hd{font-family:'Poppins',sans-serif;}
+button,input,textarea,select{font-family:inherit;}
+::selection{background:var(--or);color:#000;}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-thumb{background:var(--surf3);border-radius:99px;}
+
+#auth{position:fixed;inset:0;background:radial-gradient(1100px 700px at 15% -10%,rgba(255,138,0,.16),transparent 60%),radial-gradient(900px 600px at 110% 110%,rgba(255,138,0,.10),transparent 55%),var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;padding-top:calc(24px + var(--safe-t));padding-bottom:calc(24px + var(--safe-b));z-index:1000;overflow-y:auto;}
+.auth-card{width:100%;max-width:430px;background:linear-gradient(180deg,var(--surf2),var(--surf));border:1px solid var(--bdr);border-radius:var(--r-lg);padding:38px 30px 32px;box-shadow:0 30px 80px rgba(0,0,0,.55);}
+.logo-lockup{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:22px;}
+.logo-mark{width:46px;height:46px;flex-shrink:0;filter:drop-shadow(0 0 14px var(--or-glow));}
+.logo-text{font-family:'Poppins',sans-serif;font-weight:900;font-size:22px;line-height:1.1;}
+.logo-text .rich{color:var(--or);}
+.logo-text .nation{color:var(--wh);}
+.logo-text small{display:block;font-size:10.5px;font-weight:800;letter-spacing:3.5px;color:var(--or2);margin-top:2px;}
+.auth-title{font-weight:900;font-size:23px;color:var(--wh);text-align:center;margin-bottom:6px;}
+.auth-sub{font-size:14px;color:#b9bcc4;text-align:center;margin-bottom:26px;line-height:1.6;font-weight:600;}
+.fld{margin-bottom:16px;}
+.fld label{display:block;font-size:12px;color:var(--or2);font-weight:800;text-transform:uppercase;letter-spacing:1.3px;margin-bottom:7px;}
+.inp{width:100%;background:var(--surf3);border:1.5px solid var(--bdr-soft);border-radius:var(--r-sm);padding:13px 15px;color:var(--wh);font-size:15.5px;font-weight:600;outline:none;transition:border-color .15s,box-shadow .15s;}
+.inp::placeholder{color:#6b6f7a;font-weight:600;}
+.inp:focus{border-color:var(--or);box-shadow:0 0 0 3px var(--or-dim);}
+textarea.inp{resize:vertical;}
+.pw-row{position:relative;}
+.pw-row .inp{padding-right:64px;}
+.pw-toggle{position:absolute;right:6px;top:6px;bottom:6px;background:var(--surf2);border:1px solid var(--bdr-soft);border-radius:8px;color:var(--or2);font-size:11px;font-weight:800;cursor:pointer;padding:0 12px;}
+.btn{border:none;border-radius:var(--r-sm);padding:12px 16px;font-weight:800;font-size:14px;cursor:pointer;transition:transform .08s,opacity .15s,box-shadow .15s;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;}
+.btn:active{transform:scale(.98);}
+.btn-primary{background:linear-gradient(135deg,var(--or),#FF6A00);color:#0a0a0a;box-shadow:0 8px 22px rgba(255,138,0,.3);}
+.btn-primary:hover{box-shadow:0 10px 28px rgba(255,138,0,.42);}
+.btn-outline{background:transparent;border:1.5px solid var(--bdr-soft);color:var(--wh);}
+.btn-outline:hover{border-color:var(--or);color:var(--or2);}
+.btn-success{background:var(--gr-dim);border:1.5px solid rgba(47,230,166,.4);color:var(--gr);}
+.btn-success:hover{background:var(--gr);color:#05130d;}
+.btn-danger{background:var(--rd-dim);border:1.5px solid rgba(255,77,109,.4);color:var(--rd);}
+.btn-danger:hover{background:var(--rd);color:#fff;}
+.btn-sm{padding:8px 13px;font-size:12.5px;min-height:36px;border-radius:9px;}
+.btn.full{width:100%;}
+.auth-err{color:var(--rd);font-size:13.5px;font-weight:700;margin-top:14px;padding:11px 13px;background:var(--rd-dim);border:1px solid rgba(255,77,109,.35);border-radius:var(--r-sm);text-align:center;display:none;}
+.auth-foot{margin-top:20px;text-align:center;font-size:12.5px;color:#7a7d85;font-weight:600;}
+
+#app{display:none;min-height:100vh;flex-direction:column;background:var(--bg);}
+.topbar{position:sticky;top:0;z-index:200;height:60px;padding-top:var(--safe-t);background:rgba(10,11,13,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--bdr-soft);display:flex;align-items:center;gap:12px;padding-left:16px;padding-right:14px;flex-shrink:0;}
+.tb-logo{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.tb-logo .logo-mark{width:27px;height:27px;}
+.tb-logo .logo-text{font-size:14px;}
+.tb-logo .logo-text small{font-size:7.5px;letter-spacing:2px;}
+.tb-badge{background:var(--or-dim);border:1px solid var(--bdr);border-radius:99px;padding:4px 12px;font-size:10.5px;color:var(--or2);font-weight:800;letter-spacing:.4px;display:none;}
+@media(min-width:560px){.tb-badge{display:block;}}
+.tb-space{flex:1;}
+.icon-btn{position:relative;width:40px;height:40px;border-radius:11px;background:var(--surf2);border:1px solid var(--bdr-soft);color:var(--w2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.icon-btn:hover{border-color:var(--or);color:var(--or2);}
+.icon-btn svg{width:18px;height:18px;}
+.dot-badge{position:absolute;top:-4px;right:-4px;background:var(--rd);color:#fff;font-size:10px;font-weight:900;min-width:17px;height:17px;border-radius:99px;display:none;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--bg2);}
+.dot-badge.show{display:flex;}
+.notif-panel{position:absolute;top:calc(100% + 10px);right:14px;width:min(360px,92vw);background:var(--surf2);border:1px solid var(--bdr-soft);border-radius:var(--r-md);box-shadow:0 20px 50px rgba(0,0,0,.6);z-index:999;display:none;overflow:hidden;}
+.notif-panel.open{display:block;}
+.notif-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--bdr-soft);}
+.notif-hd b{font-size:14px;color:var(--wh);}
+.notif-hd button{background:none;border:none;color:var(--or2);font-size:12px;font-weight:800;cursor:pointer;}
+.notif-list{max-height:380px;overflow-y:auto;}
+.notif-item{padding:13px 16px;border-bottom:1px solid var(--bdr-soft);display:flex;gap:10px;cursor:pointer;}
+.notif-item:hover{background:var(--surf3);}
+.notif-item:last-child{border-bottom:none;}
+.notif-item.unread{background:rgba(255,138,0,.05);}
+.n-dot{width:8px;height:8px;border-radius:50%;background:var(--or);flex-shrink:0;margin-top:6px;}
+.n-dot.read{background:transparent;border:1px solid #4a4d55;}
+.n-lbl{font-size:13px;font-weight:800;color:var(--wh);margin-bottom:2px;}
+.n-txt{font-size:12.5px;color:#b3b6bd;font-weight:600;line-height:1.5;}
+.n-time{font-size:11px;color:#6b6f7a;margin-top:4px;font-weight:600;}
+.notif-empty{padding:30px 16px;text-align:center;color:#7a7d85;font-size:13px;font-weight:600;}
+
+.mobnav{position:sticky;top:60px;z-index:150;display:flex;gap:8px;overflow-x:auto;padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--bdr-soft);}
+.mobnav::-webkit-scrollbar{display:none;}
+.mobnav-item{flex-shrink:0;display:flex;align-items:center;gap:6px;background:var(--surf2);border:1.5px solid var(--bdr-soft);color:#a9acb3;font-size:12.5px;font-weight:800;padding:9px 14px;border-radius:99px;cursor:pointer;white-space:nowrap;}
+.mobnav-item svg{width:14px;height:14px;}
+.mobnav-item.on{background:var(--or);border-color:var(--or);color:#0a0a0a;}
+@media(min-width:1024px){.mobnav{display:none;}}
+
+.shell{display:flex;flex:1;min-height:0;}
+.sidebar{display:none;}
+@media(min-width:1024px){
+  .sidebar{display:flex;flex-direction:column;width:236px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--bdr-soft);padding:18px 12px;gap:3px;position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;}
+  .sb-label{font-size:10px;font-weight:800;color:#5c5f68;text-transform:uppercase;letter-spacing:1.5px;padding:10px 10px 6px;}
+  .sb-item{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:var(--r-sm);cursor:pointer;font-size:13.5px;color:#a9acb3;font-weight:700;background:none;border:none;width:100%;text-align:left;}
+  .sb-item svg{width:17px;height:17px;flex-shrink:0;}
+  .sb-item:hover{color:var(--wh);background:var(--surf2);}
+  .sb-item.on{color:var(--or);background:var(--or-dim);font-weight:800;}
+}
+.main{flex:1;min-width:0;overflow-y:auto;padding:20px 16px 60px;}
+@media(min-width:640px){.main{padding:28px 30px 60px;}}
+.wrap{max-width:1040px;margin:0 auto;}
+
+.page-hd{font-weight:900;font-size:24px;color:var(--wh);margin-bottom:5px;}
+.page-sub{font-size:14px;color:#a9acb3;font-weight:600;margin-bottom:22px;line-height:1.6;}
+.card{background:linear-gradient(180deg,var(--surf2),var(--surf));border:1px solid var(--bdr-soft);border-radius:var(--r-lg);padding:20px;margin-bottom:16px;}
+.card-title{font-weight:800;font-size:16px;color:var(--wh);margin-bottom:4px;}
+.card-sub{font-size:13px;color:#9fa2aa;font-weight:600;margin-bottom:14px;line-height:1.6;}
+
+.stats-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:20px;}
+@media(min-width:640px){.stats-row{grid-template-columns:repeat(4,minmax(0,1fr));}}
+.stat-box{background:var(--surf2);border:1px solid var(--bdr-soft);border-radius:var(--r-md);padding:16px;min-width:0;}
+.stat-box b{display:block;font-size:26px;font-weight:900;color:var(--or);}
+.stat-box span{font-size:11px;color:#9a9da5;font-weight:800;text-transform:uppercase;letter-spacing:.5px;word-break:break-word;}
+.stat-box.accent-gr b{color:var(--gr);}
+.stat-box.accent-bl b{color:var(--bl);}
+.stat-box.accent-rd b{color:var(--rd);}
+
+.activity-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--bdr-soft);}
+.activity-item:last-child{border-bottom:none;}
+.act-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:6px;}
+.act-txt b{color:var(--wh);font-weight:800;}
+.act-txt{font-size:13.5px;color:#c7c9cf;font-weight:600;line-height:1.6;}
+.act-time{font-size:11.5px;color:#7d8088;font-weight:700;margin-top:2px;}
+
+.student-card{background:var(--surf2);border:1px solid var(--bdr-soft);border-radius:var(--r-md);padding:16px;margin-bottom:12px;}
+.student-top{display:flex;align-items:flex-start;gap:13px;margin-bottom:12px;}
+.avatar{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--or),#FF6A00);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;color:#0a0a0a;flex-shrink:0;}
+.avatar.dim{opacity:.35;background:var(--surf3);color:#8a8d94;}
+.badge{display:inline-block;font-size:10.5px;font-weight:800;padding:3px 10px;border-radius:99px;}
+.badge-gr{background:var(--gr-dim);color:var(--gr);}
+.badge-rd{background:var(--rd-dim);color:var(--rd);}
+.badge-mu{background:var(--surf3);color:#9a9da5;border:1px solid var(--bdr-soft);}
+.pw-chip{background:var(--surf3);padding:2px 9px;border-radius:5px;color:var(--or2);font-size:11px;font-weight:800;font-family:monospace;}
+.mini-pf{height:5px;background:var(--surf3);border-radius:99px;overflow:hidden;margin-bottom:12px;}
+.mini-pf-fill{height:100%;background:var(--or);transition:width .4s;}
+
+.form-grid{display:grid;grid-template-columns:1fr;gap:12px;}
+@media(min-width:560px){.form-grid.two{grid-template-columns:1fr 1fr;}}
+
+.chat-box{display:flex;flex-direction:column;height:300px;}
+.chat-messages{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:9px;padding:13px;background:var(--surf3);border-radius:var(--r-md);margin-bottom:11px;}
+.chat-msg{max-width:76%;padding:10px 14px;border-radius:13px;font-size:13.5px;font-weight:600;line-height:1.6;}
+.chat-msg.mine{background:var(--or);color:#0a0a0a;align-self:flex-end;border-bottom-right-radius:4px;font-weight:700;}
+.chat-msg.theirs{background:var(--surf2);border:1px solid var(--bdr-soft);color:var(--w2);align-self:flex-start;border-bottom-left-radius:4px;}
+.chat-time{font-size:10px;color:#7d8088;margin-top:3px;font-weight:700;}
+.chat-compose{display:flex;gap:8px;}
+.chat-input{flex:1;background:var(--surf3);border:1.5px solid var(--bdr-soft);border-radius:var(--r-sm);padding:11px 13px;color:var(--wh);font-size:14px;font-weight:600;outline:none;resize:none;height:44px;}
+.chat-input:focus{border-color:var(--or);}
+.chat-send{background:var(--or);color:#0a0a0a;border:none;border-radius:var(--r-sm);padding:0 20px;font-weight:800;cursor:pointer;flex-shrink:0;}
+
+.journey-table{width:100%;border-collapse:collapse;}
+.journey-table th{font-size:10.5px;color:#8a8d94;text-transform:uppercase;letter-spacing:1px;padding:9px 12px;text-align:left;background:var(--surf3);}
+.journey-table td{padding:10px 12px;font-size:12.5px;border-bottom:1px solid var(--bdr-soft);color:var(--w2);font-weight:600;}
+.journey-table tr:last-child td{border-bottom:none;}
+.jdot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;}
+.jdot.done{background:var(--gr);}
+.jdot.prog{background:var(--or);}
+.jdot.todo{background:#4a4d55;}
+
+.appt-status{font-size:10.5px;font-weight:800;padding:4px 10px;border-radius:99px;flex-shrink:0;text-transform:capitalize;}
+.appt-status.pending{background:var(--bl-dim);color:var(--bl);}
+.appt-status.confirmed{background:var(--gr-dim);color:var(--gr);}
+.appt-status.cancelled{background:var(--rd-dim);color:var(--rd);}
+
+.course-editor{background:var(--surf2);border:1px solid var(--bdr-soft);border-radius:var(--r-md);margin-bottom:11px;overflow:hidden;}
+.course-editor-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;gap:12px;}
+.course-editor-hd:hover{background:var(--surf3);}
+.course-editor-body{padding:16px;border-top:1px solid var(--bdr-soft);display:none;}
+.course-editor-body.open{display:block;}
+.lesson-editor-row{margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--bdr-soft);}
+.lesson-editor-row:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.lesson-num-chip{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--or2);font-weight:800;flex-shrink:0;}
+
+.video-admin-inp{flex:1;background:var(--surf3);border:1.5px solid var(--bdr-soft);border-radius:var(--r-sm);padding:10px 13px;color:var(--wh);font-size:12.5px;font-weight:600;outline:none;}
+.video-admin-inp:focus{border-color:var(--or);}
+.video-admin-btn{background:var(--or);color:#0a0a0a;border:none;border-radius:var(--r-sm);padding:10px 16px;font-weight:800;font-size:12.5px;cursor:pointer;flex-shrink:0;}
+
+.back-btn{display:inline-flex;align-items:center;gap:7px;background:var(--surf2);border:1px solid var(--bdr-soft);border-radius:99px;padding:9px 16px;color:var(--wh);font-size:13px;font-weight:800;cursor:pointer;margin-bottom:18px;}
+.back-btn:hover{border-color:var(--or);color:var(--or2);}
+.back-btn svg{width:15px;height:15px;}
+
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;pointer-events:none;display:flex;flex-direction:column;gap:8px;align-items:center;width:calc(100% - 32px);}
+.toast-msg{background:var(--surf2);border:1.5px solid var(--bdr-soft);border-radius:12px;padding:13px 20px;font-size:13.5px;font-weight:800;color:var(--wh);box-shadow:0 10px 30px rgba(0,0,0,.5);max-width:420px;text-align:center;}
+.toast-msg.ok{border-color:var(--gr);color:var(--gr);}
+.toast-msg.err{border-color:var(--rd);color:var(--rd);}
+
+.empty-state{text-align:center;padding:52px 20px;color:#7d8088;}
+.empty-state svg{width:40px;height:40px;opacity:.35;margin-bottom:14px;}
+.empty-state b{display:block;font-size:14.5px;color:#9fa2aa;font-weight:800;margin-bottom:4px;}
+.loading-txt{color:#7d8088;font-size:14px;font-weight:700;padding:26px 0;text-align:center;}
+</style>
+</head>
+<body>
+
+<div id="auth">
+  <div class="auth-card">
+    <div class="logo-lockup">
+      <svg class="logo-mark" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" stroke="#FF8A00" stroke-width="3"/><path d="M13 30V18l11-6 11 6v12l-11 6-11-6Z" stroke="#FF8A00" stroke-width="2.4" stroke-linejoin="round"/><path d="M24 24V36" stroke="#FF8A00" stroke-width="2.4"/><path d="M13 18l11 6 11-6" stroke="#FFB454" stroke-width="2.4" stroke-linejoin="round"/></svg>
+      <div class="logo-text"><span class="rich">Rich</span><span class="nation">Nation</span><small>ACADEMY</small></div>
+    </div>
+    <div class="auth-title">Admin Control Room</div>
+    <div class="auth-sub">Sign in with your admin credentials. Only authorised administrators can access this panel.</div>
+    <div class="fld"><label>Email</label><input class="inp" id="a-email" type="email" placeholder="admin@email.com" autocomplete="username"></div>
+    <div class="fld">
+      <label>Password</label>
+      <div class="pw-row">
+        <input class="inp" id="a-pass" type="password" placeholder="Admin password" autocomplete="current-password">
+        <button class="pw-toggle" type="button" onclick="togglePw()">SHOW</button>
+      </div>
+    </div>
+    <div class="auth-err" id="a-err"></div>
+    <button class="btn btn-primary full" id="a-btn" onclick="doAuth()" style="margin-top:6px">Sign In as Admin</button>
+    <div class="auth-foot">RichNation Academy &middot; Control Room</div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="tb-logo">
+      <svg class="logo-mark" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" stroke="#FF8A00" stroke-width="3"/><path d="M13 30V18l11-6 11 6v12l-11 6-11-6Z" stroke="#FF8A00" stroke-width="2.4" stroke-linejoin="round"/><path d="M24 24V36" stroke="#FF8A00" stroke-width="2.4"/><path d="M13 18l11 6 11-6" stroke="#FFB454" stroke-width="2.4" stroke-linejoin="round"/></svg>
+      <div class="logo-text"><span class="rich">Rich</span><span class="nation">Nation</span></div>
+    </div>
+    <span class="tb-badge">Admin Control Room</span>
+    <div class="tb-space"></div>
+    <div style="position:relative">
+      <button class="icon-btn" id="notif-btn" onclick="toggleNotif()" aria-label="Inbox">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="dot-badge" id="notif-badge">0</span>
+      </button>
+      <div class="notif-panel" id="notif-panel">
+        <div class="notif-hd"><b>Admin Inbox</b><button onclick="clearAdminNotifs()">Clear all</button></div>
+        <div class="notif-list" id="notif-list"><div class="notif-empty">No notifications.</div></div>
+      </div>
+    </div>
+    <button class="icon-btn" onclick="doSignOut()" aria-label="Sign out" title="Sign out">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
+  </div>
+
+  <nav class="mobnav" id="mobnav"></nav>
+
+  <div class="shell">
+    <nav class="sidebar" id="sidebar"></nav>
+    <main class="main" id="main"></main>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+/* ===================== DATA ===================== */
+const FB='https://richnation-portal-default-rtdb.firebaseio.com';
+const ADMIN_EMAIL='richnationwbpt61@gmail.com';
+const ADMIN_PASS='UbRNGL2026';
+const COURSES=[
+{id:'c1',icon:'01',title:'Digital Skills Foundation',sub:'Start here. Build the base.',color:'#3b82f6',lessons:[
+{id:'c1l1',title:'What Is the Internet and How Does It Actually Work?',dur:'8 min read'},
+{id:'c1l2',title:'The Tools Every Digital Creator Needs',dur:'10 min read'},
+{id:'c1l3',title:'How to Use Canva Like a Professional Designer',dur:'12 min read'},
+{id:'c1l4',title:'Video Editing on Your Phone With CapCut',dur:'14 min read'},
+{id:'c1l5',title:'Setting Up Google Workspace and Building the Habit of Organisation',dur:'9 min read'},
+]},
+{id:'c2',icon:'02',title:'Content Creation 101',sub:'Find your voice. Tell your story.',color:'#FF8C00',lessons:[
+{id:'c2l1',title:'What Content Creation Really Is',dur:'10 min read'},
+{id:'c2l2',title:'How to Find Your Niche',dur:'12 min read'},
+{id:'c2l3',title:'The Art of Storytelling',dur:'11 min read'},
+{id:'c2l4',title:'Content Formats: Which One Is Right for You?',dur:'10 min read'},
+{id:'c2l5',title:'Your First Content Calendar',dur:'9 min read'},
+]},
+{id:'c3',icon:'03',title:'YouTube Mastery',sub:'Build a channel. Build an income.',color:'#ef4444',lessons:[
+{id:'c3l1',title:'How YouTube Works: The Algorithm Explained',dur:'12 min read'},
+{id:'c3l2',title:'Setting Up Your YouTube Channel Properly',dur:'10 min read'},
+{id:'c3l3',title:'YouTube SEO: How to Get Found in Search',dur:'13 min read'},
+{id:'c3l4',title:'Creating Thumbnails That Get Clicked',dur:'10 min read'},
+{id:'c3l5',title:'How to Script and Film Your Videos',dur:'12 min read'},
+{id:'c3l6',title:'YouTube Monetisation: How to Get Paid',dur:'11 min read'},
+]},
+{id:'c4',icon:'04',title:'Social Media Growth',sub:'Grow on every platform.',color:'#a855f7',lessons:[
+{id:'c4l1',title:'TikTok: How to Grow from Zero',dur:'11 min read'},
+{id:'c4l2',title:'Instagram: Reels, Stories, and Building a Community',dur:'10 min read'},
+{id:'c4l3',title:'Facebook: Community Building and Reaching Adults',dur:'9 min read'},
+{id:'c4l4',title:'LinkedIn: Your Professional Brand',dur:'9 min read'},
+{id:'c4l5',title:'Content Repurposing: Create Once, Distribute Everywhere',dur:'10 min read'},
+]},
+{id:'c5',icon:'05',title:'Making Money Online',sub:'Real income streams explained.',color:'#22c55e',lessons:[
+{id:'c5l1',title:'Ad Revenue: Getting Paid for Views',dur:'11 min read'},
+{id:'c5l2',title:'Brand Deals and Sponsorships',dur:'12 min read'},
+{id:'c5l3',title:'Digital Products: Create Once, Sell Forever',dur:'13 min read'},
+{id:'c5l4',title:'Affiliate Marketing',dur:'10 min read'},
+{id:'c5l5',title:'Coaching and Consulting',dur:'10 min read'},
+{id:'c5l6',title:'Freelancing: Selling Your Skills to Clients',dur:'11 min read'},
+]},
+{id:'c6',icon:'06',title:'Personal Branding',sub:'Your name is your biggest asset.',color:'#f59e0b',lessons:[
+{id:'c6l1',title:'What Personal Branding Really Is',dur:'9 min read'},
+{id:'c6l2',title:'Building Your Brand Identity: Voice, Values, and Visual',dur:'11 min read'},
+{id:'c6l3',title:'Writing a Bio That Attracts the Right People',dur:'9 min read'},
+{id:'c6l4',title:'Consistency: The Secret That Is Not Secret',dur:'9 min read'},
+]},
+{id:'c7',icon:'07',title:'Digital Business',sub:'Start and grow a real online business.',color:'#06b6d4',lessons:[
+{id:'c7l1',title:'How Digital Businesses Work',dur:'10 min read'},
+{id:'c7l2',title:'Starting With What You Have',dur:'11 min read'},
+{id:'c7l3',title:'Understanding Your Customer',dur:'10 min read'},
+{id:'c7l4',title:'Digital Marketing That Works for Small Businesses',dur:'12 min read'},
+]},
+{id:'c8',icon:'08',title:'AI Tools for Creators',sub:'Work smarter. Produce more.',color:'#8b5cf6',lessons:[
+{id:'c8l1',title:'Understanding AI and Why Creators Who Ignore It Fall Behind',dur:'9 min read'},
+{id:'c8l2',title:'ChatGPT and AI Writing Tools',dur:'11 min read'},
+{id:'c8l3',title:'Canva AI: Design Without a Designer',dur:'10 min read'},
+{id:'c8l4',title:'CapCut AI: Edit Faster Than Ever',dur:'11 min read'},
+{id:'c8l5',title:'More AI Tools Every Creator Should Know',dur:'10 min read'},
+]},
+{id:'c9',icon:'09',title:'Faceless Channel Mastery',sub:'Build an audience without showing your face.',color:'#ec4899',lessons:[
+{id:'c9l1',title:'What Is a Faceless Channel and Why It Works',dur:'10 min read'},
+{id:'c9l2',title:'Choosing Your Niche for a Faceless Channel',dur:'9 min read'},
+{id:'c9l3',title:'Free Tools to Create Faceless Videos',dur:'12 min read'},
+{id:'c9l4',title:'AI Voice-Over: Turning Text Into Professional Narration',dur:'11 min read'},
+{id:'c9l5',title:'AI Image Generation: Creating Visuals From Prompts',dur:'12 min read'},
+{id:'c9l6',title:'Prompt Engineering: Getting Exactly What You Want From AI',dur:'13 min read'},
+]},
+{id:'c10',icon:'10',title:'Storytelling and Personal Development',sub:'Tell stories that move people. Grow yourself in the process.',color:'#f97316',lessons:[
+{id:'c10l1',title:'Why Storytelling Is the Most Powerful Skill in the Digital Age',dur:'10 min read'},
+{id:'c10l2',title:'How to Structure Any Story for Maximum Impact',dur:'11 min read'},
+{id:'c10l3',title:'Personal Development as Content: Sharing Your Growth Journey',dur:'10 min read'},
+{id:'c10l4',title:'Building Emotional Connection With Your Audience Through Story',dur:'11 min read'},
+{id:'c10l5',title:'Turning Your Life Experiences Into Valuable Content',dur:'10 min read'},
+]},
+{id:'c11',icon:'11',title:'African Storytelling Videos',sub:'Tell African stories to the world using free tools.',color:'#84cc16',lessons:[
+{id:'c11l1',title:'Why African Stories Are the Most Untapped Content on the Internet',dur:'10 min read'},
+{id:'c11l2',title:'Types of African Stories That Perform Best on YouTube',dur:'11 min read'},
+{id:'c11l3',title:'Creating African Animated Stories With Free AI Tools',dur:'13 min read'},
+{id:'c11l4',title:'Narrating African Folktales Myths and History',dur:'11 min read'},
+{id:'c11l5',title:'Monetising African Storytelling Channels',dur:'10 min read'},
+]},
+{id:'c12',icon:'12',title:'Complete AI Creator Toolkit',sub:'Every free AI tool a creator needs explained completely.',color:'#6366f1',lessons:[
+{id:'c12l1',title:'The Best Free AI Writing Tools for Creators',dur:'10 min read'},
+{id:'c12l2',title:'Free AI Voice-Over Tools ElevenLabs Murf and Alternatives',dur:'11 min read'},
+{id:'c12l3',title:'Free AI Image Tools Leonardo Adobe Firefly and Canva AI',dur:'12 min read'},
+{id:'c12l4',title:'Free AI Video Tools Runway Pika and InVideo',dur:'12 min read'},
+{id:'c12l5',title:'Building a Complete Content Workflow Using Only Free AI Tools',dur:'13 min read'},
+]}];
+
+/* ===================== FIREBASE HELPERS ===================== */
+async function fbG(p){try{const r=await fetch(FB+'/'+p+'.json');return r.ok?await r.json():null;}catch{return null;}}
+async function fbS(p,d){try{await fetch(FB+'/'+p+'.json',{method:'PUT',body:JSON.stringify(d),headers:{'Content-Type':'application/json'}});}catch{}}
+async function fbU(p,d){try{await fetch(FB+'/'+p+'.json',{method:'PATCH',body:JSON.stringify(d),headers:{'Content-Type':'application/json'}});}catch{}}
+async function fbP(p,d){try{const r=await fetch(FB+'/'+p+'.json',{method:'POST',body:JSON.stringify(d),headers:{'Content-Type':'application/json'}});return await r.json();}catch{return null;}}
+async function fbD(p){try{await fetch(FB+'/'+p+'.json',{method:'DELETE'});}catch{}}
+
+/* ===================== UTIL ===================== */
+function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
+function initials(n){return(n||'').split(' ').map(x=>x[0]).filter(Boolean).join('').slice(0,2).toUpperCase()||'S';}
+function nowStr(){return new Date().toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});}
+function fmtDate(iso){try{return iso&&iso!==''?new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'—';}catch{return '—';}}
+function fmtTS(ts){try{return ts?new Date(ts).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'—';}catch{return '—';}}
+function toast(m,t){const el=document.createElement('div');el.className='toast-msg'+(t?' '+t:'');el.textContent=m;document.getElementById('toast').appendChild(el);setTimeout(()=>el.remove(),3400);}
+function togglePw(){const i=document.getElementById('a-pass');const b=document.querySelector('.pw-toggle');i.type=i.type==='password'?'text':'password';b.textContent=i.type==='password'?'SHOW':'HIDE';}
+function getTotalLessons(){return COURSES.reduce((s,c)=>s+c.lessons.length,0);}
+async function pushStudentNotif(uid,type,text,extra){
+  const n={id:Date.now().toString(),type,text,read:false,ts:Date.now(),...(extra||{})};
+  await fbP('rna_notifications/'+uid,n);
+}
+
+const ICON_CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+const ICON_BACK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>';
+const ICON_CHEV='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+const ICON_SEND='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>';
+
+const NAV=[
+  {id:'dashboard',label:'Dashboard',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>'},
+  {id:'students',label:'All Students',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'},
+  {id:'progress',label:'Progress Overview',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>'},
+  {id:'messages',label:'Messages',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>'},
+  {id:'appointments',label:'Appointments',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'},
+  {id:'broadcast',label:'Broadcast',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>'},
+  {id:'courses',label:'Edit Courses',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>'},
+  {id:'videos',label:'Course Videos',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>'},
+  {id:'settings',label:'Site Settings',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>'},
+];
+
+/* ===================== AUTH ===================== */
+async function doAuth(){
+  const email=(document.getElementById('a-email').value||'').trim().toLowerCase();
+  const pass=(document.getElementById('a-pass').value||'').trim();
+  const err=document.getElementById('a-err');
+  err.style.display='none';
+  if(email!==ADMIN_EMAIL||pass!==ADMIN_PASS){err.textContent='Invalid admin credentials.';err.style.display='block';return;}
+  const btn=document.getElementById('a-btn');btn.textContent='Please wait...';btn.disabled=true;
+  localStorage.setItem('rna_adm','1');
+  launchApp();
+}
+function doSignOut(){
+  localStorage.removeItem('rna_adm');
+  document.getElementById('app').style.display='none';
+  document.getElementById('auth').style.display='flex';
+  const btn=document.getElementById('a-btn');btn.textContent='Sign In as Admin';btn.disabled=false;
+}
+function launchApp(){
+  document.getElementById('auth').style.display='none';
+  document.getElementById('app').style.display='flex';
+  buildNav();
+  nav('dashboard');
+  loadAdminNotifs();
+  setInterval(loadAdminNotifs,15000);
+}
+function buildNav(){
+  const sb=document.getElementById('sidebar');
+  const mb=document.getElementById('mobnav');
+  sb.innerHTML='<div class="sb-label">Control Room</div>'+NAV.map(n=>`<button class="sb-item" id="sb-${n.id}" onclick="nav('${n.id}')">${n.icon}<span>${n.label}</span></button>`).join('');
+  mb.innerHTML=NAV.map(n=>`<button class="mobnav-item" id="mb-${n.id}" onclick="nav('${n.id}')">${n.icon}<span>${n.label}</span></button>`).join('');
+}
+function nav(page){
+  document.querySelectorAll('.sb-item,.mobnav-item').forEach(b=>b.classList.remove('on'));
+  const sb=document.getElementById('sb-'+page);if(sb)sb.classList.add('on');
+  const mb=document.getElementById('mb-'+page);if(mb){mb.classList.add('on');mb.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});}
+  document.getElementById('main').scrollTop=0;
+  if(page==='dashboard')renderDashboard();
+  else if(page==='students')renderStudents();
+  else if(page==='progress')renderProgress();
+  else if(page==='messages')renderMessages();
+  else if(page==='appointments')renderAppointments();
+  else if(page==='broadcast')renderBroadcast();
+  else if(page==='courses')renderCourses();
+  else if(page==='videos')renderVideos();
+  else if(page==='settings')renderSettings();
+}
+
+/* ===================== DASHBOARD ===================== */
+async function renderDashboard(){
+  const M=document.getElementById('main');
+  M.innerHTML='<div class="wrap"><div class="page-hd">Dashboard</div><div class="page-sub">Everything happening in RichNation Academy, at a glance.</div><div id="dash-content"><div class="loading-txt">Loading...</div></div></div>';
+  const [studentsRaw,notifsRaw]=await Promise.all([fbG('rna_students')||{},fbG('rna_admin_notifications')||{}]);
+  const students=studentsRaw||{};const notifs=notifsRaw||{};
+  const all=Object.entries(students).map(([k,v])=>({...v,id:v.id||k})).filter(s=>s&&s.role!=='admin');
+  const active=all.filter(s=>s.status==='active').length;
+  const inactive=all.filter(s=>s.status==='inactive').length;
+  const disabled=all.filter(s=>s.status==='disabled').length;
+  let totalDone=0;const total=getTotalLessons();
+  for(const s of all){
+    const p=await fbG('rna_progress/'+s.id)||{};
+    totalDone+=COURSES.reduce((sum,c)=>sum+(c.lessons.filter(l=>p[c.id]&&p[c.id].done&&p[c.id].done[l.id]).length),0);
+  }
+  const avgPct=all.length?Math.round(totalDone/(all.length*total)*100):0;
+  const allNotifs=Object.values(notifs);
+  const pendingMsgs=allNotifs.filter(n=>n.type==='message'&&!n.read).length;
+  let apptPending=0;
+  for(const uid of Object.keys(students)){
+    const appts=await fbG('rna_appointments/'+uid)||{};
+    apptPending+=Object.values(appts).filter(a=>a.status==='pending').length;
+  }
+  const recent=Object.values(notifs).sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0,8);
+  const lbls={message:'sent a message',new_student:'was registered',appointment:'requested an appointment'};
+  const colors={message:'var(--bl)',new_student:'var(--gr)',appointment:'var(--or)'};
+  const el=document.getElementById('dash-content');
+  el.innerHTML=`
+    <div class="stats-row">
+      <div class="stat-box"><b>${all.length}</b><span>Total Students</span></div>
+      <div class="stat-box accent-gr"><b>${active}</b><span>Active</span></div>
+      <div class="stat-box accent-bl"><b>${apptPending}</b><span>Pending Bookings</span></div>
+      <div class="stat-box accent-rd"><b>${pendingMsgs}</b><span>Unread Messages</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Average Course Completion</div>
+      <div class="card-sub">Across all ${all.length} students and ${total} lessons.</div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="flex:1;height:10px;background:var(--surf3);border-radius:99px;overflow:hidden"><div style="height:100%;width:${avgPct}%;background:linear-gradient(90deg,var(--or),var(--or2))"></div></div>
+        <div style="font-weight:900;color:var(--wh);font-size:16px;flex-shrink:0">${avgPct}%</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Account Status</div>
+      <div class="form-grid two" style="margin-top:8px">
+        <div class="stat-box" style="margin:0"><b>${inactive}</b><span>Inactive (need activation)</span></div>
+        <div class="stat-box" style="margin:0"><b>${disabled}</b><span>Disabled</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Recent Activity</div>
+      ${!recent.length?'<div class="empty-state" style="padding:24px"><b>No activity yet</b></div>':recent.map(n=>`<div class="activity-item">
+        <div class="act-dot" style="background:${colors[n.type]||'var(--or)'}"></div>
+        <div><div class="act-txt"><b>${esc(n.from||'Someone')}</b> ${lbls[n.type]||'did something'}</div><div class="act-time">${fmtTS(n.ts)}</div></div>
+      </div>`).join('')}
+    </div>
+  `;
+}
+
+/* ===================== STUDENTS ===================== */
+async function renderStudents(){
+  const M=document.getElementById('main');
+  M.innerHTML='<div class="wrap"><div class="loading-txt">Loading...</div></div>';
+  const students=await fbG('rna_students')||{};
+  const all=Object.entries(students).map(([k,v])=>({...v,id:v.id||k})).filter(s=>s&&s.role!=='admin').sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+  const active=all.filter(s=>s.status==='active').length;
+  const inactive=all.filter(s=>s.status==='inactive').length;
+  const disabled=all.filter(s=>s.status==='disabled').length;
+  const M2=document.getElementById('main');
+  M2.innerHTML=`<div class="wrap">
+    <div class="page-hd">All Students</div>
+    <div class="page-sub">Register, manage, and communicate with every student. Accounts start inactive — you activate them after sending credentials.</div>
+    <div class="stats-row">
+      <div class="stat-box"><b>${all.length}</b><span>Total</span></div>
+      <div class="stat-box accent-gr"><b>${active}</b><span>Active</span></div>
+      <div class="stat-box"><b>${inactive}</b><span>Inactive</span></div>
+      <div class="stat-box accent-rd"><b>${disabled}</b><span>Disabled</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Register New Student</div>
+      <div class="card-sub">Account starts <strong style="color:var(--wh)">inactive</strong>. Send the credentials to the student, then activate their account here when ready.</div>
+      <div class="form-grid two" style="margin-bottom:12px">
+        <div class="fld" style="margin:0"><label>Full Name</label><input class="inp" id="ns-name" placeholder="Student full name"></div>
+        <div class="fld" style="margin:0"><label>Email Address</label><input class="inp" id="ns-email" type="email" placeholder="student@email.com"></div>
+      </div>
+      <div class="form-grid two" style="margin-bottom:12px">
+        <div class="fld" style="margin:0"><label>Password to Send Them</label>
+          <div style="display:flex;gap:8px"><input class="inp" id="ns-pass" placeholder="Create a password" style="flex:1">
+          <button class="btn btn-outline btn-sm" onclick="genPass()" style="flex-shrink:0">Generate</button></div>
+        </div>
+        <div class="fld" style="margin:0"><label>Phone (optional)</label><input class="inp" id="ns-phone" placeholder="e.g. +234 800 000 0000"></div>
+      </div>
+      <div class="fld" style="margin-bottom:14px"><label>Notes (optional)</label><input class="inp" id="ns-notes" placeholder="e.g. Referred by John, VIP student..."></div>
+      <button class="btn btn-primary" onclick="registerStudent()">Register Student</button>
+    </div>
+    <div id="student-list">
+    ${!all.length?'<div class="empty-state"><b>No students yet</b></div>'
+    :all.map(s=>{
+      const statusBadge=s.status==='active'?'<span class="badge badge-gr">Active</span>':s.status==='disabled'?'<span class="badge badge-rd">Disabled</span>':'<span class="badge badge-mu">Inactive</span>';
+      return`<div class="student-card">
+        <div class="student-top">
+          <div class="avatar ${s.status!=='active'?'dim':''}">${initials(s.name||'')}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:800;font-size:14.5px;margin-bottom:3px">${esc(s.name||'')} ${statusBadge}</div>
+            <div style="font-size:12.5px;color:#9fa2aa;font-weight:600">${esc(s.email||'')}${s.phone?' &middot; '+esc(s.phone):''}</div>
+            <div style="font-size:11.5px;color:#7d8088;margin-top:4px;font-weight:600">Password: <span class="pw-chip">${esc(s.password||'—')}</span> &middot; Joined ${fmtDate(s.createdAt||'')}${s.notes?' &middot; '+esc(s.notes):''}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:14px;font-weight:900;color:var(--or)" id="pct-${s.id}">...</div>
+            <div style="font-size:10.5px;color:#7d8088;font-weight:700" id="pct2-${s.id}">—</div>
+          </div>
+        </div>
+        <div class="mini-pf"><div class="mini-pf-fill" id="pf-${s.id}"></div></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-outline btn-sm" onclick="viewStudentProfile('${s.id}')">View Full Profile</button>
+          ${s.status==='active'
+            ?`<button class="btn btn-danger btn-sm" onclick="setStatus('${s.id}','disabled','${esc(s.name||'')}')">Disable</button>`
+            :`<button class="btn btn-success btn-sm" onclick="setStatus('${s.id}','active','${esc(s.name||'')}')">${s.status==='inactive'?'Activate':'Reactivate'}</button>`
+          }
+          <button class="btn btn-outline btn-sm" onclick="editCredentials('${s.id}','${esc(s.name||'')}','${esc(s.email||'')}','${esc(s.password||'')}')">Edit Login</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteStudent('${s.id}','${esc(s.name||'')}')">Delete</button>
+        </div>
+      </div>`;
+    }).join('')}
+    </div>
+  </div>`;
+  for(const s of all){
+    const p=await fbG('rna_progress/'+s.id)||{};
+    const done=COURSES.reduce((sum,c)=>sum+(c.lessons.filter(l=>p[c.id]&&p[c.id].done&&p[c.id].done[l.id]).length),0);
+    const total=getTotalLessons();const pct=Math.round(done/total*100);
+    const pf=document.getElementById('pf-'+s.id);const pc=document.getElementById('pct-'+s.id);const pc2=document.getElementById('pct2-'+s.id);
+    if(pf)pf.style.width=pct+'%';if(pc)pc.textContent=pct+'%';if(pc2)pc2.textContent=done+'/'+total+' lessons';
+  }
+}
+function genPass(){
+  const c='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+  const p=Array.from({length:9},()=>c[Math.floor(Math.random()*c.length)]).join('');
+  const el=document.getElementById('ns-pass');if(el)el.value=p;
+}
+async function registerStudent(){
+  const name=(document.getElementById('ns-name').value||'').trim();
+  const email=(document.getElementById('ns-email').value||'').trim().toLowerCase();
+  const pass=(document.getElementById('ns-pass').value||'').trim();
+  const phone=(document.getElementById('ns-phone').value||'').trim();
+  const notes=(document.getElementById('ns-notes').value||'').trim();
+  if(!name||!email||!pass){toast('Name, email, and password are required.','err');return;}
+  if(email===ADMIN_EMAIL){toast('Cannot use admin email.','err');return;}
+  const uid=email.replace(/[.@+]/g,'_');
+  const existing=await fbG('rna_students/'+uid);
+  if(existing){toast('An account with this email already exists.','err');return;}
+  const u={id:uid,name,email,password:pass,phone,notes,status:'inactive',createdAt:new Date().toISOString(),role:'student'};
+  await fbS('rna_students/'+uid,u);
+  await fbP('rna_admin_notifications',{type:'new_student',from:'Admin',uid,msg:'New student registered: '+name+' ('+email+')',ts:Date.now(),read:false});
+  ['ns-name','ns-email','ns-pass','ns-phone','ns-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  toast(name+' registered. INACTIVE — send credentials then activate.','ok');
+  renderStudents();
+}
+async function setStatus(uid,status,name){
+  await fbU('rna_students/'+uid,{status});
+  if(status==='active'){
+    await pushStudentNotif(uid,'admin_broadcast','Your RichNation Academy account has been activated. Sign in now to begin your courses.',{from:'Admin'});
+    toast(name+' ACTIVATED. Student notified.','ok');
+  } else {
+    toast(name+' account disabled.','ok');
+  }
+  renderStudents();
+}
+async function editCredentials(uid,name,currentEmail,currentPass){
+  const newEmail=prompt('Edit email for '+name+' (current: '+currentEmail+'):',currentEmail);
+  if(newEmail===null)return;
+  const newPass=prompt('Edit password for '+name+' (current: '+currentPass+'):',currentPass);
+  if(newPass===null)return;
+  await fbU('rna_students/'+uid,{email:newEmail.trim().toLowerCase(),password:newPass.trim()});
+  toast('Credentials updated for '+name+'.','ok');
+  renderStudents();
+}
+async function deleteStudent(uid,name){
+  if(!confirm('PERMANENTLY delete '+name+' and ALL their data? This cannot be undone.'))return;
+  await Promise.all([fbD('rna_students/'+uid),fbD('rna_progress/'+uid),fbD('rna_messages/'+uid),fbD('rna_appointments/'+uid),fbD('rna_notifications/'+uid)]);
+  toast(name+' deleted permanently.','ok');
+  renderStudents();
+}
+async function viewStudentProfile(uid){
+  const M=document.getElementById('main');
+  M.innerHTML='<div class="wrap"><div class="loading-txt">Loading profile...</div></div>';
+  const s=await fbG('rna_students/'+uid);
+  if(!s){M.innerHTML='<div class="wrap"><button class="back-btn" onclick="renderStudents()">'+ICON_BACK+' Back</button><div class="empty-state"><b>Student not found.</b></div></div>';return;}
+  if(!s.id)s.id=uid;
+  const p=await fbG('rna_progress/'+uid)||{};
+  const msgs=await fbG('rna_messages/'+uid)||{};
+  const appts=await fbG('rna_appointments/'+uid)||{};
+  const msgList=Object.values(msgs).sort((a,b)=>a.ts-b.ts);
+  const apptList=Object.values(appts).sort((a,b)=>b.ts-a.ts);
+  const done=COURSES.reduce((sum,c)=>sum+(c.lessons.filter(l=>p[c.id]&&p[c.id].done&&p[c.id].done[l.id]).length),0);
+  const total=getTotalLessons();const pct=Math.round(done/total*100);
+  const sb=s.status==='active'?'<span class="badge badge-gr">Active</span>':s.status==='disabled'?'<span class="badge badge-rd">Disabled</span>':'<span class="badge badge-mu">Inactive</span>';
+  M.innerHTML=`<div class="wrap">
+    <button class="back-btn" onclick="renderStudents()">${ICON_BACK} Back to All Students</button>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;flex-wrap:wrap">
+      <div class="avatar" style="width:56px;height:56px;border-radius:16px;font-size:20px">${initials(s.name||'')}</div>
+      <div>
+        <div style="font-weight:900;font-size:21px;margin-bottom:3px">${esc(s.name||'')} ${sb}</div>
+        <div style="font-size:12.5px;color:#9fa2aa;font-weight:600">${esc(s.email||'')}${s.phone?' &middot; '+esc(s.phone):''} &middot; Joined ${fmtDate(s.createdAt||'')}</div>
+        <div style="font-size:12px;margin-top:5px;font-weight:600">Password: <span class="pw-chip">${esc(s.password||'—')}</span></div>
+        ${s.notes?`<div style="font-size:12px;color:#9fa2aa;margin-top:4px;font-weight:600">Notes: ${esc(s.notes)}</div>`:''}
+      </div>
+    </div>
+    <div style="display:flex;gap:9px;flex-wrap:wrap;margin-bottom:20px">
+      ${s.status==='active'
+        ?`<button class="btn btn-danger btn-sm" onclick="setStatus('${uid}','disabled','${esc(s.name||'')}')">Disable Account</button>`
+        :`<button class="btn btn-success btn-sm" onclick="setStatus('${uid}','active','${esc(s.name||'')}')">${s.status==='inactive'?'Activate Account':'Reactivate Account'}</button>`
+      }
+      <button class="btn btn-outline btn-sm" onclick="editCredentials('${uid}','${esc(s.name||'')}','${esc(s.email||'')}','${esc(s.password||'')}')">Edit Login</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteStudent('${uid}','${esc(s.name||'')}')">Delete Account</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Overall Progress — ${pct}% — ${done}/${total} lessons</div>
+      <div style="height:8px;background:var(--surf3);border-radius:99px;overflow:hidden;margin:12px 0 18px">
+        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--or),var(--or2))"></div>
+      </div>
+      <div style="overflow-x:auto"><table class="journey-table">
+        <thead><tr><th>Course</th><th>Done</th><th>Status</th><th>Last Activity</th></tr></thead>
+        <tbody>${COURSES.map(c=>{
+          const cdone=c.lessons.filter(l=>p[c.id]&&p[c.id].done&&p[c.id].done[l.id]).length;
+          const complete=cdone>=c.lessons.length;
+          const lastDone=p[c.id]&&p[c.id].done?Object.values(p[c.id].done).sort().pop():'';
+          return`<tr>
+            <td><span style="color:${c.color};font-weight:900;margin-right:6px">${c.icon}</span><span style="color:var(--wh);font-weight:700">${c.title}</span></td>
+            <td>${cdone}/${c.lessons.length}</td>
+            <td><span class="jdot ${complete?'done':cdone>0?'prog':'todo'}"></span>${complete?'Complete':cdone>0?'In progress':'Not started'}</td>
+            <td>${lastDone?fmtDate(lastDone):'—'}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Messages with ${esc(s.name||'')}</div>
+      <div class="chat-box">
+        <div class="chat-messages" id="prof-msgs">${
+          !msgList.length?'<div class="empty-state" style="padding:20px"><b>No messages yet</b></div>'
+          :msgList.map(m=>`<div style="align-self:${m.from==='student'?'flex-start':'flex-end'}">
+            <div class="chat-msg ${m.from==='student'?'theirs':'mine'}">${esc(m.text)}</div>
+            <div class="chat-time" style="${m.from!=='student'?'text-align:right':''}">${m.date||fmtTS(m.ts)}</div>
+          </div>`).join('')
+        }</div>
+        <div class="chat-compose">
+          <textarea class="chat-input" id="prof-reply-inp" placeholder="Message ${esc(s.name||'student')}..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();adminReply('${uid}');}"></textarea>
+          <button class="chat-send" onclick="adminReply('${uid}')">${ICON_SEND}</button>
+        </div>
+      </div>
+    </div>
+    ${apptList.length?`<div class="card">
+      <div class="card-title">Appointments</div>
+      ${apptList.map(a=>`<div style="padding:11px 0;border-bottom:1px solid var(--bdr-soft)">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+          <div><div style="font-weight:800;color:var(--or2)">${a.date} at ${a.time}</div><div style="font-size:13px;color:var(--w2);font-weight:600">${esc(a.topic||'')}</div>${a.adminNote?`<div style="font-size:12px;color:#9fa2aa;font-weight:600">Note: ${esc(a.adminNote)}</div>`:''}</div>
+          <span class="appt-status ${a.status||'pending'}">${a.status||'pending'}</span>
+        </div>
+      </div>`).join('')}
+    </div>`:''}
+  </div>`;
+  const pm=document.getElementById('prof-msgs');if(pm)pm.scrollTop=pm.scrollHeight;
+}
+async function adminReply(uid){
+  const inp=document.getElementById('prof-reply-inp');
+  const text=(inp.value||'').trim();if(!text)return;
+  inp.value='';
+  const msg={id:Date.now().toString(),text,from:'admin',senderName:'RichNation Academy',ts:Date.now(),date:nowStr()};
+  await fbP('rna_messages/'+uid,msg);
+  await pushStudentNotif(uid,'message_reply',text.slice(0,100),{from:'Admin'});
+  toast('Message sent.','ok');
+  viewStudentProfile(uid);
+}
+
+/* ===================== PROGRESS ===================== */
+async function renderProgress(){
+  const M=document.getElementById('main');
+  M.innerHTML='<div class="wrap"><div class="page-hd">Progress Overview</div><div class="page-sub">Every student&#39;s progress across all 12 courses at a glance. Click any student to see their full profile.</div><div id="progress-content"><div class="loading-txt">Loading...</div></div></div>';
+  const students=await fbG('rna_students')||{};
+  const all=Object.entries(students).map(([k,v])=>({...v,id:v.id||k})).filter(s=>s&&s.role!=='admin').sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+  const el=document.getElementById('progress-content');if(!el)return;
+  if(!all.length){el.innerHTML='<div class="empty-state"><b>No students yet</b></div>';return;}
+  const total=getTotalLessons();
+  let html='';
+  for(const s of all){
+    const p=await fbG('rna_progress/'+s.id)||{};
+    const done=COURSES.reduce((sum,c)=>sum+(c.lessons.filter(l=>p[c.id]&&p[c.id].done&&p[c.id].done[l.id]).length),0);
+    const pct=Math.round(done/total*100);
+    const sb=s.status==='active'?'<span class="badge badge-gr" style="font-size:9.5px">Active</span>':s.status==='disabled'?'<span class="badge badge-rd" style="font-size:9.5px">Disabled</span>':'<span class="badge badge-mu" style="font-size:9.5px">Inactive</span>';
+    html+=`<div class="student-card" style="cursor:pointer" onclick="viewStudentProfile('${s.id}')">
+      <div style="display:flex;align-items:center;gap:13px;flex-wrap:wrap">
+        <div class="avatar ${s.status!=='active'?'dim':''}">${initials(s.name||'')}</div>
+        <div style="flex:1;min-width:160px">
+          <div style="font-weight:800;font-size:14px;margin-bottom:3px">${esc(s.name||'')} ${sb}</div>
+          <div style="font-size:12px;color:#9fa2aa;font-weight:600">${pct}% complete &middot; ${done}/${total} lessons</div>
+          <div style="height:4px;background:var(--surf3);border-radius:99px;overflow:hidden;margin-top:7px;width:200px;max-width:100%"><div style="height:100%;width:${pct}%;background:var(--or)"></div></div>
+        </div>
+      </div>
+    </div>`;
+  }
+  el.innerHTML=html;
+}
+
+/* ===================== MESSAGES ===================== */
+async function renderMessages(){
+  const M=document.getElementById('main');
+  M.innerHTML='<div class="wrap"><div class="page-hd">Messages</div><div class="page-sub">All student messages. Click any to open the full conversation and reply.</div><div id="msg-list"><div class="loading-txt">Loading...</div></div></div>';
+  const notifs=await fbG('rna_admin_notifications')||{};
+  const msgs=Object.values(notifs).filter(n=>n.type==='message').sort((a,b)=>b.ts-a.ts);
+  const el=document.getElementById('msg-list');if(!el)return;
+  if(!msgs.length){el.innerHTML='<div class="empty-state"><b>No messages yet</b></div>';return;}
+  el.innerHTML=msgs.map(m=>`<div class="student-card" style="cursor:pointer" onclick="viewStudentProfile('${m.uid||''}')">
+    <div class="student-top" style="margin-bottom:0">
+      <div class="avatar">${initials(m.from||'')}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:800;font-size:14px">${esc(m.from||'')}</div>
+        <div style="font-size:12.5px;color:#9fa2aa;font-weight:600;margin-top:2px">${esc((m.preview||'').slice(0,100))}</div>
+      </div>
+      <div style="font-size:11.5px;color:#7d8088;flex-shrink:0;font-weight:600">${fmtTS(m.ts)}</div>
+    </div>
+  </div>`).join('');
+}
+
+/* ===================== APPOINTMENTS ===================== */
+async function renderAppointments(){
+  const M=document.getElementById('main');
+  M.innerHTML='<div class="wrap"><div class="page-hd">Appointments</div><div class="page-sub">Student appointment requests. Pending requests are shown first.</div><div id="appt-list"><div class="loading-txt">Loading...</div></div></div>';
+  const students=await fbG('rna_students')||{};
+  const sids=Object.keys(students).filter(id=>students[id]&&students[id].role!=='admin');
+  let all=[];
+  for(const uid of sids){
+    const appts=await fbG('rna_appointments/'+uid)||{};
+    Object.entries(appts).forEach(([k,a])=>all.push({...a,_uid:uid,_key:k,_sName:students[uid]?.name||uid}));
+  }
+  all.sort((a,b)=>{if(a.status==='pending'&&b.status!=='pending')return -1;if(b.status==='pending'&&a.status!=='pending')return 1;return(b.ts||0)-(a.ts||0);});
+  const el=document.getElementById('appt-list');if(!el)return;
+  if(!all.length){el.innerHTML='<div class="empty-state"><b>No appointment requests yet</b></div>';return;}
+  el.innerHTML=all.map(a=>`<div class="card" style="margin-bottom:10px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px;flex-wrap:wrap">
+      <div>
+        <div style="font-weight:800;font-size:15.5px;margin-bottom:4px">${esc(a._sName||'')}</div>
+        <div style="font-weight:800;font-size:14.5px;color:var(--or2)">${a.date||''} at ${a.time||''}</div>
+        <div style="font-size:13.5px;color:var(--w2);margin-top:4px;font-weight:600">${esc(a.topic||'')}</div>
+        ${a.notes?`<div style="font-size:12.5px;color:#9fa2aa;margin-top:4px;font-weight:600">${esc(a.notes)}</div>`:''}
+        ${a.adminNote?`<div style="font-size:12.5px;color:var(--or2);margin-top:5px;font-weight:600">Your note: ${esc(a.adminNote)}</div>`:''}
+      </div>
+      <span class="appt-status ${a.status||'pending'}">${a.status||'pending'}</span>
+    </div>
+    ${a.status==='pending'?`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <button class="btn btn-success btn-sm" onclick="confirmAppt('${a._uid}','${a._key}')">Confirm</button>
+      <button class="btn btn-danger btn-sm" onclick="declineAppt('${a._uid}','${a._key}')">Decline</button>
+      <input class="inp" id="an-${a._key}" placeholder="Optional note (link, location)..." style="flex:1;min-width:180px;font-size:12.5px;padding:9px 12px">
+    </div>`:''}
+  </div>`).join('');
+}
+async function confirmAppt(uid,key){
+  const noteEl=document.getElementById('an-'+key);
+  const note=(noteEl?.value||'').trim();
+  await fbU('rna_appointments/'+uid+'/'+key,{status:'confirmed',adminNote:note,confirmedAt:new Date().toISOString()});
+  const txt='Your appointment has been confirmed.'+(note?' Note: '+note:'');
+  await fbP('rna_messages/'+uid,{id:Date.now().toString(),text:txt,from:'admin',senderName:'Admin',ts:Date.now(),date:nowStr()});
+  await pushStudentNotif(uid,'appt_confirmed',txt,{from:'Admin'});
+  toast('Confirmed. Student notified.','ok');
+  renderAppointments();
+}
+async function declineAppt(uid,key){
+  await fbU('rna_appointments/'+uid+'/'+key,{status:'cancelled'});
+  await pushStudentNotif(uid,'appt_declined','Your appointment request was declined. Please request a different time.',{from:'Admin'});
+  toast('Declined. Student notified.','ok');
+  renderAppointments();
+}
+
+/* ===================== BROADCAST ===================== */
+function renderBroadcast(){
+  document.getElementById('main').innerHTML=`<div class="wrap">
+    <div class="page-hd">Broadcast</div>
+    <div class="page-sub">Send a message to every active student at once. Arrives as a notification within 15 seconds.</div>
+    <div class="card">
+      <div class="card-title">Send to All Active Students</div>
+      <div class="card-sub">This notification reaches every student with an active account. Inactive and disabled accounts are skipped.</div>
+      <div class="fld" style="margin-bottom:14px"><label>Message</label><textarea class="inp" id="bc-text" rows="6" placeholder="Type your broadcast message here..." style="resize:vertical;min-height:120px"></textarea></div>
+      <button class="btn btn-primary" onclick="sendBroadcast()">Send to All Students</button>
+    </div>
+  </div>`;
+}
+async function sendBroadcast(){
+  const text=(document.getElementById('bc-text')?.value||'').trim();
+  if(!text){toast('Please type a message first.','err');return;}
+  const students=await fbG('rna_students')||{};
+  const sids=Object.keys(students).filter(id=>students[id]&&students[id].role!=='admin'&&students[id].status==='active');
+  for(const sid of sids)await pushStudentNotif(sid,'admin_broadcast',text,{from:'Admin'});
+  document.getElementById('bc-text').value='';
+  toast('Broadcast sent to '+sids.length+' active students.','ok');
+}
+
+/* ===================== COURSES ===================== */
+async function renderCourses(){
+  const M=document.getElementById('main');
+  M.innerHTML='<div class="wrap"><div class="page-hd">Edit Courses</div><div class="page-sub">Edit titles, lesson names, and add full lesson notes students will see. Changes save instantly.</div><div id="course-list"><div class="loading-txt">Loading...</div></div></div>';
+  const edits=await fbG('rna_course_edits')||{};
+  const el=document.getElementById('course-list');if(!el)return;
+  el.innerHTML=COURSES.map(c=>{
+    const saved=edits[c.id]||{};
+    return`<div class="course-editor" id="ce-${c.id}">
+      <div class="course-editor-hd" onclick="toggleEditor('${c.id}')">
+        <span style="color:${c.color};font-weight:900;font-size:12.5px;flex-shrink:0">${c.icon}</span>
+        <span style="font-weight:800;font-size:14.5px;flex:1">${saved.title||c.title}</span>
+        <span style="color:#7d8088">${ICON_CHEV}</span>
+      </div>
+      <div class="course-editor-body" id="ceb-${c.id}">
+        <div class="fld"><label>Course Title</label><input class="inp" id="ct-${c.id}" value="${esc(saved.title||c.title)}"></div>
+        <div class="fld"><label>Course Subtitle</label><input class="inp" id="cs-${c.id}" value="${esc(saved.sub||c.sub)}"></div>
+        <div style="margin:14px 0 10px;font-size:11px;color:#7d8088;font-weight:800;text-transform:uppercase;letter-spacing:1px">Lessons</div>
+        ${c.lessons.map((l,i)=>`<div class="lesson-editor-row">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <div class="lesson-num-chip">${i+1}</div>
+            <input class="inp" id="lt-${l.id}" value="${esc((saved.lessons&&saved.lessons[i])||l.title)}" style="flex:1;font-size:13px;padding:9px 11px">
+            <input class="inp" id="ld-${l.id}" value="${esc((saved.lessonDurs&&saved.lessonDurs[i])||l.dur)}" style="width:110px;font-size:13px;padding:9px 11px" placeholder="Read time">
+          </div>
+          <textarea class="inp" id="lc-${l.id}" placeholder="Lesson notes shown to students (optional — leave blank for default text)" style="font-size:13px;resize:vertical;min-height:70px" data-lid="${l.id}"></textarea>
+        </div>`).join('')}
+        <button class="btn btn-primary" onclick="saveCourseEdits('${c.id}')" style="margin-top:8px">Save Changes</button>
+      </div>
+    </div>`;
+  }).join('');
+  const content=await fbG('rna_lesson_content')||{};
+  for(const c of COURSES){for(const l of c.lessons){const ta=document.getElementById('lc-'+l.id);if(ta&&content[l.id])ta.value=content[l.id];}}
+}
+function toggleEditor(cid){const body=document.getElementById('ceb-'+cid);if(body)body.classList.toggle('open');}
+async function saveCourseEdits(cid){
+  const c=COURSES.find(x=>x.id===cid);
+  const title=(document.getElementById('ct-'+cid)?.value||'').trim();
+  const sub=(document.getElementById('cs-'+cid)?.value||'').trim();
+  const lessons=c.lessons.map(l=>(document.getElementById('lt-'+l.id)?.value||'').trim());
+  const lessonDurs=c.lessons.map(l=>(document.getElementById('ld-'+l.id)?.value||'').trim());
+  await fbU('rna_course_edits',{[cid]:{title,sub,lessons,lessonDurs,updatedAt:new Date().toISOString()}});
+  const contentUpdates={};
+  c.lessons.forEach(l=>{
+    const val=(document.getElementById('lc-'+l.id)?.value||'').trim();
+    if(val)contentUpdates[l.id]='<p>'+esc(val).replace(/\n\n+/g,'</p><p>').replace(/\n/g,'<br>')+'</p>';
+  });
+  if(Object.keys(contentUpdates).length)await fbU('rna_lesson_content',contentUpdates);
+  toast('Course saved: '+title,'ok');
+}
+
+/* ===================== VIDEOS ===================== */
+async function renderVideos(){
+  const M=document.getElementById('main');
+  M.innerHTML='<div class="wrap"><div class="page-hd">Course Videos</div><div class="page-sub">Paste a YouTube link for any lesson. Videos play directly inside the student portal — no redirect, no Error 153.</div><div id="video-editor"><div class="loading-txt">Loading...</div></div></div>';
+  const vids=await fbG('rna_videos')||{};
+  const el=document.getElementById('video-editor');if(!el)return;
+  el.innerHTML=COURSES.map(c=>`<div class="card">
+    <div style="font-weight:800;font-size:14.5px;color:${c.color};margin-bottom:14px">${c.icon} ${c.title}</div>
+    ${c.lessons.map(l=>{
+      const vk=c.id+'_'+l.id;const existing=vids[vk]||'';
+      return`<div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--bdr-soft)">
+        <div style="font-size:13px;font-weight:800;color:var(--wh);margin-bottom:7px">${l.title}</div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <input class="video-admin-inp" id="vi-${vk}" value="${esc(existing)}" placeholder="Paste YouTube URL here...">
+          <button class="video-admin-btn" onclick="saveVideo('${vk}')">Save</button>
+          <button class="btn btn-outline btn-sm" onclick="previewVideo('${vk}')">Preview</button>
+        </div>
+        <div id="vp-${vk}"></div>
+      </div>`;
+    }).join('')}
+  </div>`).join('');
+}
+async function saveVideo(vk){
+  const url=(document.getElementById('vi-'+vk)?.value||'').trim();
+  await fbU('rna_videos',{[vk]:url});
+  toast(url?'Video saved. Visible to students immediately.':'Video removed.','ok');
+}
+function previewVideo(vk){
+  const url=(document.getElementById('vi-'+vk)?.value||'').trim();
+  const wrap=document.getElementById('vp-'+vk);if(!wrap)return;
+  if(!url){wrap.innerHTML='';return;}
+  const m=url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
+  if(!m){wrap.innerHTML='<div style="color:var(--rd);font-size:12.5px;margin-top:8px;font-weight:700">Invalid YouTube URL.</div>';return;}
+  const src=`https://www.youtube-nocookie.com/embed/${m[1]}?rel=0&modestbranding=1&fs=1`;
+  wrap.innerHTML=`<div style="max-width:400px;margin-top:10px"><div style="aspect-ratio:16/9;background:#050505;border:1px solid var(--bdr-soft);border-radius:var(--r-md);overflow:hidden"><iframe src="${src}" allowfullscreen allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;web-share" referrerpolicy="strict-origin-when-cross-origin" style="border:0;width:100%;height:100%"></iframe></div></div>`;
+}
+
+/* ===================== SETTINGS ===================== */
+async function renderSettings(){
+  const M=document.getElementById('main');
+  M.innerHTML='<div class="wrap"><div class="page-hd">Site Settings</div><div class="page-sub">Control what students see on their Home tab — no code changes needed.</div><div id="settings-content"><div class="loading-txt">Loading...</div></div></div>';
+  const s=await fbG('rna_settings')||{};
+  const el=document.getElementById('settings-content');
+  el.innerHTML=`<div class="card">
+    <div class="card-title">Home Announcement Banner</div>
+    <div class="card-sub">Shown at the top of every student's Home tab. Leave blank to hide it.</div>
+    <div class="fld"><textarea class="inp" id="set-announcement" rows="3" placeholder="e.g. New live class this Saturday at 4pm — check Messages for the link!" style="resize:vertical;min-height:80px">${esc(s.announcement||'')}</textarea></div>
+    <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Support Contact</div>
+    <div class="card-sub">Displayed to students who are not yet enrolled.</div>
+    <div class="fld" style="margin:0"><label>Support Email</label><input class="inp" id="set-email" value="${esc(s.supportEmail||ADMIN_EMAIL)}"></div>
+  </div>`;
+}
+async function saveSettings(){
+  const announcement=(document.getElementById('set-announcement')?.value||'').trim();
+  const supportEmail=(document.getElementById('set-email')?.value||'').trim();
+  await fbU('rna_settings',{announcement,supportEmail});
+  toast('Settings saved.','ok');
+}
+
+/* ===================== NOTIFICATIONS ===================== */
+async function loadAdminNotifs(){
+  const raw=await fbG('rna_admin_notifications')||{};
+  const all=Object.entries(raw).map(([k,v])=>({...v,_key:k})).sort((a,b)=>b.ts-a.ts);
+  const unread=all.filter(n=>!n.read);
+  const badge=document.getElementById('notif-badge');
+  if(badge){badge.textContent=unread.length>9?'9+':String(unread.length);badge.classList.toggle('show',unread.length>0);}
+  const list=document.getElementById('notif-list');if(!list)return;
+  const lbls={message:'New Message',appointment:'Appointment Request',new_student:'New Student Registered'};
+  if(!all.length){list.innerHTML='<div class="notif-empty">No notifications.</div>';return;}
+  list.innerHTML=all.slice(0,40).map(n=>`<div class="notif-item ${!n.read?'unread':''}" onclick="handleAdminNotif('${n._key}','${n.type||''}','${n.uid||''}')">
+    <div class="n-dot ${n.read?'read':''}"></div>
+    <div style="flex:1;min-width:0">
+      <div class="n-lbl">${esc(lbls[n.type]||'Notification')}</div>
+      <div class="n-txt">${esc(n.from||'')}${n.type==='appointment'?' — '+n.date+' at '+n.time:n.type==='message'?' — '+(n.preview||'').slice(0,60):n.msg?' — '+(n.msg||'').slice(0,60):''}</div>
+      <div class="n-time">${fmtTS(n.ts)}</div>
+    </div>
+  </div>`).join('');
+}
+async function handleAdminNotif(key,type,uid){
+  await fbU('rna_admin_notifications/'+key,{read:true});
+  toggleNotif(true);
+  if((type==='message'||type==='new_student')&&uid&&uid!=='undefined'){nav('students');setTimeout(()=>viewStudentProfile(uid),200);}
+  else if(type==='appointment'){nav('appointments');}
+  loadAdminNotifs();
+}
+function toggleNotif(forceClose){
+  const p=document.getElementById('notif-panel');
+  if(forceClose||p.classList.contains('open')){p.classList.remove('open');return;}
+  p.classList.add('open');loadAdminNotifs();
+}
+async function clearAdminNotifs(){
+  const raw=await fbG('rna_admin_notifications')||{};
+  for(const k of Object.keys(raw))await fbU('rna_admin_notifications/'+k,{read:true});
+  loadAdminNotifs();
+}
+document.addEventListener('click',e=>{
+  const p=document.getElementById('notif-panel');const b=document.getElementById('notif-btn');
+  if(p&&b&&!p.contains(e.target)&&!b.contains(e.target))p.classList.remove('open');
+});
+
+/* ===================== BOOT ===================== */
+document.addEventListener('DOMContentLoaded',function(){
+  if(localStorage.getItem('rna_adm')==='1')launchApp();
+});
+</script>
+</body>
+</html>
