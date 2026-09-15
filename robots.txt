@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /vendor.html
+Disallow: /staff.html
+Disallow: /rider.html
+Disallow: /investor.html
+
+Sitemap: https://richnationmall.com/sitemap.xml
