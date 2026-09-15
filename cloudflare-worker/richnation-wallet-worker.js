@@ -462,6 +462,42 @@ export default {
       return json({ok:true, newValue:newVal});
     }
 
+    // ── /debug-probe: TEMPORARY diagnostic, safe to remove once the 401
+    // mystery below is solved. Isolates exactly why this Worker's own
+    // writes are being rejected by Firebase, without touching any real
+    // customer/staff/vendor/rider/investor record. It runs three writes
+    // against a disposable test id (not a real account) and reports the
+    // raw Firebase response for each:
+    //   1. rootWrite    -> a path with NO matching rule at all, so it's
+    //                      only allowed if this credential gets full
+    //                      Admin-SDK-style bypass of every rule.
+    //   2. freshWrite   -> creating the disposable test record for the
+    //                      first time (walletBalance doesn't exist yet),
+    //                      which the money-field .validate lock allows
+    //                      for ANY writer, bypass or not.
+    //   3. valueChange  -> immediately changing that same test record's
+    //                      walletBalance to a different number, which the
+    //                      .validate lock only allows if this credential's
+    //                      bypass is real (exactly what /adjust needs to
+    //                      work for actual Adjust Wallet clicks).
+    // The test record is deleted again at the end either way.
+    if (action === 'debug-probe') {
+      if (!env.ADMIN_KEY) return json({error:'This Worker is not configured yet, the ADMIN_KEY secret is missing.'},500);
+      const suppliedKey = request.headers.get('X-Admin-Key') || payload.adminKey;
+      if (!suppliedKey || suppliedKey !== env.ADMIN_KEY) return json({error:'Invalid admin key'},401);
+      const testPath = 'rn_mall_customers/__debug_probe_test__';
+      const rootWrite = await dbPut(payload.dbUrl, '_debug_probe_root/test', {ok:true}, accessToken);
+      const freshWrite = await dbPut(payload.dbUrl, testPath, {email:'debug@test.local', id:'__debug_probe_test__', walletBalance: 1}, accessToken);
+      const valueChange = await dbPatch(payload.dbUrl, testPath, {walletBalance: 2}, accessToken);
+      await dbPut(payload.dbUrl, testPath, null, accessToken);
+      await dbPut(payload.dbUrl, '_debug_probe_root/test', null, accessToken);
+      return json({
+        rootWrite: {allowed: rootWrite.ok, status: rootWrite.status, body: rootWrite.text},
+        freshWrite: {allowed: freshWrite.ok, status: freshWrite.status, body: freshWrite.text},
+        valueChange: {allowed: valueChange.ok, status: valueChange.status, body: valueChange.text}
+      });
+    }
+
     // ── /set-admin-claim: mark a Firebase Auth account as a real admin ──
     // Part of the login/auth migration: admin.html's own login has always
     // been a shared password checked against rn_mall_settings.adminPasswords,
