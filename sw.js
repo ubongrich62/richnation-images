@@ -27,7 +27,7 @@ importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js'
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 // Same public config every app page already uses (protected by Firebase's
 // own rules and API key restrictions, not by secrecy, same as the Maps key).
-firebase.initializeApp({apiKey:"AIzaSyDLGnyGB8ZnEc2u6TbVzjIAQi1pgSaZVyQ",authDomain:"richnation-portal.firebaseapp.com",databaseURL:"https://richnation-portal-default-rtdb.firebaseio.com",projectId:"richnation-portal",storageBucket:"richnation-portal.firebasestorage.app",messagingSenderId:"175550692963",appId:"1:175550692963:web:1e3c995b3ed0baaadac256"});
+firebase.initializeApp({apiKey:"AIzaSyDLGnyGB8ZnEc2u6TbVzjIAQi1pgSaZVyQ",authDomain:"auth.richnationmall.com",databaseURL:"https://richnation-portal-default-rtdb.firebaseio.com",projectId:"richnation-portal",storageBucket:"richnation-portal.firebasestorage.app",messagingSenderId:"175550692963",appId:"1:175550692963:web:1e3c995b3ed0baaadac256"});
 try{
   const messaging = firebase.messaging();
   messaging.onBackgroundMessage(function(payload){
