@@ -39,7 +39,7 @@
 // 2. Cloudflare dashboard -> Compute -> Workers -> Create -> Create Worker.
 //    Name it something like richnation-wallet, Deploy.
 // 3. "Edit code", delete the sample, paste this entire file in, Deploy.
-// 4. Settings -> Variables and Secrets -> Add, three of them:
+// 4. Settings -> Variables and Secrets -> Add, four of them:
 //    - Secret FIREBASE_SERVICE_ACCOUNT: paste the entire service account
 //      .json contents (same value richnation-push-worker.js uses).
 //    - Secret ADMIN_KEY: make up any long random password, this proves a
@@ -48,6 +48,10 @@
 //      "sk_"), from your Paystack dashboard -> Settings -> API Keys &
 //      Webhooks. Only needed for verifying card top-ups; never the same as
 //      the "pk_" public key already used in the app.
+//    - Secret TURNSTILE_SECRET_KEY: the Secret Key from Cloudflare
+//      dashboard -> Turnstile -> your widget (the Site Key, a different,
+//      public value, goes in index.html's registration form instead).
+//      Only needed to stop scripted mass signup, see /verify-captcha.
 // 5. Your Worker's URL is shown at the top of its page, paste it into the
 //    app's admin Site Customiser -> Settings -> Wallet Worker URL, and
 //    paste the same ADMIN_KEY into the field next to it (that panel is the
@@ -593,6 +597,30 @@ export default {
       return json({ok:true, newValue:newVal});
     }
 
+    // ── /verify-captcha: blocks scripted mass account creation ──
+    // Called from index.html's doRegister() BEFORE a new Firebase Auth
+    // account is created, closing the "script mass-creates fake accounts
+    // to farm the one-time signup RichPoints bonus" hole. There's no
+    // customer id to check ownership against yet at this point (the
+    // account doesn't exist), so this just verifies the Cloudflare
+    // Turnstile token is real, directly with Cloudflare's own siteverify
+    // API, no separate library needed. Each token is single-use and
+    // expires in minutes, so this can't be captured once and replayed to
+    // mint unlimited accounts.
+    if (action === 'verify-captcha') {
+      if (!env.TURNSTILE_SECRET_KEY) return json({error:'This Worker is not configured yet, the TURNSTILE_SECRET_KEY secret is missing.'},500);
+      const {token} = payload;
+      if (!token) return json({error:'Missing captcha token'},400);
+      const verifyRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        method: 'POST',
+        headers: {'Content-Type':'application/x-www-form-urlencoded'},
+        body: 'secret=' + encodeURIComponent(env.TURNSTILE_SECRET_KEY) + '&response=' + encodeURIComponent(token)
+      });
+      const verifyData = await verifyRes.json();
+      if (!verifyData.success) return json({error:'Security check failed, please try again.'},400);
+      return json({ok:true});
+    }
+
     // ── /set-admin-claim: mark a Firebase Auth account as a real admin ──
     // Part of the login/auth migration: admin.html's own login has always
     // been a shared password checked against rn_mall_settings.adminPasswords,
@@ -623,6 +651,6 @@ export default {
       return json({ok:true});
     }
 
-    return json({error:'Unknown action, expected /spend, /earn, /verify-topup, /adjust, or /set-admin-claim'},404);
+    return json({error:'Unknown action, expected /spend, /earn, /verify-topup, /adjust, /verify-captcha, or /set-admin-claim'},404);
   }
 };

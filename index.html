@@ -1114,6 +1114,11 @@ html.rnm-maint #maintenance-screen{display:flex;}
 <div id="toast" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;pointer-events:none;min-width:200px;max-width:90vw;background:#1a1a1a;color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:700;box-shadow:0 6px 24px rgba(0,0,0,0.25);border-left:4px solid #FF6A00;text-align:center;"></div>
 
 <script src="https://js.paystack.co/v1/inline.js" async></script>
+<!-- Cloudflare Turnstile: shows on the registration form only (see the
+     .cf-turnstile div there), stops scripted mass account creation that
+     was farming the one-time signup RichPoints bonus. Loaded site-wide
+     but harmless where no .cf-turnstile element exists. -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>
 
 
@@ -4223,6 +4228,7 @@ function switchAuth(tab){
     <input class="fi" id="reg-phone" placeholder="Phone number" autocomplete="off"/>
     <div class="pw-wrap"><input class="fi" id="reg-pass" type="password" placeholder="Password (min 6 chars)" style="margin-bottom:0;"/><button class="pw-eye" onclick="this.previousElementSibling.type=this.previousElementSibling.type==='password'?'text':'password'">Show</button></div>
     <input class="fi" id="reg-ref" placeholder="Referral Code (optional)" autocomplete="off" value="${sessionStorage.getItem('rnm_ref')||''}"/>
+    <div class="cf-turnstile" id="reg-turnstile" data-sitekey="0x4AAAAAAAE15ARRYW_oosh1z" style="margin:10px 0;"></div>
     <div class="auth-err" id="reg-err"></div>
     <div style="font-size:11px;color:#000;font-weight:700;margin:8px 0;line-height:1.7;">By signing up you agree to our <span style="color:#000;text-decoration:underline;cursor:pointer;" onclick="showPolicyPage('terms')">Terms</span> and <span style="color:#000;text-decoration:underline;cursor:pointer;" onclick="showPolicyPage('returns')">Refund Policy</span>.</div>
     <button class="auth-btn" onclick="doRegister()" style="margin-top:4px;">Create Free Account</button>
@@ -4345,6 +4351,26 @@ async function doRegister(){
   const fn=document.getElementById('reg-fn')?.value.trim();const ln=document.getElementById('reg-ln')?.value.trim();const email=document.getElementById('reg-email')?.value.trim().toLowerCase();const phone=document.getElementById('reg-phone')?.value.trim();const pass=document.getElementById('reg-pass')?.value.trim();const refInput=(document.getElementById('reg-ref')?.value||'').trim().toUpperCase();const err=document.getElementById('reg-err');
   if(!fn||!ln||!email||!pass){err.textContent='Please fill all fields.';err.style.display='block';return;}
   if(pass.length<6){err.textContent='Password must be at least 6 characters.';err.style.display='block';return;}
+  // Blocks a script from mass-creating accounts to farm the one-time
+  // signup RichPoints bonus (see /verify-captcha in
+  // richnation-wallet-worker.js). Each token is single-use and expires in
+  // minutes, so it can't be captured once and replayed for more accounts.
+  // Both the widget script failing to load (ad-blocker, CDN hiccup) and
+  // the Worker itself being unreachable fail OPEN, not closed, this is
+  // best-effort abuse protection, not something that should turn a
+  // third-party hiccup into every real signup breaking. Only an actual
+  // solved-then-rejected token blocks signup.
+  const turnstileLoaded=typeof turnstile!=='undefined';
+  const captchaToken=turnstileLoaded?turnstile.getResponse('reg-turnstile'):'';
+  if(turnstileLoaded&&!captchaToken){err.textContent='Please complete the security check above.';err.style.display='block';return;}
+  if(captchaToken){
+    const captchaRes=await callWalletWorker('verify-captcha',{token:captchaToken});
+    if(captchaRes&&!captchaRes.ok){
+      err.textContent=captchaRes.error||'Security check failed, please try again.';err.style.display='block';
+      turnstile.reset('reg-turnstile');
+      return;
+    }
+  }
   const all=await fbG('rn_mall_customers')||{};if(Object.values(all).find(c=>c.email===email)){err.textContent='An account with this email already exists.';err.style.display='block';return;}
   const ready=await ensureFirebaseAuthReady();
   let id=null,authUid=null;
