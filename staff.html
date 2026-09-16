@@ -1112,16 +1112,27 @@ function escAttr(s){
 // configured, fetched fresh rather than cached in a global (staff.html
 // doesn't keep one, matching how it already fetches rn_mall_settings ad hoc
 // elsewhere in this file), same shape as every other app's sendPushToTokens().
-async function sendPushToTokens(tokens,title,body,data,url){
+async function sendPushToTokens(tokens,title,body,data,url,tokenBasePath){
   var list=(tokens||[]).filter(Boolean);
   if(!list.length)return;
   try{
     var pushWorkerUrl=await fbG('rn_mall_settings/pushWorkerUrl');
     if(!pushWorkerUrl)return;
-    await fetch(pushWorkerUrl.replace(/\/+$/,''),{
+    const res=await fetch(pushWorkerUrl.replace(/\/+$/,''),{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({tokens:list,title:title,body:body,data:data||{},url:url||''})
     });
+    // Prunes dead tokens the Worker itself already detected (FCM said
+    // NOT_FOUND/UNREGISTERED/INVALID_ARGUMENT) but that nothing ever used to
+    // act on, so a device's old token just sat there forever once its
+    // browser silently rotated to a new one. Left unpruned, a device with
+    // both its old and current token still on file gets the same push
+    // delivered twice; a pile of dead ones can also make delivery flaky.
+    if(tokenBasePath&&res.ok){
+      const out=await res.json().catch(function(){return null;});
+      const results=out&&out.results;
+      if(Array.isArray(results))results.forEach(function(r){if(r&&r.invalidToken&&r.token)fbD(tokenBasePath+'/'+r.token);});
+    }
   }catch(e){console.warn('Push send failed:',e.message);}
 }
 if('serviceWorker' in navigator){
@@ -1520,7 +1531,7 @@ async function assignRiderToOrder(tracking){
   const tl=(order.timeline||[]).concat([{status:'Assigned to Rider',time:new Date().toISOString(),note:'Assigned to '+riderData.name+' ('+riderData.vehicleType+')'}]);
   await fbU('rn_mall_orders/'+tracking,{riderId:riderId,riderName:riderData.name,riderPhone:riderData.phone||'',riderVehicleType:riderData.vehicleType||'',deliveryStage:'assigned',timeline:tl});
   const riderTokens=riderData.fcmTokens?Object.keys(riderData.fcmTokens):[];
-  sendPushToTokens(riderTokens,'New Delivery Assigned','Order '+tracking+' has been assigned to you, tap to view.',{tracking:tracking},'rider.html');
+  sendPushToTokens(riderTokens,'New Delivery Assigned','Order '+tracking+' has been assigned to you, tap to view.',{tracking:tracking},'rider.html','rn_mall_riders/'+riderId+'/fcmTokens');
   await logStaffActivity('Assigned rider to order',tracking+' → '+riderData.name);
   toast('Assigned to '+riderData.name+'!');
   snav('orders');

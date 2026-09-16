@@ -1291,14 +1291,25 @@ function handleForegroundPush(payload){
   var n=(payload&&payload.notification)||{};
   toast((n.title?n.title+': ':'')+(n.body||'New notification'));
 }
-async function sendPushToTokens(tokens,title,body,data,url){
+async function sendPushToTokens(tokens,title,body,data,url,tokenBasePath){
   var list=(tokens||[]).filter(Boolean);
   if(!list.length||!settings.pushWorkerUrl)return;
   try{
-    await fetch(settings.pushWorkerUrl.replace(/\/+$/,''),{
+    const res=await fetch(settings.pushWorkerUrl.replace(/\/+$/,''),{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({tokens:list,title:title,body:body,data:data||{},url:url||''})
     });
+    // Prunes dead tokens the Worker itself already detected (FCM said
+    // NOT_FOUND/UNREGISTERED/INVALID_ARGUMENT) but that nothing ever used to
+    // act on, so a device's old token just sat there forever once its
+    // browser silently rotated to a new one. Left unpruned, a device with
+    // both its old and current token still on file gets the same push
+    // delivered twice; a pile of dead ones can also make delivery flaky.
+    if(tokenBasePath&&res.ok){
+      const out=await res.json().catch(function(){return null;});
+      const results=out&&out.results;
+      if(Array.isArray(results))results.forEach(function(r){if(r&&r.invalidToken&&r.token)fbD(tokenBasePath+'/'+r.token);});
+    }
   }catch(e){console.warn('Push send failed:',e.message);}
 }
 // Every wallet/points change now goes through richnation-wallet-worker.js
@@ -4625,7 +4636,7 @@ async function payPodBalance(tracking){
         await fbU('rn_mall_orders/'+tracking,{podBalanceCollected:true,podBalancePaidOnline:true,podBalancePaidRef:response.reference,podBalancePaidAt:Date.now(),timeline:tl});
         if(order.riderId){
           const riderTokens=(await fbG('rn_mall_riders/'+order.riderId+'/fcmTokens'))||{};
-          sendPushToTokens(Object.keys(riderTokens),'Balance Paid','Customer for order '+tracking+' has paid the remaining balance online, no need to collect cash.',{tracking:tracking},'rider.html');
+          sendPushToTokens(Object.keys(riderTokens),'Balance Paid','Customer for order '+tracking+' has paid the remaining balance online, no need to collect cash.',{tracking:tracking},'rider.html','rn_mall_riders/'+order.riderId+'/fcmTokens');
         }
         hidePodPaymentLock();
         toast('Payment received, thank you!');

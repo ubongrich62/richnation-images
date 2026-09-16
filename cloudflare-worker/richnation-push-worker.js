@@ -216,6 +216,20 @@ export default {
     const results = await Promise.all(tokens.map(function(t){
       return sendOne(serviceAccount, accessToken, t, payload.title, payload.body, payload.data, payload.url);
     }));
+
+    // Same dead-token cleanup the client-side sendPushToTokens() callers now
+    // do for their own tokens (see the 6-app fix this shipped alongside),
+    // done here instead for the admin-broadcast case specifically, since
+    // this Worker already has the DB access needed to prune
+    // rn_mall_admin_fcm_tokens itself, and a customer's browser never sees
+    // these tokens at all - that's the whole point of notifyAdmins.
+    if (payload.notifyAdmins) {
+      const dead = results.filter(function(r){ return r.invalidToken; });
+      await Promise.all(dead.map(function(r){
+        return fetch(payload.dbUrl.replace(/\/+$/,'') + '/rn_mall_admin_fcm_tokens/' + r.token + '.json?auth=' + accessToken, {method:'DELETE'});
+      }));
+    }
+
     return json({results: results});
   }
 };

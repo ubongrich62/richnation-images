@@ -625,14 +625,25 @@ function handleForegroundPush(payload){
 // Shared by every trigger point that needs to actually send a push (new order, chat
 // reply, etc). Silently does nothing if no Worker is configured yet, callers don't
 // need to check settings.pushWorkerUrl themselves first.
-async function sendPushToTokens(tokens,title,body,data,url){
+async function sendPushToTokens(tokens,title,body,data,url,tokenBasePath){
   var list=(tokens||[]).filter(Boolean);
   if(!list.length||!settings.pushWorkerUrl)return;
   try{
-    await fetch(settings.pushWorkerUrl.replace(/\/+$/,''),{
+    const res=await fetch(settings.pushWorkerUrl.replace(/\/+$/,''),{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({tokens:list,title:title,body:body,data:data||{},url:url||''})
     });
+    // Prunes dead tokens the Worker itself already detected (FCM said
+    // NOT_FOUND/UNREGISTERED/INVALID_ARGUMENT) but that nothing ever used to
+    // act on, so a device's old token just sat there forever once its
+    // browser silently rotated to a new one. Left unpruned, a device with
+    // both its old and current token still on file gets the same push
+    // delivered twice; a pile of dead ones can also make delivery flaky.
+    if(tokenBasePath&&res.ok){
+      const out=await res.json().catch(function(){return null;});
+      const results=out&&out.results;
+      if(Array.isArray(results))results.forEach(function(r){if(r&&r.invalidToken&&r.token)fbD(tokenBasePath+'/'+r.token);});
+    }
   }catch(e){console.warn('Push send failed:',e.message);}
 }
 // Fetches a user's current fcmTokens and pushes to them in one call, used by every
@@ -641,7 +652,7 @@ async function sendPushToTokens(tokens,title,body,data,url){
 async function notifyUserPush(collection,id,title,body,data,page){
   try{
     const tokens=await fbG(collection+'/'+id+'/fcmTokens');
-    sendPushToTokens(tokens?Object.keys(tokens):[],title,body,data||{},page);
+    sendPushToTokens(tokens?Object.keys(tokens):[],title,body,data||{},page,collection+'/'+id+'/fcmTokens');
   }catch(e){console.warn('notifyUserPush failed:',e.message);}
 }
 const WA_NUM='2349164678560';
@@ -1985,7 +1996,7 @@ async function assignStaffTask(id,name){
   const result=await fbP('rn_mall_staff_tasks/'+id,{description:description.trim(),dueDate:dueDate.trim(),assignedBy:sessionStorage.getItem('rnm_admin_ceo_name')||'Admin',status:'pending',date:ds(),ts:Date.now()});
   if(!result){toast('Could not save the task, check your connection and try again','err');return;}
   await fbP('rn_mall_staff_notifications/'+id,{type:'task_assigned',description:description.trim(),dueDate:dueDate.trim(),date:ds(),read:false,ts:Date.now()});
-  sendPushToTokens(s.fcmTokens?Object.keys(s.fcmTokens):[],'New Task Assigned',description.trim(),{},'staff.html');
+  sendPushToTokens(s.fcmTokens?Object.keys(s.fcmTokens):[],'New Task Assigned',description.trim(),{},'staff.html','rn_mall_staff/'+id+'/fcmTokens');
   toast('Task assigned to '+name+'!');
   nav('staff',false);
 }
@@ -2285,12 +2296,12 @@ async function approveSwitchRequest(id,name,approve){
     await fbU('rn_mall_investors/'+id,{investmentOption:req.option,investmentAmount:req.newAmount,tier:tierFor(req.newAmount),planStartDate:Date.now(),pendingSwitchRequest:null});
     await fbP('rn_mall_investor_switch_log/'+id,{from:req.currentOption,to:req.option,fromAmount:req.currentAmount,toAmount:req.newAmount,date:ds(),ts:Date.now(),approvedByAdmin:true});
     await fbP('rn_mall_investor_notifications/'+id,{type:'switch_approved',option:req.option,date:ds(),read:false,ts:Date.now()});
-    sendPushToTokens(v.fcmTokens?Object.keys(v.fcmTokens):[],'Switch Approved','You are now on '+OPTION_LABELS_ADMIN[req.option]+'.',{},'investor.html');
+    sendPushToTokens(v.fcmTokens?Object.keys(v.fcmTokens):[],'Switch Approved','You are now on '+OPTION_LABELS_ADMIN[req.option]+'.',{},'investor.html','rn_mall_investors/'+id+'/fcmTokens');
     toast('Switch approved, '+name+' is now on '+OPTION_LABELS_ADMIN[req.option]);
   }else{
     await fbU('rn_mall_investors/'+id,{pendingSwitchRequest:null});
     await fbP('rn_mall_investor_notifications/'+id,{type:'switch_denied',date:ds(),read:false,ts:Date.now()});
-    sendPushToTokens(v.fcmTokens?Object.keys(v.fcmTokens):[],'Switch Request Denied','Your plan switch request was not approved.',{},'investor.html');
+    sendPushToTokens(v.fcmTokens?Object.keys(v.fcmTokens):[],'Switch Request Denied','Your plan switch request was not approved.',{},'investor.html','rn_mall_investors/'+id+'/fcmTokens');
     toast('Switch request denied');
   }
   nav('investors',false);
@@ -2584,7 +2595,7 @@ async function sendInvestorChatMsg(id){
   await fbP('rn_mall_investor_chat_'+id,{text,isAdmin:true,ts:Date.now(),date:ds()});
   await fbPNotify('rn_mall_investor_notifications/'+id,{type:'investor_chat_reply',preview:text.slice(0,80),date:ds(),read:false,ts:Date.now()});
   const invFcmTokens=await fbG('rn_mall_investors/'+id+'/fcmTokens');
-  sendPushToTokens(invFcmTokens?Object.keys(invFcmTokens):[],'RichNation Mall',text.slice(0,120),{},'investor.html');
+  sendPushToTokens(invFcmTokens?Object.keys(invFcmTokens):[],'RichNation Mall',text.slice(0,120),{},'investor.html','rn_mall_investors/'+id+'/fcmTokens');
   inp.value='';await loadInvestorChatAdmin(id);
 }
 async function renderInvestorUpdatesAdmin(c){
@@ -2940,7 +2951,7 @@ async function assignRiderToOrder(tracking){
   const tl=(order.timeline||[]).concat([{status:'Assigned to Rider',time:new Date().toISOString(),note:'Assigned to '+riderData.name+' ('+riderData.vehicleType+')'}]);
   await fbU('rn_mall_orders/'+tracking,{riderId:riderId,riderName:riderData.name,riderPhone:riderData.phone||'',riderVehicleType:riderData.vehicleType||'',deliveryStage:'assigned',timeline:tl});
   const riderTokens=riderData.fcmTokens?Object.keys(riderData.fcmTokens):[];
-  sendPushToTokens(riderTokens,'New Delivery Assigned','Order '+tracking+' has been assigned to you, tap to view.',{tracking:tracking},'rider.html');
+  sendPushToTokens(riderTokens,'New Delivery Assigned','Order '+tracking+' has been assigned to you, tap to view.',{tracking:tracking},'rider.html','rn_mall_riders/'+riderId+'/fcmTokens');
   toast('Assigned to '+riderData.name+'!');
   nav('orders',false);
 }
@@ -3152,7 +3163,7 @@ async function sendVendorAdminReply(vendorId){
   await fbP(key,{senderId:'admin',senderName:senderName,senderRole:sessionStorage.getItem('rnm_admin_is_ceo')==='1'?'ceo':null,text:text,isAdmin:true,ts:Date.now(),date:ds()});
   await fbP('rn_mall_vendor_notifications/'+vendorId,{type:'admin_reply',from:senderName,preview:text.slice(0,60),date:ds(),read:false,ts:Date.now()});
   const vendorFcmTokens=await fbG('rn_mall_vendors/'+vendorId+'/fcmTokens');
-  sendPushToTokens(vendorFcmTokens?Object.keys(vendorFcmTokens):[],senderName,text.slice(0,120),{},'vendor.html');
+  sendPushToTokens(vendorFcmTokens?Object.keys(vendorFcmTokens):[],senderName,text.slice(0,120),{},'vendor.html','rn_mall_vendors/'+vendorId+'/fcmTokens');
   inp.value='';await loadVendorAdminMsgs(vendorId);
 }
 async function openVendorForm(id){
@@ -3580,7 +3591,7 @@ async function approveVendorProduct(id){
   if(p&&p.vendorId){
     await fbP('rn_mall_vendor_notifications/'+p.vendorId,{type:'product_approved',productName:p.name,date:ds(),read:false,ts:Date.now()});
     const vFcmTokens=await fbG('rn_mall_vendors/'+p.vendorId+'/fcmTokens');
-    sendPushToTokens(vFcmTokens?Object.keys(vFcmTokens):[],'Product Approved',p.name+' is now live on RichNation Mall!',{},'vendor.html');
+    sendPushToTokens(vFcmTokens?Object.keys(vFcmTokens):[],'Product Approved',p.name+' is now live on RichNation Mall!',{},'vendor.html','rn_mall_vendors/'+p.vendorId+'/fcmTokens');
   }
   toast('Product approved, now live on RichNation Mall!');
   nav('products',false);
@@ -3594,7 +3605,7 @@ async function rejectVendorProduct(id,name){
   if(p&&p.vendorId){
     await fbP('rn_mall_vendor_notifications/'+p.vendorId,{type:'product_rejected',productName:name,reason:reason.trim(),date:ds(),read:false,ts:Date.now()});
     const vFcmTokens2=await fbG('rn_mall_vendors/'+p.vendorId+'/fcmTokens');
-    sendPushToTokens(vFcmTokens2?Object.keys(vFcmTokens2):[],'Product Rejected',name+': '+reason.trim(),{},'vendor.html');
+    sendPushToTokens(vFcmTokens2?Object.keys(vFcmTokens2):[],'Product Rejected',name+': '+reason.trim(),{},'vendor.html','rn_mall_vendors/'+p.vendorId+'/fcmTokens');
   }
   toast('Product rejected, vendor notified');
   nav('products',false);
@@ -4103,7 +4114,7 @@ async function saveOrderStatus(tracking){
       :'Your order '+tracking+' is now: '+dispStatus+(note?'. '+note:'');
     await fbPNotify('rn_mall_customer_notifications/'+o.customer.id,{type:'status_update',orderId:tracking,message:msg,date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
     const custFcmTokens=await fbG('rn_mall_customers/'+o.customer.id+'/fcmTokens');
-    sendPushToTokens(custFcmTokens?Object.keys(custFcmTokens):[],'RichNation Mall',msg,{tracking:tracking},'index.html');
+    sendPushToTokens(custFcmTokens?Object.keys(custFcmTokens):[],'RichNation Mall',msg,{tracking:tracking},'index.html','rn_mall_customers/'+o.customer.id+'/fcmTokens');
   }
   toast(status==='cancelled'?'Order cancelled, customer notified and refunded!':'Status updated to: '+dispStatus+', customer notified!');
   loadOrderChat(tracking);
@@ -4158,7 +4169,7 @@ async function notifyCustomerOfChatReply(chatKey,text,orderId){
     if(!custId)return;
     await fbPNotify('rn_mall_customer_notifications/'+custId,{type:'chat_reply',orderId:orderId||'',chatKey:chatKey,message:'RichNation Mall replied: "'+text.slice(0,80)+'"',date:new Date().toLocaleDateString(),read:false,ts:Date.now()});
     const chatFcmTokens=await fbG('rn_mall_customers/'+custId+'/fcmTokens');
-    sendPushToTokens(chatFcmTokens?Object.keys(chatFcmTokens):[],'RichNation Mall','New message: "'+text.slice(0,120)+'"',{orderId:orderId||''},'index.html');
+    sendPushToTokens(chatFcmTokens?Object.keys(chatFcmTokens):[],'RichNation Mall','New message: "'+text.slice(0,120)+'"',{orderId:orderId||''},'index.html','rn_mall_customers/'+custId+'/fcmTokens');
   }catch(e){console.warn('Chat notify failed:',e);}
 }
 async function sendOrderChat(tracking){
