@@ -1114,10 +1114,21 @@ async function ensureAdminClaim(){
   const key=localStorage.getItem('rnm_admin_wallet_key')||'';
   if(!url||!key)return; // Not set up yet, login still works via the legacy fallback, just without the auth.token-based rule benefit until it is.
   try{
-    await fetch(url+'/set-admin-claim',{
+    const res=await fetch(url+'/set-admin-claim',{
       method:'POST',headers:{'Content-Type':'application/json','X-Admin-Key':key},
       body:JSON.stringify({uid:user.uid})
     });
+    // fetch() only rejects on a network failure, a 401 (key mismatch) or 500
+    // (Worker misconfigured) comes back as a normal, non-throwing response,
+    // so this used to be silently treated as success either way, an admin
+    // could go months never actually holding the claim any rule change
+    // depends on, with nothing anywhere saying so.
+    if(!res.ok){
+      const errBody=await res.json().catch(()=>({}));
+      console.warn('Could not set admin claim:',res.status,errBody.error||'');
+      toast('Admin security key mismatch, some admin actions may be blocked. Check Site Customiser → Wallet & Payout Security.','warn');
+      return;
+    }
     // Custom claims only take effect on a FRESH ID token, Firebase caches the
     // old one otherwise, force a refresh so this session's very first
     // database write already carries the new claim.
