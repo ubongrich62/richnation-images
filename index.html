@@ -188,10 +188,23 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .hero-promo-row{max-width:var(--container);margin:0 auto;display:flex;gap:12px;align-items:stretch;padding:20px 20px 0;}
 .hero{flex:1 1 66%;min-width:0;border-radius:var(--r-md);background:linear-gradient(160deg,var(--ink),var(--ink2) 150%);padding:64px 24px 48px;position:relative;overflow:hidden;}
 .hero::after{content:'';position:absolute;right:-8%;top:-30%;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(255,106,0,.16),transparent 68%);pointer-events:none;}
-.promo-ads-grid{flex:1 1 34%;min-width:0;display:none;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:10px;}
+/* display:grid not none: .hero-promo-row above has align-items:stretch, so on
+   desktop this reserves height matching the hero automatically, with zero
+   guessing, instead of sitting at 0 height until renderPromoAds() populates
+   it later - that pop from 0 to real height next to the page's hero was a
+   large, guaranteed-above-the-fold contributor to a measured 0.491 CLS
+   score. renderPromoAds() still sets display:none itself when a site truly
+   has no active promo ads configured, collapsing this back to nothing. */
+.promo-ads-grid{flex:1 1 34%;min-width:0;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:10px;}
 @media(max-width:860px){
   .hero-promo-row{flex-direction:column;padding:16px 16px 0;}
-  .promo-ads-grid{grid-template-rows:none;}
+  /* Stacked layout means align-items:stretch no longer helps (that's a
+     cross-axis effect, and the cross axis is width once row-stacked), so a
+     manual reservation for roughly the first row of tiles is the best a
+     pure-CSS guess can do without knowing how many tiles are configured -
+     partial mitigation, not a perfect one, given the admin can configure
+     anywhere from 1 to 7 tiles. */
+  .promo-ads-grid{grid-template-rows:none;min-height:210px;}
   .promo-ad-tile{aspect-ratio:16/9;}
 }
 @media(max-width:520px){
@@ -810,7 +823,7 @@ html.rnm-maint #maintenance-screen{display:flex;}
      </div>
     </div>
    </div>
-   <div class="promo-ads-grid" id="promo-ads-grid" style="display:none;"></div>
+   <div class="promo-ads-grid" id="promo-ads-grid"></div>
   </div>
   <div id="content-slot-after-hero"></div>
   <script>
