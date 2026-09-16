@@ -65,6 +65,18 @@
 // written by this trusted Worker instead of directly by whichever browser
 // asked for the change.
 
+// The only Firebase database this Worker will ever read or write. Fixed,
+// not request-controlled: every dbGet/dbPatch/dbPut/dbPost call below
+// attaches either this Worker's own service-account access token or its
+// "worker: true" ID token as the request's ?auth= credential — both are
+// full privileged Firebase credentials. Until this fix, every one of those
+// calls built its URL from payload.dbUrl (required on every single
+// request), so any caller — including an ordinary customer hitting /spend
+// with a real session — could redirect that live, privileged token to a
+// server of their own choosing just by sending a different dbUrl. Never
+// take that host from request input again.
+const FIREBASE_DB_URL = 'https://richnation-portal-default-rtdb.firebaseio.com';
+
 // Only these origins are allowed to read this Worker's responses from a
 // BROWSER — this blocks a malicious webpage running in a victim's browser
 // from quietly calling this Worker in the background. It does NOT stop a
@@ -333,7 +345,6 @@ export default {
 
     let payload;
     try { payload = await request.json(); } catch (e) { return json({error:'Invalid JSON body'},400); }
-    if (!payload.dbUrl) return json({error:'dbUrl is required'},400);
 
     let serviceAccount;
     try { serviceAccount = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT); }
@@ -367,16 +378,16 @@ export default {
       if (!customerId || !['walletBalance','points'].includes(field) || !(amount > 0)) {
         return json({error:'customerId, a valid field, and a positive amount are required'},400);
       }
-      const owns1 = await verifyOwnCustomer(payload.dbUrl, customerId, idToken, accessToken);
+      const owns1 = await verifyOwnCustomer(FIREBASE_DB_URL, customerId, idToken, accessToken);
       if (!owns1.ok) return json({error:owns1.error},owns1.status);
-      const current = (await dbGet(payload.dbUrl, 'rn_mall_customers/'+customerId+'/'+field, accessToken)) || 0;
+      const current = (await dbGet(FIREBASE_DB_URL, 'rn_mall_customers/'+customerId+'/'+field, accessToken)) || 0;
       if (current < amount) return json({error:'Insufficient balance', currentBalance: current}, 402);
       const newBalance = current - amount;
       const update = {}; update[field] = newBalance;
-      const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, update, await workerAuth());
+      const res1 = await dbPatch(FIREBASE_DB_URL, 'rn_mall_customers/'+customerId, update, await workerAuth());
       if (!res1.ok) return json({error:'Could not update balance ('+dbErr(res1)+')'},502);
       if (field === 'walletBalance') {
-        await dbPost(payload.dbUrl, 'rn_mall_wallet_transactions/'+customerId, {type:'debit',amount:amount,description:description||('Order payment'+(orderId?' ('+orderId+')':'')),date:new Date().toISOString().slice(0,10),ts:Date.now()}, accessToken);
+        await dbPost(FIREBASE_DB_URL, 'rn_mall_wallet_transactions/'+customerId, {type:'debit',amount:amount,description:description||('Order payment'+(orderId?' ('+orderId+')':'')),date:new Date().toISOString().slice(0,10),ts:Date.now()}, accessToken);
       }
       return json({ok:true, newBalance:newBalance});
     }
@@ -390,8 +401,8 @@ export default {
     if (action === 'earn') {
       const {customerId, reason, orderId} = payload;
       if (!customerId || !reason) return json({error:'customerId and reason are required'},400);
-      const settings = await dbGet(payload.dbUrl, 'rn_mall_settings', accessToken) || {};
-      const cust = await dbGet(payload.dbUrl, 'rn_mall_customers/'+customerId, accessToken);
+      const settings = await dbGet(FIREBASE_DB_URL, 'rn_mall_settings', accessToken) || {};
+      const cust = await dbGet(FIREBASE_DB_URL, 'rn_mall_customers/'+customerId, accessToken);
       if (!cust) return json({error:'Customer not found'},404);
 
       const oneTime = ONE_TIME_REASONS[reason];
@@ -401,41 +412,41 @@ export default {
         if (amount <= 0) return json({ok:true, amount:0});
         const newVal = (cust.points||0) + amount;
         const update = {points:newVal}; update[oneTime.flagField] = true;
-        const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, update, await workerAuth());
+        const res1 = await dbPatch(FIREBASE_DB_URL, 'rn_mall_customers/'+customerId, update, await workerAuth());
         if (!res1.ok) return json({error:'Could not credit bonus ('+dbErr(res1)+')'},502);
         return json({ok:true, amount:amount, newBalance:newVal});
       }
 
       if (reason === 'purchase') {
         if (!orderId) return json({error:'orderId is required for a purchase award'},400);
-        const order = await dbGet(payload.dbUrl, 'rn_mall_orders/'+orderId, accessToken);
+        const order = await dbGet(FIREBASE_DB_URL, 'rn_mall_orders/'+orderId, accessToken);
         if (!order || !order.customer || order.customer.id !== customerId) return json({error:'Order not found for this customer'},404);
         if (order.pointsAwarded) return json({ok:true, alreadyAwarded:true, amount:0}); // never pays out twice for the same order
         const perNaira = pointsRate(settings,'perNaira') || 100;
         const amount = Math.floor((order.total||0)/perNaira);
         if (amount <= 0) return json({ok:true, amount:0});
         const newVal = (cust.points||0) + amount;
-        const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {points:newVal}, await workerAuth());
+        const res1 = await dbPatch(FIREBASE_DB_URL, 'rn_mall_customers/'+customerId, {points:newVal}, await workerAuth());
         if (!res1.ok) return json({error:'Could not credit purchase points ('+dbErr(res1)+')'},502);
-        const res2 = await dbPatch(payload.dbUrl, 'rn_mall_orders/'+orderId, {pointsAwarded:true}, accessToken);
+        const res2 = await dbPatch(FIREBASE_DB_URL, 'rn_mall_orders/'+orderId, {pointsAwarded:true}, accessToken);
         if (!res2.ok) return json({error:'Credited points but could not mark order ('+dbErr(res2)+')'},502);
         return json({ok:true, amount:amount, newBalance:newVal});
       }
 
       if (reason === 'referral') {
         if (!orderId) return json({error:'orderId is required for a referral award'},400);
-        const order = await dbGet(payload.dbUrl, 'rn_mall_orders/'+orderId, accessToken);
-        const referred = order && order.customer ? await dbGet(payload.dbUrl, 'rn_mall_customers/'+order.customer.id, accessToken) : null;
+        const order = await dbGet(FIREBASE_DB_URL, 'rn_mall_orders/'+orderId, accessToken);
+        const referred = order && order.customer ? await dbGet(FIREBASE_DB_URL, 'rn_mall_customers/'+order.customer.id, accessToken) : null;
         if (!referred || referred.referredBy !== customerId) return json({error:'This order was not referred by this customer'},400);
         if (order.referralAwarded) return json({ok:true, alreadyAwarded:true, amount:0});
-        const priorOrders = await dbGet(payload.dbUrl, 'rn_mall_customer_orders/'+order.customer.id, accessToken) || {};
+        const priorOrders = await dbGet(FIREBASE_DB_URL, 'rn_mall_customer_orders/'+order.customer.id, accessToken) || {};
         if (Object.keys(priorOrders).length > 1) return json({ok:true, alreadyAwarded:true, amount:0, reason:'not their first order'});
         const amount = pointsRate(settings,'referral');
         if (amount <= 0) return json({ok:true, amount:0});
         const newVal = (cust.points||0) + amount;
-        const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {points:newVal}, await workerAuth());
+        const res1 = await dbPatch(FIREBASE_DB_URL, 'rn_mall_customers/'+customerId, {points:newVal}, await workerAuth());
         if (!res1.ok) return json({error:'Could not credit referral points ('+dbErr(res1)+')'},502);
-        const res2 = await dbPatch(payload.dbUrl, 'rn_mall_orders/'+orderId, {referralAwarded:true}, accessToken);
+        const res2 = await dbPatch(FIREBASE_DB_URL, 'rn_mall_orders/'+orderId, {referralAwarded:true}, accessToken);
         if (!res2.ok) return json({error:'Credited points but could not mark order ('+dbErr(res2)+')'},502);
         return json({ok:true, amount:amount, newBalance:newVal});
       }
@@ -446,15 +457,15 @@ export default {
         // reviewer), not customerId.
         const {productId, reviewKey} = payload;
         if (!productId || !reviewKey) return json({error:'productId and reviewKey are required for a review award'},400);
-        const review = await dbGet(payload.dbUrl, 'rn_mall_reviews/'+productId+'/'+reviewKey, accessToken);
+        const review = await dbGet(FIREBASE_DB_URL, 'rn_mall_reviews/'+productId+'/'+reviewKey, accessToken);
         if (!review || review.userId !== customerId) return json({error:'Review not found for this customer'},404);
         if (review.pointsAwarded) return json({ok:true, alreadyAwarded:true, amount:0});
         const amount = pointsRate(settings,'review');
         if (amount <= 0) return json({ok:true, amount:0});
         const newVal = (cust.points||0) + amount;
-        const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {points:newVal}, await workerAuth());
+        const res1 = await dbPatch(FIREBASE_DB_URL, 'rn_mall_customers/'+customerId, {points:newVal}, await workerAuth());
         if (!res1.ok) return json({error:'Could not credit review points ('+dbErr(res1)+')'},502);
-        const res2 = await dbPatch(payload.dbUrl, 'rn_mall_reviews/'+productId+'/'+reviewKey, {pointsAwarded:true}, accessToken);
+        const res2 = await dbPatch(FIREBASE_DB_URL, 'rn_mall_reviews/'+productId+'/'+reviewKey, {pointsAwarded:true}, accessToken);
         if (!res2.ok) return json({error:'Credited points but could not mark review ('+dbErr(res2)+')'},502);
         return json({ok:true, amount:amount, newBalance:newVal});
       }
@@ -463,7 +474,7 @@ export default {
         const amount = pointsRate(settings, reason);
         if (amount <= 0) return json({ok:true, amount:0});
         const newVal = (cust.points||0) + amount;
-        const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {points:newVal}, await workerAuth());
+        const res1 = await dbPatch(FIREBASE_DB_URL, 'rn_mall_customers/'+customerId, {points:newVal}, await workerAuth());
         if (!res1.ok) return json({error:'Could not credit points ('+dbErr(res1)+')'},502);
         return json({ok:true, amount:amount, newBalance:newVal});
       }
@@ -483,7 +494,7 @@ export default {
       if (!customerId || !reference) return json({error:'customerId and reference are required'},400);
       // Idempotency: a reference already recorded here was already credited,
       // refuse to pay out twice for a replayed/reused reference.
-      const already = await dbGet(payload.dbUrl, 'rn_mall_processed_topups/'+reference, await workerAuth());
+      const already = await dbGet(FIREBASE_DB_URL, 'rn_mall_processed_topups/'+reference, await workerAuth());
       if (already) return json({ok:true, alreadyCredited:true});
       let verifyRes, verifyData;
       try {
@@ -495,19 +506,19 @@ export default {
       const tx = verifyData && verifyData.data;
       if (!verifyRes.ok || !tx || tx.status !== 'success') return json({error:'Payment not verified as successful'},402);
       if (tx.customer && tx.customer.email) {
-        const cust = await dbGet(payload.dbUrl, 'rn_mall_customers/'+customerId, accessToken);
+        const cust = await dbGet(FIREBASE_DB_URL, 'rn_mall_customers/'+customerId, accessToken);
         if (!cust || cust.email !== tx.customer.email) return json({error:'Payment email does not match this customer'},400);
       }
       const amount = Math.round((tx.amount||0)/100); // Paystack amounts are in kobo
       if (amount <= 0) return json({error:'Invalid amount on this transaction'},400);
-      const cust2 = await dbGet(payload.dbUrl, 'rn_mall_customers/'+customerId, accessToken);
+      const cust2 = await dbGet(FIREBASE_DB_URL, 'rn_mall_customers/'+customerId, accessToken);
       if (!cust2) return json({error:'Customer not found'},404);
       const newBalance = (cust2.walletBalance||0) + amount;
       const workerId = await workerAuth();
-      const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {walletBalance:newBalance}, workerId);
+      const res1 = await dbPatch(FIREBASE_DB_URL, 'rn_mall_customers/'+customerId, {walletBalance:newBalance}, workerId);
       if (!res1.ok) return json({error:'Could not credit wallet ('+dbErr(res1)+')'},502);
-      await dbPut(payload.dbUrl, 'rn_mall_processed_topups/'+reference, {customerId:customerId, amount:amount, ts:Date.now()}, workerId);
-      await dbPost(payload.dbUrl, 'rn_mall_wallet_transactions/'+customerId, {type:'credit',amount:amount,description:'Card top-up (Ref: '+reference+')',date:new Date().toISOString().slice(0,10),ts:Date.now()}, accessToken);
+      await dbPut(FIREBASE_DB_URL, 'rn_mall_processed_topups/'+reference, {customerId:customerId, amount:amount, ts:Date.now()}, workerId);
+      await dbPost(FIREBASE_DB_URL, 'rn_mall_wallet_transactions/'+customerId, {type:'credit',amount:amount,description:'Card top-up (Ref: '+reference+')',date:new Date().toISOString().slice(0,10),ts:Date.now()}, accessToken);
       return json({ok:true, amount:amount, newBalance:newBalance});
     }
 
@@ -521,22 +532,22 @@ export default {
     if (action === 'refund-order') {
       const {customerId, orderId, idToken} = payload;
       if (!customerId || !orderId) return json({error:'customerId and orderId are required'},400);
-      const owns2 = await verifyOwnCustomer(payload.dbUrl, customerId, idToken, accessToken);
+      const owns2 = await verifyOwnCustomer(FIREBASE_DB_URL, customerId, idToken, accessToken);
       if (!owns2.ok) return json({error:owns2.error},owns2.status);
-      const order = await dbGet(payload.dbUrl, 'rn_mall_orders/'+orderId, accessToken);
+      const order = await dbGet(FIREBASE_DB_URL, 'rn_mall_orders/'+orderId, accessToken);
       if (!order || !order.customer || order.customer.id !== customerId) return json({error:'Order not found for this customer'},404);
       if (order.payMethod === 'pod') return json({error:'Pay on Delivery orders are not refunded to wallet'},400);
       if (order.refunded) return json({ok:true, alreadyRefunded:true, amount:0});
       const amount = order.total || 0;
       if (amount <= 0) return json({ok:true, amount:0});
-      const cust = await dbGet(payload.dbUrl, 'rn_mall_customers/'+customerId, accessToken);
+      const cust = await dbGet(FIREBASE_DB_URL, 'rn_mall_customers/'+customerId, accessToken);
       if (!cust) return json({error:'Customer not found'},404);
       const newBalance = (cust.walletBalance||0) + amount;
-      const res1 = await dbPatch(payload.dbUrl, 'rn_mall_customers/'+customerId, {walletBalance:newBalance}, await workerAuth());
+      const res1 = await dbPatch(FIREBASE_DB_URL, 'rn_mall_customers/'+customerId, {walletBalance:newBalance}, await workerAuth());
       if (!res1.ok) return json({error:'Could not process refund ('+dbErr(res1)+')'},502);
-      const res2 = await dbPatch(payload.dbUrl, 'rn_mall_orders/'+orderId, {refunded:true}, accessToken);
+      const res2 = await dbPatch(FIREBASE_DB_URL, 'rn_mall_orders/'+orderId, {refunded:true}, accessToken);
       if (!res2.ok) return json({error:'Refunded but could not mark order ('+dbErr(res2)+')'},502);
-      await dbPost(payload.dbUrl, 'rn_mall_wallet_transactions/'+customerId, {type:'refund',amount:amount,description:'Refund for cancelled order '+orderId,date:new Date().toISOString().slice(0,10),ts:Date.now()}, accessToken);
+      await dbPost(FIREBASE_DB_URL, 'rn_mall_wallet_transactions/'+customerId, {type:'refund',amount:amount,description:'Refund for cancelled order '+orderId,date:new Date().toISOString().slice(0,10),ts:Date.now()}, accessToken);
       return json({ok:true, amount:amount, newBalance:newBalance});
     }
 
@@ -552,7 +563,7 @@ export default {
       if (!env.PAYSTACK_SECRET_KEY) return json({error:'This Worker is not configured yet, the PAYSTACK_SECRET_KEY secret is missing.'},500);
       const {reference, expectedAmount} = payload;
       if (!reference || !(expectedAmount > 0)) return json({error:'reference and expectedAmount are required'},400);
-      const already = await dbGet(payload.dbUrl, 'rn_mall_processed_payments/'+reference, await workerAuth());
+      const already = await dbGet(FIREBASE_DB_URL, 'rn_mall_processed_payments/'+reference, await workerAuth());
       if (already) return json({ok:true, alreadyVerified:true});
       let verifyRes, verifyData;
       try {
@@ -565,7 +576,7 @@ export default {
       if (!verifyRes.ok || !tx || tx.status !== 'success') return json({error:'Payment not verified as successful'},402);
       const paidAmount = Math.round((tx.amount||0)/100); // Paystack amounts are in kobo
       if (paidAmount < Math.round(expectedAmount)) return json({error:'Amount paid does not match the order total', paidAmount:paidAmount},400);
-      await dbPut(payload.dbUrl, 'rn_mall_processed_payments/'+reference, {amount:paidAmount, ts:Date.now()}, await workerAuth());
+      await dbPut(FIREBASE_DB_URL, 'rn_mall_processed_payments/'+reference, {amount:paidAmount, ts:Date.now()}, await workerAuth());
       return json({ok:true, amount:paidAmount});
     }
 
@@ -588,11 +599,11 @@ export default {
       if (!id) return json({error:'id is required'},400);
       let newVal = value;
       if (mode === 'add') {
-        const current = (await dbGet(payload.dbUrl, collection+'/'+id+'/'+field, accessToken)) || 0;
+        const current = (await dbGet(FIREBASE_DB_URL, collection+'/'+id+'/'+field, accessToken)) || 0;
         newVal = current + (parseFloat(value)||0);
       }
       const update = {}; update[field] = newVal;
-      const res1 = await dbPatch(payload.dbUrl, collection+'/'+id, update, await workerAuth());
+      const res1 = await dbPatch(FIREBASE_DB_URL, collection+'/'+id, update, await workerAuth());
       if (!res1.ok) return json({error:'Could not update record ('+dbErr(res1)+')'},502);
       return json({ok:true, newValue:newVal});
     }

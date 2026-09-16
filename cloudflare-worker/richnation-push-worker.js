@@ -42,6 +42,16 @@
 // than the token/title/body/data you're choosing to send, so it can't be
 // used to exfiltrate the service account key or sign arbitrary requests.
 
+// The only Firebase database this Worker will ever read or write. Fixed,
+// not request-controlled: the accessToken minted below is a full
+// service-account credential (see the scope list in getAccessToken), so
+// letting a caller supply the host it gets attached to would let anyone
+// redirect that live, privileged token to a server of their choosing just
+// by passing a different dbUrl in the request body. That was possible here
+// until this fix (the notifyAdmins branch used to build its lookup/delete
+// URLs from payload.dbUrl) — this constant is what closes it.
+const FIREBASE_DB_URL = 'https://richnation-portal-default-rtdb.firebaseio.com';
+
 // Only these origins are allowed to read this Worker's responses from a
 // BROWSER — this blocks a malicious webpage running in a victim's browser
 // from quietly calling this Worker in the background. It does NOT stop a
@@ -198,13 +208,14 @@ export default {
     // source can no longer harvest the admin team's tokens to send them
     // fake/phishing push notifications of their own.
     if (payload.notifyAdmins) {
-      if (!payload.dbUrl) return json({error:'dbUrl is required for notifyAdmins'},400);
       try {
         // Firebase Realtime Database's REST API authenticates via an "auth"
         // QUERY PARAMETER for any credential type (legacy secret, ID token,
         // or a service-account OAuth2 access token like this one), see
-        // https://firebase.google.com/docs/database/rest/auth.
-        const dbRes = await fetch(payload.dbUrl.replace(/\/+$/,'') + '/rn_mall_admin_fcm_tokens.json?auth=' + accessToken);
+        // https://firebase.google.com/docs/database/rest/auth. The host it's
+        // sent to is always FIREBASE_DB_URL, never something the caller
+        // supplied — see that constant's comment for why.
+        const dbRes = await fetch(FIREBASE_DB_URL + '/rn_mall_admin_fcm_tokens.json?auth=' + accessToken);
         const dbData = dbRes.ok ? await dbRes.json() : null;
         tokens = dbData ? Object.keys(dbData) : [];
       } catch (e) { return json({error:'Could not look up admin tokens: ' + e.message},502); }
@@ -226,7 +237,7 @@ export default {
     if (payload.notifyAdmins) {
       const dead = results.filter(function(r){ return r.invalidToken; });
       await Promise.all(dead.map(function(r){
-        return fetch(payload.dbUrl.replace(/\/+$/,'') + '/rn_mall_admin_fcm_tokens/' + r.token + '.json?auth=' + accessToken, {method:'DELETE'});
+        return fetch(FIREBASE_DB_URL + '/rn_mall_admin_fcm_tokens/' + r.token + '.json?auth=' + accessToken, {method:'DELETE'});
       }));
     }
 
