@@ -1514,7 +1514,7 @@ async function fbS(p,d){try{var qs=await fbAuthQS();await fbFetchTimeout(FB+'/'+
 async function fbU(p,d){try{var qs=await fbAuthQS();await fbFetchTimeout(FB+'/'+p+'.json'+qs,{method:'PATCH',body:JSON.stringify(d)});}catch(e){console.warn('fbU failed for',p,':',e.message);}}
 // Periodic refresh for the handful of paths customers are actually looking at
 // while admin might be editing (products, categories, homepage settings).
-function watchFirebaseCollection(path,onChange,intervalMs){
+function watchFirebaseCollection(path,onChange,intervalMs,fetchFn){
   // Was a persistent EventSource per collection, on the customer site alone
   // that's 3 open per visitor tab, several open at once (many customers, or
   // several apps in different tabs) could exhaust the browser's per-origin
@@ -1528,10 +1528,17 @@ function watchFirebaseCollection(path,onChange,intervalMs){
   // bandwidth quota (and bill) far past the actual size of the data. Fetches
   // once immediately on becoming visible again so the view isn't stale.
   var inFlight=false;
+  // fetchFn lets a caller route this collection's ongoing polling through
+  // something other than a raw Firebase read (see the products/categories
+  // watchers below, which poll the Phase 1 caching Worker instead so the
+  // Worker's edge cache absorbs this traffic too, not just the boot-time
+  // fetch). Defaults to the original direct Firebase read for every other
+  // caller (settings, and any other future use).
+  var doFetch=fetchFn||function(){return fbG(path);};
   function tick(){
     if(document.hidden||inFlight)return;
     inFlight=true;
-    fbG(path).then(function(data){inFlight=false;onChange(data);});
+    doFetch().then(function(data){inFlight=false;onChange(data);});
   }
   var timer=setInterval(tick,intervalMs||20000);
   document.addEventListener('visibilitychange',function(){if(!document.hidden)tick();});
@@ -2420,13 +2427,13 @@ async function init(){
     try{localStorage.setItem('rnm_cache_products',JSON.stringify(allProducts));}catch(e){}
     renderCatNav();renderCategories();renderFeatured();renderRecommended();renderNew();renderFlash();renderPreOrder();renderAllProducts();
     const sc=document.getElementById('stat-count');if(sc)sc.textContent=allProducts.length;
-  });
+  },undefined,fetchProductsForBoot);
   watchFirebaseCollection('rn_mall_categories',function(cats){
     allCategories=Object.values(cats||{}).filter(c=>c.visible!==false).sort((a,b)=>(a.order||99)-(b.order||99));
     try{localStorage.setItem('rnm_cache_categories',JSON.stringify(allCategories));}catch(e){}
     renderCatNav();renderCategories();
     const fc2=document.getElementById('footer-cats');if(fc2)fc2.innerHTML=allCategories.slice(0,6).map(c=>`<div class="footer-link" onclick="filterCat('${escJs(c.id)}')">${c.name}</div>`).join('');
-  });
+  },undefined,fetchCategoriesForBoot);
   watchFirebaseCollection('rn_mall_settings',function(sett){
     if(!sett)return;
     settings=sett;
@@ -5335,7 +5342,7 @@ async function manualRefreshProducts(btn){
   const orig=btn.innerHTML;
   btn.innerHTML='⏳ Refreshing…';btn.disabled=true;
   try{
-    const [freshProds,freshCats,freshSettings]=await Promise.all([fbG('rn_mall_products'),fbG('rn_mall_categories'),fbG('rn_mall_settings')]);
+    const [freshProds,freshCats,freshSettings]=await Promise.all([fetchProductsForBoot(),fetchCategoriesForBoot(),fbG('rn_mall_settings')]);
     if(freshProds)allProducts=Object.values(freshProds).filter(p=>p.visible!==false);
     if(freshCats)allCategories=Object.values(freshCats).filter(c=>c.visible!==false);
     if(freshSettings){settings=freshSettings;exchangeRate=settings.exchangeRate||1600;}
