@@ -701,8 +701,11 @@ html.rnm-maint #maintenance-screen{display:flex;}
 #vendor-cta-sec{display:none;}
 </style>
 <link rel="preconnect" href="https://richnation-portal-default-rtdb.firebaseio.com"/>
-<link rel="preconnect" href="https://www.gstatic.com" crossorigin/>
-<link rel="preconnect" href="https://basemaps.cartocdn.com"/>
+<!-- www.gstatic.com and basemaps.cartocdn.com dropped: neither is needed for
+     the initial page (gstatic is only touched if/when auth or messaging SDKs
+     load on demand; cartocdn only if a delivery-tracking map is opened) -
+     Lighthouse flags more than ~4 preconnects as spreading the browser's
+     limited early-connection budget across origins that don't need it yet. -->
 <link rel="dns-prefetch" href="https://unpkg.com"/>
 <link rel="dns-prefetch" href="https://js.paystack.co"/>
 </head>
@@ -1170,9 +1173,15 @@ function ensureFirebaseAuthReady(){
   });
   return _firebaseAuthReadyPromise;
 }
-// App Check isn't enforced yet, so it adds nothing functional right now, loaded only
-// after the page is fully done loading, so it costs the page nothing while unused.
+// App Check isn't enforced yet, so it adds nothing functional right now. Left
+// disabled (APP_CHECK_ENABLED=false) rather than deleted, since the site key
+// below was never registered in Firebase Console -> App Check: every visit
+// was silently getting a 403 on the token exchange and an uncaught rejection
+// from the SDK's own internal retry scheduler, for zero actual protection.
+// Flip this to true once that registration is actually done.
+const APP_CHECK_ENABLED=false;
 function loadAppCheckWhenIdle(){
+  if(!APP_CHECK_ENABLED)return;
   loadFirebaseAppCompat()
     .then(function(){return fbLoadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js');})
     .then(function(){
