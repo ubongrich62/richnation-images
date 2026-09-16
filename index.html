@@ -414,6 +414,28 @@ h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;}
 .fi{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:10px 13px;color:var(--wh);font-size:13px;outline:none;margin-bottom:10px;box-sizing:border-box;}
 .fi:focus{border-color:var(--or);box-shadow:0 0 0 3px rgba(255,106,0,.15);}
 .auth-card .fi{background:#fff;color:#000;border-color:rgba(0,0,0,0.15);}
+.skip-link{position:absolute;left:-9999px;top:0;background:#FF6A00;color:#000;padding:12px 18px;z-index:99999;font-weight:800;font-size:13px;border-radius:0 0 8px 0;text-decoration:none;font-family:'Plus Jakarta Sans',sans-serif;}
+.skip-link:focus{left:0;}
+.confirm-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9500;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeInUp .15s ease;}
+.confirm-modal{background:var(--card);border:1px solid var(--bdr);border-radius:14px;width:100%;max-width:380px;padding:24px;box-shadow:var(--sh-lg);}
+.confirm-modal-msg{font-size:13.5px;color:var(--wh);font-weight:600;line-height:1.7;margin-bottom:20px;}
+.confirm-modal-btns{display:flex;gap:10px;}
+.confirm-modal-btn{flex:1;padding:11px;border-radius:9px;font-weight:800;font-size:13px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;border:1px solid var(--bdr);}
+.confirm-modal-cancel{background:var(--card2);color:var(--w2);}
+.confirm-modal-ok{background:#FF6A00;color:#000;border-color:#FF6A00;}
+/* Order receipt printing: hides everything on the page except #confirm-page
+   (visibility, not display, so layout/positioning don't need reworking for
+   print) and, within it, whatever's marked .no-print (the action buttons,
+   which mean nothing on paper). Deliberately scoped to just this one page
+   rather than a site-wide print sheet, since a printed receipt is the one
+   place a customer actually wants a clean printout instead of a screenshot
+   of the whole app UI. */
+@media print{
+  body *{visibility:hidden;}
+  #confirm-page,#confirm-page *{visibility:visible;}
+  #confirm-page{position:absolute;left:0;top:0;width:100%;}
+  .no-print{display:none!important;}
+}
 .pw-wrap{position:relative;margin-bottom:10px;}
 .pw-wrap .fi{margin-bottom:0;padding-right:52px;}
 .pw-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--wh);font-weight:700;font-size:10px;cursor:pointer;font-weight:700;letter-spacing:.5px;}
@@ -723,6 +745,7 @@ html.rnm-maint #maintenance-screen{display:flex;}
 <link rel="dns-prefetch" href="https://js.paystack.co"/>
 </head>
 <body>
+<a href="#home-page" class="skip-link">Skip to content</a>
 <div id="maintenance-screen">
   <picture><source srcset="images/branding/richnation-logo-v3.webp" type="image/webp"><img src="images/branding/richnation-logo-v3.png" alt="RichNation Mall" width="108" height="56"></picture>
   <h1 id="maintenance-title">Under Maintenance</h1>
@@ -806,7 +829,7 @@ html.rnm-maint #maintenance-screen{display:flex;}
 </div>
 
 <!-- HOME PAGE -->
-<div id="home-page">
+<div id="home-page" tabindex="-1">
   <div class="hero-promo-row">
    <div class="hero" id="hero-banner" style="background-image:linear-gradient(rgba(0,0,0,0.45),rgba(0,0,0,0.45)), url('images/hero-banner/1787041657282_xxz5w2.jpeg');background-size:cover;background-position:center;background-repeat:no-repeat;">
     <div class="hero-inner">
@@ -1128,6 +1151,8 @@ html.rnm-maint #maintenance-screen{display:flex;}
 
 <!-- TOAST -->
 <div id="toast" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;pointer-events:none;min-width:200px;max-width:90vw;background:#1a1a1a;color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:700;box-shadow:0 6px 24px rgba(0,0,0,0.25);border-left:4px solid #FF6A00;text-align:center;"></div>
+<div id="scroll-progress" style="position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,#FF6A00,#FFE066);width:0%;z-index:10000;pointer-events:none;"></div>
+<button id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top" style="display:none;position:fixed;bottom:90px;right:20px;width:44px;height:44px;border-radius:50%;background:var(--card);border:1px solid var(--bdr);color:#FF6A00;font-size:18px;font-weight:900;cursor:pointer;z-index:298;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,0.3);">&#8593;</button>
 
 <script src="https://js.paystack.co/v1/inline.js" async></script>
 <!-- Cloudflare Turnstile: shows on the registration form only (see the
@@ -1468,6 +1493,22 @@ function toast(m,type='ok'){
   const el=document.getElementById('toast');el.textContent=m;
   el.style.borderLeftColor=type==='err'?'#f43f5e':type==='warn'?'#FFA733':'#FF6A00';
   el.style.display='block';void el.offsetWidth;setTimeout(()=>el.style.display='none',3200);
+}
+// Styled replacement for the browser's own confirm(), used before anything
+// destructive (cancelling an order, requesting a refund). Returns a Promise
+// so a call site just does "if(!(await showConfirmModal('...')))return;" in
+// place of the old "if(!confirm('...'))return;".
+function showConfirmModal(message,confirmLabel){
+  return new Promise(function(resolve){
+    const overlay=document.createElement('div');
+    overlay.className='confirm-modal-overlay';
+    overlay.innerHTML='<div class="confirm-modal"><div class="confirm-modal-msg">'+escHtml(message).replace(/\n/g,'<br>')+'</div><div class="confirm-modal-btns"><button class="confirm-modal-btn confirm-modal-cancel">Cancel</button><button class="confirm-modal-btn confirm-modal-ok">'+escHtml(confirmLabel||'Confirm')+'</button></div></div>';
+    document.body.appendChild(overlay);
+    function close(result){overlay.remove();resolve(result);}
+    overlay.querySelector('.confirm-modal-cancel').onclick=function(){close(false);};
+    overlay.querySelector('.confirm-modal-ok').onclick=function(){close(true);};
+    overlay.addEventListener('click',function(e){if(e.target===overlay)close(false);});
+  });
 }
 async function subscribeNewsletter(form){
   const name=form.querySelector('input[name="name"]').value.trim();
@@ -2397,8 +2438,8 @@ async function openFirebaseResetPrompt(oobCode){
   overlay.innerHTML=`<div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;width:100%;max-width:380px;padding:22px;">
     <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:16px;color:var(--wh);margin-bottom:6px;">Reset Your Password</div>
     <div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:16px;">Choose a new password for ${email}.</div>
-    <div class="pw-wrap"><input class="fi" id="fbreset-pw1" type="password" placeholder="New password (min 6 chars)" style="margin-bottom:0;"/></div>
-    <div class="pw-wrap" style="margin-top:10px;"><input class="fi" id="fbreset-pw2" type="password" placeholder="Confirm new password" style="margin-bottom:0;"/></div>
+    <div class="pw-wrap"><input class="fi" id="fbreset-pw1" type="password" placeholder="New password (min 6 chars)" style="margin-bottom:0;"/><button class="pw-eye" onclick="this.previousElementSibling.type=this.previousElementSibling.type==='password'?'text':'password'">Show</button></div>
+    <div class="pw-wrap" style="margin-top:10px;"><input class="fi" id="fbreset-pw2" type="password" placeholder="Confirm new password" style="margin-bottom:0;"/><button class="pw-eye" onclick="this.previousElementSibling.type=this.previousElementSibling.type==='password'?'text':'password'">Show</button></div>
     <div class="auth-err" id="fbreset-err" style="margin-top:8px;"></div>
     <button class="auth-btn" style="margin-top:14px;" onclick="submitFirebasePasswordReset('${oobCode}')">Set New Password</button>
     <div style="text-align:center;font-size:11px;color:var(--wh);font-weight:700;margin-top:12px;cursor:pointer;" onclick="this.closest('div[style*=fixed]').remove()">Cancel</div>
@@ -2442,8 +2483,8 @@ async function openResetPasswordPrompt(custId){
   overlay.innerHTML=`<div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;width:100%;max-width:380px;padding:22px;">
     <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:16px;color:var(--wh);margin-bottom:6px;">Reset Your Password</div>
     <div style="font-size:12px;color:var(--wh);font-weight:700;margin-bottom:16px;">Hi ${cust.fname||''}, choose a new password for ${cust.email}.</div>
-    <div class="pw-wrap"><input class="fi" id="reset-pw1" type="password" placeholder="New password (min 6 chars)" style="margin-bottom:0;"/></div>
-    <div class="pw-wrap" style="margin-top:10px;"><input class="fi" id="reset-pw2" type="password" placeholder="Confirm new password" style="margin-bottom:0;"/></div>
+    <div class="pw-wrap"><input class="fi" id="reset-pw1" type="password" placeholder="New password (min 6 chars)" style="margin-bottom:0;"/><button class="pw-eye" onclick="this.previousElementSibling.type=this.previousElementSibling.type==='password'?'text':'password'">Show</button></div>
+    <div class="pw-wrap" style="margin-top:10px;"><input class="fi" id="reset-pw2" type="password" placeholder="Confirm new password" style="margin-bottom:0;"/><button class="pw-eye" onclick="this.previousElementSibling.type=this.previousElementSibling.type==='password'?'text':'password'">Show</button></div>
     <div class="auth-err" id="reset-err" style="margin-top:8px;"></div>
     <button class="auth-btn" style="margin-top:14px;" onclick="submitPasswordReset('${custId}')">Set New Password</button>
     <div style="text-align:center;font-size:11px;color:var(--wh);font-weight:700;margin-top:12px;cursor:pointer;" onclick="this.closest('div[style*=fixed]').remove()">Cancel</div>
@@ -3424,9 +3465,10 @@ async function saveOrder(order){
     <div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:22px;margin-bottom:18px;">
       <div style="font-size:11px;color:var(--wh);font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;">Tracking Number</div>
       <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:22px;color:var(--or);letter-spacing:2px;margin-bottom:8px;">${order.tracking}</div>
-      <button onclick="navigator.clipboard?.writeText('${order.tracking}').then(()=>toast('Copied!'))" style="font-size:11px;color:var(--or);background:none;border:1px solid rgba(255,140,0,0.3);border-radius:5px;padding:4px 10px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;">Copy Number</button>
+      <button class="no-print" onclick="navigator.clipboard?.writeText('${order.tracking}').then(()=>toast('Copied!'))" style="font-size:11px;color:var(--or);background:none;border:1px solid rgba(255,140,0,0.3);border-radius:5px;padding:4px 10px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;">Copy Number</button>
+      <button class="no-print" onclick="window.print()" style="font-size:11px;color:var(--or);background:none;border:1px solid rgba(255,140,0,0.3);border-radius:5px;padding:4px 10px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;margin-left:8px;">Print Receipt</button>
     </div>
-    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+    <div class="no-print" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
       <button class="conf-btn conf-btn-or" onclick="showPage('track');showTrackPage();setTimeout(()=>{const ti=document.getElementById('track-inp');if(ti){ti.value='${order.tracking}';trackOrder();}},200)">Track Order</button>
       <button class="conf-btn conf-btn-dk" onclick="showPage('home')">Continue Shopping</button>
       <button class="conf-btn conf-btn-wa" onclick="window.open('https://wa.me/${WA_NUM}?text='+encodeURIComponent('Hi RichNation Mall! My order tracking number is ${order.tracking}. Please give me an update.'),'_blank')">WhatsApp</button>
@@ -5137,7 +5179,7 @@ async function saveAddress(){const u={address:document.getElementById('addr-addr
 async function cancelMyOrder(trackingNum){
   const order=await fbG('rn_mall_orders/'+trackingNum);if(!order)return;
   const willRefund=order.payMethod!=='pod';
-  if(!confirm('Cancel order '+trackingNum+'?'+(willRefund?' ₦'+parseInt(order.total||0).toLocaleString()+' will be refunded to your Wallet immediately.':'')+' This cannot be undone.'))return;
+  if(!(await showConfirmModal('Cancel order '+trackingNum+'?'+(willRefund?' ₦'+parseInt(order.total||0).toLocaleString()+' will be refunded to your Wallet immediately.':'')+' This cannot be undone.','Cancel Order')))return;
   const timeline=(order.timeline||[]).concat([{status:'Cancelled',time:new Date().toISOString(),note:'Cancelled by customer'}]);
   const updates={status:'cancelled',timeline:timeline,cancelReason:'Cancelled by customer',cancelledAt:Date.now()};
   if(willRefund&&!order.refunded){
@@ -5180,7 +5222,7 @@ async function sendAskSeller(vendorId){
   document.getElementById('ask-seller-overlay').remove();
   toast('Question sent to the seller!');
 }
-async function requestRefund(trackingNum){if(!confirm('Request a refund for order '+trackingNum+'?\n\nYou must return the item within 7 days. We will contact you with return instructions.'))return;await fbU('rn_mall_orders/'+trackingNum,{refundRequested:true,refundRequestDate:ds(),status:'refund_requested'});await fbP('rn_mall_notifications',{type:'refund_request',orderId:trackingNum,customer:currUser.name,date:ds(),read:false,ts:Date.now()});toast('Refund request submitted. We will contact you shortly.');accTab('orders',null);}
+async function requestRefund(trackingNum){if(!(await showConfirmModal('Request a refund for order '+trackingNum+'?\n\nYou must return the item within 7 days. We will contact you with return instructions.','Request Refund')))return;await fbU('rn_mall_orders/'+trackingNum,{refundRequested:true,refundRequestDate:ds(),status:'refund_requested'});await fbP('rn_mall_notifications',{type:'refund_request',orderId:trackingNum,customer:currUser.name,date:ds(),read:false,ts:Date.now()});toast('Refund request submitted. We will contact you shortly.');accTab('orders',null);}
 
 // ── ACCOUNT PROMPT ──
 function showAccPrompt(context='general'){if(currUser)return;if(sessionStorage.getItem('rnm_prompt_shown'))return;if(_accPromptShown)return;_accPromptShown=true;const overlay=document.getElementById('acc-prompt');if(!overlay)return;if(context==='post-order'){const t=overlay.querySelector('.acc-prompt-title');const s=overlay.querySelector('.acc-prompt-sub');if(t)t.textContent='Track Your Order Live';if(s)s.textContent='Create a free account to track your order and stay in touch with our team.';}overlay.classList.add('open');document.body.style.overflow='hidden';}
@@ -5282,6 +5324,24 @@ async function syncLiveData(){
   finally{_syncLiveDataInFlight=false;}
 }
 setInterval(syncLiveData,20000);
+// Scroll progress bar + back-to-top button. rAF-throttled so this never
+// fires more than once per frame no matter how fast scroll events arrive.
+(function(){
+  const progressEl=document.getElementById('scroll-progress');
+  const backBtn=document.getElementById('back-to-top');
+  let ticking=false;
+  function updateScrollUI(){
+    const scrollTop=window.scrollY||document.documentElement.scrollTop;
+    const docHeight=document.documentElement.scrollHeight-window.innerHeight;
+    const pct=docHeight>0?Math.min(100,(scrollTop/docHeight)*100):0;
+    if(progressEl)progressEl.style.width=pct+'%';
+    if(backBtn)backBtn.style.display=scrollTop>400?'flex':'none';
+    ticking=false;
+  }
+  window.addEventListener('scroll',function(){
+    if(!ticking){window.requestAnimationFrame(updateScrollUI);ticking=true;}
+  },{passive:true});
+})();
 setInterval(()=>{if(currUser)loadCustNotifs();},8000);
 
 
