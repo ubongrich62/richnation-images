@@ -1174,6 +1174,37 @@ html.rnm-maint #maintenance-screen{display:flex;}
 
 
 const FB='https://richnation-portal-default-rtdb.firebaseio.com';
+// Phase 1 of the move toward a real backend: the initial product/category
+// load on boot now goes through a caching Cloudflare Worker instead of
+// hitting Firebase's raw tables directly, so many customers loading the
+// site within the same ~60s window share one cached response instead of
+// each downloading the whole table themselves. Falls back to fetching
+// Firebase directly if the Worker is ever unreachable, so an outage there
+// degrades gracefully instead of breaking the storefront. The ongoing
+// live-update polling (see watchFirebaseCollection below) still reads
+// Firebase directly for now - a smaller, separate slice of the bandwidth,
+// left as a deliberate fast-follow rather than done here.
+const DATA_WORKER_URL='https://richnation-data.ubongrich62.workers.dev';
+async function fetchProductsForBoot(){
+  try{
+    const r=await fetch(DATA_WORKER_URL+'/products?limit=1000');
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return (await r.json()).products||[];
+  }catch(e){
+    console.warn('Data Worker products fetch failed, falling back to Firebase directly:',e.message);
+    return await fbG('rn_mall_products',6000);
+  }
+}
+async function fetchCategoriesForBoot(){
+  try{
+    const r=await fetch(DATA_WORKER_URL+'/categories');
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return (await r.json()).categories||[];
+  }catch(e){
+    console.warn('Data Worker categories fetch failed, falling back to Firebase directly:',e.message);
+    return await fbG('rn_mall_categories',6000);
+  }
+}
 // App Check, verifies requests come from this real app, not a bot or a copy.
 // Deliberately fails safe: if init fails or the token can't be fetched, requests
 // just go out without the header, same as before this was added. Nothing breaks
@@ -2316,7 +2347,7 @@ async function init(){
     // long a first-ever visit (no cache yet, so nothing above rendered anything)
     // can sit looking empty if Firebase is slow or unreachable, a repeat visitor
     // already saw the cached render above regardless of how this settles.
-    var results=await Promise.all([fbG('rn_mall_settings',6000),fbG('rn_mall_categories',6000),fbG('rn_mall_products',6000)]);
+    var results=await Promise.all([fbG('rn_mall_settings',6000),fetchCategoriesForBoot(),fetchProductsForBoot()]);
     sett=results[0];cats=results[1];prods=results[2];
   }catch(fetchErr){
     console.warn('Firebase fetch failed:',fetchErr.message);
