@@ -1068,7 +1068,18 @@ async function doLogin(){
     }
   }
   if(validList.includes(p)&&emailOk){
-    if(ready&&e)await migrateAdminLogin(e,p);
+    // Always migrate using validList[0], never the raw p just typed: p can
+    // legitimately be EITHER configured Owner password, but a Firebase Auth
+    // account only ever has one password. Migrating with whichever one was
+    // typed meant the account's real password got permanently fixed to
+    // whichever value was used the very first time, and every subsequent
+    // login typing the OTHER valid password failed migration forever
+    // (createUserWithEmailAndPassword: already exists; the signIn fallback:
+    // wrong password for that specific account) - invisibly, since legacy
+    // access never depended on migration succeeding. Pinning to the same
+    // canonical value every time keeps create/sign-in consistent regardless
+    // of which valid password was actually typed.
+    if(ready&&e)await migrateAdminLogin(e,validList[0]);
     enterAsOwner();
     return;
   }
