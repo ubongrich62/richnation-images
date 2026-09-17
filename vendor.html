@@ -797,6 +797,27 @@ async function doVendorRegister(){
   toast('Application submitted! We\'ll review it and email you once approved.');
   document.getElementById('register-form').innerHTML='<div style="text-align:center;padding:20px 0;"><div style="font-weight:800;margin-bottom:8px;">Application Submitted</div><div style="font-size:12px;color:var(--wh);font-weight:700;line-height:1.7;">Thanks, '+owner+'! Our team will review your application and documents for <strong style="color:var(--wh);">'+store+'</strong> and let you know once you\'re approved to start selling.</div></div>';
 }
+// Stamps this account's real Firebase Auth session with a "vendor: true"
+// custom claim, via the wallet Worker's /set-role-claim (independently
+// re-verified there, no admin key needed). Called on every successful
+// login, same idempotent/self-healing pattern as admin.html's
+// ensureAdminClaim(). Never blocks the actual login on failure.
+async function ensureVendorClaim(recordId,uid){
+  try{
+    const s=await fbG('rn_mall_settings')||{};
+    const url=(s.walletWorkerUrl||'').replace(/\/+$/,'');
+    if(!url)return;
+    const user=firebase.auth().currentUser;
+    if(!user)return;
+    const idToken=await user.getIdToken();
+    const res=await fetch(url+'/set-role-claim',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({collection:'rn_mall_vendors',recordId,uid,idToken})
+    });
+    if(res.ok)await user.getIdToken(true);
+    else console.warn('Could not set vendor claim:',res.status,(await res.json().catch(()=>({}))).error||'');
+  }catch(e){console.warn('Could not set vendor claim (will retry next login):',e.message);}
+}
 async function doVendorLogin(){
   const email=document.getElementById('v-email').value.trim().toLowerCase();
   const pass=document.getElementById('v-pass').value.trim();
@@ -815,14 +836,16 @@ async function doVendorLogin(){
     try{
       const cred=await firebase.auth().signInWithEmailAndPassword(email,pass);
       const uid=cred.user.uid;
+      let vendorId=uid;
       let record=await fbG('rn_mall_vendors/'+uid);
       if(!record){
         // Migrated account, its data still lives at the old key, look it up via
         // the index written the first time this account was upgraded.
         const oldId=await fbG('rn_mall_vendors_by_uid/'+uid);
-        if(oldId)record=await fbG('rn_mall_vendors/'+oldId);
+        if(oldId){vendorId=oldId;record=await fbG('rn_mall_vendors/'+oldId);}
       }
       if(!record){err.textContent='Account not found, please contact support.';err.style.display='block';return;}
+      await ensureVendorClaim(vendorId,uid);
       finishVendorLogin(record);
       return;
     }catch(authErr){
@@ -847,6 +870,7 @@ async function doVendorLogin(){
       await fbS('rn_mall_vendors_by_uid/'+uid2,found.id);
       migrated=Object.assign({},found,updates);
       delete migrated.password;
+      await ensureVendorClaim(found.id,uid2);
     }catch(migrateErr){
       console.warn('Auth migration on login failed, will retry next login:',migrateErr.message);
     }
