@@ -92,14 +92,32 @@
     "rn_mall_riders": {
       ".read": true,
       "$id": {
-        ".write": true,
+        // Same shape of fix as rn_mall_staff/rn_mall_vendors above. rider.html's
+        // login already refuses status 'pending_review' or 'suspended', so
+        // status is the one field that actually needed protecting. A brand-new
+        // application (the public "apply to be a rider" signup) may only ever
+        // land as status:'pending_review' (matching that flow exactly); once a
+        // record exists, status can only be carried forward unchanged unless
+        // the write carries the admin:true claim (admin.html's approveRider/
+        // toggleSuspendRider already have it). Self-migration and ordinary
+        // self-service edits never touch status, so they're unaffected.
+        ".write": "(auth != null && auth.token.admin === true) || (!data.exists() ? newData.child('status').val() === 'pending_review' : data.child('status').val() === newData.child('status').val())",
         ".validate": "newData.hasChildren(['email','id']) && ((auth != null && auth.token.worker === true) || (data.child('totalPaid').exists() ? newData.child('totalPaid').val() === data.child('totalPaid').val() : (!newData.hasChild('totalPaid') || newData.child('totalPaid').val() === 0))) && ((auth != null && auth.token.worker === true) || (data.child('points').exists() ? newData.child('points').val() === data.child('points').val() : (!newData.hasChild('points') || newData.child('points').val() === 0)))"
       }
     },
     "rn_mall_investors": {
       ".read": true,
       "$id": {
-        ".write": true,
+        // Same shape of fix as the other three role tables above.
+        // investor.html's login already refuses status 'pending_review' or
+        // 'suspended', so status is the one field that actually needed
+        // protecting. A brand-new application (the public investor
+        // application flow) may only ever land as status:'pending_review'
+        // (matching that flow exactly); once a record exists, status can
+        // only be carried forward unchanged unless the write carries the
+        // admin:true claim. Self-migration and ordinary self-service edits
+        // never touch status, so they're unaffected.
+        ".write": "(auth != null && auth.token.admin === true) || (!data.exists() ? newData.child('status').val() === 'pending_review' : data.child('status').val() === newData.child('status').val())",
         ".validate": "newData.hasChildren(['email','id']) && ((auth != null && auth.token.worker === true) || (data.child('walletBalance').exists() ? newData.child('walletBalance').val() === data.child('walletBalance').val() : (!newData.hasChild('walletBalance') || newData.child('walletBalance').val() === 0))) && ((auth != null && auth.token.worker === true) || (data.child('totalPaid').exists() ? newData.child('totalPaid').val() === data.child('totalPaid').val() : (!newData.hasChild('totalPaid') || newData.child('totalPaid').val() === 0)))"
       }
     },
