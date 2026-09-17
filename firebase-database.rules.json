@@ -18,7 +18,16 @@
     "rn_mall_seasonal_promos": { ".read": true, ".write": true },
     "rn_mall_coupons":         { ".read": true, ".write": true },
     "rn_mall_bundles":         { ".read": true, ".write": true },
-    "rn_mall_settings":        { ".read": true, ".write": true },
+    // Read stays public - every one of the six apps loads this unauthenticated
+    // (paystackKey, walletWorkerUrl, pushWorkerUrl, etc. all need to be
+    // readable before anyone signs in). Write is now admin-only: this used to
+    // be wide open, letting anyone redirect every customer's checkout to
+    // their own Paystack account or a lookalike wallet Worker with a single
+    // unauthenticated PATCH. auth.token.admin is the same custom claim
+    // richnation-wallet-worker.js's /set-admin-claim grants a real admin
+    // account after they sign in through the legacy password check (see
+    // ensureAdminClaim() in admin.html).
+    "rn_mall_settings":        { ".read": true, ".write": "auth != null && auth.token.admin === true" },
     "rn_mall_announcements":   { ".read": true, ".write": true },
 
     // Money fields (walletBalance/points/salary/totalPaid) can only ever
