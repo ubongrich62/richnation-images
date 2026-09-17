@@ -337,6 +337,35 @@ async function findVerifiedPaymentAmount(order, orderId, customerId, workerAuthT
   return null; // unrecognised/unsupported payment method - never assume payment happened
 }
 
+// ── Custom-claim minting for /set-admin-claim and /set-role-claim ──
+// Identity Toolkit's accounts:update REPLACES customAttributes wholesale -
+// it doesn't merge. Writing {admin:true} directly, as the original
+// /set-admin-claim did, would silently wipe out any OTHER claim that same
+// account already held (e.g. a person who is legitimately both staff and,
+// separately, an approved vendor). This reads the account's current claims
+// first and merges the new one in, so minting one role claim can never
+// erase another this same account already has.
+async function mintCustomClaim(uid, claimName, claimValue, accessToken){
+  const lookupRes = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:lookup', {
+    method: 'POST',
+    headers: {'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json'},
+    body: JSON.stringify({ localId: [uid] })
+  });
+  const lookupData = await lookupRes.json();
+  const account = lookupData && lookupData.users && lookupData.users[0];
+  if (!lookupRes.ok || !account) throw new Error('Could not look up this account to set its claim.');
+  let existingClaims = {};
+  try { existingClaims = account.customAttributes ? JSON.parse(account.customAttributes) : {}; }
+  catch (e) { existingClaims = {}; }
+  existingClaims[claimName] = claimValue;
+  const claimRes = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:update', {
+    method: 'POST',
+    headers: {'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json'},
+    body: JSON.stringify({ localId: uid, customAttributes: JSON.stringify(existingClaims) })
+  });
+  if (!claimRes.ok) throw new Error(claimRes.status+': '+(await claimRes.text()));
+}
+
 // RichPoints rates, mirrored from index.html's rpRates() so this Worker can
 // compute the CORRECT amount for a given reason itself instead of trusting
 // whatever number the caller's browser sends. Falls back to the same
@@ -712,15 +741,65 @@ export default {
       if (!suppliedKey || suppliedKey !== env.ADMIN_KEY) return json({error:'Invalid admin key'},401);
       const {uid} = payload;
       if (!uid) return json({error:'uid is required'},400);
-      const claimRes = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:update', {
-        method: 'POST',
-        headers: {'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json'},
-        body: JSON.stringify({ localId: uid, customAttributes: JSON.stringify({admin:true}) })
-      });
-      if (!claimRes.ok) return json({error:'Could not set admin claim ('+claimRes.status+': '+(await claimRes.text())+')'},502);
+      try {
+        await mintCustomClaim(uid, 'admin', true, accessToken);
+      } catch (e) {
+        return json({error:'Could not set admin claim: '+e.message},502);
+      }
       return json({ok:true});
     }
 
-    return json({error:'Unknown action, expected /spend, /earn, /verify-topup, /adjust, /verify-captcha, or /set-admin-claim'},404);
+    // ── /set-role-claim: mark a Firebase Auth account as real staff/vendor/
+    // rider/investor ──
+    // Same shape of problem as admin: staff.html/vendor.html/rider.html/
+    // investor.html's own logins migrate a legacy account to a real Firebase
+    // Auth account on successful login (see e.g. staff.html's doStaffLogin),
+    // but until now nothing ever stamped that account with a claim the
+    // database rules could check - meaning rn_mall_orders/rn_mall_customers
+    // couldn't tell "a real, approved staff/vendor/rider/investor account
+    // that genuinely needs to see every order" apart from "any random signed
+    // -in customer", so those tables either had to stay wide open (letting
+    // customer A read customer B) or would have broken every back-office
+    // portal's core functionality if locked to ownership alone.
+    //
+    // Unlike /set-admin-claim, this needs no shared secret: it independently
+    // re-verifies, server-side, that the calling idToken's real uid is
+    // actually linked (via authUid) to a record in the given collection with
+    // that collection's own "real, approved" status - exactly the same
+    // migration link staff.html/vendor.html/etc. already write themselves -
+    // before minting anything. A caller can't get a claim for a collection/
+    // record they don't genuinely, already legitimately belong to.
+    if (action === 'set-role-claim') {
+      const {collection, recordId, uid, idToken} = payload;
+      const ROLE_CLAIM_CONFIG = {
+        rn_mall_staff:     {claim:'staff',    activeStatus:'active'},
+        rn_mall_vendors:   {claim:'vendor',   activeStatus:'approved'},
+        rn_mall_riders:    {claim:'rider',    activeStatus:'active'},
+        rn_mall_investors: {claim:'investor', activeStatus:'active'}
+      };
+      const cfg = ROLE_CLAIM_CONFIG[collection];
+      if (!cfg) return json({error:'Unknown collection'},400);
+      if (!recordId || !uid) return json({error:'recordId and uid are required'},400);
+      const lookupRes = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:lookup', {
+        method: 'POST',
+        headers: {'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json'},
+        body: JSON.stringify({ idToken: idToken })
+      });
+      const lookupData = await lookupRes.json();
+      const verifiedUid = lookupData && lookupData.users && lookupData.users[0] && lookupData.users[0].localId;
+      if (!lookupRes.ok || !verifiedUid || verifiedUid !== uid) return json({error:'Your session has expired, please log in again.'},401);
+      const record = await dbGet(FIREBASE_DB_URL, collection+'/'+recordId, accessToken);
+      if (!record || record.authUid !== verifiedUid || record.status !== cfg.activeStatus) {
+        return json({error:'This account is not a verified, active '+cfg.claim+' record.'},403);
+      }
+      try {
+        await mintCustomClaim(uid, cfg.claim, true, accessToken);
+      } catch (e) {
+        return json({error:'Could not set role claim: '+e.message},502);
+      }
+      return json({ok:true});
+    }
+
+    return json({error:'Unknown action, expected /spend, /earn, /verify-topup, /adjust, /verify-captcha, /set-admin-claim, or /set-role-claim'},404);
   }
 };
