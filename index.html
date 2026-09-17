@@ -4346,7 +4346,7 @@ function switchAuth(tab){
     <input class="fi" id="forgot-email" type="email" placeholder="Email address" autocomplete="off"/>
     <div class="auth-err" id="forgot-err"></div>
     <div class="auth-err" id="forgot-ok" style="display:none;color:#065f2d;"></div>
-    <button class="auth-btn" onclick="doForgotPassword()" style="margin-top:6px;">Send Reset Request</button>
+    <button class="auth-btn" id="forgot-btn" onclick="doForgotPassword()" style="margin-top:6px;">Send Reset Request</button>
     <div style="text-align:center;font-size:12px;color:#000;font-weight:700;margin-top:12px;">Remembered it? <span style="color:#000;text-decoration:underline;cursor:pointer;font-weight:700;" onclick="switchAuth('login')">Sign In</span></div>
     <div style="text-align:center;font-size:11px;color:#000;font-weight:700;margin-top:14px;line-height:1.7;">Prefer to talk to someone? <span style="color:#000;text-decoration:underline;cursor:pointer;font-weight:700;" onclick="closeAuth();toggleChat();">Contact Support</span></div>`;}
   else{body.innerHTML=`<div class="auth-sub">Create your free account, required to shop</div>
@@ -4369,32 +4369,56 @@ async function doForgotPassword(){
   const err=document.getElementById('forgot-err');const ok=document.getElementById('forgot-ok');
   if(err)err.style.display='none';if(ok)ok.style.display='none';
   if(!email){if(err){err.textContent='Enter your email address.';err.style.display='block';}return;}
-  const ready=await ensureFirebaseAuthReady();
-  if(ready){
-    try{
-      await firebase.auth().sendPasswordResetEmail(email);
-      if(ok){ok.textContent='Reset email sent! Check your inbox (and spam folder) for a link to set a new password.';ok.style.display='block';}
-      return;
-    }catch(authErr){
-      // auth/user-not-found here just means this particular email hasn't been
-      // migrated to Firebase Auth yet (or never registered at all), fall through to
-      // the legacy manual-request path below instead of a dead end either way.
-      if(authErr.code&&authErr.code!=='auth/user-not-found'){
-        if(err){err.textContent='Something went wrong sending the reset email, please try again.';err.style.display='block';}
+  // Disabled for the whole attempt, re-enabled only on a real error the person
+  // can fix and retry from (no email typed, wrong-format address, unexpected
+  // failure). Firebase only ever keeps the MOST RECENTLY sent reset link
+  // valid, silently invalidating any earlier one, so a slow response with no
+  // clear feedback here was letting someone click twice and then open the
+  // now-dead first email, permanently confused about why "the link" doesn't
+  // work.
+  const btn=document.getElementById('forgot-btn');
+  const origLabel=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.textContent='Sending…';}
+  try{
+    const ready=await ensureFirebaseAuthReady();
+    if(ready){
+      try{
+        await firebase.auth().sendPasswordResetEmail(email);
+        if(ok){ok.textContent='Reset email sent! Check your inbox (and spam folder) for a link to set a new password. If you request another one, only the newest link will work.';ok.style.display='block';}
+        if(btn)btn.textContent='Request Sent';
         return;
+      }catch(authErr){
+        // auth/user-not-found here just means this particular email hasn't been
+        // migrated to Firebase Auth yet (or never registered at all), fall through to
+        // the legacy manual-request path below instead of a dead end either way.
+        if(authErr.code&&authErr.code!=='auth/user-not-found'){
+          if(err){err.textContent='Something went wrong sending the reset email, please try again.';err.style.display='block';}
+          if(btn){btn.disabled=false;btn.textContent=origLabel;}
+          return;
+        }
       }
     }
+    const all=await fbG('rn_mall_customers')||{};
+    const found=Object.entries(all).find(([id,c])=>c.email===email);
+    if(!found){
+      if(err){err.textContent='No account found with that email.';err.style.display='block';}
+      if(btn){btn.disabled=false;btn.textContent=origLabel;}
+      return;
+    }
+    const [custId]=found;
+    await fbP('rn_mall_notifications',{type:'password_reset_request',email,customerId:custId,date:ds(),read:false,ts:Date.now()});
+    await fbU('rn_mall_customers/'+custId,{resetRequested:true,resetRequestDate:ds()});
+    toast('Reset request sent to support.');
+    if(btn)btn.textContent='Request Sent';
+    const waNumber=(settings&&settings.waNumber)||'2349164678560';
+    const waText=encodeURIComponent('Hi, I forgot my password on RichNation Mall. My registered email is: '+email);
+    if(ok){ok.innerHTML='Request received, our team will follow up, but for the fastest fix, message us now on WhatsApp: <a href="https://wa.me/'+waNumber+'?text='+waText+'" target="_blank" rel="noopener" style="color:#065f2d;text-decoration:underline;font-weight:800;">Chat with Support on WhatsApp &#8594;</a>';ok.style.display='block';}
+  }catch(e){
+    // Unexpected failure (network, etc.), not one of the recoverable cases
+    // above that already re-enable the button themselves.
+    if(err){err.textContent='Something went wrong, please try again.';err.style.display='block';}
+    if(btn){btn.disabled=false;btn.textContent=origLabel;}
   }
-  const all=await fbG('rn_mall_customers')||{};
-  const found=Object.entries(all).find(([id,c])=>c.email===email);
-  if(!found){if(err){err.textContent='No account found with that email.';err.style.display='block';}return;}
-  const [custId]=found;
-  await fbP('rn_mall_notifications',{type:'password_reset_request',email,customerId:custId,date:ds(),read:false,ts:Date.now()});
-  await fbU('rn_mall_customers/'+custId,{resetRequested:true,resetRequestDate:ds()});
-  toast('Reset request sent to support.');
-  const waNumber=(settings&&settings.waNumber)||'2349164678560';
-  const waText=encodeURIComponent('Hi, I forgot my password on RichNation Mall. My registered email is: '+email);
-  if(ok){ok.innerHTML='Request received, our team will follow up, but for the fastest fix, message us now on WhatsApp: <a href="https://wa.me/'+waNumber+'?text='+waText+'" target="_blank" rel="noopener" style="color:#065f2d;text-decoration:underline;font-weight:800;">Chat with Support on WhatsApp &#8594;</a>';ok.style.display='block';}
 }
 async function doLogin(){
   const email=document.getElementById('auth-email')?.value.trim().toLowerCase();const pass=document.getElementById('auth-pass')?.value.trim();const err=document.getElementById('auth-err');
