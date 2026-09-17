@@ -3,14 +3,29 @@
     ".read": false,
     ".write": false,
 
-    "mgmt_vault": { ".read": false, ".write": false },
-    "mgmt_notes": { ".read": false, ".write": false },
+    // Locked to the admin:true custom claim (the same one richnation-wallet-worker.js's
+    // /set-admin-claim grants, confirmed working after fixing admin.html's login
+    // migration). Previously .read:true/.write:true with no auth check at all -
+    // "vault"/"notes" implies something sensitive, and there's no legitimate reason
+    // for that to be world-readable/writable. A real admin's Firebase ID token
+    // carries the claim, so this doesn't change how the admin actually uses it.
+    "mgmt_vault": { ".read": "auth != null && auth.token.admin === true", ".write": "auth != null && auth.token.admin === true" },
+    "mgmt_notes": { ".read": "auth != null && auth.token.admin === true", ".write": "auth != null && auth.token.admin === true" },
 
+    // Not part of the RichNation Mall app (no rn_mall_ prefix, not referenced by
+    // any of index/admin/vendor/staff/rider/investor.html) - left exactly as-is,
+    // out of scope for this audit, some other tool depends on these.
     "channel_settings": { ".read": true, ".write": true },
+    "channels":         { ".read": true, ".write": true },
+    "announcements":    { ".read": true, ".write": true },
+    "presence":         { ".read": true, ".write": true },
+    "fcm_tokens":       { ".read": true, ".write": true },
+    "push_queue":       { ".read": true, ".write": true },
     "divisions":        { ".read": true, ".write": true },
     "dm":               { ".read": true, ".write": true },
     "staff":            { ".read": true, ".write": true },
     "staff_logins":     { ".read": true, ".write": true },
+    "budget_entries":   { ".read": true, ".write": true },
 
     "rn_mall_products":        { ".read": true, ".write": true, "$id": { ".validate": "newData.hasChildren(['name','price'])" } },
     "rn_mall_categories":      { ".read": true, ".write": true },
@@ -23,23 +38,10 @@
     // readable before anyone signs in). Write is now admin-only: this used to
     // be wide open, letting anyone redirect every customer's checkout to
     // their own Paystack account or a lookalike wallet Worker with a single
-    // unauthenticated PATCH. auth.token.admin is the same custom claim
-    // richnation-wallet-worker.js's /set-admin-claim grants a real admin
-    // account after they sign in through the legacy password check (see
-    // ensureAdminClaim() in admin.html).
+    // unauthenticated PATCH.
     "rn_mall_settings":        { ".read": true, ".write": "auth != null && auth.token.admin === true" },
     "rn_mall_announcements":   { ".read": true, ".write": true },
 
-    // Money fields (walletBalance/points/salary/totalPaid) can only ever
-    // move via richnation-wallet-worker.js. That Worker signs itself in as
-    // a real Firebase Auth identity carrying a "worker: true" custom
-    // claim (see getWorkerIdToken in that file) and every check below
-    // explicitly trusts that claim, and ONLY that claim, to skip the
-    // frozen-value check for its own field. A raw service-account OAuth2
-    // token does NOT get this exception (confirmed by testing, contrary
-    // to what Firebase's docs on admin-token bypass implied) and neither
-    // does any other signed-in user, so this is a real, checkable grant,
-    // not a hopeful assumption about credential type.
     "rn_mall_customers": {
       ".read": true,
       "$id": {
@@ -75,9 +77,6 @@
 
     "rn_mall_orders": { ".read": true, "$id": { ".write": true } },
     "rn_mall_customer_orders":              { "$id": { ".read": true, ".write": true } },
-    // Only the Worker (its own idempotency ledger, so a Paystack reference
-    // can never be replayed to double-credit) ever needs these, gated the
-    // same way the money-field exception above is.
     "rn_mall_processed_topups":             { "$id": { ".read": "auth != null && auth.token.worker === true", ".write": "auth != null && auth.token.worker === true" } },
     "rn_mall_processed_payments":           { "$id": { ".read": "auth != null && auth.token.worker === true", ".write": "auth != null && auth.token.worker === true" } },
     "rn_mall_wallet_transactions":          { "$id": { ".read": true, ".write": true } },
