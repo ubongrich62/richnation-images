@@ -52,7 +52,22 @@
     "rn_mall_staff": {
       ".read": true,
       "$id": {
-        ".write": true,
+        // Anyone could previously write a fully-formed record here directly
+        // (role:'ceo', status:'active', adminPanelAccess:true, any password),
+        // completely bypassing both the real "apply, then admin approves"
+        // flow and staff.html/admin.html's own login gates, which only check
+        // fields already sitting unprotected in this same record. Login
+        // itself already refuses status!=='active' (pending_review/suspended
+        // both blocked), so the one thing that actually needed protecting was
+        // never letting status/role/adminPanelAccess move without an admin -
+        // a brand new application is only ever allowed to land as
+        // status:'pending_review' with no adminPanelAccess claim, and once a
+        // record exists, those three fields can only ever be carried forward
+        // unchanged unless the write carries the admin claim. This doesn't
+        // affect the self-migration write (setting authUid, nulling
+        // password) or ordinary self-service edits (phone, address, photo,
+        // fcmTokens) - none of them ever touch these three fields anyway.
+        ".write": "(auth != null && auth.token.admin === true) || (!data.exists() ? (newData.child('status').val() === 'pending_review' && !newData.hasChild('adminPanelAccess')) : (data.child('role').val() === newData.child('role').val() && data.child('status').val() === newData.child('status').val() && data.child('adminPanelAccess').val() === newData.child('adminPanelAccess').val()))",
         ".validate": "newData.hasChildren(['email','id']) && ((auth != null && auth.token.worker === true) || (data.child('salary').exists() ? newData.child('salary').val() === data.child('salary').val() : (!newData.hasChild('salary') || newData.child('salary').val() === 0))) && ((auth != null && auth.token.worker === true) || (data.child('points').exists() ? newData.child('points').val() === data.child('points').val() : (!newData.hasChild('points') || newData.child('points').val() === 0)))"
       }
     },
