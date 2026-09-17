@@ -301,6 +301,42 @@ async function verifyOwnCustomer(dbUrl, customerId, idToken, accessToken){
   return {ok:true};
 }
 
+// ── Independent payment proof for /refund-order ──
+// rn_mall_orders has no server-side price validation (the browser computes
+// and saves the whole order object itself), so an order's own total/payMethod
+// fields can't be trusted as proof that money actually moved - a client could
+// write a fabricated "confirmed" order for itself with any total it likes.
+// These two lookups instead find real, independently-verified evidence that
+// this SPECIFIC order was actually paid: a Paystack reference this Worker
+// itself confirmed with Paystack (rn_mall_processed_payments, worker-claim
+// gated, never client-writable), or a wallet debit this Worker itself made
+// for this exact order (rn_mall_wallet_transactions, now also worker/admin-
+// only). Refunding the lesser of the order's claimed total and whatever this
+// independent record actually shows means a fabricated or inflated order
+// total can never be cashed out as wallet balance, no matter what the order
+// document itself says.
+async function findVerifiedPaymentAmount(order, orderId, customerId, workerAuthToken){
+  if (order.payMethod === 'card') {
+    if (!order.payRef) return null;
+    const rec = await dbGet(FIREBASE_DB_URL, 'rn_mall_processed_payments/'+order.payRef, workerAuthToken);
+    return (rec && rec.amount > 0) ? rec.amount : null;
+  }
+  if (order.payMethod === 'wallet') {
+    // Preferred: the exact keyed debit record /spend now writes for any
+    // order-linked spend. Orders placed before this fix used an
+    // auto-generated key instead, so fall back to searching this customer's
+    // own transaction list for a debit whose description names this order.
+    const keyed = await dbGet(FIREBASE_DB_URL, 'rn_mall_wallet_transactions/'+customerId+'/'+orderId, workerAuthToken);
+    if (keyed && keyed.type === 'debit' && keyed.amount > 0) return keyed.amount;
+    const all = await dbGet(FIREBASE_DB_URL, 'rn_mall_wallet_transactions/'+customerId, workerAuthToken) || {};
+    const match = Object.values(all).find(function(t){
+      return t && t.type === 'debit' && typeof t.description === 'string' && t.description.indexOf(orderId) !== -1;
+    });
+    return (match && match.amount > 0) ? match.amount : null;
+  }
+  return null; // unrecognised/unsupported payment method - never assume payment happened
+}
+
 // RichPoints rates, mirrored from index.html's rpRates() so this Worker can
 // compute the CORRECT amount for a given reason itself instead of trusting
 // whatever number the caller's browser sends. Falls back to the same
@@ -387,7 +423,19 @@ export default {
       const res1 = await dbPatch(FIREBASE_DB_URL, 'rn_mall_customers/'+customerId, update, await workerAuth());
       if (!res1.ok) return json({error:'Could not update balance ('+dbErr(res1)+')'},502);
       if (field === 'walletBalance') {
-        await dbPost(FIREBASE_DB_URL, 'rn_mall_wallet_transactions/'+customerId, {type:'debit',amount:amount,description:description||('Order payment'+(orderId?' ('+orderId+')':'')),date:new Date().toISOString().slice(0,10),ts:Date.now()}, accessToken);
+        const txn = {type:'debit',amount:amount,description:description||('Order payment'+(orderId?' ('+orderId+')':'')),date:new Date().toISOString().slice(0,10),ts:Date.now()};
+        // Keyed by orderId (not an auto-generated push id) when this spend is
+        // for an order, so /refund-order can look up "was this exact order
+        // really paid, and for how much" deterministically instead of trusting
+        // the order document's own claimed total. Written with the trusted
+        // worker credential now (not the plain service-account accessToken),
+        // matching rn_mall_wallet_transactions' new admin/worker-only write
+        // rule - see that rule's comment for why this path needed locking down.
+        if (orderId) {
+          await dbPut(FIREBASE_DB_URL, 'rn_mall_wallet_transactions/'+customerId+'/'+orderId, txn, await workerAuth());
+        } else {
+          await dbPost(FIREBASE_DB_URL, 'rn_mall_wallet_transactions/'+customerId, txn, await workerAuth());
+        }
       }
       return json({ok:true, newBalance:newBalance});
     }
@@ -518,17 +566,24 @@ export default {
       const res1 = await dbPatch(FIREBASE_DB_URL, 'rn_mall_customers/'+customerId, {walletBalance:newBalance}, workerId);
       if (!res1.ok) return json({error:'Could not credit wallet ('+dbErr(res1)+')'},502);
       await dbPut(FIREBASE_DB_URL, 'rn_mall_processed_topups/'+reference, {customerId:customerId, amount:amount, ts:Date.now()}, workerId);
-      await dbPost(FIREBASE_DB_URL, 'rn_mall_wallet_transactions/'+customerId, {type:'credit',amount:amount,description:'Card top-up (Ref: '+reference+')',date:new Date().toISOString().slice(0,10),ts:Date.now()}, accessToken);
+      // Written with the trusted worker credential - matches
+      // rn_mall_wallet_transactions' new admin/worker-only write rule.
+      await dbPost(FIREBASE_DB_URL, 'rn_mall_wallet_transactions/'+customerId, {type:'credit',amount:amount,description:'Card top-up (Ref: '+reference+')',date:new Date().toISOString().slice(0,10),ts:Date.now()}, workerId);
       return json({ok:true, amount:amount, newBalance:newBalance});
     }
 
     // ── /refund-order: customer self-cancels their own order ──
-    // Same shape of problem as everything else here: the cancel-my-order
-    // page used to read order.total out of a client-side copy of the order
-    // and credit that straight to walletBalance. This re-reads the REAL
-    // stored order, confirms it actually belongs to this customer, is
-    // eligible for a refund, and hasn't already been refunded, before
-    // crediting anything.
+    // The cancel-my-order page used to read order.total out of a client-side
+    // copy of the order and credit that straight to walletBalance. Re-reading
+    // the real stored order (as this already did) isn't enough on its own,
+    // though: rn_mall_orders has no server-side price validation at all, so
+    // even that "real, stored" order's total/payMethod fields are things the
+    // browser wrote itself when it first saved the order, and could have been
+    // fabricated outright (a fake order for an amount that was never really
+    // paid). findVerifiedPaymentAmount() independently confirms real payment
+    // evidence this Worker itself created (a Paystack reference it verified,
+    // or a wallet debit it made) before crediting anything, refunding the
+    // LESSER of what the order claims and what was actually, verifiably paid.
     if (action === 'refund-order') {
       const {customerId, orderId, idToken} = payload;
       if (!customerId || !orderId) return json({error:'customerId and orderId are required'},400);
@@ -538,16 +593,20 @@ export default {
       if (!order || !order.customer || order.customer.id !== customerId) return json({error:'Order not found for this customer'},404);
       if (order.payMethod === 'pod') return json({error:'Pay on Delivery orders are not refunded to wallet'},400);
       if (order.refunded) return json({ok:true, alreadyRefunded:true, amount:0});
-      const amount = order.total || 0;
-      if (amount <= 0) return json({ok:true, amount:0});
+      const claimedAmount = order.total || 0;
+      if (claimedAmount <= 0) return json({ok:true, amount:0});
+      const workerId = await workerAuth();
+      const verifiedAmount = await findVerifiedPaymentAmount(order, orderId, customerId, workerId);
+      if (!verifiedAmount) return json({error:'No verified payment found for this order, nothing to refund.'},400);
+      const amount = Math.min(claimedAmount, verifiedAmount);
       const cust = await dbGet(FIREBASE_DB_URL, 'rn_mall_customers/'+customerId, accessToken);
       if (!cust) return json({error:'Customer not found'},404);
       const newBalance = (cust.walletBalance||0) + amount;
-      const res1 = await dbPatch(FIREBASE_DB_URL, 'rn_mall_customers/'+customerId, {walletBalance:newBalance}, await workerAuth());
+      const res1 = await dbPatch(FIREBASE_DB_URL, 'rn_mall_customers/'+customerId, {walletBalance:newBalance}, workerId);
       if (!res1.ok) return json({error:'Could not process refund ('+dbErr(res1)+')'},502);
       const res2 = await dbPatch(FIREBASE_DB_URL, 'rn_mall_orders/'+orderId, {refunded:true}, accessToken);
       if (!res2.ok) return json({error:'Refunded but could not mark order ('+dbErr(res2)+')'},502);
-      await dbPost(FIREBASE_DB_URL, 'rn_mall_wallet_transactions/'+customerId, {type:'refund',amount:amount,description:'Refund for cancelled order '+orderId,date:new Date().toISOString().slice(0,10),ts:Date.now()}, accessToken);
+      await dbPost(FIREBASE_DB_URL, 'rn_mall_wallet_transactions/'+customerId, {type:'refund',amount:amount,description:'Refund for cancelled order '+orderId,date:new Date().toISOString().slice(0,10),ts:Date.now()}, workerId);
       return json({ok:true, amount:amount, newBalance:newBalance});
     }
 

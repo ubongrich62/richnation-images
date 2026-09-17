@@ -79,7 +79,15 @@
     "rn_mall_customer_orders":              { "$id": { ".read": true, ".write": true } },
     "rn_mall_processed_topups":             { "$id": { ".read": "auth != null && auth.token.worker === true", ".write": "auth != null && auth.token.worker === true" } },
     "rn_mall_processed_payments":           { "$id": { ".read": "auth != null && auth.token.worker === true", ".write": "auth != null && auth.token.worker === true" } },
-    "rn_mall_wallet_transactions":          { "$id": { ".read": true, ".write": true } },
+    // Write locked to admin/worker: this log is now trusted as independent
+    // proof of a real wallet debit/credit when /refund-order decides whether
+    // a customer's order was actually paid (see that function's comment in
+    // richnation-wallet-worker.js) - if a customer could write here directly,
+    // they could fabricate a matching "debit" entry for a fake order and
+    // cash it out via refund-order regardless. admin.html's own direct writes
+    // here (manual wallet adjustments, admin-initiated refunds) already carry
+    // the admin's real ID token via fbAuthQS(), so they're unaffected.
+    "rn_mall_wallet_transactions":          { "$id": { ".read": true, ".write": "auth != null && (auth.token.admin === true || auth.token.worker === true)" } },
     "rn_mall_wallet_transactions_investor": { "$id": { ".read": true, ".write": true } },
     "rn_mall_wallet_issues": { ".read": true, "$id": { ".write": true } },
     "rn_mall_vendor_payouts":               { "$id": { ".read": true, ".write": true } },

@@ -3443,7 +3443,7 @@ async function placeOrder(isPreorder=false){
     // TRUE balance and only deduct if it's actually sufficient. The order
     // is only confirmed once that deduction genuinely succeeds, not just
     // because this browser thought the balance looked high enough.
-    const res=await callWalletWorker('spend',{customerId:currUser.id,field:'walletBalance',amount:tot,description:'Order payment ('+tracking+')'});
+    const res=await callWalletWorker('spend',{customerId:currUser.id,field:'walletBalance',amount:tot,orderId:tracking,description:'Order payment ('+tracking+')'});
     if(!res||!res.ok){toast((res&&res.error)||'Insufficient wallet balance','err');return;}
     currUser.walletBalance=res.newBalance;localStorage.setItem('rnm_user',JSON.stringify(currUser));
     order.status='confirmed';
