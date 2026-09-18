@@ -43,9 +43,28 @@
     "rn_mall_announcements":   { ".read": true, ".write": true },
 
     "rn_mall_customers": {
-      ".read": true,
+      // Was fully public read+write (validate only ever protected the two
+      // money fields) - anyone could list every customer's name/email/phone/
+      // address/order-history references in one request, or directly edit
+      // any OTHER customer's account (accountStatus, wholesaleStatus,
+      // address, etc.) with no ownership check at all. Bulk (whole-
+      // collection) reads are only ever done by admin/staff/investor
+      // dashboards or the wallet Worker (verified: index.html never bulk-
+      // reads this outside its own login/register/forgot-password flows,
+      // which only need to find ONE matching record, not read everyone
+      // else's data back to the browser). A single record stays readable/
+      // writable by its own owner (checked the same two ways as everywhere
+      // else in this app - the key itself is the uid, or the record's own
+      // authUid field matches) for every ordinary self-service action
+      // (address, phone, wallet redeem via the Worker, etc.), plus admin/
+      // staff for the account-status/wholesale actions their dashboards
+      // already do, plus worker for the money fields the .validate below
+      // still separately protects. Creating a brand-new record stays open,
+      // unchanged - registration itself is still meant to be public.
+      ".read": "auth != null && (auth.token.admin === true || auth.token.staff === true || auth.token.investor === true || auth.token.worker === true)",
       "$id": {
-        ".write": true,
+        ".read": "auth != null && (auth.uid === $id || data.child('authUid').val() === auth.uid || auth.token.admin === true || auth.token.staff === true || auth.token.investor === true || auth.token.worker === true)",
+        ".write": "!data.exists() || (auth != null && (auth.uid === $id || data.child('authUid').val() === auth.uid || auth.token.admin === true || auth.token.staff === true || auth.token.worker === true))",
         ".validate": "newData.hasChildren(['email','id']) && ((auth != null && auth.token.worker === true) || (data.child('walletBalance').exists() ? newData.child('walletBalance').val() === data.child('walletBalance').val() : (!newData.hasChild('walletBalance') || newData.child('walletBalance').val() === 0))) && ((auth != null && auth.token.worker === true) || (data.child('points').exists() ? newData.child('points').val() === data.child('points').val() : (!newData.hasChild('points') || newData.child('points').val() === 0)))"
       }
     },
@@ -140,7 +159,26 @@
     "rn_mall_riders_by_uid":    { "$uid": { ".read": "auth != null", ".write": "auth != null && (auth.uid === $uid || auth.token.admin === true)" } },
     "rn_mall_investors_by_uid": { "$uid": { ".read": "auth != null", ".write": "auth != null && (auth.uid === $uid || auth.token.admin === true)" } },
 
-    "rn_mall_orders": { ".read": true, "$id": { ".write": true } },
+    // Read stays public - deliberately, not an oversight: index.html's own
+    // "frequently bought together" product-page feature and its homepage
+    // order-count stat both bulk-read every order for ANY visitor, logged in
+    // or not, and locking that down would break both without rebuilding them
+    // around a separate, privacy-scrubbed aggregate (a real fix, just a
+    // bigger one than this pass covers - noted, not silently dropped). Write
+    // is the half that was actually dangerous and had NO check at all
+    // (anyone could overwrite ANY order - redirect a delivery address,
+    // fabricate a fake order, mark someone else's real order "delivered" -
+    // regardless of who placed it): now limited to the order's own customer
+    // (same ownership check used everywhere else in this app), or
+    // admin/staff/rider (who each write real order fields as part of their
+    // dashboards - assignment, status, delivery tracking) or worker (the
+    // points/referral/refund bookkeeping fields it already patches).
+    "rn_mall_orders": {
+      ".read": true,
+      "$id": {
+        ".write": "!data.exists() ? (auth != null && (newData.child('customer').child('id').val() === auth.uid || root.child('rn_mall_customers').child(newData.child('customer').child('id').val()).child('authUid').val() === auth.uid || auth.token.admin === true || auth.token.staff === true)) : (auth != null && (data.child('customer').child('id').val() === auth.uid || root.child('rn_mall_customers').child(data.child('customer').child('id').val()).child('authUid').val() === auth.uid || auth.token.admin === true || auth.token.staff === true || auth.token.rider === true || auth.token.worker === true))"
+      }
+    },
     "rn_mall_customer_orders":              { "$id": { ".read": true, ".write": true } },
     "rn_mall_processed_topups":             { "$id": { ".read": "auth != null && auth.token.worker === true", ".write": "auth != null && auth.token.worker === true" } },
     "rn_mall_processed_payments":           { "$id": { ".read": "auth != null && auth.token.worker === true", ".write": "auth != null && auth.token.worker === true" } },
