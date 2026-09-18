@@ -570,6 +570,22 @@ function ensureFirebaseAuthReady(){
   });
   return _firebaseAuthReadyPromise;
 }
+// This only confirms the SDK's script is loaded, not that it has finished
+// restoring a persisted login session - that happens separately (Firebase
+// reads its own saved session from IndexedDB asynchronously), and
+// firebase.auth().currentUser stays null until it completes, regardless of
+// whether a real session actually exists. Checking currentUser right after
+// ensureFirebaseAuthReady() resolves was a race: on a fresh page load it
+// could still read null and skip refreshing the admin claim entirely, then
+// proceed to load the dashboard with no claim on the token at all. This
+// waits for Firebase's own restoration to actually finish (whatever the
+// result) before anything checks currentUser.
+function waitForAuthRestored(){
+  return new Promise(function(resolve){
+    if(typeof firebase==='undefined'||!firebase.auth){resolve(null);return;}
+    const unsub=firebase.auth().onAuthStateChanged(function(user){unsub();resolve(user);});
+  });
+}
 // App Check isn't enforced yet, so it adds nothing functional right now, loaded only
 // after the page is fully done loading, so it costs the page nothing while unused.
 function loadAppCheckWhenIdle(){
@@ -1194,7 +1210,10 @@ function signOut(){
     // does here closes that race instead of leaving every reload to win or
     // lose it.
     const ready=await ensureFirebaseAuthReady();
-    if(ready)await ensureAdminClaim();
+    if(ready){
+      await waitForAuthRestored();
+      await ensureAdminClaim();
+    }
     initAdmin();
   }
 })();
