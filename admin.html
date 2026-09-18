@@ -1176,12 +1176,25 @@ function signOut(){
   document.getElementById('li-p').value='';
   navStack=[];updateBackBtn();
 }
-(function checkAdminSession(){
+(async function checkAdminSession(){
   if(sessionStorage.getItem('rnm_admin_session')==='1'){
     document.getElementById('login').style.display='none';
     document.getElementById('app').style.display='flex';
     const e=sessionStorage.getItem('rnm_admin_email');
     if(e)document.getElementById('tb-user').textContent=e.split('@')[0];
+    // Every reload/navigation restores the session this way, bypassing
+    // doLogin()'s own explicit admin-claim refresh entirely - the dashboard's
+    // first data load used to fire against whatever token Firebase Auth's
+    // own persistence already had cached, which doesn't reliably carry a
+    // custom claim set earlier in the session (claims only land on a freshly
+    // -minted token). That race showed up as rn_mall_customers reads getting
+    // denied on a fresh page load even though the account genuinely holds
+    // the admin claim, self-resolving only once something else happened to
+    // force a token refresh. Awaiting the same refresh a real login already
+    // does here closes that race instead of leaving every reload to win or
+    // lose it.
+    const ready=await ensureFirebaseAuthReady();
+    if(ready)await ensureAdminClaim();
     initAdmin();
   }
 })();
