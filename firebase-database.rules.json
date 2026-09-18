@@ -122,6 +122,24 @@
       }
     },
 
+    // Self-migration UID index for each role: written by an account itself right
+    // after createUserWithEmailAndPassword, linking its own real Firebase Auth uid
+    // to its pre-existing rn_mall_<role> record (needed whenever that record's own
+    // key isn't already the uid), and read by that same login flow's fallback
+    // lookup on every later sign-in. None of these five had ANY rule before, so
+    // every write here silently fell through to the top-level ".write": false
+    // default and was always rejected - even for an admin token, since nothing
+    // ever granted permission here at all. Discovered while manually relinking one
+    // legacy staff account whose index write was rejected with a 401 despite a
+    // valid admin session. This has likely been silently breaking self-migration
+    // for every legacy account (any role) whose original id isn't already its uid,
+    // for as long as this indexing scheme has existed.
+    "rn_mall_customers_by_uid": { "$uid": { ".read": "auth != null", ".write": "auth != null && (auth.uid === $uid || auth.token.admin === true)" } },
+    "rn_mall_staff_by_uid":     { "$uid": { ".read": "auth != null", ".write": "auth != null && (auth.uid === $uid || auth.token.admin === true)" } },
+    "rn_mall_vendors_by_uid":   { "$uid": { ".read": "auth != null", ".write": "auth != null && (auth.uid === $uid || auth.token.admin === true)" } },
+    "rn_mall_riders_by_uid":    { "$uid": { ".read": "auth != null", ".write": "auth != null && (auth.uid === $uid || auth.token.admin === true)" } },
+    "rn_mall_investors_by_uid": { "$uid": { ".read": "auth != null", ".write": "auth != null && (auth.uid === $uid || auth.token.admin === true)" } },
+
     "rn_mall_orders": { ".read": true, "$id": { ".write": true } },
     "rn_mall_customer_orders":              { "$id": { ".read": true, ".write": true } },
     "rn_mall_processed_topups":             { "$id": { ".read": "auth != null && auth.token.worker === true", ".write": "auth != null && auth.token.worker === true" } },
