@@ -2444,7 +2444,24 @@ async function init(){
   watchFirebaseCollection('rn_mall_products',function(prods){
     allProducts=Object.values(prods||{}).filter(p=>p.visible!==false);
     try{localStorage.setItem('rnm_cache_products',JSON.stringify(allProducts));}catch(e){}
-    renderCatNav();renderCategories();renderFeatured();renderRecommended();renderNew();renderFlash();renderPreOrder();renderAllProducts();
+    renderCatNav();renderCategories();renderFeatured();renderRecommended();renderNew();renderFlash();renderPreOrder();
+    // Was renderAllProducts() with no args, which always falls back to the
+    // full unfiltered catalog - every 20s this silently reset whichever
+    // category filter or search a customer had active back to "All
+    // Products", the live equivalent of the vendor/admin form-wiping bug.
+    // Re-applying whatever's actually selected keeps this refresh doing its
+    // job (picking up new/changed products) without discarding what the
+    // customer is looking at.
+    const liveSearchQ=((document.getElementById('search-inp')||{}).value||'').trim();
+    // Not calling liveSearch(q) here directly - it also scrollIntoView()s the
+    // products section, which would yank the page's scroll position out from
+    // under the customer every 20s. Only the filtering half is wanted.
+    if(liveSearchQ){
+      const q2=liveSearchQ.toLowerCase();
+      renderAllProducts(allProducts.filter(p=>p.name.toLowerCase().includes(q2)||p.description?.toLowerCase().includes(q2)||catName(p.category).toLowerCase().includes(q2)));
+    }else{
+      renderAllProducts(currentCatFilter?allProducts.filter(p=>p.category===currentCatFilter):null);
+    }
     const sc=document.getElementById('stat-count');if(sc)sc.textContent=allProducts.length;
   },undefined,fetchProductsForBoot);
   watchFirebaseCollection('rn_mall_categories',function(cats){
