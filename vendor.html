@@ -901,7 +901,13 @@ async function startApp(){
   refreshVendorNotifBadge();
   setInterval(refreshVendorNotifBadge,20000);
   watchFirebaseCollection('rn_mall_products',function(){
-    if(curNav==='products'){
+    // _vProdFormOpen guards against wiping an in-progress Add/Edit Product
+    // form: the form renders into this SAME #content container under the
+    // SAME curNav==='products', with no separate nav state of its own, so
+    // this 20s background refresh used to blow away whatever the vendor
+    // was mid-typing back to the plain product list, every single tick,
+    // forcing them to start the form over from scratch.
+    if(curNav==='products'&&!window._vProdFormOpen){
       var c=document.getElementById('content');
       if(c)renderVProducts(c);
     }
@@ -1304,6 +1310,7 @@ function renderVDashInner(c,allProds,allOrders){
 
 // ── PRODUCTS ──
 async function renderVProducts(c){
+  window._vProdFormOpen=false;
   c.innerHTML='<div class="page-hdr"><div class="page-hdr-title">My Products</div></div><div style="color:var(--wh);font-weight:700;">Loading...</div>';
   const allProds=await fbG('rn_mall_products')||{};
   const myProds=Object.entries(allProds).filter(([id,p])=>p.vendorId===vendor.id);
@@ -1324,6 +1331,7 @@ async function renderVProducts(c){
   c.innerHTML=html;
 }
 function openVProdForm(id){
+  window._vProdFormOpen=true;
   (async function(){
     const p=id?(await fbG('rn_mall_products/'+id))||{}:{};
     window._vImages=(p.images||[]).slice();

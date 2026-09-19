@@ -1301,7 +1301,13 @@ async function initAdmin(){
     // the app — see the bandwidth incident writeup at watchFirebaseCollection.
     watchFirebaseCollection('rn_mall_orders',function(orders){
       allOrders=orders||{};
-      if(curNav==='orders'){
+      // _adminOrderDetailOpen guards against wiping an open Order Detail view:
+      // openOrder() renders into this SAME #content-inner under the SAME
+      // curNav==='orders' (it never calls nav(), so curNav never actually
+      // changes), so this background refresh used to yank the admin back to
+      // the plain order list every 45s while reviewing or updating a
+      // specific order.
+      if(curNav==='orders'&&!window._adminOrderDetailOpen){
         var ci=document.getElementById('content-inner');
         if(ci)renderOrders(ci);
       }
@@ -3716,6 +3722,7 @@ async function delProd(id,name){
 
 // ── ORDERS ──
 function renderOrders(c,filter=''){
+  window._adminOrderDetailOpen=false;
   let orders=Object.values(allOrders).sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
   if(filter)orders=orders.filter(o=>o.status===filter||(filter==='delivered'&&o.status==='delivered confirmed'));
   const STATUSES=['pending','confirmed','packed','shipped','out for delivery','delivered','cancelled'];
@@ -3974,6 +3981,7 @@ async function renderAdminDeliveryMap(order){
   if(statusEl)statusEl.innerHTML=(isLive?'<span style="color:var(--su);">● Live</span>, rider location updating in real time':'<span style="color:var(--wh);font-weight:700;">○ Approximate</span>, waiting for rider\'s live location')+adminEtaText;
 }
 async function openOrder(tracking){
+  window._adminOrderDetailOpen=true;
   navStack.push(curNav);updateBackBtn();pushAdminNavState();
   const o=allOrders[tracking]||await fbG('rn_mall_orders/'+tracking);
   if(!o){toast('Order not found','err');return;}
