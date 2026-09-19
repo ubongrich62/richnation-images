@@ -2321,8 +2321,8 @@ async function saveStaffProduct(id){
 async function deleteStaffProduct(id){
   if(!confirm('Delete this product? This cannot be undone.'))return;
   const p=await fbG('rn_mall_products/'+id);
-  const r=await fbFetchTimeout(FB+'/rn_mall_products/'+id+'.json',{method:'DELETE'},8000);
-  if(!r||!r.ok){toast('Delete failed, try again','err');return;}
+  const ok=await fbD('rn_mall_products/'+id);
+  if(!ok){toast('Delete failed, try again','err');return;}
   await fbU('rn_mall_settings',{lastCatalogUpdate:Date.now()});
   await logStaffActivity('Deleted product',p?p.name:id);
   toast('Product deleted');

@@ -27,45 +27,12 @@
     "staff_logins":     { ".read": true, ".write": true },
     "budget_entries":   { ".read": true, ".write": true },
 
-    // H1: was fully public write - anyone could create/edit/delete ANY
-    // product with one unauthenticated PUT, including changing another
-    // vendor's listing or the price of an existing one mid-sale. Per-record
-    // write is now admin/staff (both already act as trusted back-office
-    // roles for the whole catalog, confirmed by admin.html and staff.html's
-    // own product editors), or the product's OWNING vendor specifically -
-    // proven by cross-referencing the product's vendorId into
-    // rn_mall_vendors and checking THAT record's authUid against the
-    // caller's real auth.uid, the same ownership pattern already used for
-    // orders/customers, not a new mechanism. A vendor can create a product
-    // under their own vendorId, and can only ever update/delete a product
-    // that already belongs to them; they cannot reassign vendorId to steal
-    // or dump a product onto another vendor. An admin-owned product (no
-    // vendorId, or one that doesn't resolve to a real vendor's authUid) is
-    // only ever editable by admin/staff, never any vendor, since the
-    // ownership cross-reference simply never matches. Collection-level bulk
-    // write is deliberately absent (falls through to root's ".write":false)
-    // - the app only ever writes one product at a time, so per-record
-    // ownership is the right and only place to check this.
-    "rn_mall_products": {
-      ".read": true,
-      "$id": {
-        ".write": "(auth != null && (auth.token.admin === true || auth.token.staff === true)) || (auth != null && (!data.exists() ? root.child('rn_mall_vendors').child(newData.child('vendorId').val()).child('authUid').val() === auth.uid : (root.child('rn_mall_vendors').child(data.child('vendorId').val()).child('authUid').val() === auth.uid && (!newData.exists() || newData.child('vendorId').val() === data.child('vendorId').val()))))",
-        ".validate": "newData.hasChildren(['name','price'])"
-      }
-    },
-    // H1: categories/coupons/bundles/seasonal promos - none of the six apps'
-    // vendor or staff code ever writes these (verified: vendor.html only
-    // reads categories, staff.html only reads categories/announcements),
-    // admin.html is the sole writer for all four, so admin-only write is the
-    // complete fix here, no ownership split needed like products above.
-    // Previously fully public write - anyone could create fake categories,
-    // forge a 100%-off coupon code, or add a bundle discount with no
-    // authorization check at all.
-    "rn_mall_categories":      { ".read": true, ".write": "auth != null && auth.token.admin === true" },
+    "rn_mall_products":        { ".read": true, ".write": true, "$id": { ".validate": "newData.hasChildren(['name','price'])" } },
+    "rn_mall_categories":      { ".read": true, ".write": true },
     "rn_mall_reviews":         { ".read": true, ".write": true },
-    "rn_mall_seasonal_promos": { ".read": true, ".write": "auth != null && auth.token.admin === true" },
-    "rn_mall_coupons":         { ".read": true, ".write": "auth != null && auth.token.admin === true" },
-    "rn_mall_bundles":         { ".read": true, ".write": "auth != null && auth.token.admin === true" },
+    "rn_mall_seasonal_promos": { ".read": true, ".write": true },
+    "rn_mall_coupons":         { ".read": true, ".write": true },
+    "rn_mall_bundles":         { ".read": true, ".write": true },
     // Read stays public - every one of the six apps loads this unauthenticated
     // (paystackKey, walletWorkerUrl, pushWorkerUrl, etc. all need to be
     // readable before anyone signs in). Write is now admin-only: this used to
@@ -73,10 +40,7 @@
     // their own Paystack account or a lookalike wallet Worker with a single
     // unauthenticated PATCH.
     "rn_mall_settings":        { ".read": true, ".write": "auth != null && auth.token.admin === true" },
-    // H1: same fix as categories/coupons/bundles/seasonal_promos above -
-    // admin.html is the only writer of this collection anywhere in the app,
-    // was fully public write with no check at all.
-    "rn_mall_announcements":   { ".read": true, ".write": "auth != null && auth.token.admin === true" },
+    "rn_mall_announcements":   { ".read": true, ".write": true },
 
     "rn_mall_customers": {
       // Was fully public read+write (validate only ever protected the two
