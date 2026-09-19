@@ -1312,6 +1312,25 @@ async function initAdmin(){
         if(ci)renderOrders(ci);
       }
     },45000);
+    // Products had no live watcher at all before this - allProds only ever
+    // got set once at boot (or on a manual "Refresh Data" click), so a
+    // vendor's own Add Product save (which now genuinely works after the H1
+    // rule fix) never showed up in the admin's Pending Vendor Approvals
+    // queue until they manually refreshed or reloaded the whole panel.
+    // Same guards as the orders watcher above: skip when nothing actually
+    // changed, and don't touch the page while an Add/Edit Product form is
+    // open (openProdForm() renders into this same #content-inner under the
+    // same curNav==='products', same shape as the Order Detail issue).
+    watchFirebaseCollection('rn_mall_products',function(prods){
+      const prodsKey=JSON.stringify(prods);
+      if(prodsKey===window._lastAdminProductsKey)return;
+      window._lastAdminProductsKey=prodsKey;
+      allProds=prods||{};
+      if(curNav==='products'&&!window._adminProductFormOpen){
+        var ci2=document.getElementById('content-inner');
+        if(ci2)renderProducts(ci2);
+      }
+    },20000);
   }catch(e){
     // fbG() itself never rejects, so reaching here means something outside it
     // failed unexpectedly, without this the loading spinner above would be
@@ -3584,6 +3603,7 @@ async function renderDash(c){
 
 // ── PRODUCTS ──
 function renderProducts(c){
+  window._adminProductFormOpen=false;
   const prods=Object.values(allProds);
   const pendingVendorProds=Object.entries(allProds).filter(function(e){return e[1].vendorId&&e[1].approvalStatus==='pending';});
   const cats=Object.values(allCats).length?Object.values(allCats):[
@@ -7001,6 +7021,7 @@ async function savePayIcons(){
 
 function genProdCode(){return 'RNM-'+Math.random().toString(36).slice(2,7).toUpperCase();}
 function openProdForm(id){
+  window._adminProductFormOpen=true;
   navStack.push(curNav);updateBackBtn();pushAdminNavState();
   _videoRemoved=false;
   window._currentEditProdId=id||null;
