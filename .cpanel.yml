@@ -1,0 +1,19 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/sites/41b/1/1330a764fe/public_html/
+    - /bin/cp -f index.html $DEPLOYPATH
+    - /bin/cp -f admin.html $DEPLOYPATH
+    - /bin/cp -f vendor.html $DEPLOYPATH
+    - /bin/cp -f staff.html $DEPLOYPATH
+    - /bin/cp -f rider.html $DEPLOYPATH
+    - /bin/cp -f investor.html $DEPLOYPATH
+    - /bin/cp -f manifest.json $DEPLOYPATH
+    - /bin/cp -f sw.js $DEPLOYPATH
+    - /bin/cp -f robots.txt $DEPLOYPATH
+    - /bin/cp -f sitemap.xml $DEPLOYPATH
+    - /bin/cp -f 404.html $DEPLOYPATH
+    - /bin/cp -f privacy.html $DEPLOYPATH
+    - /bin/cp -f terms.html $DEPLOYPATH
+    - /bin/mkdir -p $DEPLOYPATH/images
+    - /bin/cp -rf images/* $DEPLOYPATH/images/
