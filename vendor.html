@@ -485,8 +485,15 @@ async function fbAuthQS(){
   return '';
 }
 async function fbG(p,ms){try{const qs=await fbAuthQS();const r=await fbFetchTimeout(FB+'/'+p+'.json'+qs,{},ms);return r.ok?await r.json():null;}catch(e){try{await new Promise(res=>setTimeout(res,400));const qs2=await fbAuthQS();const r2=await fbFetchTimeout(FB+'/'+p+'.json'+qs2,{},ms);return r2.ok?await r2.json():null;}catch(e2){console.warn('fbG failed:',e2.message);return null;}}}
-async function fbS(p,d){try{const qs=await fbAuthQS();await fbFetchTimeout(FB+'/'+p+'.json'+qs,{method:'PUT',body:JSON.stringify(d)});}catch(e){console.warn('fbS failed:',e.message);}}
-async function fbU(p,d){try{const qs=await fbAuthQS();await fbFetchTimeout(FB+'/'+p+'.json'+qs,{method:'PATCH',body:JSON.stringify(d)});}catch(e){console.warn('fbU failed:',e.message);}}
+// Previously fired the request and returned nothing, so every caller
+// treated it as "succeeded" unconditionally - a 401 (permission denied by
+// a rules check, e.g. the H1 product-ownership rule) looks identical to a
+// real success to fetch(), it doesn't throw, so a rejected save still
+// showed "Product submitted!" with nothing actually written. Now returns
+// whether it actually worked, and the reason when it didn't, so a caller
+// CAN tell the difference and say so instead of lying about it.
+async function fbS(p,d){try{const qs=await fbAuthQS();const r=await fbFetchTimeout(FB+'/'+p+'.json'+qs,{method:'PUT',body:JSON.stringify(d)});if(r&&r.ok)return{ok:true};const body=await r.json().catch(()=>({}));return{ok:false,reason:(r&&r.status===401)?'Permission denied, check you\'re still signed in':(body.error||('HTTP '+(r&&r.status)))};}catch(e){console.warn('fbS failed:',e.message);return{ok:false,reason:'Network error, check your connection'};}}
+async function fbU(p,d){try{const qs=await fbAuthQS();const r=await fbFetchTimeout(FB+'/'+p+'.json'+qs,{method:'PATCH',body:JSON.stringify(d)});if(r&&r.ok)return{ok:true};const body=await r.json().catch(()=>({}));return{ok:false,reason:(r&&r.status===401)?'Permission denied, check you\'re still signed in':(body.error||('HTTP '+(r&&r.status)))};}catch(e){console.warn('fbU failed:',e.message);return{ok:false,reason:'Network error, check your connection'};}}
 async function fbP(p,d){try{const qs=await fbAuthQS();const r=await fbFetchTimeout(FB+'/'+p+'.json'+qs,{method:'POST',body:JSON.stringify(d)});return await r.json();}catch(e){console.warn('fbP failed:',e.message);return null;}}
 async function fbD(p){try{const qs=await fbAuthQS();const r=await fbFetchTimeout(FB+'/'+p+'.json'+qs,{method:'DELETE'},4000);return !!(r&&r.ok);}catch{return false;}}
 
@@ -1555,7 +1562,11 @@ async function saveVProd(id){
     createdAt:existing.createdAt||new Date().toISOString(),
     updatedAt:new Date().toISOString()
   };
-  await fbS('rn_mall_products/'+pid,prod);
+  const saveResult=await fbS('rn_mall_products/'+pid,prod);
+  if(!saveResult.ok){
+    toast('Could not save: '+saveResult.reason,'err');
+    return;
+  }
   await fbP('rn_mall_notifications',{type:'vendor_product_pending',vendorName:vendor.storeName,productName:name,date:ds(),read:false,ts:Date.now()});
   toast(id?'Changes submitted, pending admin approval before they go live.':'Product submitted, pending admin approval before it goes live.');
   vnav('products');
