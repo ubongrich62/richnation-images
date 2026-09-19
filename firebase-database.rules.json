@@ -49,7 +49,17 @@
     "rn_mall_products": {
       ".read": true,
       "$id": {
-        ".write": "(auth != null && (auth.token.admin === true || auth.token.staff === true)) || (auth != null && (!data.exists() ? root.child('rn_mall_vendors').child(newData.child('vendorId').val()).child('authUid').val() === auth.uid : (root.child('rn_mall_vendors').child(data.child('vendorId').val()).child('authUid').val() === auth.uid && (!newData.exists() || newData.child('vendorId').val() === data.child('vendorId').val()))))",
+        // H1 fix: the first version of this rule only ever checked the
+        // vendor record's authUid field for ownership, but that field is
+        // only ever set on LEGACY-migrated vendor accounts - a modern vendor
+        // account (created directly with its own key already equal to its
+        // Firebase Auth uid, same as every other role in this app) has no
+        // authUid field at all, so that vendor's own product saves were
+        // being silently rejected by this rule the moment it went live.
+        // Now checks both ways a vendor account can prove ownership, same
+        // "auth.uid === $id || authUid matches" idiom already used for
+        // rn_mall_customers/staff/vendors/riders/investors themselves.
+        ".write": "(auth != null && (auth.token.admin === true || auth.token.staff === true)) || (auth != null && (!data.exists() ? (newData.child('vendorId').val() === auth.uid || root.child('rn_mall_vendors').child(newData.child('vendorId').val()).child('authUid').val() === auth.uid) : ((data.child('vendorId').val() === auth.uid || root.child('rn_mall_vendors').child(data.child('vendorId').val()).child('authUid').val() === auth.uid) && (!newData.exists() || newData.child('vendorId').val() === data.child('vendorId').val()))))",
         ".validate": "newData.hasChildren(['name','price'])"
       }
     },
