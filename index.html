@@ -2365,6 +2365,8 @@ async function init(){
       allCategories=cachedCats?JSON.parse(cachedCats):[];
       allProducts=JSON.parse(cachedProds);
       applyHeroConfig(settings);renderPromoAds(settings);renderCustomBannerBlock(settings);renderVideoGalleryBlock(settings);
+      window._lastCustomBannerKey=JSON.stringify(settings.customBanners||settings.customBanner||null);
+      window._lastVideoGalleryKey=JSON.stringify(settings.videoGallery||null);
       renderCatNav();renderCategories();renderFeatured();renderRecommended();renderNew();renderFlash();renderPreOrder();renderAllProducts();
     }
   }catch(cacheErr){console.warn('Cache read failed:',cacheErr.message);}
@@ -2399,6 +2401,8 @@ async function init(){
     }
   }catch(cacheWriteErr){/* storage full or unavailable, skip caching */}
   applyHeroConfig(settings);renderPromoAds(settings);renderCustomBannerBlock(settings);renderVideoGalleryBlock(settings);initPopupAd(settings);
+  window._lastCustomBannerKey=JSON.stringify(settings.customBanners||settings.customBanner||null);
+  window._lastVideoGalleryKey=JSON.stringify(settings.videoGallery||null);
   if(settings.announcement){const ab=document.getElementById('announce-bar');if(ab){ab.textContent=settings.announcement;ab.style.display='block';}}
   computeActivePromo().then(function(){
     if(activePromo&&activePromo.bannerText){const ab=document.getElementById('announce-bar');if(ab){ab.textContent=activePromo.bannerText;ab.style.display='block';}}
@@ -2477,7 +2481,18 @@ async function init(){
     if(settings.paystackKey)PAYSTACK_KEY=settings.paystackKey;
       if(settings.googleMapsKey)GOOGLE_MAPS_API_KEY=settings.googleMapsKey;
     if(settings.theme)applyTheme(settings.theme);
-    applyHeroConfig(settings);renderPromoAds(settings);renderCustomBannerBlock(settings);renderVideoGalleryBlock(settings);
+    applyHeroConfig(settings);renderPromoAds(settings);
+    // renderCustomBannerBlock/renderVideoGalleryBlock both tear down their
+    // section's DOM and rebuild it from scratch (fresh opacity:0 elements
+    // that fade back in via IntersectionObserver) - calling them on every
+    // 20s settings tick, even when nothing in them changed, made both
+    // sections visibly flicker/fade-in-again on a loop for as long as the
+    // page stayed open. Only rebuild when the actual banner/gallery content
+    // is different from what's already on screen.
+    const bannerKey=JSON.stringify(sett.customBanners||sett.customBanner||null);
+    if(bannerKey!==window._lastCustomBannerKey){window._lastCustomBannerKey=bannerKey;renderCustomBannerBlock(settings);}
+    const galleryKey=JSON.stringify(sett.videoGallery||null);
+    if(galleryKey!==window._lastVideoGalleryKey){window._lastVideoGalleryKey=galleryKey;renderVideoGalleryBlock(settings);}
     try{localStorage.setItem('rnm_cache_settings',JSON.stringify(settings));}catch(e){}
     const ab2=document.getElementById('announce-bar');
     if(ab2)ab2.style.display=settings.announcement&&!activePromo?'block':(ab2.style.display==='block'&&!settings.announcement?'none':ab2.style.display);
