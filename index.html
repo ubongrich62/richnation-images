@@ -1251,6 +1251,21 @@ function ensureFirebaseAuthReady(){
   });
   return _firebaseAuthReadyPromise;
 }
+// Firebase Auth's own session restore is async even after the SDK itself has
+// loaded - firebase.auth().currentUser reads null for a brief window on every
+// page load before it resolves, so anything that checks currentUser (like
+// fbAuthQS() below) too early sends an unauthenticated request and silently
+// loses it to auth != null rules that used to be wide open before this app's
+// security pass. onAuthStateChanged's first callback is the actual signal
+// that restoration finished (with either a real user or null - both are a
+// valid, immediate answer, this never hangs waiting on someone who was never
+// signed in).
+function waitForAuthRestored(){
+  return new Promise(function(resolve){
+    if(typeof firebase==='undefined'||!firebase.auth){resolve(null);return;}
+    const unsub=firebase.auth().onAuthStateChanged(function(user){unsub();resolve(user);});
+  });
+}
 // App Check isn't enforced yet, so it adds nothing functional right now. Left
 // disabled (APP_CHECK_ENABLED=false) rather than deleted, since the site key
 // below was never registered in Firebase Console -> App Check: every visit
@@ -1423,7 +1438,11 @@ async function silentlyRefreshCustomerPushToken(){
     if(!messaging)return;
     const reg=await navigator.serviceWorker.register('sw.js');
     const token=await messaging.getToken({vapidKey:settings.pushVapidKey,serviceWorkerRegistration:reg});
-    if(token)await fbS('rn_mall_customers/'+currUser.id+'/fcmTokens/'+token,{ts:Date.now()});
+    if(token){
+      await ensureFirebaseAuthReady();
+      await waitForAuthRestored();
+      await fbS('rn_mall_customers/'+currUser.id+'/fcmTokens/'+token,{ts:Date.now()});
+    }
   }catch(e){console.warn('Silent push token refresh failed:',e.message);}
 }
 const WA_NUM='2349164678560';
@@ -4730,6 +4749,8 @@ async function trackCustomerActivity(){
       localStorage.setItem(lastDayKey,today);
       patch.activeDayCount={'.sv':{'increment':1}};
     }
+    await ensureFirebaseAuthReady();
+    await waitForAuthRestored();
     var qs=await fbAuthQS();
     await fbFetchTimeout(FB+'/rn_mall_customers/'+currUser.id+'.json'+qs,{method:'PATCH',body:JSON.stringify(patch)},8000);
   }catch(e){console.warn('Customer activity tracking failed (non-critical):',e);}
