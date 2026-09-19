@@ -2446,6 +2446,16 @@ async function init(){
   // From here on the page stays live, an admin editing a product, category, or
   // homepage setting shows up here within about a second, no reload needed.
   watchFirebaseCollection('rn_mall_products',function(prods){
+    // Was rebuilding every single product section (nav, tiles, 5 carousels,
+    // the whole "All Products" grid) on every 20s tick regardless of whether
+    // anything actually changed - each rebuild replaces the section's
+    // innerHTML from scratch, which reloads images and resets any hover/
+    // scroll state even when the content is identical, reading as the whole
+    // page visibly twitching on a loop. Skip the entire cascade when this
+    // fetch is byte-identical to the last one.
+    const prodsKey=JSON.stringify(prods);
+    if(prodsKey===window._lastProductsRawKey)return;
+    window._lastProductsRawKey=prodsKey;
     allProducts=Object.values(prods||{}).filter(p=>p.visible!==false);
     try{localStorage.setItem('rnm_cache_products',JSON.stringify(allProducts));}catch(e){}
     renderCatNav();renderCategories();renderFeatured();renderRecommended();renderNew();renderFlash();renderPreOrder();
@@ -2469,6 +2479,11 @@ async function init(){
     const sc=document.getElementById('stat-count');if(sc)sc.textContent=allProducts.length;
   },undefined,fetchProductsForBoot);
   watchFirebaseCollection('rn_mall_categories',function(cats){
+    // Same guard as the products watcher above - skip the rebuild entirely
+    // when nothing actually changed.
+    const catsKey=JSON.stringify(cats);
+    if(catsKey===window._lastCategoriesRawKey)return;
+    window._lastCategoriesRawKey=catsKey;
     allCategories=Object.values(cats||{}).filter(c=>c.visible!==false).sort((a,b)=>(a.order||99)-(b.order||99));
     try{localStorage.setItem('rnm_cache_categories',JSON.stringify(allCategories));}catch(e){}
     renderCatNav();renderCategories();
@@ -2612,7 +2627,7 @@ async function submitPasswordReset(custId){
   openAuth('login');
 }
 
-function renderCatNav(){const nav=document.getElementById('cat-nav');if(!nav)return;nav.innerHTML=`<div class="cat-nav-item active" onclick="filterCat('',this)">${t('allCats')}</div>`+allCategories.map(c=>`<div class="cat-nav-item" onclick="filterCat('${escJs(c.id)}',this)">${c.name}</div>`).join('');}
+function renderCatNav(){const nav=document.getElementById('cat-nav');if(!nav)return;nav.innerHTML=`<div class="cat-nav-item${currentCatFilter?'':' active'}" onclick="filterCat('',this)">${t('allCats')}</div>`+allCategories.map(c=>`<div class="cat-nav-item${currentCatFilter===c.id?' active':''}" onclick="filterCat('${escJs(c.id)}',this)">${c.name}</div>`).join('');}
 function brandLoaderHTML(sub){
   return `<div style="grid-column:1/-1;text-align:center;padding:40px 20px;">
     <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:20px;background:linear-gradient(90deg,var(--or),var(--gold),var(--or));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmerText 1.6s linear infinite;">RichNation Mall</div>
