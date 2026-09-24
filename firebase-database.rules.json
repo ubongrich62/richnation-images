@@ -107,7 +107,27 @@
       // already do, plus worker for the money fields the .validate below
       // still separately protects. Creating a brand-new record stays open,
       // unchanged - registration itself is still meant to be public.
-      ".read": "auth != null && (auth.token.admin === true || auth.token.staff === true || auth.token.investor === true || auth.token.worker === true)",
+      // 2nd fix on top of the H1 lockdown above: that fix correctly blocked
+      // bulk/whole-collection reads, but index.html's login/register/forgot-
+      // password/Google-link flows still needed to find ONE customer record
+      // by email BEFORE any Firebase Auth session exists (a legacy account
+      // has no real Firebase Auth session to check auth.uid against yet).
+      // Those flows were left with no legal read path at all - silently
+      // returning "not found" for every one of them (duplicate-email checks
+      // failing open on signup, legacy-account logins always saying
+      // "incorrect password" even when correct) - AND, since fbG() had no
+      // narrower option available, index.html kept trying a full
+      // unauthenticated bulk read anyway, which got denied but still cost
+      // real download bandwidth on the attempt, run repeatedly by every
+      // visitor hitting login/register/forgot-password.
+      // Firebase's query.* rule variables let a query be authorized by its
+      // OWN SHAPE, independent of the boolean above: this permits exactly
+      // "give me the one record whose email equals a SPECIFIC value I
+      // already provided", never a bulk/browsing read, since query.equalTo
+      // must be a real value (not this) and query.orderByChild is fixed to
+      // 'email' - there is no way to ask for "everyone" through this clause.
+      ".read": "(auth != null && (auth.token.admin === true || auth.token.staff === true || auth.token.investor === true || auth.token.worker === true)) || (query.orderByChild === 'email' && query.equalTo != null) || (query.orderByChild === 'referralCode' && query.equalTo != null)",
+      ".indexOn": ["email", "referralCode"],
       "$id": {
         ".read": "auth != null && (auth.uid === $id || data.child('authUid').val() === auth.uid || auth.token.admin === true || auth.token.staff === true || auth.token.investor === true || auth.token.worker === true)",
         ".write": "!data.exists() || (auth != null && (auth.uid === $id || data.child('authUid').val() === auth.uid || auth.token.admin === true || auth.token.staff === true || auth.token.worker === true))",

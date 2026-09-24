@@ -1529,6 +1529,29 @@ async function fbG(p,ms){
     return null;
   }
 }
+// Scoped alternative to fbG() for the handful of pre-login lookups (find a
+// customer by email/referralCode before any Firebase Auth session exists)
+// that used to bulk-fetch the WHOLE rn_mall_customers collection just to
+// find one record client-side. Relies on the matching orderByChild/equalTo
+// carve-out in that field's own database rule (see
+// firebase-database.rules.json) - this can only ever return the single
+// record matching a value the caller already has, never enumerate/browse
+// the collection, same risk profile as a direct single-record read.
+async function fbQueryOne(p,field,value,ms){
+  try{
+    var authQS=await fbAuthQS();
+    var indexQS='orderBy='+encodeURIComponent('"'+field+'"')+'&equalTo='+encodeURIComponent('"'+value+'"');
+    var qs=authQS?authQS+'&'+indexQS:'?'+indexQS;
+    var r=await fbFetchTimeout(FB+'/'+p+'.json'+qs,null,ms);
+    if(!r.ok)return null;
+    var data=await r.json();
+    var entries=data?Object.entries(data):[];
+    return entries.length?entries[0]:null; // [id, record] or null
+  }catch(e){
+    console.warn('fbQueryOne failed for',p,field,':',e.message);
+    return null;
+  }
+}
 async function fbS(p,d){try{var qs=await fbAuthQS();await fbFetchTimeout(FB+'/'+p+'.json'+qs,{method:'PUT',body:JSON.stringify(d)});}catch(e){console.warn('fbS failed for',p,':',e.message);}}
 async function fbU(p,d){try{var qs=await fbAuthQS();await fbFetchTimeout(FB+'/'+p+'.json'+qs,{method:'PATCH',body:JSON.stringify(d)});}catch(e){console.warn('fbU failed for',p,':',e.message);}}
 // Periodic refresh for the handful of paths customers are actually looking at
@@ -4464,8 +4487,7 @@ async function doForgotPassword(){
         }
       }
     }
-    const all=await fbG('rn_mall_customers')||{};
-    const found=Object.entries(all).find(([id,c])=>c.email===email);
+    const found=await fbQueryOne('rn_mall_customers','email',email);
     if(!found){
       if(err){err.textContent='No account found with that email.';err.style.display='block';}
       if(btn){btn.disabled=false;btn.textContent=origLabel;}
@@ -4521,8 +4543,7 @@ async function doLogin(){
       // check is what upgrades a not-yet-migrated account transparently.
     }
   }
-  const all=await fbG('rn_mall_customers')||{};
-  const foundEntry=Object.entries(all).find(([id,c])=>c.email===email);
+  const foundEntry=await fbQueryOne('rn_mall_customers','email',email);
   if(!foundEntry){err.textContent='Incorrect email or password.';err.style.display='block';return;}
   const [custId,found]=foundEntry;
   if(found.password!==pass){
@@ -4591,7 +4612,7 @@ async function doRegister(){
       return;
     }
   }
-  const all=await fbG('rn_mall_customers')||{};if(Object.values(all).find(c=>c.email===email)){err.textContent='An account with this email already exists.';err.style.display='block';return;}
+  if(await fbQueryOne('rn_mall_customers','email',email)){err.textContent='An account with this email already exists.';err.style.display='block';return;}
   const ready=await ensureFirebaseAuthReady();
   let id=null,authUid=null;
   if(ready){
@@ -4643,8 +4664,7 @@ async function signInWithGoogle(){
       // No account linked to this Google uid yet, but they may already have a
       // password-based account under the same email, link it instead of
       // creating a duplicate.
-      const all=await fbG('rn_mall_customers')||{};
-      const foundEntry=Object.entries(all).find(([cid,c])=>c.email===email);
+      const foundEntry=await fbQueryOne('rn_mall_customers','email',email);
       if(foundEntry){
         const [custId,found]=foundEntry;
         await fbU('rn_mall_customers/'+custId,{authUid:uid});
@@ -4668,8 +4688,8 @@ async function signInWithGoogle(){
     const customer={id:uid,fname:fn,lname:ln,name:displayName||fn,email,phone:'',photo:user.photoURL||null,authUid:uid,joinDate:ds(),accountStatus:'active',points:0,referralCode};
     const refInput=(sessionStorage.getItem('rnm_ref')||'').trim().toUpperCase();
     if(refInput){
-      const all=await fbG('rn_mall_customers')||{};
-      const referrer=Object.values(all).find(c=>(c.referralCode||'').toUpperCase()===refInput);
+      const referrerEntry=await fbQueryOne('rn_mall_customers','referralCode',refInput);
+      const referrer=referrerEntry?referrerEntry[1]:null;
       if(referrer&&referrer.id!==uid)customer.referredBy=referrer.id;
     }
     await fbS('rn_mall_customers/'+uid,customer);
